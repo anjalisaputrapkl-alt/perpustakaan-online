@@ -1,9 +1,6 @@
 <?php
-session_start();
-if (empty($_SESSION['user'])) {
-  header('Location: /perpustakaan-online/public/login.php');
-  exit;
-}
+require __DIR__ . '/../src/auth.php';
+requireAuth();
 
 $pdo = require __DIR__ . '/../src/db.php';
 $user = $_SESSION['user'];

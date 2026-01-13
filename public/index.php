@@ -1,5 +1,6 @@
 <?php
-session_start();
+require __DIR__ . '/../src/auth.php';
+requireAuth();
 
 $is_authenticated = !empty($_SESSION['user']);
 
