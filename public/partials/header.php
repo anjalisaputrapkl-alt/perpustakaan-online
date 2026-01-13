@@ -4,6 +4,10 @@ if (session_status() !== PHP_SESSION_ACTIVE)
 $user = $_SESSION['user'] ?? null;
 $current = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $base = '/perpustakaan-online/public';
+
+// Load tenant info untuk menampilkan nama sekolah
+$tenant = $_SESSION['tenant'] ?? null;
+
 function _is_active($path, $current)
 {
   $current = rtrim(str_replace('/perpustakaan-online/public', '', $current), '/') ?: '/';
@@ -20,7 +24,14 @@ function _is_active($path, $current)
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
         </svg>
-        <span class="brand-text">Perpustakaan</span>
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <span class="brand-text">Perpustakaan</span>
+          <?php if ($tenant && $tenant['school_name']): ?>
+            <span style="font-size: 11px; opacity: 0.9; font-weight: 500;">
+              📍 <?php echo htmlspecialchars($tenant['school_name']); ?>
+            </span>
+          <?php endif; ?>
+        </div>
       </a>
       <nav class="nav-links">
         <a class="nav-link<?php echo _is_active($base . '/', $current); ?>" href="<?php echo $base; ?>/">📚 Home</a>
