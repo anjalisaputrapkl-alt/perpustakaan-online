@@ -1,26 +1,3 @@
-<?php
-/**
- * Landing Page - Perpustakaan Online
- * 
- * Halaman ini menampilkan:
- * - Jika main domain (perpus.test): Landing page platform + register + login
- * - Jika subdomain sekolah (sma1.perpus.test): Redirect ke dashboard sekolah
- */
-
-require __DIR__ . '/public/tenant-router.php';
-
-// Jika mengakses dari subdomain sekolah, redirect ke dashboard sekolah
-if (!IS_MAIN_DOMAIN && IS_VALID_TENANT) {
-  header('Location: /public/index.php');
-  exit;
-}
-
-// Jika subdomain tidak valid, tampilkan error
-if (!IS_MAIN_DOMAIN && !IS_VALID_TENANT) {
-  http_response_code(404);
-  die('Sekolah tidak ditemukan. Silakan akses dari domain utama perpus.test untuk mendaftar.');
-}
-?>
 <!doctype html>
 <html lang="id">
 
@@ -500,6 +477,13 @@ if (!IS_MAIN_DOMAIN && !IS_VALID_TENANT) {
     </div>
 
     <script>
+      // Check if login is required and auto-open modal
+      if (new URLSearchParams(window.location.search).get('login_required') === '1') {
+        window.addEventListener('load', () => {
+          openLoginModal();
+        });
+      }
+
       function openLoginModal(e) {
         if (e) e.preventDefault();
         document.getElementById('loginModal').style.display = 'flex';

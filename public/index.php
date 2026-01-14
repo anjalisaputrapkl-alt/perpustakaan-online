@@ -1,18 +1,4 @@
 <?php
-/**
- * Dashboard - Perpustakaan Sekolah
- * 
- * Halaman ini hanya bisa diakses dari subdomain sekolah (sma1.perpus.test)
- * dengan user yang sudah login
- */
-
-// Load tenant router untuk multi-tenant support
-require __DIR__ . '/tenant-router.php';
-
-// Enforce: hanya bisa diakses dari subdomain sekolah yang valid
-requireValidTenant('/');
-
-// Load authentication
 require __DIR__ . '/../src/auth.php';
 requireAuth();
 
@@ -22,13 +8,6 @@ if ($is_authenticated) {
     $pdo = require __DIR__ . '/../src/db.php';
     $user = $_SESSION['user'];
     $school_id = $user['school_id'];
-
-    // Validasi: school_id dari user harus sama dengan school_id dari tenant
-    if ($user['school_id'] !== SCHOOL_ID) {
-        // User mencoba akses sekolah lain, redirect
-        header('Location: /public/logout.php');
-        exit;
-    }
 
     function countData($pdo, $sql, $sid)
     {

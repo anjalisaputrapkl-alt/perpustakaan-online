@@ -25,25 +25,11 @@ function getAuthUser()
 
 /**
  * Redirect ke login jika belum autentikasi
- * Untuk multi-tenant, redirect ke login-modal.php dari subdomain
  */
 function requireAuth()
 {
     if (!isAuthenticated()) {
-        // Jika di subdomain sekolah, gunakan login-modal.php dari subdomain
-        if (!empty($_SERVER['HTTP_HOST'])) {
-            $host = explode(':', $_SERVER['HTTP_HOST'])[0];
-            $parts = explode('.', $host);
-
-            if (count($parts) >= 3) {
-                // Subdomain sekolah
-                header('Location: /public/login-modal.php');
-                exit;
-            }
-        }
-
-        // Default login page
-        header('Location: /public/login.php');
+        header('Location: /perpustakaan-online/?login_required=1');
         exit;
     }
 }
@@ -54,7 +40,7 @@ function requireAuth()
 function logout()
 {
     session_destroy();
-    header('Location: /');
+    header('Location: /perpustakaan-online/public/login.php');
     exit;
 }
 

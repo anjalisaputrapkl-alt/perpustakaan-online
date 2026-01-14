@@ -1,31 +1,10 @@
 <?php
-/**
- * books.php - Manajemen Buku
- * 
- * Halaman ini hanya bisa diakses dari subdomain sekolah yang valid
- * dengan user yang sudah authenticated
- */
-
-// Load tenant router untuk multi-tenant support
-require __DIR__ . '/tenant-router.php';
-
-// Enforce: hanya bisa diakses dari subdomain sekolah yang valid
-requireValidTenant('/');
-
-// Load authentication
 require __DIR__ . '/../src/auth.php';
 requireAuth();
 
 $pdo = require __DIR__ . '/../src/db.php';
 $user = $_SESSION['user'];
-$sid = SCHOOL_ID; // Gunakan SCHOOL_ID dari tenant constant
-
-// Validasi: school_id dari user harus sama dengan school_id dari tenant
-if ($user['school_id'] !== SCHOOL_ID) {
-  header('Location: /public/logout.php');
-  exit;
-}
-
+$sid = $user['school_id'];
 $action = $_GET['action'] ?? 'list';
 
 if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -1,8 +1,5 @@
 <?php
-/**
- * logout.php - Logout User
- * 
- * Menghapus session dan redirect ke root
- */
-
-logout();
+session_start();
+session_destroy();
+header('Location: /perpustakaan-online/');
+exit;
