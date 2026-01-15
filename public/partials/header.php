@@ -30,6 +30,8 @@ function _is_active($path, $current)
           href="<?php echo $base; ?>/members.php">👥 Anggota</a>
         <a class="nav-link<?php echo _is_active($base . '/borrows.php', $current); ?>"
           href="<?php echo $base; ?>/borrows.php">🔄 Pinjam</a>
+        <a class="nav-link<?php echo _is_active($base . '/book-maintenance.php', $current); ?>"
+          href="<?php echo $base; ?>/book-maintenance.php">🔧 Maintenance</a>
         <?php if ($user): ?>
           <a class="nav-link<?php echo _is_active($base . '/settings.php', $current); ?>"
             href="<?php echo $base; ?>/settings.php">⚙️ Pengaturan</a>
