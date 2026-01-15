@@ -238,24 +238,6 @@ $school = $stmt->fetch();
             gap: 32px;
         }
 
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .color-input {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .color-input input {
-            width: 100%;
-            height: 40px;
-            cursor: pointer;
-        }
-
         .flex-row {
             display: flex;
             gap: 12px;
@@ -310,94 +292,44 @@ $school = $stmt->fetch();
 
                             <h3>Pilih Tema</h3>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                                <button class="btn"
-                                    style="padding: 12px; background: #f0f9ff; border: 2px solid var(--accent);">Default</button>
-                                <button class="btn"
-                                    style="padding: 12px; background: #1f2937; color: white;">Dark</button>
-                                <button class="btn"
-                                    style="padding: 12px; background: #f6f9ff; border: 2px solid #3A7FF2;">Blue</button>
+                                <button class="btn theme-btn" data-theme="light"
+                                    style="padding: 12px; background: #f0f9ff; border: 2px solid var(--accent); font-weight: 600;">☀️
+                                    Light</button>
+                                <button class="btn theme-btn" data-theme="dark"
+                                    style="padding: 12px; background: #1f2937; color: white; font-weight: 600;">🌙
+                                    Dark</button>
+                                <button class="btn theme-btn" data-theme="blue"
+                                    style="padding: 12px; background: #0f172a; color: #60a5fa; border: 2px solid #60a5fa; font-weight: 600;">🔵
+                                    Blue</button>
                             </div>
+                            <small style="display: block; margin-top: 12px; color: var(--muted);">Tema yang dipilih akan
+                                disimpan secara otomatis</small>
 
-                            <h3>Penyesuaian Warna</h3>
-                            <div class="color-grid">
-                                <div class="color-input">
-                                    <label>Warna Utama</label>
-                                    <input id="primary-color" type="color" value="#2563eb">
-                                </div>
-                                <div class="color-input">
-                                    <label>Warna Sekunder</label>
-                                    <input id="secondary-color" type="color" value="#60a5fa">
-                                </div>
-                                <div class="color-input">
-                                    <label>Background</label>
-                                    <input id="bg-color" type="color" value="#f1f4f8">
-                                </div>
-                                <div class="color-input">
-                                    <label>Aksen</label>
-                                    <input id="accent-color" type="color" value="#1f2937">
-                                </div>
+                            <h3>Tema Tambahan</h3>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+                                <button class="btn theme-btn" data-theme="green"
+                                    style="padding: 12px; background: #065f46; color: #d1fae5; border: 2px solid #10b981; font-weight: 600;">🟢
+                                    Green</button>
+                                <button class="btn theme-btn" data-theme="purple"
+                                    style="padding: 12px; background: #581c87; color: #e9d5ff; border: 2px solid #d946ef; font-weight: 600;">🟣
+                                    Purple</button>
+                                <button class="btn theme-btn" data-theme="orange"
+                                    style="padding: 12px; background: #7c2d12; color: #fed7aa; border: 2px solid #f97316; font-weight: 600;">🟠
+                                    Orange</button>
+                                <button class="btn theme-btn" data-theme="rose"
+                                    style="padding: 12px; background: #831843; color: #ffe4e6; border: 2px solid #f43f5e; font-weight: 600;">🌹
+                                    Rose</button>
                             </div>
-
-                            <button class="btn secondary" style="margin-top: 12px; width: 100%;">↺ Reset Warna</button>
                         </div>
+
+                        <!-- Color Customization -->
+                        <!-- REMOVED -->
 
                         <!-- Typography -->
-                        <div class="card">
-                            <h2>✍️ Tipografi</h2>
-
-                            <div class="form-group">
-                                <label>Font</label>
-                                <select>
-                                    <option selected>Inter (Modern)</option>
-                                    <option>System (Sans)</option>
-                                    <option>Serif (Classic)</option>
-                                </select>
-                            </div>
-
-                            <div class="flex-row">
-                                <div>
-                                    <label>Ukuran</label>
-                                    <select>
-                                        <option>Small</option>
-                                        <option selected>Default</option>
-                                        <option>Large</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Bobot</label>
-                                    <select>
-                                        <option>Normal</option>
-                                        <option selected>Semi-bold</option>
-                                        <option>Bold</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- REMOVED -->
 
                         <!-- Layout Settings -->
-                        <div class="card">
-                            <h2>📐 Tata Letak</h2>
-
-                            <div class="flex-row">
-                                <div>
-                                    <label>Sudut Rounded</label>
-                                    <select>
-                                        <option>Small</option>
-                                        <option selected>Medium</option>
-                                        <option>Large</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label>Bayangan</label>
-                                    <select>
-                                        <option>None</option>
-                                        <option selected>Soft</option>
-                                        <option>Medium</option>
-                                        <option>Deep</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
+                        <!-- REMOVED -->
 
                         <!-- School Info -->
                         <div class="card">
@@ -501,215 +433,175 @@ $school = $stmt->fetch();
     <?php include __DIR__ . '/partials/footer.php'; ?>
 
     <script>
-        // Simple theme preview
-        document.querySelectorAll('.settings-controls button').forEach(btn => {
-            if (btn.textContent.includes('Default') || btn.textContent.includes('Dark') || btn.textContent.includes('Blue')) {
-                btn.addEventListener('click', () => {
-                    btn.parentElement.querySelectorAll('button').forEach(b => b.style.borderWidth = '1px');
-                    btn.style.borderWidth = '2px';
-                });
+        // Theme definitions
+        const themes = {
+            light: {
+                name: 'Light',
+                colors: {
+                    '--bg': '#f1f4f8',
+                    '--surface': '#ffffff',
+                    '--text': '#1f2937',
+                    '--muted': '#6b7280',
+                    '--border': '#e5e7eb',
+                    '--accent': '#2563eb',
+                    '--danger': '#dc2626',
+                    '--success': '#16a34a'
+                }
+            },
+            dark: {
+                name: 'Dark',
+                colors: {
+                    '--bg': '#1f2937',
+                    '--surface': '#111827',
+                    '--text': '#f3f4f6',
+                    '--muted': '#9ca3af',
+                    '--border': '#374151',
+                    '--accent': '#3b82f6',
+                    '--danger': '#ef4444',
+                    '--success': '#22c55e'
+                }
+            },
+            blue: {
+                name: 'Blue',
+                colors: {
+                    '--bg': '#0f172a',
+                    '--surface': '#1e293b',
+                    '--text': '#e2e8f0',
+                    '--muted': '#94a3b8',
+                    '--border': '#334155',
+                    '--accent': '#3b82f6',
+                    '--danger': '#f87171',
+                    '--success': '#4ade80'
+                }
+            },
+            green: {
+                name: 'Green',
+                colors: {
+                    '--bg': '#f0fdf4',
+                    '--surface': '#ffffff',
+                    '--text': '#166534',
+                    '--muted': '#6b7280',
+                    '--border': '#dcfce7',
+                    '--accent': '#10b981',
+                    '--danger': '#dc2626',
+                    '--success': '#059669'
+                }
+            },
+            purple: {
+                name: 'Purple',
+                colors: {
+                    '--bg': '#faf5ff',
+                    '--surface': '#ffffff',
+                    '--text': '#6b21a8',
+                    '--muted': '#6b7280',
+                    '--border': '#e9d5ff',
+                    '--accent': '#d946ef',
+                    '--danger': '#dc2626',
+                    '--success': '#a855f7'
+                }
+            },
+            orange: {
+                name: 'Orange',
+                colors: {
+                    '--bg': '#fffbeb',
+                    '--surface': '#ffffff',
+                    '--text': '#92400e',
+                    '--muted': '#6b7280',
+                    '--border': '#fed7aa',
+                    '--accent': '#f97316',
+                    '--danger': '#dc2626',
+                    '--success': '#ea580c'
+                }
+            },
+            rose: {
+                name: 'Rose',
+                colors: {
+                    '--bg': '#fff7ed',
+                    '--surface': '#ffffff',
+                    '--text': '#831843',
+                    '--muted': '#6b7280',
+                    '--border': '#ffe4e6',
+                    '--accent': '#f43f5e',
+                    '--danger': '#dc2626',
+                    '--success': '#be185d'
+                }
             }
+        };
+
+        // Global state to track current theme
+        let currentTheme = 'light';
+
+        // Update button states
+        function updateThemeButtons(active) {
+            document.querySelectorAll('.theme-btn').forEach(btn => {
+                if (btn.getAttribute('data-theme') === active) {
+                    btn.style.boxShadow = '0 0 0 3px rgba(37, 99, 235, 0.2)';
+                    btn.style.fontWeight = '600';
+                } else {
+                    btn.style.boxShadow = 'none';
+                    btn.style.fontWeight = '400';
+                }
+            });
+        }
+
+        // Apply theme and save to API
+        async function applyTheme(themeName) {
+            const theme = themes[themeName];
+            if (!theme) return;
+
+            // Apply colors to DOM
+            Object.entries(theme.colors).forEach(([key, value]) => {
+                document.documentElement.style.setProperty(key, value);
+            });
+
+            currentTheme = themeName;
+            updateThemeButtons(themeName);
+
+            // Save to database via API
+            try {
+                const response = await fetch('/perpustakaan-online/public/api/theme.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        theme_name: themeName
+                    })
+                });
+                if (!response.ok) console.error('Failed to save theme');
+            } catch (error) {
+                console.error('Error saving theme:', error);
+            }
+        }
+
+        // Theme button listeners
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const themeName = btn.getAttribute('data-theme');
+                applyTheme(themeName);
+            });
         });
 
-        // Color preview
-        ['primary-color', 'secondary-color', 'bg-color', 'accent-color'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('change', (e) => {
-                    document.documentElement.style.setProperty('--' + id.replace('-color', ''), e.target.value);
-                });
+        // Load settings from API on page load
+        async function loadSettingsFromAPI() {
+            try {
+                const response = await fetch('/perpustakaan-online/public/api/theme.php');
+                if (!response.ok) throw new Error('Failed to load settings');
+                const data = await response.json();
+                if (data.success) {
+                    currentTheme = data.theme_name;
+                    applyTheme(data.theme_name);
+                }
+            } catch (error) {
+                console.warn('Could not load settings from API, using defaults:', error);
             }
+        }
+
+        // Load and apply saved theme on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Load from API first
+            await loadSettingsFromAPI();
         });
     </script>
 
 </body>
 
 </html>
-
-<script>
-    // Simple theme preview
-    document.querySelectorAll('.settings-controls button').forEach(btn => {
-        if (btn.textContent.includes('Default') || btn.textContent.includes('Dark') || btn.textContent.includes('Blue')) {
-            btn.addEventListener('click', () => {
-                btn.parentElement.querySelectorAll('button').forEach(b => b.style.borderWidth = '1px');
-                btn.style.borderWidth = '2px';
-            });
-        }
-    });
-
-    // Color preview
-    ['primary-color', 'secondary-color', 'bg-color', 'accent-color'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.addEventListener('change', (e) => {
-                document.documentElement.style.setProperty('--' + id.replace('-color', ''), e.target.value);
-            });
-        }
-    });
-</script>
-
-</body>
-
-</html>
-
-<script>
-    (function () {
-        const defaultSettings = {
-            theme: 'blue',
-            primary: '#3A7FF2',
-            secondary: '#7AB8F5',
-            bg: '#F6F9FF',
-            accent: '#0A1A4F',
-            fontFamily: "Inter, system-ui, -apple-system, 'Segoe UI', Roboto",
-            fontSize: '16',
-            fontWeight: '600',
-            cornerRadius: '10',
-            shadowStrength: 'soft',
-            dashboardCardBg: '#FFFFFF',
-            catalogMode: 'grid',
-            reportsTableStyle: 'bordered'
-        };
-
-        let undoStack = [], redoStack = [];
-
-        function loadSettings() {
-            try {
-                return JSON.parse(localStorage.getItem('smartlib_theme')) || defaultSettings;
-            } catch (e) { return defaultSettings; }
-        }
-
-        function saveToStorage(s) {
-            localStorage.setItem('smartlib_theme', JSON.stringify(s));
-        }
-
-        function applySettings(s) {
-            document.documentElement.style.setProperty('--primary', s.primary);
-            document.documentElement.style.setProperty('--primary-2', s.secondary);
-            document.documentElement.style.setProperty('--bg', s.bg);
-            document.documentElement.style.setProperty('--primary-dark', s.accent);
-            document.documentElement.style.setProperty('--radius-md', s.cornerRadius + 'px');
-            document.body.style.fontFamily = s.fontFamily;
-            document.body.style.fontSize = s.fontSize + 'px';
-            // shadow classes
-            document.body.classList.remove('shadow-none', 'shadow-soft', 'shadow-medium', 'shadow-deep');
-            document.body.classList.add('shadow-' + s.shadowStrength);
-
-            // preview tweaks
-            var preview = document.getElementById('live-preview');
-            if (preview) {
-                preview.querySelectorAll('.card').forEach(c => {
-                    c.style.background = s.dashboardCardBg;
-                    c.style.borderRadius = s.cornerRadius + 'px';
-                });
-                if (s.reportsTableStyle === 'borderless') {
-                    preview.querySelectorAll('table').forEach(t => t.style.border = 'none');
-                } else {
-                    preview.querySelectorAll('table').forEach(t => t.style.border = '1px solid var(--border)');
-                }
-            }
-        }
-
-        function pushUndo(s) { undoStack.push(JSON.stringify(s)); if (undoStack.length > 50) undoStack.shift(); redoStack = []; }
-        function undo() { if (!undoStack.length) return; var cur = loadSettings(); redoStack.push(JSON.stringify(cur)); var prev = JSON.parse(undoStack.pop()); saveToStorage(prev); updateControls(prev); applySettings(prev); try { window.dispatchEvent(new CustomEvent('smartlib_theme:changed', { detail: prev })); } catch (e) { } }
-        function redo() { if (!redoStack.length) return; var cur = loadSettings(); undoStack.push(JSON.stringify(cur)); var nxt = JSON.parse(redoStack.pop()); saveToStorage(nxt); updateControls(nxt); applySettings(nxt); try { window.dispatchEvent(new CustomEvent('smartlib_theme:changed', { detail: nxt })); } catch (e) { } }
-
-        function updateControls(s) {
-            document.getElementById('theme-select').value = s.theme;
-            document.getElementById('primary-color').value = s.primary;
-            document.getElementById('secondary-color').value = s.secondary;
-            document.getElementById('bg-color').value = s.bg;
-            document.getElementById('accent-color').value = s.accent;
-            document.getElementById('font-family').value = s.fontFamily;
-            document.getElementById('font-size').value = s.fontSize;
-            document.getElementById('font-weight').value = s.fontWeight;
-            document.getElementById('corner-radius').value = s.cornerRadius;
-            document.getElementById('shadow-strength').value = s.shadowStrength;
-            document.getElementById('dashboard-card-bg').value = s.dashboardCardBg;
-            document.getElementById('catalog-mode').value = s.catalogMode;
-            document.getElementById('reports-table-style').value = s.reportsTableStyle;
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            var settings = loadSettings();
-            updateControls(settings);
-            applySettings(settings);
-
-            // wire controls
-            ['theme-select', 'primary-color', 'secondary-color', 'bg-color', 'accent-color', 'font-family', 'font-size', 'font-weight', 'corner-radius', 'shadow-strength', 'dashboard-card-bg', 'catalog-mode', 'reports-table-style'].forEach(id => {
-                var el = document.getElementById(id);
-                if (!el) return;
-                el.addEventListener('change', function (e) {
-                    var cur = loadSettings();
-                    pushUndo(cur);
-                    var key = id.replace(/-/g, '');
-                    // map ids to settings
-                    switch (id) {
-                        case 'theme-select': cur.theme = e.target.value; break;
-                        case 'primary-color': cur.primary = e.target.value; break;
-                        case 'secondary-color': cur.secondary = e.target.value; break;
-                        case 'bg-color': cur.bg = e.target.value; break;
-                        case 'accent-color': cur.accent = e.target.value; break;
-                        case 'font-family': cur.fontFamily = e.target.value; break;
-                        case 'font-size': cur.fontSize = e.target.value; break;
-                        case 'font-weight': cur.fontWeight = e.target.value; break;
-                        case 'corner-radius': cur.cornerRadius = e.target.value; break;
-                        case 'shadow-strength': cur.shadowStrength = e.target.value; break;
-                        case 'dashboard-card-bg': cur.dashboardCardBg = e.target.value; break;
-                        case 'catalog-mode': cur.catalogMode = e.target.value; break;
-                        case 'reports-table-style': cur.reportsTableStyle = e.target.value; break;
-                        default: break;
-                    }
-                    saveToStorage(cur);
-                    applySettings(cur);
-                    try { window.dispatchEvent(new CustomEvent('smartlib_theme:changed', { detail: cur })); } catch (e) { }
-                });
-            });
-
-            document.getElementById('btn-reset-colors').addEventListener('click', function () {
-                pushUndo(loadSettings());
-                var s = loadSettings(); s.primary = defaultSettings.primary; s.secondary = defaultSettings.secondary; s.bg = defaultSettings.bg; s.accent = defaultSettings.accent; saveToStorage(s); updateControls(s); applySettings(s);
-                try { window.dispatchEvent(new CustomEvent('smartlib_theme:changed', { detail: s })); } catch (e) { }
-                showToast('Color values reset.');
-            });
-
-            document.getElementById('save-settings').addEventListener('click', function () {
-                var s = loadSettings(); saveToStorage(s); try { window.dispatchEvent(new CustomEvent('smartlib_theme:changed', { detail: s })); } catch (e) { }; showToast('Settings saved to localStorage. (Server-side save not enabled.)');
-            });
-
-            document.getElementById('reset-settings').addEventListener('click', function () {
-                pushUndo(loadSettings()); saveToStorage(defaultSettings); updateControls(defaultSettings); applySettings(defaultSettings); try { window.dispatchEvent(new CustomEvent('smartlib_theme:changed', { detail: defaultSettings })); } catch (e) { }; showToast('Settings reset to default.');
-            });
-
-            document.getElementById('undo-settings').addEventListener('click', function () { undo(); });
-            document.getElementById('redo-settings').addEventListener('click', function () { redo(); });
-
-            // theme-mini preview quick click
-            document.querySelectorAll('.theme-mini').forEach(el => {
-                el.addEventListener('click', function () {
-                    var t = el.getAttribute('data-theme');
-                    var cur = loadSettings();
-                    pushUndo(cur);
-                    if (t === 'dark') {
-                        cur.primary = '#0A1A4F'; cur.secondary = '#3A7FF2'; cur.bg = '#071226'; cur.accent = '#7AB8F5';
-                    } else if (t === 'blue') {
-                        cur.primary = '#3A7FF2'; cur.secondary = '#7AB8F5'; cur.bg = '#F6F9FF'; cur.accent = '#0A1A4F';
-                    } else {
-                        cur = Object.assign({}, defaultSettings);
-                    }
-                    saveToStorage(cur); updateControls(cur); applySettings(cur);
-                    try { window.dispatchEvent(new CustomEvent('smartlib_theme:changed', { detail: cur })); } catch (e) { }
-                });
-            });
-
-            // toast helper
-            function showToast(msg) {
-                var t = document.createElement('div');
-                t.className = 'toast';
-                t.style.cssText = 'position:fixed;right:18px;bottom:18px;background:#0A1A4F;color:#fff;padding:10px 14px;border-radius:8px;box-shadow:0 8px 20px rgba(10,26,79,0.12);z-index:9999';
-                t.innerText = msg; document.body.appendChild(t);
-                setTimeout(() => { t.style.opacity = 0; setTimeout(() => t.remove(), 300); }, 2200);
-            }
-
-        });
-    })();
-</script>

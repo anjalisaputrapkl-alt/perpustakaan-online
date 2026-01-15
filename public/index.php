@@ -59,7 +59,21 @@ if ($is_authenticated) {
         return strtotime($b['timestamp']) - strtotime($a['timestamp']);
     });
 
-    $monthly_borrows = [12, 18, 25, 20, 30, 28, 35, 40, 38, 32, 26, 22];
+    // Get monthly borrow data for current year
+    $stmt = $pdo->prepare("SELECT MONTH(borrowed_at) as month, COUNT(*) as count FROM borrows 
+        WHERE school_id = :sid AND YEAR(borrowed_at) = YEAR(NOW())
+        GROUP BY MONTH(borrowed_at)
+        ORDER BY MONTH(borrowed_at)");
+    $stmt->execute(['sid' => $school_id]);
+    $monthly_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Create array with 0 for all months first
+    $monthly_borrows = array_fill(0, 12, 0);
+
+    // Fill in actual data
+    foreach ($monthly_data as $row) {
+        $monthly_borrows[$row['month'] - 1] = $row['count'];
+    }
 }
 ?>
 <!doctype html>
@@ -489,7 +503,8 @@ if ($is_authenticated) {
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
                                                     <div class="member-name">Dipinjam oleh
-                                                        <?= htmlspecialchars($activity['name']) ?></div>
+                                                        <?= htmlspecialchars($activity['name']) ?>
+                                                    </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>
                                             </div>
@@ -511,7 +526,8 @@ if ($is_authenticated) {
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
                                                     <div class="member-name">Dikembalikan oleh
-                                                        <?= htmlspecialchars($activity['name']) ?></div>
+                                                        <?= htmlspecialchars($activity['name']) ?>
+                                                    </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>
                                             </div>

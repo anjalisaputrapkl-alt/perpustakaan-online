@@ -1,143 +1,138 @@
-// GLOBAL THEME APPLIER
-(function(){
-    function loadSettings(){
+// Global Theme System
+// Automatically loads the saved theme on all pages from per-school database storage
+
+(function() {
+    const themes = {
+        light: {
+            '--bg': '#f1f4f8',
+            '--surface': '#ffffff',
+            '--text': '#1f2937',
+            '--muted': '#6b7280',
+            '--border': '#e5e7eb',
+            '--accent': '#2563eb',
+            '--danger': '#dc2626',
+            '--success': '#16a34a'
+        },
+        dark: {
+            '--bg': '#1f2937',
+            '--surface': '#111827',
+            '--text': '#f3f4f6',
+            '--muted': '#9ca3af',
+            '--border': '#374151',
+            '--accent': '#3b82f6',
+            '--danger': '#ef4444',
+            '--success': '#22c55e'
+        },
+        blue: {
+            '--bg': '#0f172a',
+            '--surface': '#1e293b',
+            '--text': '#e2e8f0',
+            '--muted': '#94a3b8',
+            '--border': '#334155',
+            '--accent': '#3b82f6',
+            '--danger': '#f87171',
+            '--success': '#4ade80'
+        },
+        green: {
+            '--bg': '#f0fdf4',
+            '--surface': '#ffffff',
+            '--text': '#166534',
+            '--muted': '#6b7280',
+            '--border': '#dcfce7',
+            '--accent': '#10b981',
+            '--danger': '#dc2626',
+            '--success': '#059669'
+        },
+        purple: {
+            '--bg': '#faf5ff',
+            '--surface': '#ffffff',
+            '--text': '#6b21a8',
+            '--muted': '#6b7280',
+            '--border': '#e9d5ff',
+            '--accent': '#d946ef',
+            '--danger': '#dc2626',
+            '--success': '#a855f7'
+        },
+        orange: {
+            '--bg': '#fffbeb',
+            '--surface': '#ffffff',
+            '--text': '#92400e',
+            '--muted': '#6b7280',
+            '--border': '#fed7aa',
+            '--accent': '#f97316',
+            '--danger': '#dc2626',
+            '--success': '#ea580c'
+        },
+        rose: {
+            '--bg': '#fff7ed',
+            '--surface': '#ffffff',
+            '--text': '#831843',
+            '--muted': '#6b7280',
+            '--border': '#ffe4e6',
+            '--accent': '#f43f5e',
+            '--danger': '#dc2626',
+            '--success': '#be185d'
+        }
+    };
+
+    // Load theme from API (per-school from database)
+    async function loadThemeFromAPI() {
         try {
-            const saved = localStorage.getItem('perpustakaan_theme');
-            return saved ? JSON.parse(saved) : {};
-        } catch(e){
-            return {};
-        }
-    }
-
-    function applyTheme(){
-        const s = loadSettings();
-        
-        // Apply CSS variables to root
-        if(s.primary) document.documentElement.style.setProperty('--accent', s.primary);
-        if(s.secondary) document.documentElement.style.setProperty('--secondary', s.secondary);
-        if(s.bg) document.documentElement.style.setProperty('--bg', s.bg);
-        if(s.accent) document.documentElement.style.setProperty('--text', s.accent);
-        
-        // Apply surface (card background)
-        if(s.dashboardCardBg) {
-            document.documentElement.style.setProperty('--surface', s.dashboardCardBg);
-        }
-
-        if(s.cornerRadius) {
-            document.documentElement.style.setProperty('--radius-md', s.cornerRadius + "px");
-        }
-
-        // Apply typography
-        if(s.fontFamily) {
-            document.body.style.fontFamily = s.fontFamily;
-            document.documentElement.style.fontFamily = s.fontFamily;
-        }
-        if(s.fontSize) {
-            document.body.style.fontSize = s.fontSize + "px";
-        }
-        if(s.fontWeight) {
-            document.body.style.fontWeight = s.fontWeight;
-        }
-
-        // Apply card backgrounds with dynamic style
-        const cardStyleId = 'perpustakaan-card-style';
-        let cardStyle = document.getElementById(cardStyleId);
-        if(s.dashboardCardBg) {
-            if(!cardStyle) {
-                cardStyle = document.createElement('style');
-                cardStyle.id = cardStyleId;
-                document.head.appendChild(cardStyle);
-            }
-            cardStyle.textContent = `
-                .card, .panel, .activity-section, .chart-box, .actions, .stat {
-                    background: ${s.dashboardCardBg} !important;
-                }
-            `;
-        }
-
-        // Apply sidebar & topbar colors with dynamic style
-        const navStyleId = 'perpustakaan-nav-style';
-        let navStyle = document.getElementById(navStyleId);
-        const hasSidebarCustom = s.sidebarBg || s.sidebarText || s.sidebarBorder;
-        const hasTopbarCustom = s.topbarBg || s.topbarText || s.topbarBorder;
-        
-        if(hasSidebarCustom || hasTopbarCustom) {
-            if(!navStyle) {
-                navStyle = document.createElement('style');
-                navStyle.id = navStyleId;
-                document.head.appendChild(navStyle);
-            }
+            const response = await fetch('/perpustakaan-online/public/api/theme.php');
+            if (!response.ok) throw new Error('Failed to load theme');
+            const data = await response.json();
             
-            navStyle.textContent = `
-                .sidebar {
-                    background: ${s.sidebarBg || '#ffffff'} !important;
-                    color: ${s.sidebarText || '#1f2937'} !important;
-                    border-right: 1px solid ${s.sidebarBorder || '#e5e7eb'} !important;
+            if (data.success) {
+                const theme = themes[data.theme_name] || themes.light;
+                
+                // Apply base theme colors
+                Object.entries(theme).forEach(([key, value]) => {
+                    document.documentElement.style.setProperty(key, value);
+                });
+                
+                // Apply custom colors if any (override theme)
+                if (data.custom_colors && Object.keys(data.custom_colors).length > 0) {
+                    Object.entries(data.custom_colors).forEach(([colorId, value]) => {
+                        const cssVar = colorId.replace('color-', '--');
+                        document.documentElement.style.setProperty(cssVar, value);
+                    });
                 }
-                .sidebar-brand {
-                    color: ${s.sidebarText || '#1f2937'} !important;
+                
+                // Apply typography if any
+                if (data.typography && Object.keys(data.typography).length > 0) {
+                    if (data.typography['font-family']) {
+                        document.documentElement.style.fontFamily = data.typography['font-family'];
+                        document.body.style.fontFamily = data.typography['font-family'];
+                    }
+                    if (data.typography['font-weight']) {
+                        document.documentElement.style.fontWeight = data.typography['font-weight'];
+                        document.body.style.fontWeight = data.typography['font-weight'];
+                    }
                 }
-                .sidebar-link {
-                    color: ${s.sidebarText || '#1f2937'} !important;
-                }
-                .sidebar-logout {
-                    color: ${s.sidebarText || '#1f2937'} !important;
-                }
-                .sidebar-link:hover {
-                    background: rgba(0,0,0,0.05) !important;
-                }
-                .topbar {
-                    background: ${s.topbarBg || '#ffffff'} !important;
-                    color: ${s.topbarText || '#1f2937'} !important;
-                    border-bottom: 1px solid ${s.topbarBorder || '#e5e7eb'} !important;
-                }
-                .topbar strong {
-                    color: ${s.topbarText || '#1f2937'} !important;
-                }
-            `;
-        }
-
-        // Apply table styles
-        if(s.reportsTableStyle === 'borderless') {
-            const tableStyleId = 'perpustakaan-table-style';
-            let tableStyle = document.getElementById(tableStyleId);
-            if(!tableStyle) {
-                tableStyle = document.createElement('style');
-                tableStyle.id = tableStyleId;
-                document.head.appendChild(tableStyle);
+                
+                return;
             }
-            tableStyle.textContent = `
-                table {
-                    border: none !important;
-                }
-                table td, table th {
-                    border: none !important;
-                    border-bottom: 1px solid var(--border) !important;
-                }
-            `;
+        } catch (error) {
+            console.warn('Could not load theme from API:', error);
         }
-
-        // Apply catalog mode
-        if(s.catalogMode) {
-            document.body.setAttribute('data-catalog-mode', s.catalogMode);
-        }
+        
+        // Fallback: use default light theme
+        applyDefaultTheme();
     }
 
-    // Apply theme immediately when script loads
-    applyTheme();
-    
-    // Also apply on DOM ready
-    if(document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', applyTheme);
+    // Apply default light theme as fallback
+    function applyDefaultTheme() {
+        const defaultTheme = themes.light;
+        Object.entries(defaultTheme).forEach(([key, value]) => {
+            document.documentElement.style.setProperty(key, value);
+        });
     }
-    
-    // Listen for theme changes from settings page
-    window.addEventListener('perpustakaan_theme:changed', applyTheme);
-    
-    // Re-apply theme on visibility change (when tab becomes visible)
-    document.addEventListener('visibilitychange', function() {
-        if(!document.hidden) {
-            applyTheme();
-        }
-    });
+
+    // Load and apply theme when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadThemeFromAPI);
+    } else {
+        loadThemeFromAPI();
+    }
 })();
+
