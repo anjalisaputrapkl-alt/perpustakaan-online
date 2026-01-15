@@ -9,13 +9,16 @@ $action = $_GET['action'] ?? 'list';
 
 if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   $pdo->prepare(
-    'INSERT INTO books (school_id,title,author,isbn,copies)
-     VALUES (:sid,:title,:author,:isbn,:copies)'
+    'INSERT INTO books (school_id,title,author,isbn,category,shelf,row_number,copies)
+     VALUES (:sid,:title,:author,:isbn,:category,:shelf,:row,:copies)'
   )->execute([
         'sid' => $sid,
         'title' => $_POST['title'],
         'author' => $_POST['author'],
         'isbn' => $_POST['isbn'],
+        'category' => $_POST['category'],
+        'shelf' => $_POST['shelf'],
+        'row' => $_POST['row_number'],
         'copies' => (int) $_POST['copies']
       ]);
   header('Location: books.php');
@@ -26,12 +29,15 @@ if ($action === 'edit' && isset($_GET['id'])) {
   $id = (int) $_GET['id'];
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo->prepare(
-      'UPDATE books SET title=:title,author=:author,isbn=:isbn,copies=:copies
+      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,shelf=:shelf,row_number=:row,copies=:copies
        WHERE id=:id AND school_id=:sid'
     )->execute([
           'title' => $_POST['title'],
           'author' => $_POST['author'],
           'isbn' => $_POST['isbn'],
+          'category' => $_POST['category'],
+          'shelf' => $_POST['shelf'],
+          'row' => $_POST['row_number'],
           'copies' => (int) $_POST['copies'],
           'id' => $id,
           'sid' => $sid
@@ -54,6 +60,21 @@ if ($action === 'delete' && isset($_GET['id'])) {
 $stmt = $pdo->prepare('SELECT * FROM books WHERE school_id=:sid ORDER BY id DESC');
 $stmt->execute(['sid' => $sid]);
 $books = $stmt->fetchAll();
+
+$categories = [
+  'Fiksi',
+  'Non-Fiksi',
+  'Referensi',
+  'Biografi',
+  'Sejarah',
+  'Seni & Budaya',
+  'Teknologi',
+  'Pendidikan',
+  'Anak-anak',
+  'Komik',
+  'Majalah',
+  'Lainnya'
+];
 ?>
 <!doctype html>
 <html lang="id">
@@ -157,6 +178,23 @@ $books = $stmt->fetchAll();
       font-size: 13px
     }
 
+    select {
+      padding: 12px 14px;
+      padding-right: 30px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 13px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: Inter, sans-serif;
+      cursor: pointer;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+      background-size: 16px;
+      appearance: none;
+    }
+
     .btn {
       padding: 7px 14px;
       border-radius: 6px;
@@ -207,6 +245,10 @@ $books = $stmt->fetchAll();
 
     col.isbn {
       width: 18%
+    }
+
+    col.category {
+      width: 15%
     }
 
     col.qty {
@@ -324,6 +366,21 @@ $books = $stmt->fetchAll();
             <div class="form-group"><label>ISBN</label>
               <input name="isbn" value="<?= $book['isbn'] ?? '' ?>">
             </div>
+            <div class="form-group"><label>Kategori</label>
+              <select name="category">
+                <option value="">-- Pilih Kategori --</option>
+                <?php foreach ($categories as $cat): ?>
+                  <option value="<?= $cat ?>" <?= ($book['category'] ?? '') === $cat ? 'selected' : '' ?>><?= $cat ?>
+                  </option>
+                <?php endforeach ?>
+              </select>
+            </div>
+            <div class="form-group"><label>Rak/Lemari</label>
+              <input name="shelf" value="<?= $book['shelf'] ?? '' ?>">
+            </div>
+            <div class="form-group"><label>Baris</label>
+              <input type="number" min="1" name="row_number" value="<?= $book['row_number'] ?? '' ?>">
+            </div>
             <div class="form-group"><label>Jumlah</label>
               <input type="number" min="1" name="copies" value="<?= $book['copies'] ?? 1 ?>">
             </div>
@@ -341,6 +398,7 @@ $books = $stmt->fetchAll();
                 <col class="title">
                 <col class="author">
                 <col class="isbn">
+                <col class="category">
                 <col class="qty">
                 <col class="action">
               </colgroup>
@@ -351,6 +409,8 @@ $books = $stmt->fetchAll();
                   <th>Judul</th>
                   <th>Pengarang</th>
                   <th>ISBN</th>
+                  <th>Kategori</th>
+                  <th>Lokasi</th>
                   <th class="text-center">Jumlah</th>
                   <th class="text-center">Aksi</th>
                 </tr>
@@ -363,6 +423,8 @@ $books = $stmt->fetchAll();
                     <td><strong><?= htmlspecialchars($b['title']) ?></strong></td>
                     <td><?= htmlspecialchars($b['author']) ?></td>
                     <td><?= htmlspecialchars($b['isbn']) ?></td>
+                    <td><?= htmlspecialchars($b['category'] ?? '-') ?></td>
+                    <td><?= htmlspecialchars(($b['shelf'] ?? '-') . ' / Baris ' . ($b['row_number'] ?? '-')) ?></td>
                     <td class="text-center"><?= $b['copies'] ?></td>
                     <td class="text-center">
                       <div class="actions">

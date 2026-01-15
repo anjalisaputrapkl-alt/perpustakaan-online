@@ -432,12 +432,14 @@ $members = $members->fetchAll();
             <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
               <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Sedang Dipinjam</div>
               <div style="font-size: 24px; font-weight: 600">
-                <?= count(array_filter($borrows, fn($b) => $b['status'] !== 'returned')) ?></div>
+                <?= count(array_filter($borrows, fn($b) => $b['status'] !== 'returned')) ?>
+              </div>
             </div>
             <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
               <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Terlambat</div>
               <div style="font-size: 24px; font-weight: 600">
-                <?= count(array_filter($borrows, fn($b) => $b['status'] === 'overdue')) ?></div>
+                <?= count(array_filter($borrows, fn($b) => $b['status'] === 'overdue')) ?>
+              </div>
             </div>
           </div>
         </div>

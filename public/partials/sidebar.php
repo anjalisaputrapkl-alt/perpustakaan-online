@@ -33,6 +33,11 @@ function _is_active_sidebar($path, $current)
             <span class="sidebar-icon">📚</span>
             <span class="sidebar-label">Buku</span>
         </a>
+        <a href="<?php echo $base; ?>/book-maintenance.php"
+            class="sidebar-link<?php echo _is_active_sidebar($base . '/book-maintenance.php', $current); ?>">
+            <span class="sidebar-icon">🔧</span>
+            <span class="sidebar-label">Pemeliharaan Buku</span>
+        </a>
         <a href="<?php echo $base; ?>/members.php"
             class="sidebar-link<?php echo _is_active_sidebar($base . '/members.php', $current); ?>">
             <span class="sidebar-icon">👥</span>

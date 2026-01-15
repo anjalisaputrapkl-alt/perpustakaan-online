@@ -62,7 +62,7 @@ $members = $stmt->fetchAll();
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kelola Anggota</title>
+  <title>Kelola Murid</title>
   <script src="../assets/js/theme.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
@@ -297,14 +297,14 @@ $members = $stmt->fetchAll();
   <div class="app">
 
     <div class="topbar">
-      <strong>Kelola Anggota</strong>
+      <strong>Kelola Murid</strong>
     </div>
 
     <div class="content">
       <div class="main">
 
         <div class="card">
-          <h2><?= $action === 'edit' ? 'Edit Anggota' : 'Tambah Anggota' ?></h2>
+          <h2><?= $action === 'edit' ? 'Edit Murid' : 'Tambah Murid' ?></h2>
           <form method="post" action="<?= $action === 'edit' ? '' : 'members.php?action=add' ?>">
             <div class="form-group">
               <label>Nama Lengkap</label>
@@ -315,17 +315,17 @@ $members = $stmt->fetchAll();
               <input type="email" name="email" required value="<?= $member['email'] ?? '' ?>">
             </div>
             <div class="form-group">
-              <label>No Anggota</label>
+              <label>No Murid</label>
               <input name="member_no" required value="<?= $member['member_no'] ?? '' ?>">
             </div>
             <button class="btn primary">
-              <?= $action === 'edit' ? 'Simpan Perubahan' : 'Tambah Anggota' ?>
+              <?= $action === 'edit' ? 'Simpan Perubahan' : 'Tambah Murid' ?>
             </button>
           </form>
         </div>
 
         <div class="card">
-          <h2>Daftar Anggota (<?= count($members) ?>)</h2>
+          <h2>Daftar Murid (<?= count($members) ?>)</h2>
           <div class="table-wrap">
             <table>
               <thead>
@@ -333,7 +333,7 @@ $members = $stmt->fetchAll();
                   <th>ID</th>
                   <th>Nama</th>
                   <th>Email</th>
-                  <th>No Anggota</th>
+                  <th>No Murid</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
@@ -347,7 +347,7 @@ $members = $stmt->fetchAll();
                     <td>
                       <div class="actions">
                         <a class="btn" href="members.php?action=edit&id=<?= $m['id'] ?>">Edit</a>
-                        <a class="btn danger" onclick="return confirm('Hapus anggota ini?')"
+                        <a class="btn danger" onclick="return confirm('Hapus murid ini?')"
                           href="members.php?action=delete&id=<?= $m['id'] ?>">Hapus</a>
                       </div>
                     </td>
@@ -359,20 +359,21 @@ $members = $stmt->fetchAll();
         </div>
 
         <div class="card" style="grid-column: 1/-1">
-          <h2>Statistik Anggota</h2>
+          <h2>Statistik Murid</h2>
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px">
             <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
-              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Total Anggota</div>
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Total Murid</div>
               <div style="font-size: 24px; font-weight: 600"><?= count($members) ?></div>
             </div>
             <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
-              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Anggota Baru</div>
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Murid Baru</div>
               <div style="font-size: 24px; font-weight: 600">—</div>
             </div>
             <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
               <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Email Terdaftar</div>
               <div style="font-size: 24px; font-weight: 600">
-                <?= count(array_filter($members, fn($m) => !empty($m['email']))) ?></div>
+                <?= count(array_filter($members, fn($m) => !empty($m['email']))) ?>
+              </div>
             </div>
           </div>
         </div>
@@ -380,23 +381,23 @@ $members = $stmt->fetchAll();
         <div class="card" style="grid-column: 1/-1">
           <h2>Pertanyaan Umum</h2>
           <div class="faq-item">
-            <div class="faq-question">Bagaimana cara menambah anggota baru? <span>+</span></div>
-            <div class="faq-answer">Isi form di kolom kiri dengan nama lengkap, email, dan nomor anggota, lalu klik
-              tombol "Tambah Anggota".</div>
+            <div class="faq-question">Bagaimana cara menambah murid baru? <span>+</span></div>
+            <div class="faq-answer">Isi form di kolom kiri dengan nama lengkap, email, dan nomor murid, lalu klik
+              tombol "Tambah Murid".</div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Bisakah saya mengedit data anggota? <span>+</span></div>
-            <div class="faq-answer">Ya, klik tombol "Edit" pada baris anggota yang ingin diubah di daftar anggota, ubah
+            <div class="faq-question">Bisakah saya mengedit data murid? <span>+</span></div>
+            <div class="faq-answer">Ya, klik tombol "Edit" pada baris murid yang ingin diubah di daftar murid, ubah
               data, lalu klik "Simpan Perubahan".</div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Apa yang terjadi jika saya menghapus anggota? <span>+</span></div>
-            <div class="faq-answer">Anggota akan dihapus dari sistem. Pastikan anggota tidak memiliki peminjaman aktif
+            <div class="faq-question">Apa yang terjadi jika saya menghapus murid? <span>+</span></div>
+            <div class="faq-answer">Murid akan dihapus dari sistem. Pastikan murid tidak memiliki peminjaman aktif
               sebelum menghapus.</div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Apakah nomor anggota harus unik? <span>+</span></div>
-            <div class="faq-answer">Ya, setiap anggota harus memiliki nomor unik untuk identifikasi dan sistem
+            <div class="faq-question">Apakah nomor murid harus unik? <span>+</span></div>
+            <div class="faq-answer">Ya, setiap murid harus memiliki nomor unik untuk identifikasi dan sistem
               peminjaman.</div>
           </div>
         </div>
