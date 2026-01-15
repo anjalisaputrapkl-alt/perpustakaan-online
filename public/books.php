@@ -121,8 +121,8 @@ $books = $stmt->fetchAll();
     }
 
     .main {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 32px
     }
 
@@ -178,7 +178,11 @@ $books = $stmt->fetchAll();
     }
 
     .table-wrap {
-      overflow-x: auto
+      overflow-x: auto;
+      max-height: 380px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
     }
 
     /* 🔒 KUNCI KESELARASAN */
@@ -284,11 +288,14 @@ $books = $stmt->fetchAll();
       font-size: 12px;
       color: var(--muted);
       margin-top: 6px;
-      display: none
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out;
     }
 
     .faq-item.active .faq-answer {
-      display: block
+      max-height: 200px;
+      transition: max-height 0.3s ease-in;
     }
   </style>
 </head>
@@ -368,6 +375,51 @@ $books = $stmt->fetchAll();
                 <?php endforeach ?>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1/-1">
+          <h2>Statistik Buku</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px">
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Total Buku</div>
+              <div style="font-size: 24px; font-weight: 600"><?= count($books) ?></div>
+            </div>
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Total Salinan</div>
+              <div style="font-size: 24px; font-weight: 600"><?= array_sum(array_map(fn($b) => $b['copies'], $books)) ?>
+              </div>
+            </div>
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Rata-rata Salinan</div>
+              <div style="font-size: 24px; font-weight: 600">
+                <?= count($books) > 0 ? round(array_sum(array_map(fn($b) => $b['copies'], $books)) / count($books), 1) : 0 ?>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1/-1">
+          <h2>Pertanyaan Umum</h2>
+          <div class="faq-item">
+            <div class="faq-question">Bagaimana cara menambah buku baru? <span>+</span></div>
+            <div class="faq-answer">Isi form di kolom kiri dengan judul, pengarang, ISBN (opsional), dan jumlah salinan,
+              lalu klik tombol "Tambah Buku".</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Bisakah saya mengedit data buku? <span>+</span></div>
+            <div class="faq-answer">Ya, klik tombol "Edit" pada baris buku yang ingin diubah di daftar buku, ubah data,
+              lalu klik "Simpan".</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Apa yang terjadi jika saya menghapus buku? <span>+</span></div>
+            <div class="faq-answer">Buku akan dihapus dari sistem. Pastikan tidak ada peminjaman aktif untuk buku
+              tersebut sebelum menghapus.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Bagaimana cara menambah salinan buku yang sudah ada? <span>+</span></div>
+            <div class="faq-answer">Klik tombol "Edit" pada buku yang ingin ditambah salinannya, ubah nilai "Jumlah",
+              lalu klik "Simpan".</div>
           </div>
         </div>
 

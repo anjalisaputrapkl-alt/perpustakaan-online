@@ -126,8 +126,8 @@ $members = $members->fetchAll();
       margin-top: 64px;
 
       .main {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 32px
       }
 
@@ -185,7 +185,11 @@ $members = $members->fetchAll();
       }
 
       .table-wrap {
-        overflow-x: auto
+        overflow-x: auto;
+        max-height: 380px;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
       }
 
       table {
@@ -308,11 +312,14 @@ $members = $members->fetchAll();
         font-size: 12px;
         color: var(--muted);
         margin-top: 6px;
-        display: none
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
       }
 
       .faq-item.active .faq-answer {
-        display: block
+        max-height: 200px;
+        transition: max-height 0.3s ease-in;
       }
   </style>
 </head>
@@ -412,6 +419,50 @@ $members = $members->fetchAll();
                 <?php endforeach ?>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1/-1">
+          <h2>Statistik Peminjaman</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px">
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Total Peminjaman</div>
+              <div style="font-size: 24px; font-weight: 600"><?= count($borrows) ?></div>
+            </div>
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Sedang Dipinjam</div>
+              <div style="font-size: 24px; font-weight: 600">
+                <?= count(array_filter($borrows, fn($b) => $b['status'] !== 'returned')) ?></div>
+            </div>
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Terlambat</div>
+              <div style="font-size: 24px; font-weight: 600">
+                <?= count(array_filter($borrows, fn($b) => $b['status'] === 'overdue')) ?></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1/-1">
+          <h2>Pertanyaan Umum</h2>
+          <div class="faq-item">
+            <div class="faq-question">Bagaimana cara menambah peminjaman baru? <span>+</span></div>
+            <div class="faq-answer">Pilih buku dan anggota dari dropdown di form kiri, atur tanggal jatuh tempo
+              (opsional), lalu klik "Pinjamkan Buku".</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Bagaimana cara mengembalikan buku? <span>+</span></div>
+            <div class="faq-answer">Cari peminjaman di daftar, jika status masih "Dipinjam" atau "Terlambat", klik
+              tombol "Kembalikan" untuk menyelesaikan peminjaman.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Apa itu status "Terlambat"? <span>+</span></div>
+            <div class="faq-answer">Status terlambat muncul ketika tanggal jatuh tempo sudah berlalu tetapi buku belum
+              dikembalikan. Segera kembalikan buku untuk menghindari denda.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Bisakah saya mengubah tanggal jatuh tempo? <span>+</span></div>
+            <div class="faq-answer">Saat ini, Anda perlu mengembalikan buku lalu meminjam ulang dengan tanggal baru.
+              Atau hubungi admin untuk bantuan lebih lanjut.</div>
           </div>
         </div>
 

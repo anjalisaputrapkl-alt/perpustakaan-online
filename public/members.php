@@ -121,8 +121,8 @@ $members = $stmt->fetchAll();
       margin-top: 64px;
 
       .main {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 32px;
       }
 
@@ -159,7 +159,11 @@ $members = $stmt->fetchAll();
 
       /* ========= FIX TABEL (INI YANG PENTING) ========= */
       .table-wrap {
-        overflow-x: auto
+        overflow-x: auto;
+        max-height: 380px;
+        overflow-y: auto;
+        border: 1px solid var(--border);
+        border-radius: 8px;
       }
 
       table {
@@ -274,12 +278,15 @@ $members = $stmt->fetchAll();
         font-size: 12px;
         color: var(--muted);
         margin-top: 6px;
-        display: none;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
         line-height: 1.6;
       }
 
       .faq-item.active .faq-answer {
-        display: block
+        max-height: 200px;
+        transition: max-height 0.3s ease-in;
       }
   </style>
 </head>
@@ -348,6 +355,49 @@ $members = $stmt->fetchAll();
                 <?php endforeach ?>
               </tbody>
             </table>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1/-1">
+          <h2>Statistik Anggota</h2>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px">
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Total Anggota</div>
+              <div style="font-size: 24px; font-weight: 600"><?= count($members) ?></div>
+            </div>
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Anggota Baru</div>
+              <div style="font-size: 24px; font-weight: 600">—</div>
+            </div>
+            <div style="padding: 16px; background: rgba(37, 99, 235, .05); border-radius: 8px">
+              <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px">Email Terdaftar</div>
+              <div style="font-size: 24px; font-weight: 600">
+                <?= count(array_filter($members, fn($m) => !empty($m['email']))) ?></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="grid-column: 1/-1">
+          <h2>Pertanyaan Umum</h2>
+          <div class="faq-item">
+            <div class="faq-question">Bagaimana cara menambah anggota baru? <span>+</span></div>
+            <div class="faq-answer">Isi form di kolom kiri dengan nama lengkap, email, dan nomor anggota, lalu klik
+              tombol "Tambah Anggota".</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Bisakah saya mengedit data anggota? <span>+</span></div>
+            <div class="faq-answer">Ya, klik tombol "Edit" pada baris anggota yang ingin diubah di daftar anggota, ubah
+              data, lalu klik "Simpan Perubahan".</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Apa yang terjadi jika saya menghapus anggota? <span>+</span></div>
+            <div class="faq-answer">Anggota akan dihapus dari sistem. Pastikan anggota tidak memiliki peminjaman aktif
+              sebelum menghapus.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Apakah nomor anggota harus unik? <span>+</span></div>
+            <div class="faq-answer">Ya, setiap anggota harus memiliki nomor unik untuk identifikasi dan sistem
+              peminjaman.</div>
           </div>
         </div>
 
