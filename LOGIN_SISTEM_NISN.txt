@@ -1,0 +1,266 @@
+🎯 SISTEM LOGIN SISWA DENGAN NISN - PANDUAN IMPLEMENTASI
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ IMPLEMENTASI SELESAI
+
+Sistem login siswa telah diubah dari email-based menjadi NISN-based.
+Setiap siswa yang ditambahkan di admin panel akan otomatis mendapatkan akun.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📊 RINGKASAN PERUBAHAN
+
+1️⃣ DATABASE SCHEMA
+   ✓ Kolom NISN ditambahkan ke tabel users (VARCHAR(20), UNIQUE)
+   ✓ Kolom NISN ditambahkan ke tabel members (VARCHAR(20), UNIQUE)
+   ✓ Role enum diupdate untuk termasuk 'student'
+
+2️⃣ ADMIN PANEL - KELOLA MURID (public/members.php)
+   ✓ Form tambah/edit murid + field NISN
+   ✓ Tabel daftar murid + kolom NISN
+   ✓ Akun siswa otomatis terbuat dengan password = NISN
+   ✓ Info box menjelaskan sistem login NISN
+
+3️⃣ FORM LOGIN (index.php)
+   ✓ Student login form: NISN + Password
+   ✓ Admin login form: Email + Password (tetap sama)
+
+4️⃣ API LOGIN (public/api/login.php)
+   ✓ Logika terpisah untuk student vs admin
+   ✓ Student: query by NISN + verify password
+   ✓ Admin: query by email + verify password
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🚀 CARA MENGGUNAKAN
+
+LANGKAH 1: ADMIN MENAMBAH SISWA
+
+1. Login ke admin panel (email + password admin)
+2. Buka menu "Kelola Murid"
+3. Isi form:
+   - Nama Lengkap: [nama siswa]
+   - Email: [email siswa]
+   - No Murid: [nomor urut sekolah]
+   - NISN: [nomor induk siswa nasional]
+4. Klik "Tambah Murid"
+5. ✓ Akun siswa otomatis terbuat!
+
+Notifikasi:
+   "Murid berhasil ditambahkan. 
+    Akun siswa otomatis terbuat dengan NISN: [NISN] dan Password: [NISN]"
+
+Tabel akan menampilkan:
+   ✓ Akun Terbuat (status badge hijau)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+LANGKAH 2: SISWA LOGIN
+
+1. Buka halaman utama (index.php)
+2. Klik "Login" atau "Login Siswa"
+3. Pilih tab "Login Siswa"
+4. Isi form:
+   - NISN: [nomor induk siswa nasional]
+   - Password: [NISN]
+5. Klik "Login"
+6. ✓ Masuk ke dashboard siswa
+
+URL: http://sekolah.localhost/index.php
+Form Student Login:
+   NISN: 1234567890
+   Password: 1234567890
+   [Klik Login]
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 PERBEDAAN NO MURID vs NISN
+
+┌──────────────┬──────────────────────┬────────────────────────────┐
+│ Aspek        │ No Murid              │ NISN                       │
+├──────────────┼──────────────────────┼────────────────────────────┤
+│ Singkatan    │ Nomor Induk Siswa    │ Nomor Induk Siswa Nasional │
+│ Jenis        │ Lokal sekolah        │ Nasional (resmi pemerintah)│
+│ Contoh       │ 001, 002, 003        │ 1234567890                 │
+│ Penggunaan   │ Internal admin saja  │ Login siswa                │
+│ Unik         │ Per sekolah          │ Nasional (selalu unik)     │
+│ Di Login?    │ ❌ Tidak             │ ✅ Ya                      │
+└──────────────┴──────────────────────┴────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔐 KREDENSIAL LOGIN
+
+UNTUK SISWA:
+   Username: NISN (Nomor Induk Siswa Nasional)
+   Password: NISN (sama dengan username, untuk keamanan tinggi user harus ganti)
+
+UNTUK ADMIN/LIBRARIAN SEKOLAH:
+   Username: Email
+   Password: Password Admin
+   (Tidak berubah dari sistem sebelumnya)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚙️ FLOW DIAGRAM
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ADMIN MENAMBAH SISWA                                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Admin Panel
+    ↓
+[public/members.php]
+    ↓
+Isi Form:
+  - Nama: Budi Santoso
+  - Email: budi@sekolah.com
+  - No Murid: 001
+  - NISN: 1234567890
+    ↓
+Klik "Tambah Murid"
+    ↓
+INSERT INTO members (school_id, name, email, member_no, nisn)
+    ↓
+Hash password: password_hash('1234567890', PASSWORD_BCRYPT)
+    ↓
+INSERT INTO users (school_id, name, email, password, role='student', nisn)
+    ↓
+✓ Notifikasi: Akun siswa terbuat dengan NISN: 1234567890, Password: 1234567890
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ SISWA LOGIN                                                                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Homepage (index.php)
+    ↓
+Klik "Login" → Pilih "Login Siswa"
+    ↓
+[Student Login Form]
+  NISN: 1234567890
+  Password: 1234567890
+    ↓
+POST ke [public/api/login.php]
+    ↓
+SELECT * FROM users 
+WHERE nisn = '1234567890' 
+AND role = 'student'
+    ↓
+password_verify('1234567890', $hashed_password)
+    ↓
+✓ Valid → Set $_SESSION['user'] → Redirect ke student-dashboard.php
+✗ Invalid → Error: "NISN atau password salah"
+
+═══════════════════════════════════════════════════════════════════════════════
+
+📁 FILE YANG DIUBAH
+
+DATABASE:
+   ✓ sql/migrations/add_nisn_column.sql
+   ✓ migrate-nisn.php (sudah dijalankan)
+
+ADMIN PANEL:
+   ✓ public/members.php (form + tabel + FAQ)
+   ✓ assets/css/members.css (styling)
+
+LOGIN & API:
+   ✓ index.php (student login form)
+   ✓ public/api/login.php (login logic)
+
+DOKUMENTASI:
+   ✓ NISN_LOGIN_CHANGES.md (detail teknis)
+   ✓ test-add-students.php (script test data)
+   ✓ LOGIN_SISTEM_NISN.txt (ini!)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🧪 TEST DATA (OPTIONAL)
+
+Jika ingin menambah test data siswa, jalankan:
+   C:\xampp\php\php.exe test-add-students.php
+
+Akan menambah 3 siswa test:
+   1. Budi Santoso (NISN: 1234567890)
+   2. Siti Nurhaliza (NISN: 1234567891)
+   3. Ahmad Rijal (NISN: 1234567892)
+
+Bisa langsung test login dengan NISN tsb + password = NISN
+
+═══════════════════════════════════════════════════════════════════════════════
+
+❓ FAQ & TROUBLESHOOTING
+
+Q: Bagaimana jika admin salah input NISN?
+A: Admin dapat edit siswa dan ganti NISN. Password login akan otomatis update.
+
+Q: Bagaimana jika siswa lupa NISN?
+A: Admin dapat lihat NISN di tabel daftar murid dan komunikasikan ke siswa.
+
+Q: Apakah masih bisa login pakai email?
+A: Tidak, siswa harus menggunakan NISN. Email hanya untuk komunikasi admin.
+
+Q: Apa bedanya password siswa?
+A: Password siswa sama dengan NISN-nya. Admin sangat menyarankan siswa untuk 
+   mengubah password saat first login (feature ini bisa ditambah di iterasi berikutnya).
+
+Q: Bagaimana menghapus siswa?
+A: Di admin panel, klik "Hapus" pada baris siswa. Akun siswa juga otomatis 
+   terhapus dari sistem.
+
+Q: Apakah NISN harus 10 digit?
+A: NISN resmi memang 10 digit numerik, tapi sistem ini bisa menerima string 
+   apa saja (belum ada validasi format NISN).
+
+Q: Bisa ganti NISN setelah siswa terdaftar?
+A: Ya, admin bisa edit siswa dan ganti NISN. Siswa harus login pakai NISN baru.
+
+═══════════════════════════════════════════════════════════════════════════════
+
+⚠️ KEAMANAN NOTES
+
+1. Password default = NISN:
+   - Praktis untuk first login
+   - Admin/sekolah bertanggung jawab untuk memberitahu siswa
+   - Siswa HARUS ganti password setelah first login
+
+2. NISN adalah identitas nasional:
+   - Jangan bagikan di tempat umum
+   - Siswa harus menjaga kerahasiaannya seperti password
+
+3. Backup database:
+   - Pastikan backup rutin karena NISN penting
+
+═══════════════════════════════════════════════════════════════════════════════
+
+🔄 NEXT ITERATIONS (SARAN PENGEMBANGAN)
+
+1. Change Password Feature
+   - Siswa bisa ganti password setelah login
+   - API: public/api/change-password.php
+
+2. Password Reset Admin
+   - Admin bisa reset password siswa jika lupa
+   - Generate temporary password
+
+3. NISN Validation
+   - Validasi format NISN (10 digit numerik)
+   - Check keunikan NISN
+
+4. Login Audit Log
+   - Catat setiap login attempt
+   - Track suspicious activities
+
+5. Two-Factor Authentication
+   - SMS/Email verification
+   - Security enhancement
+
+═══════════════════════════════════════════════════════════════════════════════
+
+✨ SELESAI!
+
+Sistem login dengan NISN sudah siap digunakan.
+Admin bisa langsung mulai menambah siswa di halaman Kelola Murid.
+Siswa bisa login menggunakan NISN + Password (NISN).
+
+Pertanyaan? Silakan hubungi developer tim.

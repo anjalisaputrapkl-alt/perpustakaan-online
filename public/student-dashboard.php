@@ -60,6 +60,15 @@ try {
 } catch (Exception $e) {
     $categories = [];
 }
+
+// Get borrow counts for statistics
+try {
+    $borrowStmt = $pdo->prepare('SELECT COUNT(*) as total_borrows FROM borrows WHERE school_id = :school_id AND status = "borrowed"');
+    $borrowStmt->execute(['school_id' => $school_id]);
+    $borrowStats = $borrowStmt->fetch();
+} catch (Exception $e) {
+    $borrowStats = ['total_borrows' => 0];
+}
 ?>
 <!doctype html>
 <html lang="id">
@@ -813,6 +822,259 @@ try {
             font-size: 14px;
         }
 
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--card);
+        }
+
+        .modal-header h2 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            margin: 0;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--muted);
+            transition: color 0.2s;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            color: var(--text);
+        }
+
+        .modal-body {
+            padding: 24px;
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+        }
+
+        .modal-book-left {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+
+        .modal-book-cover {
+            width: 200px;
+            height: 300px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-book-cover iconify-icon {
+            width: 80px;
+            height: 80px;
+            color: white;
+        }
+
+        .modal-book-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            word-break: break-word;
+            white-space: normal;
+        }
+
+        .modal-book-info {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex: 1;
+        }
+
+        .modal-book-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .modal-book-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .modal-book-item-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .modal-book-item-value {
+            font-size: 14px;
+            color: var(--text);
+        }
+
+        .modal-book-status {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            width: fit-content;
+        }
+
+        .modal-book-status.available {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+        }
+
+        .modal-book-status.unavailable {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .modal-btn-borrow {
+            background: var(--accent);
+            color: white;
+        }
+
+        .modal-btn-borrow:hover:not(:disabled) {
+            background: #062d4a;
+        }
+
+        .modal-btn-borrow:disabled {
+            background: var(--border);
+            color: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .modal-btn-close {
+            background: var(--bg);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .modal-btn-close:hover {
+            background: var(--border);
+        }
+
+        /* Modal Responsive */
+        @media (max-width: 768px) {
+            .modal-body {
+                flex-direction: column;
+            }
+
+            .modal-book-left {
+                width: 100%;
+            }
+
+            .modal-book-cover {
+                width: 100%;
+                height: 250px;
+            }
+
+            .modal-content {
+                max-width: 90%;
+                width: 100%;
+            }
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .header {
@@ -1354,7 +1616,8 @@ try {
                         </div>
                         <div>
                             <p style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Sedang Dipinjam</p>
-                            <p style="font-size: 20px; font-weight: 700; color: var(--warning);">-</p>
+                            <p style="font-size: 20px; font-weight: 700; color: var(--warning);">
+                                <?php echo $borrowStats['total_borrows']; ?></p>
                         </div>
                     </div>
                 </div>
@@ -1381,22 +1644,35 @@ try {
                 <div class="books-grid">
                     <?php if (!empty($books)): ?>
                         <?php foreach ($books as $book): ?>
+                            <?php
+                            $isAvailable = ($book['copies'] ?? 1) > 0;
+                            $statusClass = $isAvailable ? 'available' : 'unavailable';
+                            $statusText = $isAvailable ? 'Tersedia' : 'Tidak Tersedia';
+                            ?>
                             <div class="book-card">
                                 <div class="book-cover">
-                                    <iconify-icon icon="mdi:book-open-variant" width="48" height="48"></iconify-icon>
-                                    <span class="book-status available">Tersedia</span>
+                                    <?php if (!empty($book['cover_image'])): ?>
+                                        <img src="../img/covers/<?php echo htmlspecialchars($book['cover_image']); ?>"
+                                            alt="<?php echo htmlspecialchars($book['title']); ?>"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                    <?php else: ?>
+                                        <iconify-icon icon="mdi:book-open-variant" width="48" height="48"></iconify-icon>
+                                    <?php endif; ?>
+                                    <span class="book-status <?php echo $statusClass; ?>"><?php echo $statusText; ?></span>
                                 </div>
                                 <div class="book-info">
                                     <h3 class="book-title"><?php echo htmlspecialchars($book['title']); ?></h3>
-                                    <p class="book-author"><?php echo htmlspecialchars($book['author']); ?></p>
+                                    <p class="book-author"><?php echo htmlspecialchars($book['author'] ?? '-'); ?></p>
                                     <p class="book-category"><?php echo htmlspecialchars($book['category'] ?? 'Umum'); ?></p>
                                     <div class="book-rating">
-                                        ⭐ 4.5 (12 reviews)
+                                        <span style="font-size: 11px; color: var(--muted);">ISBN:
+                                            <?php echo htmlspecialchars($book['isbn'] ?? '-'); ?></span>
                                     </div>
                                     <div class="book-actions">
-                                        <button class="btn-borrow"
-                                            onclick="borrowBook(<?php echo $book['id']; ?>)">Pinjam</button>
-                                        <a href="book-detail.php?id=<?php echo $book['id']; ?>" class="btn-detail">Detail</a>
+                                        <button class="btn-borrow" <?php echo !$isAvailable ? 'disabled' : ''; ?>"
+                                            onclick="borrowBook(<?php echo $book['id']; ?>, '<?php echo htmlspecialchars($book['title']); ?>')">Pinjam</button>
+                                        <button class="btn-detail"
+                                            onclick="openBookModal(<?php echo htmlspecialchars(json_encode($book)); ?>)">Detail</button>
                                     </div>
                                 </div>
                             </div>
@@ -1413,7 +1689,69 @@ try {
         </div>
     </div>
 
+    <!-- Book Detail Modal -->
+    <div class="modal" id="bookModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Detail Buku</h2>
+                <button class="modal-close" onclick="closeBookModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-book-left">
+                    <div class="modal-book-cover">
+                        <img id="modalBookCover" src="" alt="Cover" style="display: none;">
+                        <iconify-icon id="modalBookIcon" icon="mdi:book-open-variant" width="80"
+                            height="80"></iconify-icon>
+                    </div>
+                    <h3 class="modal-book-title" id="modalBookTitle">-</h3>
+                </div>
+
+                <div class="modal-book-info">
+                    <div class="modal-book-meta">
+                        <div class="modal-book-item">
+                            <span class="modal-book-item-label">Pengarang</span>
+                            <span class="modal-book-item-value" id="modalBookAuthor">-</span>
+                        </div>
+
+                        <div class="modal-book-item">
+                            <span class="modal-book-item-label">Kategori</span>
+                            <span class="modal-book-item-value" id="modalBookCategory">-</span>
+                        </div>
+
+                        <div class="modal-book-item">
+                            <span class="modal-book-item-label">ISBN</span>
+                            <span class="modal-book-item-value" id="modalBookISBN">-</span>
+                        </div>
+
+                        <div class="modal-book-item">
+                            <span class="modal-book-item-label">Jumlah Tersedia</span>
+                            <span class="modal-book-item-value" id="modalBookCopies">-</span>
+                        </div>
+
+                        <div class="modal-book-item">
+                            <span class="modal-book-item-label">Lokasi Rak</span>
+                            <span class="modal-book-item-value" id="modalBookShelf">-</span>
+                        </div>
+
+                        <div class="modal-book-item">
+                            <span class="modal-book-item-label">Status</span>
+                            <span class="modal-book-status" id="modalBookStatus">-</span>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button class="modal-btn modal-btn-borrow" id="modalBorrowBtn"
+                            onclick="borrowFromModal()">Pinjam</button>
+                        <button class="modal-btn modal-btn-close" onclick="closeBookModal()">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        let currentBookData = null;
+
         // Navigation Sidebar Toggle
         const navToggle = document.getElementById('navToggle');
         const navSidebar = document.getElementById('navSidebar');
@@ -1443,12 +1781,73 @@ try {
             }
         });
 
-        function borrowBook(bookId) {
-            if (!confirm('Apakah Anda ingin meminjam buku ini?')) {
+        // Modal functions
+        function openBookModal(bookData) {
+            currentBookData = bookData;
+
+            // Set cover image
+            const coverImg = document.getElementById('modalBookCover');
+            const coverIcon = document.getElementById('modalBookIcon');
+            if (bookData.cover_image) {
+                coverImg.src = '../img/covers/' + bookData.cover_image;
+                coverImg.style.display = 'block';
+                coverIcon.style.display = 'none';
+            } else {
+                coverImg.style.display = 'none';
+                coverIcon.style.display = 'block';
+            }
+
+            // Set book details
+            document.getElementById('modalBookTitle').textContent = bookData.title || '-';
+            document.getElementById('modalBookAuthor').textContent = bookData.author || '-';
+            document.getElementById('modalBookCategory').textContent = bookData.category || 'Umum';
+            document.getElementById('modalBookISBN').textContent = bookData.isbn || '-';
+            document.getElementById('modalBookCopies').textContent = bookData.copies || '0';
+            document.getElementById('modalBookShelf').textContent = (bookData.shelf || '-') + (bookData.row_number ? ' (Baris ' + bookData.row_number + ')' : '');
+
+            // Set status
+            const isAvailable = (bookData.copies || 1) > 0;
+            const statusEl = document.getElementById('modalBookStatus');
+            if (isAvailable) {
+                statusEl.textContent = 'Tersedia';
+                statusEl.className = 'modal-book-status available';
+            } else {
+                statusEl.textContent = 'Tidak Tersedia';
+                statusEl.className = 'modal-book-status unavailable';
+            }
+
+            // Enable/disable borrow button
+            const borrowBtn = document.getElementById('modalBorrowBtn');
+            borrowBtn.disabled = !isAvailable;
+
+            // Show modal
+            document.getElementById('bookModal').classList.add('active');
+        }
+
+        function closeBookModal() {
+            document.getElementById('bookModal').classList.remove('active');
+            currentBookData = null;
+        }
+
+        function borrowFromModal() {
+            if (currentBookData) {
+                borrowBook(currentBookData.id, currentBookData.title);
+                closeBookModal();
+            }
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('bookModal').addEventListener('click', (e) => {
+            if (e.target.id === 'bookModal') {
+                closeBookModal();
+            }
+        });
+
+        function borrowBook(bookId, bookTitle) {
+            if (!confirm('Apakah Anda ingin meminjam ' + bookTitle + '?')) {
                 return;
             }
 
-            // TODO: Implement borrow functionality
             fetch('api/borrow-book.php', {
                 method: 'POST',
                 headers: {

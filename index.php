@@ -543,19 +543,14 @@
           <div class="login-modal-header">
             <div class="login-icon"></div>
             <h2>Login Siswa</h2>
-            <p>Akses akun siswa Anda</p>
+            <p>Akses akun siswa Anda dengan NISN</p>
           </div>
 
           <form method="post" action="public/api/login.php" class="login-modal-form">
             <input type="hidden" name="user_type" value="student">
             <div class="form-group">
-              <label>NIS (Nomor Induk Siswa)</label>
-              <input type="text" name="nis" required placeholder="Contoh: 12345">
-            </div>
-
-            <div class="form-group">
-              <label>Email Siswa</label>
-              <input type="email" name="email" required placeholder="siswa@sekolah.com">
+              <label>NISN (Nomor Induk Siswa Nasional)</label>
+              <input type="text" name="nisn" required placeholder="Contoh: 1234567890">
             </div>
 
             <div class="form-group">

@@ -9,31 +9,62 @@ $sid = $user['school_id'];
 $action = $_GET['action'] ?? 'list';
 
 if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-  $stmt = $pdo->prepare(
-    'INSERT INTO members (school_id,name,email,member_no)
-     VALUES (:sid,:name,:email,:no)'
-  );
-  $stmt->execute([
-    'sid' => $sid,
-    'name' => $_POST['name'],
-    'email' => $_POST['email'],
-    'no' => $_POST['member_no']
-  ]);
-  header('Location: members.php');
-  exit;
+  try {
+    // Insert into members table
+    $stmt = $pdo->prepare(
+      'INSERT INTO members (school_id,name,email,member_no,nisn)
+       VALUES (:sid,:name,:email,:no,:nisn)'
+    );
+    $stmt->execute([
+      'sid' => $sid,
+      'name' => $_POST['name'],
+      'email' => $_POST['email'],
+      'no' => $_POST['member_no'],
+      'nisn' => $_POST['nisn']
+    ]);
+
+    // Get the inserted NISN for password generation
+    $nisn = $_POST['nisn'];
+    // Default password: NISN
+    $default_password = password_hash($nisn, PASSWORD_BCRYPT);
+
+    // Create student account in users table
+    $userStmt = $pdo->prepare(
+      'INSERT INTO users (school_id, name, email, password, role, nisn)
+       VALUES (:sid, :name, :email, :password, :role, :nisn)'
+    );
+    $userStmt->execute([
+      'sid' => $sid,
+      'name' => $_POST['name'],
+      'email' => $_POST['email'],
+      'password' => $default_password,
+      'role' => 'student',
+      'nisn' => $nisn
+    ]);
+
+    // Success message
+    $_SESSION['success'] = 'Murid berhasil ditambahkan. Akun siswa otomatis terbuat dengan NISN: ' . $nisn . ' dan Password: ' . $nisn;
+    header('Location: members.php');
+    exit;
+  } catch (Exception $e) {
+    $_SESSION['error'] = 'Gagal menambahkan murid: ' . $e->getMessage();
+    header('Location: members.php');
+    exit;
+  }
 }
 
 if ($action === 'edit' && isset($_GET['id'])) {
   $id = (int) $_GET['id'];
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt = $pdo->prepare(
-      'UPDATE members SET name=:name,email=:email,member_no=:no
+      'UPDATE members SET name=:name,email=:email,member_no=:no,nisn=:nisn
        WHERE id=:id AND school_id=:sid'
     );
     $stmt->execute([
       'name' => $_POST['name'],
       'email' => $_POST['email'],
       'no' => $_POST['member_no'],
+      'nisn' => $_POST['nisn'],
       'id' => $id,
       'sid' => $sid
     ]);
@@ -46,10 +77,30 @@ if ($action === 'edit' && isset($_GET['id'])) {
 }
 
 if ($action === 'delete' && isset($_GET['id'])) {
-  $stmt = $pdo->prepare('DELETE FROM members WHERE id=:id AND school_id=:sid');
-  $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
-  header('Location: members.php');
-  exit;
+  try {
+    // Get member data to find associated user
+    $getMemberStmt = $pdo->prepare('SELECT email, nisn FROM members WHERE id=:id AND school_id=:sid');
+    $getMemberStmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
+    $member = $getMemberStmt->fetch();
+
+    if ($member) {
+      // Delete user account if exists (by NISN)
+      $deleteUserStmt = $pdo->prepare('DELETE FROM users WHERE nisn=:nisn AND role=:role');
+      $deleteUserStmt->execute(['nisn' => $member['nisn'], 'role' => 'student']);
+
+      // Delete member
+      $stmt = $pdo->prepare('DELETE FROM members WHERE id=:id AND school_id=:sid');
+      $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
+    }
+
+    $_SESSION['success'] = 'Murid dan akun siswa berhasil dihapus';
+    header('Location: members.php');
+    exit;
+  } catch (Exception $e) {
+    $_SESSION['error'] = 'Gagal menghapus murid: ' . $e->getMessage();
+    header('Location: members.php');
+    exit;
+  }
 }
 
 $stmt = $pdo->prepare('SELECT * FROM members WHERE school_id=:sid ORDER BY id DESC');
@@ -82,8 +133,28 @@ $members = $stmt->fetchAll();
     <div class="content">
       <div class="main">
 
+        <?php if (isset($_SESSION['success'])): ?>
+          <div class="alert alert-success">
+            <?php echo htmlspecialchars($_SESSION['success']); ?>
+            <?php unset($_SESSION['success']); ?>
+          </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+          <div class="alert alert-error">
+            <?php echo htmlspecialchars($_SESSION['error']); ?>
+            <?php unset($_SESSION['error']); ?>
+          </div>
+        <?php endif; ?>
+
         <div class="card">
           <h2><?= $action === 'edit' ? 'Edit Murid' : 'Tambah Murid' ?></h2>
+          <?php if ($action === 'add'): ?>
+            <div
+              style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 12px; color: #0c4a6e;">
+              <strong>ℹ️ Info:</strong> Ketika murid ditambahkan, akun siswa akan otomatis terbuat. <strong>Siswa login dengan NISN dan Password = NISN</strong>. Password dapat diubah setelah login pertama kali.
+            </div>
+          <?php endif; ?>
           <form method="post" action="<?= $action === 'edit' ? '' : 'members.php?action=add' ?>">
             <div class="form-group">
               <label>Nama Lengkap</label>
@@ -96,6 +167,10 @@ $members = $stmt->fetchAll();
             <div class="form-group">
               <label>No Murid</label>
               <input name="member_no" required value="<?= $member['member_no'] ?? '' ?>">
+            </div>
+            <div class="form-group">
+              <label>NISN Siswa</label>
+              <input name="nisn" required placeholder="Nomor Induk Siswa Nasional" value="<?= $member['nisn'] ?? '' ?>">
             </div>
             <button class="btn primary">
               <?= $action === 'edit' ? 'Simpan Perubahan' : 'Tambah Murid' ?>
@@ -113,20 +188,39 @@ $members = $stmt->fetchAll();
                   <th>Nama</th>
                   <th>Email</th>
                   <th>No Murid</th>
+                  <th>NISN</th>
+                  <th>Status Akun</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                <?php foreach ($members as $m): ?>
+                <?php foreach ($members as $m):
+                  // Check if student account exists
+                  $checkUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND role = :role');
+                  $checkUserStmt->execute(['nisn' => $m['nisn'], 'role' => 'student']);
+                  $userExists = $checkUserStmt->fetch() ? true : false;
+                  ?>
                   <tr>
                     <td>#<?= $m['id'] ?></td>
                     <td><strong><?= htmlspecialchars($m['name']) ?></strong></td>
                     <td><?= htmlspecialchars($m['email']) ?></td>
                     <td><?= htmlspecialchars($m['member_no']) ?></td>
+                    <td><strong><?= htmlspecialchars($m['nisn']) ?></strong></td>
+                    <td>
+                      <?php if ($userExists): ?>
+                        <span
+                          style="display: inline-block; background: rgba(16, 185, 129, 0.1); color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">✓
+                          Akun Terbuat</span>
+                      <?php else: ?>
+                        <span
+                          style="display: inline-block; background: rgba(107, 114, 128, 0.1); color: #374151; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;">-
+                          Belum</span>
+                      <?php endif; ?>
+                    </td>
                     <td>
                       <div class="actions">
                         <a class="btn" href="members.php?action=edit&id=<?= $m['id'] ?>">Edit</a>
-                        <a class="btn danger" onclick="return confirm('Hapus murid ini?')"
+                        <a class="btn danger" onclick="return confirm('Hapus murid ini? Akun siswa juga akan dihapus.')"
                           href="members.php?action=delete&id=<?= $m['id'] ?>">Hapus</a>
                       </div>
                     </td>
@@ -159,23 +253,31 @@ $members = $stmt->fetchAll();
           <h2>Pertanyaan Umum</h2>
           <div class="faq-item">
             <div class="faq-question">Bagaimana cara menambah murid baru? <span>+</span></div>
-            <div class="faq-answer">Isi form di kolom kiri dengan nama lengkap, email, dan nomor murid, lalu klik
-              tombol "Tambah Murid".</div>
+            <div class="faq-answer">Isi form dengan nama lengkap, email, no murid, dan NISN siswa, lalu klik "Tambah Murid". Akun siswa akan otomatis terbuat dengan NISN sebagai username dan password.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Apa perbedaan No Murid dan NISN? <span>+</span></div>
+            <div class="faq-answer"><strong>No Murid</strong> adalah nomor internal sekolah (ex: 001, 002). <strong>NISN</strong> adalah Nomor Induk Siswa Nasional yang unik dan digunakan untuk login. Siswa login menggunakan NISN sebagai username.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Apa itu "Status Akun"? <span>+</span></div>
+            <div class="faq-answer">Status Akun menunjukkan apakah akun siswa sudah terbuat di sistem. Ketika Anda menambah murid, akun siswa otomatis terbuat dengan NISN dan Password = NISN.</div>
+          </div>
+          <div class="faq-item">
+            <div class="faq-question">Bagaimana siswa login ke dashboard? <span>+</span></div>
+            <div class="faq-answer">Siswa login di halaman siswa menggunakan <strong>NISN sebagai username</strong> dan <strong>Password = NISN</strong> (sama dengan username). Siswa sangat disarankan untuk mengubah password setelah login pertama kali.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Bisakah saya mengedit data murid? <span>+</span></div>
-            <div class="faq-answer">Ya, klik tombol "Edit" pada baris murid yang ingin diubah di daftar murid, ubah
-              data, lalu klik "Simpan Perubahan".</div>
+            <div class="faq-answer">Ya, klik "Edit" pada baris murid yang ingin diubah. Anda bisa mengubah nama, email, no murid, dan NISN. Perubahan NISN juga akan mengubah kredensial login siswa.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa yang terjadi jika saya menghapus murid? <span>+</span></div>
-            <div class="faq-answer">Murid akan dihapus dari sistem. Pastikan murid tidak memiliki peminjaman aktif
-              sebelum menghapus.</div>
+            <div class="faq-answer">Murid dan akun siswa akan dihapus dari sistem. Siswa tidak bisa login lagi. Pastikan murid tidak memiliki peminjaman aktif sebelum menghapus.</div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Apakah nomor murid harus unik? <span>+</span></div>
-            <div class="faq-answer">Ya, setiap murid harus memiliki nomor unik untuk identifikasi dan sistem
-              peminjaman.</div>
+            <div class="faq-question">Apakah NISN harus unik? <span>+</span></div>
+            <div class="faq-answer">Ya, NISN harus unik karena digunakan sebagai identitas login siswa. Setiap siswa hanya memiliki satu NISN yang valid secara nasional.</div>
           </div>
         </div>
 
