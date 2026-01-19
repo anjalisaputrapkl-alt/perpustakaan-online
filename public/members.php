@@ -152,7 +152,8 @@ $members = $stmt->fetchAll();
           <?php if ($action === 'add'): ?>
             <div
               style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 12px; color: #0c4a6e;">
-              <strong>ℹ️ Info:</strong> Ketika murid ditambahkan, akun siswa akan otomatis terbuat. <strong>Siswa login dengan NISN dan Password = NISN</strong>. Password dapat diubah setelah login pertama kali.
+              <strong>ℹ️ Info:</strong> Ketika murid ditambahkan, akun siswa akan otomatis terbuat. <strong>Siswa login
+                dengan NISN dan Password = NISN</strong>. Password dapat diubah setelah login pertama kali.
             </div>
           <?php endif; ?>
           <form method="post" action="<?= $action === 'edit' ? '' : 'members.php?action=add' ?>">
@@ -253,31 +254,40 @@ $members = $stmt->fetchAll();
           <h2>Pertanyaan Umum</h2>
           <div class="faq-item">
             <div class="faq-question">Bagaimana cara menambah murid baru? <span>+</span></div>
-            <div class="faq-answer">Isi form dengan nama lengkap, email, no murid, dan NISN siswa, lalu klik "Tambah Murid". Akun siswa akan otomatis terbuat dengan NISN sebagai username dan password.</div>
+            <div class="faq-answer">Isi form dengan nama lengkap, email, no murid, dan NISN siswa, lalu klik "Tambah
+              Murid". Akun siswa akan otomatis terbuat dengan NISN sebagai username dan password.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa perbedaan No Murid dan NISN? <span>+</span></div>
-            <div class="faq-answer"><strong>No Murid</strong> adalah nomor internal sekolah (ex: 001, 002). <strong>NISN</strong> adalah Nomor Induk Siswa Nasional yang unik dan digunakan untuk login. Siswa login menggunakan NISN sebagai username.</div>
+            <div class="faq-answer"><strong>No Murid</strong> adalah nomor internal sekolah (ex: 001, 002).
+              <strong>NISN</strong> adalah Nomor Induk Siswa Nasional yang unik dan digunakan untuk login. Siswa login
+              menggunakan NISN sebagai username.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa itu "Status Akun"? <span>+</span></div>
-            <div class="faq-answer">Status Akun menunjukkan apakah akun siswa sudah terbuat di sistem. Ketika Anda menambah murid, akun siswa otomatis terbuat dengan NISN dan Password = NISN.</div>
+            <div class="faq-answer">Status Akun menunjukkan apakah akun siswa sudah terbuat di sistem. Ketika Anda
+              menambah murid, akun siswa otomatis terbuat dengan NISN dan Password = NISN.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Bagaimana siswa login ke dashboard? <span>+</span></div>
-            <div class="faq-answer">Siswa login di halaman siswa menggunakan <strong>NISN sebagai username</strong> dan <strong>Password = NISN</strong> (sama dengan username). Siswa sangat disarankan untuk mengubah password setelah login pertama kali.</div>
+            <div class="faq-answer">Siswa login di halaman siswa menggunakan <strong>NISN sebagai username</strong> dan
+              <strong>Password = NISN</strong> (sama dengan username). Siswa sangat disarankan untuk mengubah password
+              setelah login pertama kali.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Bisakah saya mengedit data murid? <span>+</span></div>
-            <div class="faq-answer">Ya, klik "Edit" pada baris murid yang ingin diubah. Anda bisa mengubah nama, email, no murid, dan NISN. Perubahan NISN juga akan mengubah kredensial login siswa.</div>
+            <div class="faq-answer">Ya, klik "Edit" pada baris murid yang ingin diubah. Anda bisa mengubah nama, email,
+              no murid, dan NISN. Perubahan NISN juga akan mengubah kredensial login siswa.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa yang terjadi jika saya menghapus murid? <span>+</span></div>
-            <div class="faq-answer">Murid dan akun siswa akan dihapus dari sistem. Siswa tidak bisa login lagi. Pastikan murid tidak memiliki peminjaman aktif sebelum menghapus.</div>
+            <div class="faq-answer">Murid dan akun siswa akan dihapus dari sistem. Siswa tidak bisa login lagi. Pastikan
+              murid tidak memiliki peminjaman aktif sebelum menghapus.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apakah NISN harus unik? <span>+</span></div>
-            <div class="faq-answer">Ya, NISN harus unik karena digunakan sebagai identitas login siswa. Setiap siswa hanya memiliki satu NISN yang valid secara nasional.</div>
+            <div class="faq-answer">Ya, NISN harus unik karena digunakan sebagai identitas login siswa. Setiap siswa
+              hanya memiliki satu NISN yang valid secara nasional.</div>
           </div>
         </div>
 

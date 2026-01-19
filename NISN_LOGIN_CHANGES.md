@@ -3,12 +3,14 @@
 ### ✅ Perubahan Yang Telah Dilakukan
 
 #### 1. **Database Schema Updates**
+
 - ✓ Menambahkan kolom `nisn` (VARCHAR(20)) ke tabel `users`
 - ✓ Menambahkan kolom `nisn` (VARCHAR(20)) ke tabel `members`
 - ✓ Update role enum di users table untuk termasuk 'student' (admin, librarian, student)
 - ✓ Menjalankan migration dengan file: `sql/migrations/add_nisn_column.sql`
 
 #### 2. **Halaman Admin - Kelola Murid (public/members.php)**
+
 - ✓ Menambahkan field NISN di form tambah/edit murid
 - ✓ Menampilkan kolom NISN di tabel daftar murid
 - ✓ Update INSERT query untuk menyimpan NISN ke members + users
@@ -18,15 +20,17 @@
 - ✓ Update FAQ untuk menjelaskan perbedaan No Murid vs NISN
 
 #### 3. **Form Login (index.php)**
+
 - ✓ Update student login form untuk hanya meminta NISN + Password
 - ✓ Menghapus field email dan nis dari student login
 - ✓ Ubah label dari "NIS" menjadi "NISN (Nomor Induk Siswa Nasional)"
 - ✓ Update placeholder menjadi "Contoh: 1234567890"
 
 #### 4. **API Login (public/api/login.php)**
+
 - ✓ Refactor login logic untuk handle student + school admin terpisah
 - ✓ Update student login untuk menggunakan NISN sebagai username
-- ✓ Query: SELECT * FROM users WHERE nisn = :nisn AND role = 'student'
+- ✓ Query: SELECT \* FROM users WHERE nisn = :nisn AND role = 'student'
 - ✓ Tetap menjaga admin login menggunakan email + password
 - ✓ Menambahkan nisn ke session user
 
@@ -35,12 +39,14 @@
 ### 🔐 Cara Kerja Sistem Login Baru
 
 #### **UNTUK SISWA:**
+
 ```
 Username: NISN (misal: 1234567890)
 Password: NISN (misal: 1234567890)
 ```
 
 #### **UNTUK ADMIN SEKOLAH:**
+
 ```
 Username: Email
 Password: Password Admin
@@ -68,8 +74,9 @@ Password: Password Admin
      - nisn: `1234567890`
 
 3. **Admin akan menerima notifikasi:**
+
    ```
-   ✓ Murid berhasil ditambahkan. 
+   ✓ Murid berhasil ditambahkan.
    Akun siswa otomatis terbuat dengan NISN: 1234567890 dan Password: 1234567890
    ```
 
@@ -99,39 +106,41 @@ Password: Password Admin
 
 ### ⚠️ PENTING: PERBEDAAN NO MURID vs NISN
 
-| Aspek | No Murid | NISN |
-|-------|----------|------|
-| **Singkatan** | Nomor Induk Siswa | Nomor Induk Siswa Nasional |
-| **Definisi** | Nomor lokal dari sekolah | Nomor resmi pemerintah nasional |
-| **Penggunaan** | Internal admin | Login siswa |
-| **Contoh** | 001, 002, 003 | 1234567890 |
-| **Unik** | Per sekolah | Nasional (unik absolut) |
-| **Di Login** | ❌ Tidak | ✓ Ya |
+| Aspek          | No Murid                 | NISN                            |
+| -------------- | ------------------------ | ------------------------------- |
+| **Singkatan**  | Nomor Induk Siswa        | Nomor Induk Siswa Nasional      |
+| **Definisi**   | Nomor lokal dari sekolah | Nomor resmi pemerintah nasional |
+| **Penggunaan** | Internal admin           | Login siswa                     |
+| **Contoh**     | 001, 002, 003            | 1234567890                      |
+| **Unik**       | Per sekolah              | Nasional (unik absolut)         |
+| **Di Login**   | ❌ Tidak                 | ✓ Ya                            |
 
 ---
 
 ### 🔧 TECHNICAL DETAILS
 
 #### Perubahan Tabel Users:
+
 ```sql
 -- Sebelum:
 CREATE TABLE users (
-  id, school_id, name, email, password, 
-  role enum('admin','librarian'), 
+  id, school_id, name, email, password,
+  role enum('admin','librarian'),
   created_at
 )
 
 -- Sesudah:
 CREATE TABLE users (
-  id, school_id, name, email, 
+  id, school_id, name, email,
   nisn VARCHAR(20) UNIQUE,  ← BARU
-  password, 
+  password,
   role enum('admin','librarian','student'),  ← UPDATED
   created_at
 )
 ```
 
 #### Perubahan Tabel Members:
+
 ```sql
 -- Sesudah:
 CREATE TABLE members (

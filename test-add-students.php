@@ -32,7 +32,7 @@ try {
         // Check apakah sudah ada
         $checkStmt = $pdo->prepare('SELECT id FROM members WHERE nisn = :nisn');
         $checkStmt->execute(['nisn' => $student['nisn']]);
-        
+
         if ($checkStmt->rowCount() > 0) {
             echo "⚠️ Siswa dengan NISN {$student['nisn']} sudah ada, skip...\n";
             continue;
