@@ -5,7 +5,7 @@
   <meta charset="utf-8" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, user-scalable=yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <title>Perpustakaan Digital — Akses Pengetahuan Modern</title>
   <link rel="stylesheet" href="assets/css/landing.css" />
@@ -35,6 +35,10 @@
         <a href="#features">Fitur</a>
         <a href="#audience">Pengguna</a>
         <a href="#contact">Kontak</a>
+        <div class="nav-mobile-cta">
+          <a href="#" onclick="openLoginModal(event)" class="nav-btn login">Login</a>
+          <a href="#" onclick="openRegisterModal(event)" class="nav-btn register">Daftar</a>
+        </div>
       </nav>
 
       <div class="nav-right">
@@ -42,7 +46,7 @@
         <a href="#" onclick="openRegisterModal(event)" class="nav-btn register">Daftar</a>
       </div>
 
-      <button class="nav-toggle" onclick="toggleNav()">☰</button>
+      <button class="nav-toggle" id="hamburger-btn" aria-label="Toggle menu">☰</button>
     </div>
   </header>
 
@@ -718,6 +722,7 @@
         observer.observe(statsSection);
       }
     </script>
+    <script src="assets/js/landing.js"></script>
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
     <script>
       AOS.init();
