@@ -730,7 +730,11 @@
 
             const data = await response.json();
             if (data.success) {
-              window.location.href = 'public/index.php';
+              // Redirect to appropriate dashboard based on user type
+              const redirectUrl = data.redirect_url
+                ? 'public/' + data.redirect_url
+                : 'public/index.php';
+              window.location.href = redirectUrl;
             } else {
               alert(data.message || 'Login gagal');
             }

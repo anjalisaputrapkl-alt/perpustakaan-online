@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';
+$user_type = $_POST['user_type'] ?? '';
 
 if (empty($email) || empty($password)) {
     http_response_code(400);
@@ -32,7 +33,22 @@ try {
             'role' => $user['role']
         ];
 
-        echo json_encode(['success' => true, 'message' => 'Login berhasil']);
+        // Determine redirect URL based on user_type
+        $redirect_url = 'index.php';
+
+        if ($user_type === 'student') {
+            // Redirect siswa ke dashboard siswa
+            $redirect_url = 'student-dashboard.php';
+        } else if ($user_type === 'school' || $user['role'] === 'admin') {
+            // Redirect admin/pustakawan ke dashboard admin
+            $redirect_url = 'index.php';
+        }
+
+        echo json_encode([
+            'success' => true,
+            'message' => 'Login berhasil',
+            'redirect_url' => $redirect_url
+        ]);
         exit;
     } else {
         http_response_code(401);
