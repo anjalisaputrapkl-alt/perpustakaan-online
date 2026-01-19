@@ -237,7 +237,7 @@
 
     <!-- AUDIENCE -->
     <section id="audience" class="section audience" style="background: #f9fafb; padding: 80px 0;">
-      <div class="container" data-aos="zoom-in">
+      <div class="container">
         <h2>Untuk Siapa Sistem Ini?</h2>
         <p class="microcopy">Dirancang untuk memenuhi kebutuhan semua pihak yang terlibat dalam ekosistem perpustakaan
           sekolah.</p>
@@ -507,35 +507,98 @@
       </div>
     </footer>
 
+    <!-- USER TYPE SELECTION MODAL -->
+    <div id="userTypeModal" class="modal" onclick="closeUserTypeModal(event)">
+      <div class="modal-content user-type-modal" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeUserTypeModal()">&times;</button>
+
+        <div class="user-type-header">
+          <h2>Masuk ke Akun Anda</h2>
+          <p>Pilih jenis akun untuk melanjutkan</p>
+        </div>
+
+        <div class="user-type-options">
+          <button type="button" class="user-type-option" onclick="selectUserType('student')">
+            <div class="user-type-icon"></div>
+            <div class="user-type-title">Siswa / Mahasiswa</div>
+            <div class="user-type-desc">Akses sebagai pengguna pelajar</div>
+          </button>
+
+          <button type="button" class="user-type-option" onclick="selectUserType('school')">
+            <div class="user-type-icon"></div>
+            <div class="user-type-title">Admin / Pustakawan</div>
+            <div class="user-type-desc">Akses sebagai admin/pustakawan</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- LOGIN MODAL -->
     <div id="loginModal" class="modal" onclick="closeLoginModal(event)">
       <div class="modal-content" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeLoginModal()">&times;</button>
 
-        <div class="login-modal-header">
-          <div class="login-icon">📚</div>
-          <h2>Masuk Perpustakaan</h2>
-          <p>Kelola perpustakaan sekolah Anda</p>
+        <!-- STUDENT LOGIN FORM -->
+        <div id="studentLoginForm" class="login-form-container" style="display: none;">
+          <div class="login-modal-header">
+            <div class="login-icon"></div>
+            <h2>Login Siswa</h2>
+            <p>Akses akun siswa Anda</p>
+          </div>
+
+          <form method="post" action="public/api/login.php" class="login-modal-form">
+            <input type="hidden" name="user_type" value="student">
+            <div class="form-group">
+              <label>NIS (Nomor Induk Siswa)</label>
+              <input type="text" name="nis" required placeholder="Contoh: 12345">
+            </div>
+
+            <div class="form-group">
+              <label>Email Siswa</label>
+              <input type="email" name="email" required placeholder="siswa@sekolah.com">
+            </div>
+
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn-modal-submit">Login</button>
+          </form>
+
+          <div class="login-modal-divider"></div>
         </div>
 
-        <form method="post" action="public/api/login.php" id="loginForm" class="login-modal-form">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" name="email" required placeholder="admin@sekolah.com">
+        <!-- SCHOOL ADMIN LOGIN FORM -->
+        <div id="schoolLoginForm" class="login-form-container" style="display: none;">
+          <div class="login-modal-header">
+            <div class="login-icon"></div>
+            <h2>Login Admin Sekolah</h2>
+            <p>Kelola perpustakaan sekolah Anda</p>
           </div>
 
-          <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" required placeholder="••••••••">
-          </div>
+          <form method="post" action="public/api/login.php" class="login-modal-form">
+            <input type="hidden" name="user_type" value="school">
+            <div class="form-group">
+              <label>Email Admin</label>
+              <input type="email" name="email" required placeholder="admin@sekolah.com">
+            </div>
 
-          <button type="submit" class="btn-modal-submit">🔓 Login</button>
-        </form>
+            <div class="form-group">
+              <label>Password</label>
+              <input type="password" name="password" required placeholder="••••••••">
+            </div>
 
-        <div class="login-modal-divider"></div>
+            <button type="submit" class="btn-modal-submit">Login</button>
+          </form>
 
-        <p class="login-modal-footer">Belum punya akun?</p>
-        <a href="#" onclick="closeLoginModal(); openRegisterModal(event);" class="btn-modal-register">📝 Daftar Akun</a>
+          <div class="login-modal-divider"></div>
+
+          <p class="login-modal-footer">Belum punya akun?</p>
+          <a href="#" onclick="closeLoginModal(); openRegisterModal(event);" class="btn-modal-register">Daftar
+            Sekolah Baru</a>
+
+        </div>
       </div>
     </div>
 
@@ -545,7 +608,7 @@
         <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
 
         <div class="login-modal-header">
-          <div class="login-icon">📖</div>
+          <div class="login-icon"></div>
           <h2>Daftar Sekolah Baru</h2>
           <p>Kelola perpustakaan sekolah dengan sistem yang modern</p>
         </div>
@@ -577,7 +640,7 @@
         <div class="login-modal-divider"></div>
 
         <p class="login-modal-footer">Sudah punya akun?</p>
-        <a href="#" onclick="closeRegisterModal(); openLoginModal(event);" class="btn-modal-register">🔓 Login di
+        <a href="#" onclick="closeRegisterModal(); openLoginModal(event);" class="btn-modal-register">Login di
           sini</a>
       </div>
     </div>
@@ -592,8 +655,50 @@
 
       function openLoginModal(e) {
         if (e) e.preventDefault();
+        document.body.style.overflow = 'hidden';
+
+        // Check screen size: if mobile/tablet (<=768px), go directly to student form
+        if (window.innerWidth <= 768) {
+          document.getElementById('loginModal').style.display = 'flex';
+          showLoginForm('student');
+        } else {
+          // Desktop: show user type selection first
+          document.getElementById('userTypeModal').style.display = 'flex';
+        }
+      }
+
+      function closeUserTypeModal(e) {
+        if (e && e.target.id !== 'userTypeModal') return;
+        document.getElementById('userTypeModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      function selectUserType(type) {
+        closeUserTypeModal();
         document.getElementById('loginModal').style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        showLoginForm(type);
+      }
+
+      function showLoginForm(type) {
+        // Hide all forms
+        document.getElementById('studentLoginForm').style.display = 'none';
+        document.getElementById('schoolLoginForm').style.display = 'none';
+
+        // Show selected form
+        if (type === 'student') {
+          document.getElementById('studentLoginForm').style.display = 'block';
+        } else if (type === 'school') {
+          document.getElementById('schoolLoginForm').style.display = 'block';
+        }
+
+        // Store current type
+        window.currentLoginType = type;
+      }
+
+      function switchLoginType(newType) {
+        event.preventDefault();
+        showLoginForm(newType);
       }
 
       function closeLoginModal(e) {
@@ -605,30 +710,33 @@
       // Close modal on Escape key
       document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          closeUserTypeModal();
           closeLoginModal();
           closeRegisterModal();
         }
       });
 
-      // Handle login form submission
-      document.getElementById('loginForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
+      // Handle login form submission (works for both student and school forms)
+      document.addEventListener('submit', async (e) => {
+        if (e.target.classList.contains('login-modal-form')) {
+          e.preventDefault();
+          const formData = new FormData(e.target);
 
-        try {
-          const response = await fetch('public/api/login.php', {
-            method: 'POST',
-            body: formData
-          });
+          try {
+            const response = await fetch('public/api/login.php', {
+              method: 'POST',
+              body: formData
+            });
 
-          const data = await response.json();
-          if (data.success) {
-            window.location.href = 'public/index.php';
-          } else {
-            alert(data.message || 'Login gagal');
+            const data = await response.json();
+            if (data.success) {
+              window.location.href = 'public/index.php';
+            } else {
+              alert(data.message || 'Login gagal');
+            }
+          } catch (error) {
+            alert('Terjadi kesalahan: ' + error.message);
           }
-        } catch (error) {
-          alert('Terjadi kesalahan: ' + error.message);
         }
       });
 

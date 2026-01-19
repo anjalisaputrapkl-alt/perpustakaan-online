@@ -384,6 +384,7 @@ h1,h2,h3,h4{margin:0}
   position:relative;
   overflow:hidden;
   padding:60px 0;
+  top: -3rem;
 }
 .hero::before{
   content:'';
@@ -410,7 +411,7 @@ h1,h2,h3,h4{margin:0}
 }
 .hero h1{
   font-family:Merriweather,serif;
-  font-size:72px;
+  font-size:68px;
   color:#fff;
   line-height:1.2;
   margin-bottom:32px;
@@ -419,7 +420,7 @@ h1,h2,h3,h4{margin:0}
 }
 .lede{
   margin:24px 0 48px;
-  font-size:24px;
+  font-size:16px;
   color:rgba(255,255,255,.9);
   max-width:600px;
   line-height:1.8;
@@ -1010,6 +1011,9 @@ h1,h2,h3,h4{margin:0}
    RESPONSIVE - BELOW TABLET (max-width: 768px)
 ================================ */
 @media(max-width:768px){
+  .hero {
+      top: 0rem;
+  }
   .nav-toggle{
     display:flex !important;
   }
@@ -1812,6 +1816,77 @@ h1,h2,h3,h4{margin:0}
   animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.modal-content.user-type-modal {
+  max-width: 480px;
+  padding: 48px 32px;
+}
+
+.user-type-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.user-type-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 8px 0;
+  color: var(--text);
+}
+
+.user-type-header p {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.user-type-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-type-option {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.user-type-option:hover {
+  border-color: var(--accent);
+  background: #f9fafb;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(11, 61, 97, 0.1);
+}
+
+.user-type-option:active {
+  background: #f0f5ff;
+}
+
+.user-type-icon {
+  font-size: 40px;
+  flex-shrink: 0;
+}
+
+.user-type-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.user-type-desc {
+  font-size: 12px;
+  color: var(--muted);
+}
+
 .modal-close {
   position: absolute;
   top: 16px;
@@ -1945,6 +2020,22 @@ h1,h2,h3,h4{margin:0}
   border-color: var(--accent);
 }
 
+.btn-switch-login {
+  display: inline-block;
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 4px;
+  transition: 0.2s ease;
+}
+
+.btn-switch-login:hover {
+  background: var(--soft);
+  color: var(--accent);
+}
+
 /* Modal responsive */
 @media (max-width: 768px) {
   .modal-content {
@@ -1977,31 +2068,88 @@ h1,h2,h3,h4{margin:0}
     right: 12px;
   }
   .login-modal-header {
-    margin-bottom: 24px;
+    margin-bottom: 20px;
   }
   .login-icon {
-    font-size: 40px;
+    font-size: 32px;
   }
   .login-modal-header h2 {
-    font-size: 18px;
+    font-size: 16px;
+    margin: 0 0 4px 0;
+  }
+  .login-modal-header p {
+    font-size: 12px;
+  }
+
+  .login-modal-form {
+    margin-bottom: 16px;
   }
   .login-modal-form .form-group {
     margin-bottom: 12px;
+    gap: 4px;
+  }
+  .login-modal-form label {
+    font-size: 10px;
   }
   .login-modal-form input {
-    padding: 11px 12px;
-    font-size: 16px;
-  }
-  .btn-modal-submit {
-    padding: 11px 14px;
-    font-size: 14px;
-    margin-top: 4px;
-  }
-  .login-modal-divider {
-    margin: 20px 0;
-  }
-  .btn-modal-register {
-    padding: 11px 14px;
+    padding: 8px 10px;
     font-size: 13px;
+  }
+
+  .btn-modal-submit {
+    padding: 8px 10px;
+    font-size: 12px;
+    margin-top: 6px;
+  }
+
+  .login-modal-divider {
+    margin: 16px 0;
+  }
+
+  .login-modal-footer {
+    font-size: 10px;
+    margin: 0 0 10px 0;
+  }
+
+  .btn-modal-register {
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  .btn-switch-login {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+
+  /* User Type Modal */
+  .modal-content.user-type-modal {
+    padding: 32px 20px;
+    max-width: none;
+  }
+  .user-type-header {
+    margin-bottom: 24px;
+  }
+  .user-type-header h2 {
+    font-size: 18px;
+    margin: 0 0 6px 0;
+  }
+  .user-type-header p {
+    font-size: 12px;
+  }
+  .user-type-options {
+    gap: 10px;
+  }
+  .user-type-option {
+    padding: 16px;
+    gap: 12px;
+  }
+  .user-type-icon {
+    font-size: 32px;
+  }
+  .user-type-title {
+    font-size: 14px;
+  }
+  .user-type-desc {
+    font-size: 11px;
   }
 }
