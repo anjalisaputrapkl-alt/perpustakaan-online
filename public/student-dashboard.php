@@ -60,6 +60,23 @@ try {
 } catch (Exception $e) {
     $categories = [];
 }
+
+// Get books by specific categories for featured sections
+$featured_categories = ['Fiksi', 'Nonfiksi', 'Referensi', 'Komik'];
+$featured_books = [];
+
+foreach ($featured_categories as $cat) {
+    try {
+        $stmt = $pdo->prepare('SELECT * FROM books WHERE school_id = :school_id AND category = :category ORDER BY created_at DESC LIMIT 6');
+        $stmt->execute(['school_id' => $school_id, 'category' => $cat]);
+        $books_cat = $stmt->fetchAll();
+        if (!empty($books_cat)) {
+            $featured_books[$cat] = $books_cat;
+        }
+    } catch (Exception $e) {
+        $featured_books[$cat] = [];
+    }
+}
 ?>
 <!doctype html>
 <html lang="id">
@@ -98,6 +115,62 @@ try {
             line-height: 1.6;
         }
 
+        /* ===== ANIMATIONS ===== */
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
         /* Header */
         .header {
             background: var(--card);
@@ -107,6 +180,7 @@ try {
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            animation: slideDown 0.6s ease-out;
         }
 
         .header-container {
@@ -225,6 +299,7 @@ try {
             position: sticky;
             top: 100px;
             height: fit-content;
+            animation: slideInLeft 0.7s ease-out 0.2s both;
         }
 
         .sidebar-section {
@@ -233,6 +308,19 @@ try {
             padding: 20px;
             margin-bottom: 20px;
             border: 1px solid var(--border);
+            animation: fadeInUp 0.5s ease-out backwards;
+        }
+
+        .sidebar-section:nth-child(1) {
+            animation-delay: 0.25s;
+        }
+
+        .sidebar-section:nth-child(2) {
+            animation-delay: 0.35s;
+        }
+
+        .sidebar-section:nth-child(3) {
+            animation-delay: 0.45s;
         }
 
         .sidebar-section h3 {
@@ -275,6 +363,7 @@ try {
             display: flex;
             flex-direction: column;
             gap: 24px;
+            animation: slideInRight 0.7s ease-out 0.2s both;
         }
 
         .search-sort-bar {
@@ -285,6 +374,7 @@ try {
             display: flex;
             gap: 16px;
             align-items: center;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
         }
 
         .search-input {
@@ -341,6 +431,7 @@ try {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 20px;
+            animation: fadeInUp 0.6s ease-out 0.4s both;
         }
 
         .book-card {
@@ -352,7 +443,19 @@ try {
             display: flex;
             flex-direction: column;
             cursor: pointer;
+            animation: scaleIn 0.5s ease-out backwards;
         }
+
+        /* Stagger animation untuk setiap book card */
+        .book-card:nth-child(1) { animation-delay: 0.45s; }
+        .book-card:nth-child(2) { animation-delay: 0.50s; }
+        .book-card:nth-child(3) { animation-delay: 0.55s; }
+        .book-card:nth-child(4) { animation-delay: 0.60s; }
+        .book-card:nth-child(5) { animation-delay: 0.65s; }
+        .book-card:nth-child(6) { animation-delay: 0.70s; }
+        .book-card:nth-child(7) { animation-delay: 0.75s; }
+        .book-card:nth-child(8) { animation-delay: 0.80s; }
+        .book-card:nth-child(n+9) { animation-delay: 0.85s; }
 
         .book-card:hover {
             transform: translateY(-4px);
@@ -505,11 +608,13 @@ try {
             background: var(--card);
             border-radius: 12px;
             border: 1px solid var(--border);
+            animation: fadeInUp 0.6s ease-out 0.45s both;
         }
 
         .empty-state-icon {
             font-size: 64px;
             margin-bottom: 16px;
+            animation: scaleIn 0.6s ease-out;
         }
 
         .empty-state h3 {
@@ -520,6 +625,68 @@ try {
 
         .empty-state p {
             color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* Featured Sections */
+        .featured-section {
+            margin-bottom: 48px;
+            animation: fadeInUp 0.6s ease-out 0.3s both;
+        }
+
+        .featured-section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            border-bottom: 3px solid var(--accent);
+            background: linear-gradient(to right, var(--accent-light), transparent);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .featured-section-icon {
+            font-size: 28px;
+        }
+
+        .featured-section-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .featured-section-subtitle {
+            font-size: 12px;
+            color: var(--muted);
+            margin-left: auto;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .featured-books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+        }
+
+        .featured-books-grid .book-card {
+            animation: scaleIn 0.5s ease-out backwards;
+        }
+
+        .featured-books-grid .book-card:nth-child(1) { animation-delay: 0.3s; }
+        .featured-books-grid .book-card:nth-child(2) { animation-delay: 0.35s; }
+        .featured-books-grid .book-card:nth-child(3) { animation-delay: 0.4s; }
+        .featured-books-grid .book-card:nth-child(4) { animation-delay: 0.45s; }
+        .featured-books-grid .book-card:nth-child(5) { animation-delay: 0.5s; }
+        .featured-books-grid .book-card:nth-child(6) { animation-delay: 0.55s; }
+
+        .featured-section-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--accent-light);
+            border-radius: 8px;
+            color: var(--accent);
             font-size: 14px;
         }
 
@@ -535,41 +702,135 @@ try {
             }
 
             .books-grid {
-                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
             }
         }
 
         @media (max-width: 768px) {
+            .header {
+                padding: 12px 0;
+            }
+
             .header-container {
                 flex-wrap: wrap;
                 padding: 12px 16px;
+                gap: 12px;
             }
 
             .header-brand {
-                flex: 1;
-                min-width: 200px;
+                flex: 0 1 auto;
+                min-width: auto;
+            }
+
+            .header-brand-icon {
+                font-size: 24px;
+                width: 32px;
+                height: 32px;
+            }
+
+            .header-brand-text h2 {
+                font-size: 14px;
+            }
+
+            .header-brand-text p {
+                font-size: 11px;
             }
 
             .header-user {
                 flex: 1;
                 justify-content: flex-end;
                 gap: 12px;
+                order: 3;
+                width: 100%;
             }
 
             .header-user-info {
                 display: none;
             }
 
+            .header-user-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
+            .header-logout {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
             .container {
                 padding: 16px;
             }
 
-            .search-sort-bar {
+            .content-wrapper {
+                gap: 16px;
+                display: flex;
                 flex-direction: column;
             }
 
+            .sidebar {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 12px;
+                order: -1;
+            }
+
+            .sidebar-section {
+                background: var(--card);
+                border-radius: 12px;
+                padding: 16px;
+                border: 1px solid var(--border);
+                margin-bottom: 0;
+            }
+
+            .sidebar-section h3 {
+                font-size: 13px;
+                margin-bottom: 12px;
+            }
+
+            .filter-group {
+                display: grid;
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .filter-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 12px;
+            }
+
+            .filter-item input[type="radio"],
+            .filter-item input[type="checkbox"] {
+                width: 14px;
+                height: 14px;
+                cursor: pointer;
+            }
+
+            .filter-item label {
+                font-size: 12px;
+                cursor: pointer;
+            }
+
+            .search-sort-bar {
+                flex-direction: column;
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .sort-select {
+                width: 100%;
+            }
+
+            .btn-search {
+                width: 100%;
+            }
+
             .books-grid {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                grid-template-columns: repeat(2, 1fr);
                 gap: 12px;
             }
 
@@ -591,8 +852,225 @@ try {
                 font-size: 11px;
             }
 
+            .book-actions {
+                gap: 6px;
+            }
+
+            .btn-borrow,
+            .btn-detail {
+                padding: 8px;
+                font-size: 11px;
+            }
+
+            .sidebar {
+                display: block;
+                position: relative;
+                top: 0;
+                order: -1;
+                animation: fadeInUp 0.6s ease-out 0.2s both;
+            }
+
             .sidebar-section {
-                display: none;
+                margin-bottom: 16px;
+                padding: 16px;
+            }
+
+            .sidebar-section h3 {
+                font-size: 12px;
+                margin-bottom: 12px;
+            }
+
+            .filter-group {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .filter-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+
+            .filter-item input[type="radio"],
+            .filter-item input[type="checkbox"] {
+                width: 14px;
+                height: 14px;
+            }
+
+            .filter-item label {
+                font-size: 12px;
+            }
+
+            .empty-state {
+                padding: 40px 20px;
+            }
+
+            .empty-state-icon {
+                font-size: 48px;
+                margin-bottom: 12px;
+            }
+
+            .empty-state h3 {
+                font-size: 16px;
+            }
+
+            .empty-state p {
+                font-size: 13px;
+            }
+        }
+
+        /* Extra small devices (< 480px) */
+        @media (max-width: 480px) {
+            .header-container {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+
+            .header-brand-icon {
+                font-size: 20px;
+                width: 28px;
+                height: 28px;
+            }
+
+            .header-brand-text h2 {
+                font-size: 13px;
+            }
+
+            .header-brand-text p {
+                font-size: 10px;
+            }
+
+            .header-user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .header-logout {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .container {
+                padding: 12px;
+            }
+
+            .search-sort-bar {
+                padding: 12px;
+                gap: 10px;
+            }
+
+            .search-input {
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            .sort-select {
+                padding: 8px 8px;
+                font-size: 12px;
+            }
+
+            .btn-search {
+                padding: 8px 12px;
+                font-size: 11px;
+            }
+
+            .books-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+
+            .book-cover {
+                height: 140px;
+                font-size: 32px;
+            }
+
+            .book-info {
+                padding: 10px;
+                gap: 5px;
+            }
+
+            .book-title {
+                font-size: 11px;
+            }
+
+            .book-author {
+                font-size: 10px;
+            }
+
+            .book-category {
+                font-size: 10px;
+            }
+
+            .book-rating {
+                font-size: 11px;
+            }
+
+            .btn-borrow,
+            .btn-detail {
+                padding: 6px;
+                font-size: 10px;
+            }
+
+            .empty-state {
+                padding: 30px 16px;
+            }
+
+            .empty-state-icon {
+                font-size: 40px;
+            }
+
+            .empty-state h3 {
+                font-size: 14px;
+            }
+
+            .empty-state p {
+                font-size: 12px;
+            }
+
+            .featured-section-header {
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+                padding: 12px 16px;
+                border-bottom: 3px solid var(--accent);
+            }
+
+            .featured-section-title {
+                font-size: 16px;
+            }
+
+            .featured-section-icon {
+                font-size: 22px;
+            }
+
+            .featured-books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 12px;
+            }
+
+            .featured-section {
+                margin-bottom: 32px;
+            }
+
+            .featured-section .book-card {
+                border-radius: 8px;
+            }
+
+            .featured-section .book-cover {
+                height: 160px;
+            }
+        }
+
+        /* Tablet responsive (768px - 1024px) */
+        @media (max-width: 1024px) and (min-width: 768px) {
+            .featured-books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 16px;
+            }
+
+            .featured-section-title {
+                font-size: 18px;
             }
         }
     </style>
@@ -681,6 +1159,57 @@ try {
 
             <!-- Main Content -->
             <div class="main-content">
+                <!-- Featured Sections -->
+                <?php 
+                $section_icons = [
+                    'Fiksi' => '📚',
+                    'Nonfiksi' => '📖',
+                    'Referensi' => '🔍',
+                    'Komik' => '💭'
+                ];
+                ?>
+                
+                <?php foreach ($featured_categories as $category): ?>
+                    <?php if (!empty($featured_books[$category])): ?>
+                        <div class="featured-section">
+                            <div class="featured-section-header">
+                                <span class="featured-section-icon"><?php echo $section_icons[$category] ?? '📕'; ?></span>
+                                <h2 class="featured-section-title"><?php echo htmlspecialchars($category); ?></h2>
+                                <span class="featured-section-subtitle"><?php echo count($featured_books[$category]); ?> buku</span>
+                            </div>
+                            <div class="featured-books-grid">
+                                <?php foreach ($featured_books[$category] as $book): ?>
+                                    <div class="book-card">
+                                        <div class="book-cover">
+                                            📖
+                                            <span class="book-status available">Tersedia</span>
+                                        </div>
+                                        <div class="book-info">
+                                            <h3 class="book-title"><?php echo htmlspecialchars($book['title']); ?></h3>
+                                            <p class="book-author"><?php echo htmlspecialchars($book['author']); ?></p>
+                                            <p class="book-category"><?php echo htmlspecialchars($book['category'] ?? 'Umum'); ?></p>
+                                            <div class="book-rating">
+                                                ⭐ 4.5 (12)
+                                            </div>
+                                            <div class="book-actions">
+                                                <button class="btn-borrow" onclick="borrowBook(<?php echo $book['id']; ?>)">Pinjam</button>
+                                                <a href="book-detail.php?id=<?php echo $book['id']; ?>" class="btn-detail">Detail</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+
+                <!-- Divider -->
+                <div style="border-top: 2px solid var(--border); margin: 40px 0; padding-top: 24px; margin-top: 48px;">
+                    <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                        <span>📚</span> Jelajahi Semua Buku
+                    </h2>
+                </div>
+
                 <!-- Search & Sort Bar -->
                 <div class="search-sort-bar">
                     <form method="get" style="display: flex; gap: 16px; flex: 1; align-items: center;">
