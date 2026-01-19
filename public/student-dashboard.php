@@ -71,6 +71,7 @@ try {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <style>
         :root {
             --bg: #f8fafc;
@@ -104,6 +105,7 @@ try {
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -115,6 +117,7 @@ try {
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -126,6 +129,7 @@ try {
                 opacity: 0;
                 transform: translateX(40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -137,6 +141,7 @@ try {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -148,10 +153,158 @@ try {
                 opacity: 0;
                 transform: scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
             }
+        }
+
+        /* Navigation Sidebar */
+        .nav-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 240px;
+            background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%);
+            color: white;
+            padding: 24px 0;
+            z-index: 1002;
+            overflow-y: auto;
+            animation: slideInLeft 0.6s ease-out;
+        }
+
+        .nav-sidebar-header {
+            padding: 0 24px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-sidebar-header-icon {
+            font-size: 32px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+        }
+
+        .nav-sidebar-header-icon iconify-icon {
+            width: 32px;
+            height: 32px;
+            color: white;
+        }
+
+        .nav-sidebar-header h2 {
+            font-size: 14px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .nav-sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-sidebar-menu li {
+            margin: 0;
+        }
+
+        .nav-sidebar-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 24px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+            position: relative;
+        }
+
+        .nav-sidebar-menu a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-sidebar-menu a.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left-color: white;
+            font-weight: 600;
+        }
+
+        .nav-sidebar-menu-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        iconify-icon {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .nav-sidebar-menu iconify-icon {
+            font-size: 18px;
+            width: 24px;
+            height: 24px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .nav-sidebar-menu a:hover iconify-icon,
+        .nav-sidebar-menu a.active iconify-icon {
+            color: white;
+        }
+
+        .nav-sidebar-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+        }
+
+        /* Hamburger Menu Button */
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 6px;
+            left: 12px;
+            z-index: 999;
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            padding: 0;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .nav-toggle:hover {
+            background: var(--bg);
+        }
+
+        .nav-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .nav-toggle iconify-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
         }
 
         /* Header */
@@ -164,6 +317,7 @@ try {
             z-index: 100;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
             animation: slideDown 0.6s ease-out;
+            margin-left: 240px;
         }
 
         .header-container {
@@ -193,6 +347,12 @@ try {
             justify-content: center;
             background: var(--accent-light);
             border-radius: 8px;
+        }
+
+        .header-brand-icon iconify-icon {
+            width: 32px;
+            height: 32px;
+            color: var(--accent);
         }
 
         .header-brand-text h2 {
@@ -269,6 +429,7 @@ try {
             max-width: 1400px;
             margin: 0 auto;
             padding: 32px 24px;
+            margin-left: 240px;
         }
 
         .content-wrapper {
@@ -313,6 +474,15 @@ try {
             color: var(--text);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sidebar-section h3 iconify-icon {
+            width: 16px;
+            height: 16px;
+            color: var(--accent);
         }
 
         .filter-group {
@@ -430,15 +600,41 @@ try {
         }
 
         /* Stagger animation untuk setiap book card */
-        .book-card:nth-child(1) { animation-delay: 0.45s; }
-        .book-card:nth-child(2) { animation-delay: 0.50s; }
-        .book-card:nth-child(3) { animation-delay: 0.55s; }
-        .book-card:nth-child(4) { animation-delay: 0.60s; }
-        .book-card:nth-child(5) { animation-delay: 0.65s; }
-        .book-card:nth-child(6) { animation-delay: 0.70s; }
-        .book-card:nth-child(7) { animation-delay: 0.75s; }
-        .book-card:nth-child(8) { animation-delay: 0.80s; }
-        .book-card:nth-child(n+9) { animation-delay: 0.85s; }
+        .book-card:nth-child(1) {
+            animation-delay: 0.45s;
+        }
+
+        .book-card:nth-child(2) {
+            animation-delay: 0.50s;
+        }
+
+        .book-card:nth-child(3) {
+            animation-delay: 0.55s;
+        }
+
+        .book-card:nth-child(4) {
+            animation-delay: 0.60s;
+        }
+
+        .book-card:nth-child(5) {
+            animation-delay: 0.65s;
+        }
+
+        .book-card:nth-child(6) {
+            animation-delay: 0.70s;
+        }
+
+        .book-card:nth-child(7) {
+            animation-delay: 0.75s;
+        }
+
+        .book-card:nth-child(8) {
+            animation-delay: 0.80s;
+        }
+
+        .book-card:nth-child(n+9) {
+            animation-delay: 0.85s;
+        }
 
         .book-card:hover {
             transform: translateY(-4px);
@@ -458,6 +654,12 @@ try {
             text-align: center;
             position: relative;
             overflow: hidden;
+        }
+
+        .book-cover iconify-icon {
+            width: 48px;
+            height: 48px;
+            color: white;
         }
 
         .book-cover img {
@@ -613,6 +815,14 @@ try {
 
         /* Responsive */
         @media (max-width: 1024px) {
+            .header {
+                margin-left: 240px;
+            }
+
+            .container {
+                margin-left: 240px;
+            }
+
             .content-wrapper {
                 grid-template-columns: 1fr;
             }
@@ -629,13 +839,30 @@ try {
         }
 
         @media (max-width: 768px) {
+            .nav-toggle {
+                display: flex;
+            }
+
+            .nav-sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                width: 240px;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+            }
+
+            .nav-sidebar.active {
+                transform: translateX(0);
+            }
+
             .header {
+                margin-left: 0;
                 padding: 12px 0;
+                padding-left: 12px;
             }
 
             .header-container {
                 flex-wrap: wrap;
-                padding: 12px 16px;
+                padding: 0 16px;
                 gap: 12px;
             }
 
@@ -683,6 +910,7 @@ try {
 
             .container {
                 padding: 16px;
+                margin-left: 0;
             }
 
             .content-wrapper {
@@ -843,8 +1071,31 @@ try {
 
         /* Extra small devices (< 480px) */
         @media (max-width: 480px) {
+            .nav-toggle {
+                display: flex;
+                width: 40px;
+                height: 40px;
+                left: 10px;
+                top: 6px;
+            }
+
+            .nav-toggle iconify-icon {
+                width: 20px;
+                height: 20px;
+            }
+
+            .nav-sidebar {
+                width: 200px;
+            }
+
+            .header {
+                margin-left: 0;
+                padding: 10px 0;
+                padding-left: 10px;
+            }
+
             .header-container {
-                padding: 10px 12px;
+                padding: 0 12px;
                 gap: 8px;
             }
 
@@ -875,6 +1126,7 @@ try {
 
             .container {
                 padding: 12px;
+                margin-left: 0;
             }
 
             .search-sort-bar {
@@ -954,11 +1206,84 @@ try {
 </head>
 
 <body>
+    <!-- Navigation Sidebar -->
+    <aside class="nav-sidebar" id="navSidebar">
+        <a href="student-dashboard.php" class="nav-sidebar-header">
+            <div class="nav-sidebar-header-icon">
+                <iconify-icon icon="mdi:library" width="32" height="32"></iconify-icon>
+            </div>
+            <h2>AS Library</h2>
+        </a>
+
+        <ul class="nav-sidebar-menu">
+            <li>
+                <a href="student-dashboard.php" class="active">
+                    <iconify-icon icon="mdi:home" width="18" height="18"></iconify-icon>
+                    Dashboard
+                </a>
+            </li>
+            <li>
+                <a href="borrowing-history.php">
+                    <iconify-icon icon="mdi:book-open-variant" width="18" height="18"></iconify-icon>
+                    Riwayat Peminjaman
+                </a>
+            </li>
+            <li>
+                <a href="notifications.php">
+                    <iconify-icon icon="mdi:bell" width="18" height="18"></iconify-icon>
+                    Notifikasi
+                </a>
+            </li>
+            <li>
+                <a href="favorites.php">
+                    <iconify-icon icon="mdi:heart" width="18" height="18"></iconify-icon>
+                    Koleksi Favorit
+                </a>
+            </li>
+            <li>
+                <a href="my-profile.php">
+                    <iconify-icon icon="mdi:account" width="18" height="18"></iconify-icon>
+                    Profil Saya
+                </a>
+            </li>
+        </ul>
+
+        <div class="nav-sidebar-divider"></div>
+
+        <ul class="nav-sidebar-menu">
+            <li>
+                <a href="help.php">
+                    <iconify-icon icon="mdi:help-circle" width="18" height="18"></iconify-icon>
+                    Bantuan
+                </a>
+            </li>
+            <li>
+                <a href="settings.php">
+                    <iconify-icon icon="mdi:cog" width="18" height="18"></iconify-icon>
+                    Pengaturan
+                </a>
+            </li>
+            <li>
+                <a href="logout.php">
+                    <iconify-icon icon="mdi:logout" width="18" height="18"></iconify-icon>
+                    Logout
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Hamburger Menu Button -->
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
+    </button>
+
     <!-- Header -->
     <header class="header">
         <div class="header-container">
             <a href="student-dashboard.php" class="header-brand">
-                <div class="header-brand-icon">📚</div>
+                <div class="header-brand-icon">
+                    <iconify-icon icon="mdi:library" width="32" height="32"></iconify-icon>
+                </div>
                 <div class="header-brand-text">
                     <h2>AS Library</h2>
                     <p>Dashboard Siswa</p>
@@ -985,7 +1310,7 @@ try {
             <aside class="sidebar">
                 <!-- Search Tips -->
                 <div class="sidebar-section">
-                    <h3>💡 Tips</h3>
+                    <h3><iconify-icon icon="mdi:lightbulb-on" width="16" height="16"></iconify-icon> Tips</h3>
                     <p style="font-size: 12px; color: var(--muted); line-height: 1.6;">
                         Gunakan search untuk mencari buku berdasarkan judul atau pengarang. Filter kategori membantu
                         Anda menemukan buku yang Anda inginkan.
@@ -995,7 +1320,7 @@ try {
                 <!-- Category Filter -->
                 <?php if (!empty($categories)): ?>
                     <div class="sidebar-section">
-                        <h3>Kategori</h3>
+                        <h3><iconify-icon icon="mdi:folder-multiple" width="16" height="16"></iconify-icon> Kategori</h3>
                         <form method="get" class="filter-group">
                             <?php if (!empty($search)): ?>
                                 <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
@@ -1019,12 +1344,13 @@ try {
 
                 <!-- Quick Stats -->
                 <div class="sidebar-section">
-                    <h3>📊 Statistik</h3>
+                    <h3><iconify-icon icon="mdi:chart-box" width="16" height="16"></iconify-icon> Statistik</h3>
                     <div style="display: flex; flex-direction: column; gap: 12px;">
                         <div>
                             <p style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Total Buku</p>
                             <p style="font-size: 20px; font-weight: 700; color: var(--accent);">
-                                <?php echo count($books); ?></p>
+                                <?php echo count($books); ?>
+                            </p>
                         </div>
                         <div>
                             <p style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Sedang Dipinjam</p>
@@ -1057,7 +1383,7 @@ try {
                         <?php foreach ($books as $book): ?>
                             <div class="book-card">
                                 <div class="book-cover">
-                                    📖
+                                    <iconify-icon icon="mdi:book-open-variant" width="48" height="48"></iconify-icon>
                                     <span class="book-status available">Tersedia</span>
                                 </div>
                                 <div class="book-info">
@@ -1088,6 +1414,35 @@ try {
     </div>
 
     <script>
+        // Navigation Sidebar Toggle
+        const navToggle = document.getElementById('navToggle');
+        const navSidebar = document.getElementById('navSidebar');
+
+        navToggle.addEventListener('click', () => {
+            navSidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking on a link
+        document.querySelectorAll('.nav-sidebar-menu a').forEach(link => {
+            link.addEventListener('click', () => {
+                navSidebar.classList.remove('active');
+            });
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!navSidebar.contains(e.target) && !navToggle.contains(e.target)) {
+                navSidebar.classList.remove('active');
+            }
+        });
+
+        // Close sidebar on window resize if >= 768px
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                navSidebar.classList.remove('active');
+            }
+        });
+
         function borrowBook(bookId) {
             if (!confirm('Apakah Anda ingin meminjam buku ini?')) {
                 return;
