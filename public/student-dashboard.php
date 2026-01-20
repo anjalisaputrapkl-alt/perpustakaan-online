@@ -1359,8 +1359,13 @@ $pageTitle = 'Dashboard Siswa';
             }
 
             .header-container {
-                padding: 0 12px;
+                padding: 0 12px 0 50px;
                 gap: 8px;
+            }
+
+            .header-brand {
+                flex: 0;
+                min-width: auto;
             }
 
             .header-brand-icon {
@@ -1369,12 +1374,8 @@ $pageTitle = 'Dashboard Siswa';
                 height: 28px;
             }
 
-            .header-brand-text h2 {
-                font-size: 13px;
-            }
-
-            .header-brand-text p {
-                font-size: 10px;
+            .header-brand-text {
+                display: none;
             }
 
             .header-user-avatar {

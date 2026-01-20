@@ -867,6 +867,81 @@ $pageTitle = 'Riwayat Peminjaman';
             }
         }
 
+        @media (max-width: 480px) {
+            .nav-toggle {
+                width: 40px;
+                height: 40px;
+                left: 10px;
+                top: 6px;
+            }
+
+            .nav-toggle iconify-icon {
+                width: 20px;
+                height: 20px;
+            }
+
+            .nav-sidebar {
+                width: 200px;
+            }
+
+            .header {
+                padding: 10px 0;
+                padding-left: 10px;
+            }
+
+            .header-container {
+                padding: 0 12px 0 50px;
+                gap: 8px;
+            }
+
+            .header-brand {
+                flex: 0;
+                min-width: auto;
+            }
+
+            .header-brand-icon {
+                font-size: 20px;
+                width: 28px;
+                height: 28px;
+            }
+
+            .header-brand-text {
+                display: none;
+            }
+
+            .header-user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+
+            .header-logout {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+
+            .container-main {
+                padding: 12px;
+            }
+
+            .page-header h1 {
+                font-size: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table {
+                font-size: 11px;
+            }
+
+            .table th,
+            .table td {
+                padding: 8px;
+            }
+        }
+
         iconify-icon {
             display: inline-block;
             vertical-align: middle;
