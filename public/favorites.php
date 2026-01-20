@@ -22,33 +22,36 @@ $successMessage = '';
 
 try {
     $model = new FavoriteModel($pdo);
-    
+
     // Get all categories
     $categories = $model->getCategories();
-    
+
     // Get all books (default)
     $books = $model->getBooksByCategory(null);
-    
+
     // Get favorites
     $favorites = $model->getFavorites($studentId);
-    
+
 } catch (Exception $e) {
     $errorMessage = 'Error: ' . htmlspecialchars($e->getMessage());
 }
+
+$pageTitle = 'Koleksi Favorit';
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Koleksi Favorit - Perpustakaan Digital</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
-    
+
     <style>
         :root {
             --bg: #f8fafc;
@@ -82,6 +85,7 @@ try {
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -93,6 +97,7 @@ try {
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -104,6 +109,7 @@ try {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -324,30 +330,35 @@ try {
         }
 
         .header-user-avatar {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%);
-            color: white;
-            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), #2563eb);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
         }
 
         .header-logout {
-            padding: 6px 12px;
-            background: var(--danger);
-            color: white;
-            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 12px;
-            transition: all 0.2s ease;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .header-logout:hover {
-            background: #dc2626;
+            background: #f0f0f0;
+            border-color: var(--text);
         }
 
         /* Main Container */
@@ -738,6 +749,7 @@ try {
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Sidebar -->
     <?php include 'partials/student-sidebar.php'; ?>
@@ -747,31 +759,8 @@ try {
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <a href="student-dashboard.php" class="header-brand">
-                <div class="header-brand-icon">
-                    <iconify-icon icon="mdi:library" width="32" height="32"></iconify-icon>
-                </div>
-                <div class="header-brand-text">
-                    <h2>AS Library</h2>
-                    <p>Koleksi Favorit</p>
-                </div>
-            </a>
-
-            <div class="header-user">
-                <div class="header-user-info">
-                    <p class="name"><?php echo htmlspecialchars($user['name'] ?? 'Siswa'); ?></p>
-                    <p class="role">Siswa</p>
-                </div>
-                <div class="header-user-avatar">
-                    <?php echo strtoupper(substr($user['name'] ?? 'S', 0, 1)); ?>
-                </div>
-                <a href="logout.php" class="header-logout">Logout</a>
-            </div>
-        </div>
-    </header>
+    <!-- Global Student Header -->
+    <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container-main">
@@ -892,7 +881,8 @@ try {
                                             </span>
                                         <?php endif; ?>
                                         <div class="book-card-action">
-                                            <button class="btn-remove" onclick="removeFavorite(<?php echo $fav['id_favorit']; ?>)">
+                                            <button class="btn-remove"
+                                                onclick="removeFavorite(<?php echo $fav['id_favorit']; ?>)">
                                                 <iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
                                                 Hapus
                                             </button>
@@ -925,12 +915,12 @@ try {
         }
 
         // Handle category change
-        document.getElementById('categorySelect').addEventListener('change', async function() {
+        document.getElementById('categorySelect').addEventListener('change', async function () {
             const category = this.value;
             const bookSelect = document.getElementById('bookSelect');
 
             try {
-                const url = category 
+                const url = category
                     ? `/perpustakaan-online/public/api/favorites.php?action=books_by_category&category=${encodeURIComponent(category)}`
                     : `/perpustakaan-online/public/api/favorites.php?action=books_by_category`;
 
@@ -955,7 +945,7 @@ try {
         });
 
         // Handle form submission
-        document.getElementById('favoriteForm').addEventListener('submit', async function(e) {
+        document.getElementById('favoriteForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const bookId = document.getElementById('bookSelect').value;
@@ -1005,20 +995,21 @@ try {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.querySelector(`[data-favorite-id="${favoriteId}"]`).remove();
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Gagal menghapus dari favorit');
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector(`[data-favorite-id="${favoriteId}"]`).remove();
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Gagal menghapus dari favorit');
+                });
         }
     </script>
 </body>
+
 </html>

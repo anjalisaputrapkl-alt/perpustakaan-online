@@ -121,6 +121,8 @@ function getStatusColor($status) {
             return 'secondary';
     }
 }
+
+$pageTitle = 'Riwayat Peminjaman';
 ?>
 
 <!DOCTYPE html>
@@ -416,30 +418,35 @@ function getStatusColor($status) {
         }
 
         .header-user-avatar {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%);
-            color: white;
-            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), #2563eb);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
         }
 
         .header-logout {
-            padding: 6px 12px;
-            background: var(--danger);
-            color: white;
-            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 12px;
-            transition: all 0.2s ease;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .header-logout:hover {
-            background: #dc2626;
+            background: #f0f0f0;
+            border-color: var(--text);
         }
 
         /* Main Container */
@@ -835,31 +842,8 @@ function getStatusColor($status) {
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <a href="student-dashboard.php" class="header-brand">
-                <div class="header-brand-icon">
-                    <iconify-icon icon="mdi:library" width="32" height="32"></iconify-icon>
-                </div>
-                <div class="header-brand-text">
-                    <h2>AS Library</h2>
-                    <p>Riwayat Peminjaman</p>
-                </div>
-            </a>
-
-            <div class="header-user">
-                <div class="header-user-info">
-                    <p class="name"><?php echo htmlspecialchars($user['name'] ?? 'Siswa'); ?></p>
-                    <p class="role">Siswa</p>
-                </div>
-                <div class="header-user-avatar">
-                    <?php echo strtoupper(substr($user['name'] ?? 'S', 0, 1)); ?>
-                </div>
-                <a href="logout.php" class="header-logout">Logout</a>
-            </div>
-        </div>
-    </header>
+    <!-- Global Student Header -->
+    <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container-main">

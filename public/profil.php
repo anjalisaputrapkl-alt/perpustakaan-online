@@ -8,7 +8,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
 }
 
 $pdo = require __DIR__ . '/../src/db.php';
-$siswaId = (int)$_SESSION['user']['school_id'];
+$siswaId = (int) $_SESSION['user']['school_id'];
 
 // Get student profile
 $stmt = $pdo->prepare("
@@ -32,7 +32,7 @@ $createdAt = !empty($siswa['created_at']) ? date('d M Y, H:i', strtotime($siswa[
 $updatedAt = !empty($siswa['updated_at']) ? date('d M Y, H:i', strtotime($siswa['updated_at'])) : '-';
 
 // Gender display
-$genderDisplay = match($siswa['jenis_kelamin']) {
+$genderDisplay = match ($siswa['jenis_kelamin']) {
     'L', 'M' => 'Laki-laki',
     'P', 'F' => 'Perempuan',
     default => '-'
@@ -42,9 +42,12 @@ $genderDisplay = match($siswa['jenis_kelamin']) {
 $photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpustakaan-online/public', '', $siswa['foto']))
     ? $siswa['foto']
     : '/perpustakaan-online/assets/img/default-avatar.png';
+
+$pageTitle = 'Profil Saya';
 ?>
 <!doctype html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -85,6 +88,7 @@ $photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpus
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -96,6 +100,7 @@ $photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpus
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -107,6 +112,7 @@ $photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpus
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -214,6 +220,40 @@ $photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpus
             margin: 16px 0;
         }
 
+        /* Hamburger Menu Button */
+        .nav-toggle {
+            display: none;
+            position: fixed;
+            top: 6px;
+            left: 12px;
+            z-index: 999;
+            background: var(--card);
+            color: var(--text);
+            cursor: pointer;
+            width: 44px;
+            height: 44px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            padding: 0;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .nav-toggle:hover {
+            background: var(--bg);
+        }
+
+        .nav-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .nav-toggle iconify-icon {
+            width: 24px;
+            height: 24px;
+            color: var(--accent);
+        }
+
         /* Header */
         .header {
             background: var(--card);
@@ -237,10 +277,98 @@ $photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpus
             gap: 24px;
         }
 
-        .header h1 {
-            font-size: 24px;
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .header-brand-icon {
+            font-size: 32px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-light);
+            border-radius: 8px;
+        }
+
+        .header-brand-icon iconify-icon {
+            width: 32px;
+            height: 32px;
+            color: var(--accent);
+        }
+
+        .header-brand-text h2 {
+            font-size: 16px;
             font-weight: 700;
             margin: 0;
+        }
+
+        .header-brand-text p {
+            font-size: 12px;
+            color: var(--muted);
+            margin: 2px 0 0 0;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-user-info {
+            text-align: right;
+        }
+
+        .header-user-info p {
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .header-user-info .name {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .header-user-info .role {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .header-user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), #2563eb);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .header-logout {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .header-logout:hover {
+            background: #f0f0f0;
+            border-color: var(--text);
         }
 
         /* Container */
@@ -423,98 +551,103 @@ $photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpus
         }
     </style>
 </head>
+
 <body>
     <?php require __DIR__ . '/partials/student-sidebar.php'; ?>
 
-    <div class="header">
-        <div class="header-container">
-            <h1>Profil Saya</h1>
-        </div>
-    </div>
+    <!-- Hamburger Menu Button -->
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
+    </button>
+
+    <!-- Global Student Header -->
+    <?php include 'partials/student-header.php'; ?>
 
     <div class="container-main">
         <div class="card">
-                <div class="profile-header">
-                    <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="profile-photo">
-                    <div class="profile-info">
-                        <h2><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></h2>
-                        <p><?php echo htmlspecialchars($siswa['kelas']); ?> - <?php echo htmlspecialchars($siswa['jurusan']); ?></p>
-                    </div>
+            <div class="profile-header">
+                <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="profile-photo">
+                <div class="profile-info">
+                    <h2><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></h2>
+                    <p><?php echo htmlspecialchars($siswa['kelas']); ?> -
+                        <?php echo htmlspecialchars($siswa['jurusan']); ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Nama Lengkap</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></div>
                 </div>
 
-                <div class="divider"></div>
-
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Nama Lengkap</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">NIS</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['nis']); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">NISN</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['nisn']); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">Kelas</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['kelas']); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">Jurusan</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['jurusan']); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">Jenis Kelamin</span>
-                        <div class="info-value"><?php echo htmlspecialchars($genderDisplay); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">Tanggal Lahir</span>
-                        <div class="info-value"><?php echo htmlspecialchars($tanggalLahir); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">Email</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['email']); ?></div>
-                    </div>
-
-                    <div class="info-item">
-                        <span class="info-label">Nomor HP</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['no_hp']); ?></div>
-                    </div>
-
-                    <div class="info-item" style="grid-column: 1 / -1;">
-                        <span class="info-label">Alamat</span>
-                        <div class="info-value"><?php echo htmlspecialchars($siswa['alamat']); ?></div>
-                    </div>
+                <div class="info-item">
+                    <span class="info-label">NIS</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['nis']); ?></div>
                 </div>
 
-                <div class="meta-section">
-                    <div class="meta-item">
-                        <strong>Dibuat:</strong>
-                        <span><?php echo htmlspecialchars($createdAt); ?></span>
-                    </div>
-                    <div class="meta-item">
-                        <strong>Terakhir diperbarui:</strong>
-                        <span><?php echo htmlspecialchars($updatedAt); ?></span>
-                    </div>
+                <div class="info-item">
+                    <span class="info-label">NISN</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['nisn']); ?></div>
                 </div>
 
-                <div class="button-group">
-                    <a href="profil-edit.php" class="btn primary">Edit Profil</a>
-                    <a href="upload-foto.php" class="btn primary">Ganti Foto</a>
-                    <a href="kartu-siswa.php" class="btn primary">Kartu Siswa</a>
-                    <a href="student-dashboard.php" class="btn secondary">Kembali</a>
+                <div class="info-item">
+                    <span class="info-label">Kelas</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['kelas']); ?></div>
                 </div>
+
+                <div class="info-item">
+                    <span class="info-label">Jurusan</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['jurusan']); ?></div>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Jenis Kelamin</span>
+                    <div class="info-value"><?php echo htmlspecialchars($genderDisplay); ?></div>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Tanggal Lahir</span>
+                    <div class="info-value"><?php echo htmlspecialchars($tanggalLahir); ?></div>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Email</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['email']); ?></div>
+                </div>
+
+                <div class="info-item">
+                    <span class="info-label">Nomor HP</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['no_hp']); ?></div>
+                </div>
+
+                <div class="info-item" style="grid-column: 1 / -1;">
+                    <span class="info-label">Alamat</span>
+                    <div class="info-value"><?php echo htmlspecialchars($siswa['alamat']); ?></div>
+                </div>
+            </div>
+
+            <div class="meta-section">
+                <div class="meta-item">
+                    <strong>Dibuat:</strong>
+                    <span><?php echo htmlspecialchars($createdAt); ?></span>
+                </div>
+                <div class="meta-item">
+                    <strong>Terakhir diperbarui:</strong>
+                    <span><?php echo htmlspecialchars($updatedAt); ?></span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <a href="profil-edit.php" class="btn primary">Edit Profil</a>
+                <a href="upload-foto.php" class="btn primary">Ganti Foto</a>
+                <a href="kartu-siswa.php" class="btn primary">Kartu Siswa</a>
+                <a href="student-dashboard.php" class="btn secondary">Kembali</a>
             </div>
         </div>
     </div>
 </body>
+
 </html>

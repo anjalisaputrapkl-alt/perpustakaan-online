@@ -69,6 +69,8 @@ try {
 } catch (Exception $e) {
     $borrowStats = ['total_borrows' => 0];
 }
+
+$pageTitle = 'Dashboard Siswa';
 ?>
 <!doctype html>
 <html lang="id">
@@ -1476,31 +1478,8 @@ try {
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <a href="student-dashboard.php" class="header-brand">
-                <div class="header-brand-icon">
-                    <iconify-icon icon="mdi:library" width="32" height="32"></iconify-icon>
-                </div>
-                <div class="header-brand-text">
-                    <h2>AS Library</h2>
-                    <p>Dashboard Siswa</p>
-                </div>
-            </a>
-
-            <div class="header-user">
-                <div class="header-user-info">
-                    <p class="name"><?php echo htmlspecialchars($user['name'] ?? 'Siswa'); ?></p>
-                    <p class="role">Siswa</p>
-                </div>
-                <div class="header-user-avatar">
-                    <?php echo strtoupper(substr($user['name'] ?? 'S', 0, 1)); ?>
-                </div>
-                <a href="logout.php" class="header-logout">Logout</a>
-            </div>
-        </div>
-    </header>
+    <!-- Global Student Header -->
+    <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container">
@@ -1554,7 +1533,8 @@ try {
                         <div>
                             <p style="font-size: 11px; color: var(--muted); margin-bottom: 4px;">Sedang Dipinjam</p>
                             <p style="font-size: 20px; font-weight: 700; color: var(--warning);">
-                                <?php echo $borrowStats['total_borrows']; ?></p>
+                                <?php echo $borrowStats['total_borrows']; ?>
+                            </p>
                         </div>
                     </div>
                 </div>

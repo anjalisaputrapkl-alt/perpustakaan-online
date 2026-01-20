@@ -21,59 +21,66 @@ $successMessage = '';
 
 try {
     $service = new NotificationsService($pdo);
-    
+
     // Get sort filter from GET
     $sort = $_GET['sort'] ?? 'latest';
     $validSorts = ['latest', 'oldest'];
     $sort = in_array($sort, $validSorts) ? $sort : 'latest';
-    
+
     // Get notifications
     $notifications = $service->getAllNotifications($studentId);
-    
+
     // Sort
     if ($sort === 'oldest') {
         $notifications = array_reverse($notifications);
     }
-    
+
     $stats = $service->getStatistics($studentId);
-    
+
 } catch (Exception $e) {
     $errorMessage = 'Error: ' . htmlspecialchars($e->getMessage());
 }
 
+$pageTitle = 'Notifikasi';
+
 // Helper function untuk format tanggal
-function formatDate($date) {
+function formatDate($date)
+{
     return NotificationsService::formatDate($date);
 }
 
 // Helper function untuk get icon
-function getIcon($type) {
+function getIcon($type)
+{
     return NotificationsService::getIcon($type);
 }
 
 // Helper function untuk get badge class
-function getBadgeClass($type) {
+function getBadgeClass($type)
+{
     return NotificationsService::getBadgeClass($type);
 }
 
 // Helper function untuk get label
-function getLabel($type) {
+function getLabel($type)
+{
     return NotificationsService::getLabel($type);
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notifikasi - Perpustakaan Digital</title>
-    
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
-    
+
     <style>
         :root {
             --bg: #f8fafc;
@@ -107,6 +114,7 @@ function getLabel($type) {
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -118,6 +126,7 @@ function getLabel($type) {
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -129,6 +138,7 @@ function getLabel($type) {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -355,30 +365,35 @@ function getLabel($type) {
         }
 
         .header-user-avatar {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%);
-            color: white;
-            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--accent), #2563eb);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
         }
 
         .header-logout {
-            padding: 6px 12px;
-            background: var(--danger);
-            color: white;
-            text-decoration: none;
+            padding: 8px 16px;
+            border: 1px solid var(--border);
             border-radius: 6px;
-            font-size: 12px;
-            transition: all 0.2s ease;
+            background: var(--bg);
+            color: var(--text);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
 
         .header-logout:hover {
-            background: #dc2626;
+            background: #f0f0f0;
+            border-color: var(--text);
         }
 
         /* Main Container */
@@ -891,6 +906,7 @@ function getLabel($type) {
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation Sidebar -->
     <?php include 'partials/student-sidebar.php'; ?>
@@ -900,31 +916,8 @@ function getLabel($type) {
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="header-container">
-            <a href="student-dashboard.php" class="header-brand">
-                <div class="header-brand-icon">
-                    <iconify-icon icon="mdi:library" width="32" height="32"></iconify-icon>
-                </div>
-                <div class="header-brand-text">
-                    <h2>AS Library</h2>
-                    <p>Notifikasi</p>
-                </div>
-            </a>
-
-            <div class="header-user">
-                <div class="header-user-info">
-                    <p class="name"><?php echo htmlspecialchars($user['name'] ?? 'Siswa'); ?></p>
-                    <p class="role">Siswa</p>
-                </div>
-                <div class="header-user-avatar">
-                    <?php echo strtoupper(substr($user['name'] ?? 'S', 0, 1)); ?>
-                </div>
-                <a href="logout.php" class="header-logout">Logout</a>
-            </div>
-        </div>
-    </header>
+    <!-- Global Student Header -->
+    <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container-main">
@@ -955,57 +948,57 @@ function getLabel($type) {
 
         <!-- Stats Grid -->
         <?php if (!empty($stats)): ?>
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:bell" width="16" height="16"></iconify-icon>
-                    Total Notifikasi
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-card-label">
+                        <iconify-icon icon="mdi:bell" width="16" height="16"></iconify-icon>
+                        Total Notifikasi
+                    </div>
+                    <div class="stat-card-value"><?php echo (int) ($stats['total'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card-value"><?php echo (int)($stats['total'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:email-multiple-outline" width="16" height="16"></iconify-icon>
-                    Belum Dibaca
+                <div class="stat-card">
+                    <div class="stat-card-label">
+                        <iconify-icon icon="mdi:email-multiple-outline" width="16" height="16"></iconify-icon>
+                        Belum Dibaca
+                    </div>
+                    <div class="stat-card-value"><?php echo (int) ($stats['unread'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card-value"><?php echo (int)($stats['unread'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card overdue">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon>
-                    Keterlambatan
+                <div class="stat-card overdue">
+                    <div class="stat-card-label">
+                        <iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon>
+                        Keterlambatan
+                    </div>
+                    <div class="stat-card-value"><?php echo (int) ($stats['overdue'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card-value"><?php echo (int)($stats['overdue'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card warning">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:alert-triangle" width="16" height="16"></iconify-icon>
-                    Peringatan
+                <div class="stat-card warning">
+                    <div class="stat-card-label">
+                        <iconify-icon icon="mdi:alert-triangle" width="16" height="16"></iconify-icon>
+                        Peringatan
+                    </div>
+                    <div class="stat-card-value"><?php echo (int) ($stats['warning'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card-value"><?php echo (int)($stats['warning'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card return">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:package-variant-closed" width="16" height="16"></iconify-icon>
-                    Pengembalian
+                <div class="stat-card return">
+                    <div class="stat-card-label">
+                        <iconify-icon icon="mdi:package-variant-closed" width="16" height="16"></iconify-icon>
+                        Pengembalian
+                    </div>
+                    <div class="stat-card-value"><?php echo (int) ($stats['return'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card-value"><?php echo (int)($stats['return'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card info">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:information" width="16" height="16"></iconify-icon>
-                    Informasi
+                <div class="stat-card info">
+                    <div class="stat-card-label">
+                        <iconify-icon icon="mdi:information" width="16" height="16"></iconify-icon>
+                        Informasi
+                    </div>
+                    <div class="stat-card-value"><?php echo (int) ($stats['info'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card-value"><?php echo (int)($stats['info'] ?? 0); ?></div>
-            </div>
-            <div class="stat-card newbooks">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:book-open-page-variant" width="16" height="16"></iconify-icon>
-                    Buku Baru
+                <div class="stat-card newbooks">
+                    <div class="stat-card-label">
+                        <iconify-icon icon="mdi:book-open-page-variant" width="16" height="16"></iconify-icon>
+                        Buku Baru
+                    </div>
+                    <div class="stat-card-value"><?php echo (int) ($stats['newbooks'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card-value"><?php echo (int)($stats['newbooks'] ?? 0); ?></div>
             </div>
-        </div>
         <?php endif; ?>
 
         <!-- Filter Bar -->
@@ -1029,7 +1022,8 @@ function getLabel($type) {
                 </div>
                 <h3>Belum Ada Notifikasi</h3>
                 <p>Semua peminjaman Anda dalam kondisi baik. Tidak ada notifikasi penting saat ini.</p>
-                <a href="student-dashboard.php" style="display: inline-block; padding: 10px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: all 0.2s ease;">
+                <a href="student-dashboard.php"
+                    style="display: inline-block; padding: 10px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: all 0.2s ease;">
                     <iconify-icon icon="mdi:arrow-left" width="16" height="16"></iconify-icon>
                     Kembali ke Dashboard
                 </a>
@@ -1037,10 +1031,12 @@ function getLabel($type) {
         <?php else: ?>
             <!-- Notifications Cards -->
             <?php foreach ($notifications as $notif): ?>
-                <div class="notification-card <?php echo !$notif['status_baca'] ? 'unread' : ''; ?> <?php echo htmlspecialchars($notif['jenis_notifikasi']); ?>">
+                <div
+                    class="notification-card <?php echo !$notif['status_baca'] ? 'unread' : ''; ?> <?php echo htmlspecialchars($notif['jenis_notifikasi']); ?>">
                     <div class="notification-card-content">
                         <div class="notification-card-icon">
-                            <iconify-icon icon="<?php echo getIcon($notif['jenis_notifikasi']); ?>" width="24" height="24"></iconify-icon>
+                            <iconify-icon icon="<?php echo getIcon($notif['jenis_notifikasi']); ?>" width="24"
+                                height="24"></iconify-icon>
                         </div>
                         <div class="notification-card-body">
                             <div class="notification-card-header">
@@ -1085,4 +1081,5 @@ function getLabel($type) {
         }
     </script>
 </body>
+
 </html>
