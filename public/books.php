@@ -15,23 +15,23 @@ if (!is_dir($uploadsDir)) {
 
 if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   $coverImage = '';
-  
+
   // Handle image upload
   if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
     $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'tiff'];
     $filename = basename($_FILES['cover_image']['name']);
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    
+
     if (in_array($ext, $allowed)) {
       $newFilename = 'book_' . time() . '_' . uniqid() . '.' . $ext;
       $uploadPath = $uploadsDir . '/' . $newFilename;
-      
+
       if (move_uploaded_file($_FILES['cover_image']['tmp_name'], $uploadPath)) {
         $coverImage = $newFilename;
       }
     }
   }
-  
+
   $pdo->prepare(
     'INSERT INTO books (school_id,title,author,isbn,category,shelf,row_number,copies,cover_image)
      VALUES (:sid,:title,:author,:isbn,:category,:shelf,:row,:copies,:cover_image)'
@@ -57,17 +57,17 @@ if ($action === 'edit' && isset($_GET['id'])) {
     $stmt->execute(['id' => $id, 'sid' => $sid]);
     $oldBook = $stmt->fetch();
     $coverImage = $oldBook['cover_image'] ?? '';
-    
+
     // Handle new image upload
     if (isset($_FILES['cover_image']) && $_FILES['cover_image']['error'] === UPLOAD_ERR_OK) {
       $allowed = ['jpg', 'jpeg', 'png', 'gif'];
       $filename = basename($_FILES['cover_image']['name']);
       $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-      
+
       if (in_array($ext, $allowed)) {
         $newFilename = 'book_' . time() . '_' . uniqid() . '.' . $ext;
         $uploadPath = $uploadsDir . '/' . $newFilename;
-        
+
         if (move_uploaded_file($_FILES['cover_image']['tmp_name'], $uploadPath)) {
           // Delete old image if exists
           if ($coverImage && file_exists($uploadsDir . '/' . $coverImage)) {
@@ -77,7 +77,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
         }
       }
     }
-    
+
     $pdo->prepare(
       'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,shelf=:shelf,row_number=:row,copies=:copies,cover_image=:cover_image
        WHERE id=:id AND school_id=:sid'
@@ -136,7 +136,11 @@ $categories = [
   <title>Kelola Buku</title>
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/header-sidebar.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/books.css">
 </head>
@@ -156,7 +160,8 @@ $categories = [
         <div>
           <div class="card">
             <h2><?= $action === 'edit' ? 'Edit Buku' : 'Tambah Buku' ?></h2>
-            <form method="post" action="<?= $action === 'edit' ? '' : 'books.php?action=add' ?>" enctype="multipart/form-data">
+            <form method="post" action="<?= $action === 'edit' ? '' : 'books.php?action=add' ?>"
+              enctype="multipart/form-data">
               <div class="form-group"><label>Judul Buku</label>
                 <input name="title" required value="<?= $book['title'] ?? '' ?>">
               </div>
@@ -185,7 +190,8 @@ $categories = [
                 <input type="number" min="1" name="copies" value="<?= $book['copies'] ?? 1 ?>">
               </div>
               <div class="form-group"><label>Gambar Buku</label>
-                <input type="file" name="cover_image" accept="image/jpeg,image/png,image/gif" id="imageInput" onchange="previewImage(event)">
+                <input type="file" name="cover_image" accept="image/jpeg,image/png,image/gif" id="imageInput"
+                  onchange="previewImage(event)">
                 <small>Format: JPG, PNG, GIF (Max 5MB)</small>
                 <div id="imagePreview" class="image-preview" style="margin-top: 12px;">
                   <?php if ($action === 'edit' && !empty($book['cover_image'])): ?>
@@ -206,7 +212,8 @@ $categories = [
             </div>
             <div class="faq-item">
               <div class="faq-question">Bisakah saya mengedit data buku? <span>+</span></div>
-              <div class="faq-answer">Ya, klik tombol "Edit" pada kartu buku yang ingin diubah di daftar buku, ubah data,
+              <div class="faq-answer">Ya, klik tombol "Edit" pada kartu buku yang ingin diubah di daftar buku, ubah
+                data,
                 lalu klik "Simpan".</div>
             </div>
             <div class="faq-item">
@@ -230,7 +237,8 @@ $categories = [
                 <div class="book-card">
                   <div class="book-cover">
                     <?php if (!empty($b['cover_image']) && file_exists(__DIR__ . '/../img/covers/' . $b['cover_image'])): ?>
-                      <img src="../img/covers/<?= htmlspecialchars($b['cover_image']) ?>" alt="<?= htmlspecialchars($b['title']) ?>">
+                      <img src="../img/covers/<?= htmlspecialchars($b['cover_image']) ?>"
+                        alt="<?= htmlspecialchars($b['title']) ?>">
                     <?php else: ?>
                       <div class="no-image">📚</div>
                     <?php endif; ?>
@@ -244,9 +252,11 @@ $categories = [
                     </div>
                   </div>
                   <div class="book-actions">
-                    <button class="btn small" onclick="showDetail(<?= htmlspecialchars(json_encode($b)) ?>)">Detail</button>
+                    <button class="btn small"
+                      onclick="showDetail(<?= htmlspecialchars(json_encode($b)) ?>)">Detail</button>
                     <a href="books.php?action=edit&id=<?= $b['id'] ?>" class="btn small">Edit</a>
-                    <a href="books.php?action=delete&id=<?= $b['id'] ?>" class="btn small danger" onclick="return confirm('Hapus buku ini?')">Hapus</a>
+                    <a href="books.php?action=delete&id=<?= $b['id'] ?>" class="btn small danger"
+                      onclick="return confirm('Hapus buku ini?')">Hapus</a>
                   </div>
                 </div>
               <?php endforeach ?>
@@ -266,7 +276,9 @@ $categories = [
               </div>
               <div class="stat-card">
                 <div class="stat-label">Rata-rata Salinan</div>
-                <div class="stat-value"><?= count($books) > 0 ? round(array_sum(array_map(fn($b) => $b['copies'], $books)) / count($books), 1) : 0 ?></div>
+                <div class="stat-value">
+                  <?= count($books) > 0 ? round(array_sum(array_map(fn($b) => $b['copies'], $books)) / count($books), 1) : 0 ?>
+                </div>
               </div>
             </div>
           </div>

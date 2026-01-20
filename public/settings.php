@@ -38,7 +38,13 @@ $school = $stmt->fetch();
     <title>Pengaturan Sekolah - Perpustakaan Online</title>
     <script src="../assets/js/theme-loader.js"></script>
     <script src="../assets/js/theme.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">  <link rel="stylesheet" href="../assets/css/animations.css">    <link rel="stylesheet" href="../assets/css/settings.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/header-sidebar.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <link rel="stylesheet" href="../assets/css/animations.css">
+    <link rel="stylesheet" href="../assets/css/settings.css">
 </head>
 
 <body>
@@ -47,7 +53,7 @@ $school = $stmt->fetch();
     <div class="app">
 
         <div class="topbar">
-            <strong>⚙️ Pengaturan Sekolah</strong>
+            <strong><iconify-icon icon="mdi:cog" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Sekolah</strong>
         </div>
 
         <div class="content">
@@ -58,7 +64,7 @@ $school = $stmt->fetch();
 
                         <!-- Theme Settings -->
                         <div class="card">
-                            <h2>🎨 Pengaturan Tema</h2>
+                            <h2><iconify-icon icon="mdi:palette" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Tema</h2>
 
                             <h3>Pilih Tema</h3>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
@@ -129,7 +135,7 @@ $school = $stmt->fetch();
 
                     <!-- School Info Panel -->
                     <div class="card preview-card">
-                        <h2>🏫 Informasi Sekolah</h2>
+                        <h2><iconify-icon icon="mdi:school" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Informasi Sekolah</h2>
 
                         <?php if (!empty($error)): ?>
                             <div class="alert danger">
@@ -159,7 +165,7 @@ $school = $stmt->fetch();
                                 <small>Gunakan huruf kecil, angka, dan tanda hubung (-)</small>
                             </div>
 
-                            <button type="submit" class="btn primary" style="width: 100%;">💾 Simpan
+                            <button type="submit" class="btn primary" style="width: 100%;"><iconify-icon icon="mdi:content-save" style="vertical-align: middle; margin-right: 6px;"></iconify-icon>Simpan
                                 Perubahan</button>
                         </form>
                     </div>
@@ -171,27 +177,34 @@ $school = $stmt->fetch();
                     <h2>Pertanyaan Umum</h2>
                     <div class="faq-item">
                         <div class="faq-question">Bagaimana cara mengubah tema aplikasi? <span>+</span></div>
-                        <div class="faq-answer">Klik salah satu tombol tema yang tersedia di bagian "Pengaturan Tema". Pilihan Anda akan disimpan secara otomatis dan diterapkan ke seluruh aplikasi.</div>
+                        <div class="faq-answer">Klik salah satu tombol tema yang tersedia di bagian "Pengaturan Tema".
+                            Pilihan Anda akan disimpan secara otomatis dan diterapkan ke seluruh aplikasi.</div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question">Berapa banyak tema yang tersedia? <span>+</span></div>
-                        <div class="faq-answer">Ada 15 tema yang dapat dipilih: Light, Dark, Blue, Green, Purple, Orange, Rose, Indigo, Cyan, Pink, Amber, Red, Slate, Teal, dan Lime.</div>
+                        <div class="faq-answer">Ada 15 tema yang dapat dipilih: Light, Dark, Blue, Green, Purple,
+                            Orange, Rose, Indigo, Cyan, Pink, Amber, Red, Slate, Teal, dan Lime.</div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question">Apakah tema yang saya pilih disimpan? <span>+</span></div>
-                        <div class="faq-answer">Ya, tema yang Anda pilih akan disimpan di database sekolah Anda. Tema akan tetap diterapkan ketika Anda login kembali.</div>
+                        <div class="faq-answer">Ya, tema yang Anda pilih akan disimpan di database sekolah Anda. Tema
+                            akan tetap diterapkan ketika Anda login kembali.</div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question">Bagaimana cara mengubah nama dan slug sekolah? <span>+</span></div>
-                        <div class="faq-answer">Masukkan nama sekolah dan slug baru di form "Informasi Sekolah", kemudian klik tombol "Simpan Perubahan". Slug harus unik dan hanya boleh menggunakan huruf kecil, angka, dan tanda hubung (-).</div>
+                        <div class="faq-answer">Masukkan nama sekolah dan slug baru di form "Informasi Sekolah",
+                            kemudian klik tombol "Simpan Perubahan". Slug harus unik dan hanya boleh menggunakan huruf
+                            kecil, angka, dan tanda hubung (-).</div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question">Apa itu slug? <span>+</span></div>
-                        <div class="faq-answer">Slug adalah identitas unik sekolah Anda yang digunakan dalam URL. Misalnya, slug "sma-negeri-1" akan digunakan dalam alamat website sekolah Anda.</div>
+                        <div class="faq-answer">Slug adalah identitas unik sekolah Anda yang digunakan dalam URL.
+                            Misalnya, slug "sma-negeri-1" akan digunakan dalam alamat website sekolah Anda.</div>
                     </div>
                     <div class="faq-item">
                         <div class="faq-question">Bisakah saya mengubah slug yang sudah ada? <span>+</span></div>
-                        <div class="faq-answer">Ya, Anda bisa mengubah slug kapan saja, tetapi pastikan slug baru belum digunakan oleh sekolah lain dalam sistem.</div>
+                        <div class="faq-answer">Ya, Anda bisa mengubah slug kapan saja, tetapi pastikan slug baru belum
+                            digunakan oleh sekolah lain dalam sistem.</div>
                     </div>
                 </div>
 

@@ -68,7 +68,11 @@ $members = $members->fetchAll();
   <title>Pinjam & Kembalikan</title>
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/header-sidebar.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/borrows.css">
 </head>
@@ -125,7 +129,8 @@ $members = $members->fetchAll();
               </div>
               <div class="stat-card">
                 <div class="stat-label">Sedang Dipinjam</div>
-                <div class="stat-value"><?= count(array_filter($borrows, fn($b) => $b['status'] !== 'returned')) ?></div>
+                <div class="stat-value"><?= count(array_filter($borrows, fn($b) => $b['status'] !== 'returned')) ?>
+                </div>
               </div>
               <div class="stat-card">
                 <div class="stat-label">Terlambat</div>
@@ -143,7 +148,8 @@ $members = $members->fetchAll();
                 <div class="borrow-card">
                   <div class="book-cover">
                     <?php if (!empty($br['cover_image']) && file_exists(__DIR__ . '/../img/covers/' . $br['cover_image'])): ?>
-                      <img src="../img/covers/<?= htmlspecialchars($br['cover_image']) ?>" alt="<?= htmlspecialchars($br['title']) ?>">
+                      <img src="../img/covers/<?= htmlspecialchars($br['cover_image']) ?>"
+                        alt="<?= htmlspecialchars($br['title']) ?>">
                     <?php else: ?>
                       <div class="no-image">📚</div>
                     <?php endif; ?>
@@ -168,7 +174,8 @@ $members = $members->fetchAll();
                     </div>
                   </div>
                   <div class="borrow-actions">
-                    <button class="btn small" onclick="showBorrowDetail(<?= htmlspecialchars(json_encode($br)) ?>)">Detail</button>
+                    <button class="btn small"
+                      onclick="showBorrowDetail(<?= htmlspecialchars(json_encode($br)) ?>)">Detail</button>
                     <?php if ($br['status'] !== 'returned'): ?>
                       <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn small success">Kembalikan</a>
                     <?php else: ?>

@@ -99,7 +99,11 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   <title>Pemeliharaan Buku</title>
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/header-sidebar.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/book-maintenance.css">
 </head>
@@ -241,12 +245,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
               </div>
             </div>
           <?php endif; ?>
-          
+
           <div class="card">
             <h2>Pertanyaan Umum</h2>
             <div class="faq-item">
               <div class="faq-question">Bagaimana cara menambah catatan maintenance baru? <span>+</span></div>
-              <div class="faq-answer">Klik tombol "+ Tambah Catatan" di pojok kanan atas, pilih buku dari dropdown, atur status dan prioritas, kemudian isi catatan keterangan. Tekan "Simpan" untuk menyimpan catatan.</div>
+              <div class="faq-answer">Klik tombol "+ Tambah Catatan" di pojok kanan atas, pilih buku dari dropdown, atur
+                status dan prioritas, kemudian isi catatan keterangan. Tekan "Simpan" untuk menyimpan catatan.</div>
             </div>
           </div>
         </div>

@@ -85,8 +85,12 @@ if ($is_authenticated) {
     <title>Dashboard Perpustakaan</title>
     <script src="../assets/js/theme-loader.js"></script>
     <script src="../assets/js/theme.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/header-sidebar.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
     <link rel="stylesheet" href="../assets/css/animations.css">
     <link rel="stylesheet" href="../assets/css/index.css">
 </head>
@@ -125,7 +129,7 @@ if ($is_authenticated) {
                     </div>
 
                     <div class="activity-section">
-                        <h2>📋 Aktivitas Terbaru</h2>
+                        <h2><iconify-icon icon="mdi:clipboard-list" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Aktivitas Terbaru</h2>
 
                         <div class="activity-tabs">
                             <button class="activity-tab active" data-tab="all">🔀 Semua</button>

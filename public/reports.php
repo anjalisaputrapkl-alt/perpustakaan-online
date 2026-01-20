@@ -95,7 +95,11 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE created_at >
   <title>Laporan - Perpustakaan Online</title>
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+  <link rel="stylesheet" href="../assets/css/global.css">
+  <link rel="stylesheet" href="../assets/css/header-sidebar.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/reports.css">
 </head>
@@ -105,7 +109,7 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE created_at >
 
   <div class="app">
     <div class="topbar">
-      <strong>📊 Laporan Perpustakaan</strong>
+      <strong><iconify-icon icon="mdi:chart-box-outline" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Laporan Perpustakaan</strong>
     </div>
 
     <div class="content">
