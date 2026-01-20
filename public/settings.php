@@ -52,8 +52,8 @@ $school = $stmt->fetch();
     <div class="app">
 
         <div class="topbar">
-            <strong><iconify-icon icon="mdi:cog"
-                    style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Sekolah</strong>
+            <strong class="topbar-title"><iconify-icon icon="mdi:cog" class="topbar-icon"></iconify-icon>Pengaturan
+                Sekolah</strong>
         </div>
 
         <div class="content">
@@ -64,53 +64,45 @@ $school = $stmt->fetch();
 
                         <!-- Theme Settings -->
                         <div class="card">
-                            <h2><iconify-icon icon="mdi:palette"
-                                    style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Tema
-                            </h2>
+                            <h2 class="theme-header"><iconify-icon icon="mdi:palette"
+                                    class="theme-header-icon"></iconify-icon>Pengaturan Tema</h2>
 
                             <h3>Pilih Tema</h3>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                                <button class="btn btn-secondary theme-btn" data-theme="light"
-                                    style="padding: 12px; background: #f0f9ff; border: 2px solid var(--accent); font-weight: 600;"><iconify-icon
-                                        icon="mdi:white-balance-sunny"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Light</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="dark"
-                                    style="padding: 12px; background: #1f2937; color: white; font-weight: 600;"><iconify-icon
-                                        icon="mdi:moon-waning-crescent"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Dark</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="blue"
-                                    style="padding: 12px; background: #0f172a; color: #60a5fa; border: 2px solid #60a5fa; font-weight: 600;"><iconify-icon
-                                        icon="mdi:circle-multiple"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Blue</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="monochrome"
-                                    style="padding: 12px; background: #262626; color: #f5f5f5; border: 2px solid #808080; font-weight: 600;"><iconify-icon
-                                        icon="mdi:checkbox-multiple-blank-circle-outline"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Monochrome</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="sepia"
-                                    style="padding: 12px; background: #5d4e37; color: #e8d7c3; border: 2px solid #8b7355; font-weight: 600;"><iconify-icon
-                                        icon="mdi:image-filter-vintage"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Sepia</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="slate"
-                                    style="padding: 12px; background: #1c1f26; color: #7c88a3; border: 2px solid #3a4251; font-weight: 600;"><iconify-icon
-                                        icon="mdi:palette-gray"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Slate</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="ocean"
-                                    style="padding: 12px; background: #0a1628; color: #1fa3f4; border: 2px solid #2d4a6f; font-weight: 600;"><iconify-icon
-                                        icon="mdi:water"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Ocean</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="sunset"
-                                    style="padding: 12px; background: #2d1810; color: #ff9f4a; border: 2px solid #5c4033; font-weight: 600;"><iconify-icon
-                                        icon="mdi:weather-sunset"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Sunset</button>
-                                <button class="btn btn-secondary theme-btn" data-theme="teal"
-                                    style="padding: 12px; background: #0d4f4f; color: #26a69a; border: 2px solid #2d7a7a; font-weight: 600;"><iconify-icon
-                                        icon="mdi:water-opacity"
-                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Teal</button>
+                            <div class="theme-grid">
+                                <button class="btn btn-secondary theme-btn theme-btn-light" data-theme="light">
+                                    <iconify-icon icon="mdi:white-balance-sunny"
+                                        class="theme-btn-icon"></iconify-icon>Light
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-dark" data-theme="dark">
+                                    <iconify-icon icon="mdi:moon-waning-crescent"
+                                        class="theme-btn-icon"></iconify-icon>Dark
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-blue" data-theme="blue">
+                                    <iconify-icon icon="mdi:circle-multiple" class="theme-btn-icon"></iconify-icon>Blue
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-monochrome"
+                                    data-theme="monochrome">
+                                    <iconify-icon icon="mdi:checkbox-multiple-blank-circle-outline"
+                                        class="theme-btn-icon"></iconify-icon>Monochrome
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-sepia" data-theme="sepia">
+                                    <iconify-icon icon="mdi:image-filter-vintage"
+                                        class="theme-btn-icon"></iconify-icon>Sepia
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-slate" data-theme="slate">
+                                    <iconify-icon icon="mdi:palette-gray" class="theme-btn-icon"></iconify-icon>Slate
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-ocean" data-theme="ocean">
+                                    <iconify-icon icon="mdi:water" class="theme-btn-icon"></iconify-icon>Ocean
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-sunset" data-theme="sunset">
+                                    <iconify-icon icon="mdi:weather-sunset" class="theme-btn-icon"></iconify-icon>Sunset
+                                </button>
+                                <button class="btn btn-secondary theme-btn theme-btn-teal" data-theme="teal">
+                                    <iconify-icon icon="mdi:water-opacity" class="theme-btn-icon"></iconify-icon>Teal
+                                </button>
                             </div>
-                            <small style="display: block; margin-top: 12px; color: var(--muted);">Tema yang dipilih akan
-                                disimpan secara otomatis</small>
-
-
+                            <small class="theme-hint">Tema yang dipilih akan disimpan secara otomatis</small>
                         </div>
 
                         <!-- Color Customization -->
@@ -126,24 +118,24 @@ $school = $stmt->fetch();
 
                     <!-- School Info Panel -->
                     <div class="card preview-card">
-                        <h2><iconify-icon icon="mdi:school"
-                                style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Informasi Sekolah</h2>
+                        <h2 class="school-header"><iconify-icon icon="mdi:school"
+                                class="school-header-icon"></iconify-icon>Informasi Sekolah</h2>
 
                         <?php if (!empty($error)): ?>
-                            <div class="alert danger">
+                            <div class="alert alert-danger">
                                 <span>⚠️</span>
                                 <div><?php echo $error; ?></div>
                             </div>
                         <?php endif; ?>
 
                         <?php if (!empty($success)): ?>
-                            <div class="alert success">
+                            <div class="alert alert-success">
                                 <span>✓</span>
                                 <div><?php echo $success; ?></div>
                             </div>
                         <?php endif; ?>
 
-                        <form method="post">
+                        <form method="post" class="school-form">
                             <div class="form-group">
                                 <label for="name">Nama Sekolah</label>
                                 <input id="name" name="name" required
@@ -157,9 +149,9 @@ $school = $stmt->fetch();
                                 <small>Gunakan huruf kecil, angka, dan tanda hubung (-)</small>
                             </div>
 
-                            <button type="submit" class="btn" style="width: 100%;"><iconify-icon icon="mdi:content-save"
-                                    style="vertical-align: middle; margin-right: 6px;"></iconify-icon>Simpan
-                                Perubahan</button>
+                            <button type="submit" class="btn btn-submit">
+                                <iconify-icon icon="mdi:content-save" class="btn-icon"></iconify-icon>Simpan Perubahan
+                            </button>
                         </form>
                     </div>
 

@@ -239,7 +239,8 @@
     <section id="audience" class="section audience" style="background: #f9fafb; padding: 80px 0;">
       <div class="container">
         <h2>Untuk Siapa Sistem Ini?</h2>
-        <p class="microcopy">Dirancang untuk memenuhi kebutuhan semua pihak yang terlibat dalam ekosistem perpustakaan
+        <p class="microcopy" style="text-align: center; max-width: 600px; margin: 0 auto 48px;">Dirancang untuk memenuhi
+          kebutuhan semua pihak yang terlibat dalam ekosistem perpustakaan
           sekolah.</p>
 
         <div

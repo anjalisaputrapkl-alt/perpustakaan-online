@@ -53,91 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Daftar Sekolah</title>
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            font-family: system-ui, -apple-system, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 500px;
-            margin: 40px auto;
-            background: white;
-            border-radius: 8px;
-            padding: 32px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            text-align: center;
-            margin: 0 0 24px;
-        }
-
-        .errors {
-            background: #fee;
-            border: 1px solid #fcc;
-            border-radius: 4px;
-            padding: 12px;
-            margin-bottom: 16px;
-            color: #c33;
-        }
-
-        .success {
-            background: #efe;
-            border: 1px solid #0c0;
-            border-radius: 4px;
-            padding: 12px;
-            margin-bottom: 16px;
-            color: #060;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: inherit;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #2563eb;
-        }
-
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #2563eb;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #1d4ed8;
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/register-debug.css">
 </head>
 
 <body>
@@ -145,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h1>Daftar Sekolah Baru</h1>
 
         <?php if (!empty($errors)): ?>
-            <div class="errors">
+            <div class="alert-errors">
                 <?php foreach ($errors as $err): ?>
                     <p><?php echo htmlspecialchars($err); ?></p>
                 <?php endforeach; ?>
@@ -153,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <?php if ($success): ?>
-            <div class="success">
+            <div class="alert-success">
                 <p><?php echo htmlspecialchars($success); ?></p>
                 <p><a href="/perpustakaan-online/public/login.php">Klik di sini untuk login</a></p>
             </div>
