@@ -554,7 +554,7 @@ $pageTitle = 'Profil Saya';
 
             .header-container {
                 flex-wrap: wrap;
-                padding: 0 16px;
+                padding: 0 16px 0 60px;
                 gap: 12px;
             }
 
