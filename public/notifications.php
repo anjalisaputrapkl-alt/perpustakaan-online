@@ -1,6 +1,7 @@
 <?php
 session_start();
 $pdo = require __DIR__ . '/../src/db.php';
+require_once __DIR__ . '/../src/NotificationsService.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user'])) {
@@ -10,116 +11,54 @@ if (!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 $school_id = $user['school_id'];
-$memberId = $user['id'];
+$studentId = $user['id'];
 
-// Inisialisasi variabel
-$borrowingHistory = [];
-$totalBooks = 0;
-$borrowedBooks = 0;
-$returnedBooks = 0;
-$overdueBooks = 0;
+// Initialize variables
+$notifications = [];
+$stats = [];
 $errorMessage = '';
+$successMessage = '';
 
 try {
-    /**
-     * Query untuk mengambil riwayat peminjaman dengan informasi buku
-     * 
-     * JOIN antara tabel:
-     * - borrows: data peminjaman
-     * - books: informasi buku (judul, penulis, cover)
-     * 
-     * Filter berdasarkan member_id dan sortir dari tanggal pinjam terbaru
-     */
-    $query = "
-        SELECT 
-            b.id AS borrow_id,
-            b.member_id,
-            b.book_id,
-            b.borrowed_at,
-            b.due_at,
-            b.returned_at,
-            b.status,
-            bk.title AS book_title,
-            bk.author,
-            bk.cover_image,
-            CASE 
-                WHEN b.status = 'returned' THEN 'Dikembalikan'
-                WHEN b.status = 'overdue' THEN 'Telat'
-                WHEN b.status = 'borrowed' THEN 'Dipinjam'
-                ELSE b.status
-            END AS status_text,
-            DATEDIFF(b.due_at, NOW()) AS hari_sisa
-        FROM borrows b
-        LEFT JOIN books bk ON b.book_id = bk.id
-        WHERE b.member_id = ?
-        ORDER BY b.borrowed_at DESC
-    ";
-
-    $stmt = $pdo->prepare($query);
+    $service = new NotificationsService($pdo);
     
-    // Sanitasi input
-    if (!$stmt->execute([$memberId])) {
-        throw new Exception('Gagal mengambil data peminjaman');
+    // Get sort filter from GET
+    $sort = $_GET['sort'] ?? 'latest';
+    $validSorts = ['latest', 'oldest'];
+    $sort = in_array($sort, $validSorts) ? $sort : 'latest';
+    
+    // Get notifications
+    $notifications = $service->getAllNotifications($studentId);
+    
+    // Sort
+    if ($sort === 'oldest') {
+        $notifications = array_reverse($notifications);
     }
-
-    $borrowingHistory = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $totalBooks = count($borrowingHistory);
-
-    // Hitung statistik
-    foreach ($borrowingHistory as $item) {
-        switch ($item['status']) {
-            case 'borrowed':
-                $borrowedBooks++;
-                break;
-            case 'returned':
-                $returnedBooks++;
-                break;
-            case 'overdue':
-                $overdueBooks++;
-                break;
-        }
-    }
-
-} catch (PDOException $e) {
-    $errorMessage = 'Error Database: ' . htmlspecialchars($e->getMessage());
+    
+    $stats = $service->getStatistics($studentId);
+    
 } catch (Exception $e) {
     $errorMessage = 'Error: ' . htmlspecialchars($e->getMessage());
 }
 
 // Helper function untuk format tanggal
 function formatDate($date) {
-    if (empty($date) || $date === '0000-00-00 00:00:00') {
-        return '-';
-    }
-    return date('d M Y H:i', strtotime($date));
+    return NotificationsService::formatDate($date);
 }
 
-// Helper function untuk format status
-function getStatusBadge($status) {
-    switch ($status) {
-        case 'borrowed':
-            return '<span class="badge badge-primary">Dipinjam</span>';
-        case 'returned':
-            return '<span class="badge badge-success">Dikembalikan</span>';
-        case 'overdue':
-            return '<span class="badge badge-danger">Telat</span>';
-        default:
-            return '<span class="badge badge-secondary">' . htmlspecialchars($status) . '</span>';
-    }
+// Helper function untuk get icon
+function getIcon($type) {
+    return NotificationsService::getIcon($type);
 }
 
-// Helper function untuk status warna
-function getStatusColor($status) {
-    switch ($status) {
-        case 'borrowed':
-            return 'warning';
-        case 'returned':
-            return 'success';
-        case 'overdue':
-            return 'danger';
-        default:
-            return 'secondary';
-    }
+// Helper function untuk get badge class
+function getBadgeClass($type) {
+    return NotificationsService::getBadgeClass($type);
+}
+
+// Helper function untuk get label
+function getLabel($type) {
+    return NotificationsService::getLabel($type);
 }
 ?>
 
@@ -128,7 +67,7 @@ function getStatusColor($status) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Peminjaman Buku - Perpustakaan Digital</title>
+    <title>Notifikasi - Perpustakaan Digital</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -474,7 +413,7 @@ function getStatusColor($status) {
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(7, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -494,16 +433,24 @@ function getStatusColor($status) {
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
-        .stat-card.borrowed {
+        .stat-card.overdue {
+            border-left-color: var(--danger);
+        }
+
+        .stat-card.warning {
             border-left-color: var(--warning);
         }
 
-        .stat-card.returned {
-            border-left-color: var(--success);
+        .stat-card.return {
+            border-left-color: var(--accent);
         }
 
-        .stat-card.overdue {
-            border-left-color: var(--danger);
+        .stat-card.info {
+            border-left-color: var(--accent);
+        }
+
+        .stat-card.newbooks {
+            border-left-color: #10b981;
         }
 
         .stat-card-label {
@@ -528,171 +475,270 @@ function getStatusColor($status) {
             color: var(--text);
         }
 
-        .stat-card.borrowed .stat-card-value {
-            color: var(--warning);
-        }
-
-        .stat-card.returned .stat-card-value {
-            color: var(--success);
-        }
-
         .stat-card.overdue .stat-card-value {
             color: var(--danger);
         }
 
-        /* History Card */
-        .history-card {
+        .stat-card.warning .stat-card-value {
+            color: var(--warning);
+        }
+
+        .stat-card.return .stat-card-value {
+            color: var(--accent);
+        }
+
+        .stat-card.info .stat-card-value {
+            color: var(--accent);
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--card);
+            color: var(--text);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        /* Notification Card */
+        .notification-card {
             background: var(--card);
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            animation: fadeInUp 0.6s ease-out 0.1s both;
+            animation: fadeInUp 0.6s ease-out;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+            border-left: 4px solid var(--border);
         }
 
-        .history-card-header {
-            background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%);
-            color: white;
-            padding: 20px 24px;
+        .notification-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .notification-card.unread {
+            background: var(--accent-light);
+            border-left-color: var(--accent);
+        }
+
+        .notification-card.telat {
+            border-left-color: var(--danger);
+        }
+
+        .notification-card.peringatan {
+            border-left-color: var(--warning);
+        }
+
+        .notification-card.pengembalian {
+            border-left-color: var(--accent);
+        }
+
+        .notification-card.info {
+            border-left-color: #0891b2;
+        }
+
+        .notification-card.sukses {
+            border-left-color: var(--success);
+        }
+
+        .notification-card.buku {
+            border-left-color: #10b981;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+        }
+
+        .notification-card.buku .notification-card-icon {
+            background: #d1fae5;
+            color: #10b981;
+        }
+
+        .notification-card-content {
+            padding: 20px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .notification-card-icon {
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            flex-shrink: 0;
+            font-size: 24px;
+        }
+
+        .notification-card.unread .notification-card-icon {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .notification-card.telat .notification-card-icon {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .notification-card.peringatan .notification-card-icon {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .notification-card.pengembalian .notification-card-icon,
+        .notification-card.info .notification-card-icon {
+            background: #cffafe;
+            color: #0891b2;
+        }
+
+        .notification-card.sukses .notification-card-icon {
+            background: #d1fae5;
+            color: var(--success);
+        }
+
+        .notification-card.buku .notification-card-icon {
+            background: #ede9fe;
+            color: #8b5cf6;
+        }
+
+        .notification-card-body {
+            flex: 1;
+        }
+
+        .notification-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 8px;
             gap: 12px;
         }
 
-        .history-card-header h2 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 700;
-        }
-
-        .history-card-header iconify-icon {
-            width: 24px;
-            height: 24px;
-        }
-
-        /* Table */
-        .table-responsive {
-            overflow-x: auto;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0;
-        }
-
-        .table thead {
-            background: var(--bg);
-            border-bottom: 2px solid var(--border);
-        }
-
-        .table th {
-            padding: 16px;
-            text-align: left;
-            font-size: 12px;
+        .notification-card-title {
+            font-size: 15px;
             font-weight: 600;
-            color: var(--muted);
+            color: var(--text);
+            margin: 0;
+        }
+
+        .notification-card-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-        }
-
-        .table td {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .table tbody tr:hover {
-            background: var(--bg);
-        }
-
-        /* Book Info */
-        .book-info {
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .book-cover {
-            width: 50px;
-            height: 70px;
-            background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%);
-            border-radius: 6px;
-            object-fit: cover;
+            white-space: nowrap;
             flex-shrink: 0;
         }
 
-        .book-details h6 {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            margin: 0 0 4px 0;
-        }
-
-        .book-details small {
-            font-size: 12px;
-            color: var(--muted);
-        }
-
-        /* Badge */
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .badge-borrowed {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .badge-returned {
-            background: #d1fae5;
-            color: #065f46;
-        }
-
-        .badge-overdue {
+        .notification-badge-overdue {
             background: #fee2e2;
             color: #991b1b;
         }
 
-        /* Date Info */
-        .date-cell {
-            font-size: 13px;
+        .notification-badge-warning {
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        .date-label {
-            display: block;
-            font-size: 11px;
+        .notification-badge-return {
+            background: #cffafe;
+            color: #164e63;
+        }
+
+        .notification-badge-info {
+            background: #e0f2fe;
+            color: #0c4a6e;
+        }
+
+        .notification-badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .notification-badge-book {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .notification-badge-default {
+            background: var(--border);
             color: var(--muted);
-            margin-bottom: 2px;
         }
 
-        .date-value {
+        .notification-card-message {
+            font-size: 14px;
+            color: var(--muted);
+            margin: 0 0 8px 0;
+            line-height: 1.5;
+        }
+
+        .notification-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .notification-card-date {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .notification-card-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .notification-card-action {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            font-size: 12px;
+        }
+
+        .notification-card-action:hover {
+            background: var(--border);
             color: var(--text);
-            font-weight: 500;
         }
 
-        .date-hint {
-            font-size: 11px;
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        .date-hint.success {
-            color: var(--success);
-        }
-
-        .date-hint.danger {
-            color: var(--danger);
+        .notification-card-action iconify-icon {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+            margin-right: 4px;
         }
 
         /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 60px 24px;
+            padding: 80px 24px;
             color: var(--muted);
         }
 
@@ -713,34 +759,39 @@ function getStatusColor($status) {
             margin: 0 0 16px 0;
         }
 
-        .empty-state-btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: var(--accent);
-            color: white;
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s ease;
-        }
-
-        .empty-state-btn:hover {
-            background: #062d4a;
-        }
-
         /* Alert */
         .alert {
             padding: 16px;
             border-radius: 8px;
             margin-bottom: 16px;
             font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
 
         .alert-danger {
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #fecaca;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-info {
+            background: #e0f2fe;
+            color: #0c4a6e;
+            border: 1px solid #bae6fd;
+        }
+
+        .alert iconify-icon {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
         }
 
         /* Responsive */
@@ -793,31 +844,44 @@ function getStatusColor($status) {
                 font-size: 24px;
             }
 
-            .table {
-                font-size: 12px;
-            }
-
-            .table th,
-            .table td {
-                padding: 12px;
-            }
-
-            .book-info {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .book-cover {
-                width: 40px;
-                height: 60px;
-            }
-
             .page-header h1 {
                 font-size: 20px;
             }
 
-            .history-card-header h2 {
-                font-size: 16px;
+            .filter-bar {
+                gap: 8px;
+            }
+
+            .filter-btn {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .notification-card-content {
+                padding: 16px;
+                gap: 12px;
+            }
+
+            .notification-card-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+
+            .notification-card-title {
+                font-size: 14px;
+            }
+
+            .notification-card-message {
+                font-size: 13px;
+            }
+
+            .notification-card-header {
+                flex-wrap: wrap;
+            }
+
+            .notification-card-badge {
+                font-size: 10px;
             }
         }
 
@@ -830,6 +894,7 @@ function getStatusColor($status) {
 <body>
     <!-- Navigation Sidebar -->
     <?php include 'partials/student-sidebar.php'; ?>
+
     <!-- Hamburger Menu Button -->
     <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
@@ -844,7 +909,7 @@ function getStatusColor($status) {
                 </div>
                 <div class="header-brand-text">
                     <h2>AS Library</h2>
-                    <p>Riwayat Peminjaman</p>
+                    <p>Notifikasi</p>
                 </div>
             </a>
 
@@ -871,181 +936,135 @@ function getStatusColor($status) {
             </div>
         <?php endif; ?>
 
+        <!-- Success Alert -->
+        <?php if (!empty($successMessage)): ?>
+            <div class="alert alert-success">
+                <iconify-icon icon="mdi:check-circle" width="18" height="18"></iconify-icon>
+                <?php echo $successMessage; ?>
+            </div>
+        <?php endif; ?>
+
         <!-- Page Header -->
         <div class="page-header">
             <h1>
-                <iconify-icon icon="mdi:history" width="28" height="28"></iconify-icon>
-                Riwayat Peminjaman Buku
+                <iconify-icon icon="mdi:bell" width="28" height="28"></iconify-icon>
+                Notifikasi
             </h1>
-            <p>Lihat semua buku yang pernah Anda pinjam dan status pengembaliannya</p>
+            <p>Pantau semua notifikasi penting dari sistem perpustakaan</p>
         </div>
 
-        <!-- Statistik Cards -->
+        <!-- Stats Grid -->
+        <?php if (!empty($stats)): ?>
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-card-label">
-                    <iconify-icon icon="mdi:book-open-variant" width="16" height="16"></iconify-icon>
-                    Total Peminjaman
+                    <iconify-icon icon="mdi:bell" width="16" height="16"></iconify-icon>
+                    Total Notifikasi
                 </div>
-                <div class="stat-card-value"><?php echo $totalBooks; ?></div>
+                <div class="stat-card-value"><?php echo (int)($stats['total'] ?? 0); ?></div>
             </div>
-            <div class="stat-card borrowed">
+            <div class="stat-card">
                 <div class="stat-card-label">
-                    <iconify-icon icon="mdi:hourglass-half" width="16" height="16"></iconify-icon>
-                    Sedang Dipinjam
+                    <iconify-icon icon="mdi:email-multiple-outline" width="16" height="16"></iconify-icon>
+                    Belum Dibaca
                 </div>
-                <div class="stat-card-value"><?php echo $borrowedBooks; ?></div>
-            </div>
-            <div class="stat-card returned">
-                <div class="stat-card-label">
-                    <iconify-icon icon="mdi:check-circle" width="16" height="16"></iconify-icon>
-                    Sudah Dikembalikan
-                </div>
-                <div class="stat-card-value"><?php echo $returnedBooks; ?></div>
+                <div class="stat-card-value"><?php echo (int)($stats['unread'] ?? 0); ?></div>
             </div>
             <div class="stat-card overdue">
                 <div class="stat-card-label">
+                    <iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon>
+                    Keterlambatan
+                </div>
+                <div class="stat-card-value"><?php echo (int)($stats['overdue'] ?? 0); ?></div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-card-label">
                     <iconify-icon icon="mdi:alert-triangle" width="16" height="16"></iconify-icon>
-                    Telat Dikembalikan
+                    Peringatan
                 </div>
-                <div class="stat-card-value"><?php echo $overdueBooks; ?></div>
+                <div class="stat-card-value"><?php echo (int)($stats['warning'] ?? 0); ?></div>
+            </div>
+            <div class="stat-card return">
+                <div class="stat-card-label">
+                    <iconify-icon icon="mdi:package-variant-closed" width="16" height="16"></iconify-icon>
+                    Pengembalian
+                </div>
+                <div class="stat-card-value"><?php echo (int)($stats['return'] ?? 0); ?></div>
+            </div>
+            <div class="stat-card info">
+                <div class="stat-card-label">
+                    <iconify-icon icon="mdi:information" width="16" height="16"></iconify-icon>
+                    Informasi
+                </div>
+                <div class="stat-card-value"><?php echo (int)($stats['info'] ?? 0); ?></div>
+            </div>
+            <div class="stat-card newbooks">
+                <div class="stat-card-label">
+                    <iconify-icon icon="mdi:book-open-page-variant" width="16" height="16"></iconify-icon>
+                    Buku Baru
+                </div>
+                <div class="stat-card-value"><?php echo (int)($stats['newbooks'] ?? 0); ?></div>
             </div>
         </div>
+        <?php endif; ?>
 
-        <!-- History Card -->
-        <div class="history-card">
-            <div class="history-card-header">
-                <iconify-icon icon="mdi:list-box" width="24" height="24"></iconify-icon>
-                <h2>Detail Riwayat Peminjaman</h2>
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <a href="?sort=latest" class="filter-btn <?php echo $sort === 'latest' ? 'active' : ''; ?>">
+                <iconify-icon icon="mdi:clock" width="16" height="16"></iconify-icon>
+                Terbaru
+            </a>
+            <a href="?sort=oldest" class="filter-btn <?php echo $sort === 'oldest' ? 'active' : ''; ?>">
+                <iconify-icon icon="mdi:archive" width="16" height="16"></iconify-icon>
+                Terlama
+            </a>
+        </div>
+
+        <!-- Notifications List -->
+        <?php if (empty($notifications)): ?>
+            <!-- Empty State -->
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <iconify-icon icon="mdi:inbox-multiple" width="64" height="64"></iconify-icon>
+                </div>
+                <h3>Belum Ada Notifikasi</h3>
+                <p>Semua peminjaman Anda dalam kondisi baik. Tidak ada notifikasi penting saat ini.</p>
+                <a href="student-dashboard.php" style="display: inline-block; padding: 10px 20px; background: var(--accent); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: all 0.2s ease;">
+                    <iconify-icon icon="mdi:arrow-left" width="16" height="16"></iconify-icon>
+                    Kembali ke Dashboard
+                </a>
             </div>
-
-            <?php if (empty($borrowingHistory)): ?>
-                <!-- Empty State -->
-                <div class="empty-state">
-                    <div class="empty-state-icon">
-                        <iconify-icon icon="mdi:inbox-multiple" width="64" height="64"></iconify-icon>
+        <?php else: ?>
+            <!-- Notifications Cards -->
+            <?php foreach ($notifications as $notif): ?>
+                <div class="notification-card <?php echo !$notif['status_baca'] ? 'unread' : ''; ?> <?php echo htmlspecialchars($notif['jenis_notifikasi']); ?>">
+                    <div class="notification-card-content">
+                        <div class="notification-card-icon">
+                            <iconify-icon icon="<?php echo getIcon($notif['jenis_notifikasi']); ?>" width="24" height="24"></iconify-icon>
+                        </div>
+                        <div class="notification-card-body">
+                            <div class="notification-card-header">
+                                <h3 class="notification-card-title">
+                                    <?php echo htmlspecialchars($notif['judul']); ?>
+                                </h3>
+                                <span class="notification-card-badge <?php echo getBadgeClass($notif['jenis_notifikasi']); ?>">
+                                    <?php echo getLabel($notif['jenis_notifikasi']); ?>
+                                </span>
+                            </div>
+                            <p class="notification-card-message">
+                                <?php echo htmlspecialchars($notif['pesan']); ?>
+                            </p>
+                            <div class="notification-card-footer">
+                                <div class="notification-card-date">
+                                    <iconify-icon icon="mdi:clock-outline" width="16" height="16"></iconify-icon>
+                                    <?php echo formatDate($notif['tanggal']); ?>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3>Belum Ada Riwayat Peminjaman</h3>
-                    <p>Anda belum pernah meminjam buku. Silakan kunjungi katalog buku untuk memulai.</p>
-                    <a href="student-dashboard.php" class="empty-state-btn">
-                        <iconify-icon icon="mdi:arrow-left" width="16" height="16"></iconify-icon>
-                        Kembali ke Dashboard
-                    </a>
                 </div>
-            <?php else: ?>
-                <!-- Tabel Responsif -->
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Cover</th>
-                                <th>Judul & Penulis</th>
-                                <th>Tanggal Pinjam</th>
-                                <th>Tenggat Kembali</th>
-                                <th>Tanggal Kembali</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($borrowingHistory as $item): ?>
-                                <tr>
-                                    <!-- Cover -->
-                                    <td>
-                                        <?php if (!empty($item['cover_image'])): ?>
-                                            <img 
-                                                src="<?php echo htmlspecialchars('../img/covers/' . $item['cover_image']); ?>" 
-                                                alt="<?php echo htmlspecialchars($item['book_title']); ?>"
-                                                class="book-cover"
-                                            >
-                                        <?php else: ?>
-                                            <div style="width: 50px; height: 70px; background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white;">
-                                                <iconify-icon icon="mdi:book" width="24" height="24"></iconify-icon>
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <!-- Info Buku -->
-                                    <td>
-                                        <div class="book-details">
-                                            <h6><?php echo htmlspecialchars($item['book_title'] ?? 'Buku Tidak Ditemukan'); ?></h6>
-                                            <small>
-                                                <iconify-icon icon="mdi:pen" width="14" height="14"></iconify-icon>
-                                                <?php echo htmlspecialchars($item['author'] ?? '-'); ?>
-                                            </small>
-                                        </div>
-                                    </td>
-
-                                    <!-- Tanggal Pinjam -->
-                                    <td class="date-cell">
-                                        <div class="date-label">Pinjam</div>
-                                        <div class="date-value"><?php echo formatDate($item['borrowed_at']); ?></div>
-                                    </td>
-
-                                    <!-- Tenggat Kembali -->
-                                    <td class="date-cell">
-                                        <div class="date-label">Tenggat</div>
-                                        <div class="date-value"><?php echo formatDate($item['due_at']); ?></div>
-                                        <?php if ($item['status'] === 'borrowed' && $item['hari_sisa'] >= 0): ?>
-                                            <div class="date-hint success">
-                                                <iconify-icon icon="mdi:check-circle" width="12" height="12"></iconify-icon>
-                                                <?php echo $item['hari_sisa']; ?> hari tersisa
-                                            </div>
-                                        <?php elseif ($item['status'] === 'borrowed'): ?>
-                                            <div class="date-hint danger">
-                                                <iconify-icon icon="mdi:alert-circle" width="12" height="12"></iconify-icon>
-                                                <?php echo abs($item['hari_sisa']); ?> hari telat
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <!-- Tanggal Kembali -->
-                                    <td class="date-cell">
-                                        <div class="date-label">Dikembalikan</div>
-                                        <div class="date-value"><?php echo formatDate($item['returned_at']); ?></div>
-                                    </td>
-
-                                    <!-- Status -->
-                                    <td>
-                                        <?php
-                                        $statusClass = '';
-                                        $statusText = '';
-                                        switch ($item['status']) {
-                                            case 'borrowed':
-                                                $statusClass = 'badge-borrowed';
-                                                $statusText = 'Dipinjam';
-                                                break;
-                                            case 'returned':
-                                                $statusClass = 'badge-returned';
-                                                $statusText = 'Dikembalikan';
-                                                break;
-                                            case 'overdue':
-                                                $statusClass = 'badge-overdue';
-                                                $statusText = 'Telat';
-                                                break;
-                                            default:
-                                                $statusClass = '';
-                                                $statusText = htmlspecialchars($item['status']);
-                                        }
-                                        ?>
-                                        <span class="badge <?php echo $statusClass; ?>">
-                                            <?php echo $statusText; ?>
-                                        </span>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Footer Info -->
-        <div style="margin-top: 24px; padding: 16px; background: var(--card); border-radius: 8px; text-align: center; color: var(--muted); font-size: 13px; border-left: 4px solid var(--accent);">
-            <p style="margin: 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                <iconify-icon icon="mdi:information" width="16" height="16"></iconify-icon>
-                Harap kembalikan buku sebelum tenggat waktu untuk menghindari denda. Hubungi pustakawan jika ada pertanyaan.
-            </p>
-        </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
     </div>
 
     <script>
@@ -1058,7 +1077,6 @@ function getStatusColor($status) {
                 navSidebar.classList.toggle('active');
             });
 
-            // Close sidebar when clicking outside
             document.addEventListener('click', (e) => {
                 if (!navSidebar.contains(e.target) && !navToggle.contains(e.target)) {
                     navSidebar.classList.remove('active');
