@@ -213,17 +213,25 @@ $members = $stmt->fetchAll();
                     <td>
                       <?php if ($userExists): ?>
                         <span
-                          style="display: inline-block; background: rgba(16, 185, 129, 0.1); color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;"><iconify-icon icon="mdi:check-circle" style="vertical-align: middle; margin-right: 4px;"></iconify-icon> Akun Terbuat</span>
+                          style="display: inline-block; background: rgba(16, 185, 129, 0.1); color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;"><iconify-icon
+                            icon="mdi:check-circle" style="vertical-align: middle; margin-right: 4px;"></iconify-icon> Akun
+                          Terbuat</span>
                       <?php else: ?>
                         <span
-                          style="display: inline-block; background: rgba(107, 114, 128, 0.1); color: #374151; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;"><iconify-icon icon="mdi:minus-circle" style="vertical-align: middle; margin-right: 4px;"></iconify-icon> Belum</span>
+                          style="display: inline-block; background: rgba(107, 114, 128, 0.1); color: #374151; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;"><iconify-icon
+                            icon="mdi:minus-circle" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                          Belum</span>
                       <?php endif; ?>
                     </td>
                     <td>
                       <div class="actions">
-                        <a class="btn btn-sm btn-secondary" href="members.php?action=edit&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:pencil" style="vertical-align: middle;"></iconify-icon> Edit</a>
-                        <a class="btn btn-sm btn-danger" onclick="return confirm('Hapus murid ini? Akun siswa juga akan dihapus.')"
-                          href="members.php?action=delete&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:trash-can" style="vertical-align: middle;"></iconify-icon> Hapus</a>
+                        <a class="btn btn-sm btn-secondary"
+                          href="members.php?action=edit&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:pencil"
+                            style="vertical-align: middle;"></iconify-icon> Edit</a>
+                        <a class="btn btn-sm btn-danger"
+                          onclick="return confirm('Hapus murid ini? Akun siswa juga akan dihapus.')"
+                          href="members.php?action=delete&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:trash-can"
+                            style="vertical-align: middle;"></iconify-icon> Hapus</a>
                       </div>
                     </td>
                   </tr>
@@ -262,7 +270,8 @@ $members = $stmt->fetchAll();
             <div class="faq-question">Apa perbedaan No Murid dan NISN? <span>+</span></div>
             <div class="faq-answer"><strong>No Murid</strong> adalah nomor internal sekolah (ex: 001, 002).
               <strong>NISN</strong> adalah Nomor Induk Siswa Nasional yang unik dan digunakan untuk login. Siswa login
-              menggunakan NISN sebagai username.</div>
+              menggunakan NISN sebagai username.
+            </div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa itu "Status Akun"? <span>+</span></div>
@@ -273,7 +282,8 @@ $members = $stmt->fetchAll();
             <div class="faq-question">Bagaimana siswa login ke dashboard? <span>+</span></div>
             <div class="faq-answer">Siswa login di halaman siswa menggunakan <strong>NISN sebagai username</strong> dan
               <strong>Password = NISN</strong> (sama dengan username). Siswa sangat disarankan untuk mengubah password
-              setelah login pertama kali.</div>
+              setelah login pertama kali.
+            </div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Bisakah saya mengedit data murid? <span>+</span></div>

@@ -115,7 +115,8 @@ $members = $members->fetchAll();
                 <label>Jatuh Tempo</label>
                 <input type="date" name="due_at">
               </div>
-              <button class="btn" type="submit"><iconify-icon icon="mdi:book-open" style="vertical-align: middle;"></iconify-icon> Pinjamkan Buku</button>
+              <button class="btn" type="submit"><iconify-icon icon="mdi:book-open"
+                  style="vertical-align: middle;"></iconify-icon> Pinjamkan Buku</button>
             </form>
           </div>
 
@@ -150,16 +151,21 @@ $members = $members->fetchAll();
                       <img src="../img/covers/<?= htmlspecialchars($br['cover_image']) ?>"
                         alt="<?= htmlspecialchars($br['title']) ?>">
                     <?php else: ?>
-                      <div class="no-image"><iconify-icon icon="mdi:book-multiple" style="font-size: 48px;"></iconify-icon></div>
+                      <div class="no-image"><iconify-icon icon="mdi:book-multiple" style="font-size: 48px;"></iconify-icon>
+                      </div>
                     <?php endif; ?>
                   </div>
                   <div class="borrow-info">
                     <div class="borrow-title"><?= htmlspecialchars($br['title']) ?></div>
                     <div class="borrow-member"><?= htmlspecialchars($br['member_name']) ?></div>
                     <div class="borrow-dates">
-                      <small><iconify-icon icon="mdi:calendar" style="vertical-align: middle; margin-right: 4px;"></iconify-icon> <?= date('d/m/Y', strtotime($br['borrowed_at'])) ?></small>
+                      <small><iconify-icon icon="mdi:calendar"
+                          style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                        <?= date('d/m/Y', strtotime($br['borrowed_at'])) ?></small>
                       <?php if ($br['due_at']): ?>
-                        <small><iconify-icon icon="mdi:clock-outline" style="vertical-align: middle; margin-right: 4px;"></iconify-icon> <?= date('d/m/Y', strtotime($br['due_at'])) ?></small>
+                        <small><iconify-icon icon="mdi:clock-outline"
+                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                          <?= date('d/m/Y', strtotime($br['due_at'])) ?></small>
                       <?php endif; ?>
                     </div>
                     <div class="borrow-status">
@@ -174,11 +180,14 @@ $members = $members->fetchAll();
                   </div>
                   <div class="borrow-actions">
                     <button class="btn btn-sm btn-secondary"
-                      onclick="showBorrowDetail(<?= htmlspecialchars(json_encode($br)) ?>)"><iconify-icon icon="mdi:information" style="vertical-align: middle;"></iconify-icon> Detail</button>
+                      onclick="showBorrowDetail(<?= htmlspecialchars(json_encode($br)) ?>)"><iconify-icon
+                        icon="mdi:information" style="vertical-align: middle;"></iconify-icon> Detail</button>
                     <?php if ($br['status'] !== 'returned'): ?>
-                      <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn btn-sm btn-success"><iconify-icon icon="mdi:check" style="vertical-align: middle;"></iconify-icon> Kembalikan</a>
+                      <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn btn-sm btn-success"><iconify-icon
+                          icon="mdi:check" style="vertical-align: middle;"></iconify-icon> Kembalikan</a>
                     <?php else: ?>
-                      <button class="btn btn-sm btn-secondary" disabled><iconify-icon icon="mdi:check-circle" style="vertical-align: middle;"></iconify-icon> Dikembalikan</button>
+                      <button class="btn btn-sm btn-secondary" disabled><iconify-icon icon="mdi:check-circle"
+                          style="vertical-align: middle;"></iconify-icon> Dikembalikan</button>
                     <?php endif ?>
                   </div>
                 </div>

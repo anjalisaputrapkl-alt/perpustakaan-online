@@ -52,7 +52,8 @@ $school = $stmt->fetch();
     <div class="app">
 
         <div class="topbar">
-            <strong><iconify-icon icon="mdi:cog" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Sekolah</strong>
+            <strong><iconify-icon icon="mdi:cog"
+                    style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Sekolah</strong>
         </div>
 
         <div class="content">
@@ -63,16 +64,24 @@ $school = $stmt->fetch();
 
                         <!-- Theme Settings -->
                         <div class="card">
-                            <h2><iconify-icon icon="mdi:palette" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Tema</h2>
+                            <h2><iconify-icon icon="mdi:palette"
+                                    style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pengaturan Tema
+                            </h2>
 
                             <h3>Pilih Tema</h3>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
                                 <button class="btn btn-secondary theme-btn" data-theme="light"
-                                    style="padding: 12px; background: #f0f9ff; border: 2px solid var(--accent); font-weight: 600;"><iconify-icon icon="mdi:white-balance-sunny" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Light</button>
+                                    style="padding: 12px; background: #f0f9ff; border: 2px solid var(--accent); font-weight: 600;"><iconify-icon
+                                        icon="mdi:white-balance-sunny"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Light</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="dark"
-                                    style="padding: 12px; background: #1f2937; color: white; font-weight: 600;"><iconify-icon icon="mdi:moon-waning-crescent" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Dark</button>
+                                    style="padding: 12px; background: #1f2937; color: white; font-weight: 600;"><iconify-icon
+                                        icon="mdi:moon-waning-crescent"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Dark</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="blue"
-                                    style="padding: 12px; background: #0f172a; color: #60a5fa; border: 2px solid #60a5fa; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Blue</button>
+                                    style="padding: 12px; background: #0f172a; color: #60a5fa; border: 2px solid #60a5fa; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Blue</button>
                             </div>
                             <small style="display: block; margin-top: 12px; color: var(--muted);">Tema yang dipilih akan
                                 disimpan secara otomatis</small>
@@ -80,31 +89,53 @@ $school = $stmt->fetch();
                             <h3>Tema Tambahan</h3>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
                                 <button class="btn btn-secondary theme-btn" data-theme="green"
-                                    style="padding: 12px; background: #065f46; color: #d1fae5; border: 2px solid #10b981; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Green</button>
+                                    style="padding: 12px; background: #065f46; color: #d1fae5; border: 2px solid #10b981; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Green</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="purple"
-                                    style="padding: 12px; background: #581c87; color: #e9d5ff; border: 2px solid #d946ef; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Purple</button>
+                                    style="padding: 12px; background: #581c87; color: #e9d5ff; border: 2px solid #d946ef; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Purple</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="orange"
-                                    style="padding: 12px; background: #7c2d12; color: #fed7aa; border: 2px solid #f97316; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Orange</button>
+                                    style="padding: 12px; background: #7c2d12; color: #fed7aa; border: 2px solid #f97316; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Orange</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="rose"
-                                    style="padding: 12px; background: #831843; color: #ffe4e6; border: 2px solid #f43f5e; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Rose</button>
+                                    style="padding: 12px; background: #831843; color: #ffe4e6; border: 2px solid #f43f5e; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Rose</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="indigo"
-                                    style="padding: 12px; background: #312e81; color: #e0e7ff; border: 2px solid #6366f1; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Indigo</button>
+                                    style="padding: 12px; background: #312e81; color: #e0e7ff; border: 2px solid #6366f1; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Indigo</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="cyan"
-                                    style="padding: 12px; background: #164e63; color: #cffafe; border: 2px solid #06b6d4; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Cyan</button>
+                                    style="padding: 12px; background: #164e63; color: #cffafe; border: 2px solid #06b6d4; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Cyan</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="pink"
-                                    style="padding: 12px; background: #831854; color: #fbcfe8; border: 2px solid #ec4899; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Pink</button>
+                                    style="padding: 12px; background: #831854; color: #fbcfe8; border: 2px solid #ec4899; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Pink</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="amber"
-                                    style="padding: 12px; background: #78350f; color: #fef3c7; border: 2px solid #f59e0b; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Amber</button>
+                                    style="padding: 12px; background: #78350f; color: #fef3c7; border: 2px solid #f59e0b; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Amber</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="red"
-                                    style="padding: 12px; background: #7f1d1d; color: #fee2e2; border: 2px solid #ef4444; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Red</button>
-                                    Red</button>
+                                    style="padding: 12px; background: #7f1d1d; color: #fee2e2; border: 2px solid #ef4444; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Red</button>
+                                Red</button>
                                 <button class="btn theme-btn" data-theme="slate"
                                     style="padding: 12px; background: #1e293b; color: #e2e8f0; border: 2px solid #64748b; font-weight: 600;">⚫
                                     Slate</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="teal"
-                                    style="padding: 12px; background: #134e4a; color: #ccfbf1; border: 2px solid #14b8a6; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Teal</button>
+                                    style="padding: 12px; background: #134e4a; color: #ccfbf1; border: 2px solid #14b8a6; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Teal</button>
                                 <button class="btn btn-secondary theme-btn" data-theme="lime"
-                                    style="padding: 12px; background: #365314; color: #cdfe56; border: 2px solid #84cc16; font-weight: 600;"><iconify-icon icon="mdi:circle-multiple" style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Lime</button>
+                                    style="padding: 12px; background: #365314; color: #cdfe56; border: 2px solid #84cc16; font-weight: 600;"><iconify-icon
+                                        icon="mdi:circle-multiple"
+                                        style="margin-right: 6px; vertical-align: middle;"></iconify-icon>Lime</button>
                             </div>
                         </div>
 
@@ -121,7 +152,8 @@ $school = $stmt->fetch();
 
                     <!-- School Info Panel -->
                     <div class="card preview-card">
-                        <h2><iconify-icon icon="mdi:school" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Informasi Sekolah</h2>
+                        <h2><iconify-icon icon="mdi:school"
+                                style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Informasi Sekolah</h2>
 
                         <?php if (!empty($error)): ?>
                             <div class="alert danger">
@@ -151,7 +183,8 @@ $school = $stmt->fetch();
                                 <small>Gunakan huruf kecil, angka, dan tanda hubung (-)</small>
                             </div>
 
-                            <button type="submit" class="btn" style="width: 100%;"><iconify-icon icon="mdi:content-save" style="vertical-align: middle; margin-right: 6px;"></iconify-icon>Simpan
+                            <button type="submit" class="btn" style="width: 100%;"><iconify-icon icon="mdi:content-save"
+                                    style="vertical-align: middle; margin-right: 6px;"></iconify-icon>Simpan
                                 Perubahan</button>
                         </form>
                     </div>

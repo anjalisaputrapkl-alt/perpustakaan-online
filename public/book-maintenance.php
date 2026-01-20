@@ -113,10 +113,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   <div class="app">
 
     <div class="topbar">
-      <strong><iconify-icon icon="mdi:wrench" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pemeliharaan Buku</strong>
+      <strong><iconify-icon icon="mdi:wrench"
+          style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pemeliharaan Buku</strong>
       <div class="topbar-actions">
-        <button class="btn btn-secondary" onclick="exportCSV()"><iconify-icon icon="mdi:file-excel" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Export Excel</button>
-        <button class="btn" onclick="openAddModal()" style="margin-left: 8px;"><iconify-icon icon="mdi:plus" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Tambah Catatan</button>
+        <button class="btn btn-secondary" onclick="exportCSV()"><iconify-icon icon="mdi:file-excel"
+            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Export Excel</button>
+        <button class="btn" onclick="openAddModal()" style="margin-left: 8px;"><iconify-icon icon="mdi:plus"
+            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Tambah Catatan</button>
       </div>
     </div>
 
@@ -145,7 +148,8 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                 <option value="Urgent">Urgent</option>
               </select>
               <div class="filter-buttons">
-                <button class="btn btn-danger" onclick="resetFilter();"><iconify-icon icon="mdi:redo" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Reset</button>
+                <button class="btn btn-danger" onclick="resetFilter();"><iconify-icon icon="mdi:redo"
+                    style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Reset</button>
               </div>
             </div>
             <div class="stats-container">
@@ -232,8 +236,10 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                         <td style="font-size: 12px;"><?= date('d M Y', strtotime($r['updated_at'])) ?></td>
                         <td class="text-center">
                           <div class="actions">
-                            <button class="btn btn-sm btn-secondary" onclick="openEditModal(<?= $r['id'] ?>)"><iconify-icon icon="mdi:pencil" style="vertical-align: middle;"></iconify-icon> Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteRecord(<?= $r['id'] ?>)"><iconify-icon icon="mdi:trash-can" style="vertical-align: middle;"></iconify-icon> Hapus</button>
+                            <button class="btn btn-sm btn-secondary" onclick="openEditModal(<?= $r['id'] ?>)"><iconify-icon
+                                icon="mdi:pencil" style="vertical-align: middle;"></iconify-icon> Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteRecord(<?= $r['id'] ?>)"><iconify-icon
+                                icon="mdi:trash-can" style="vertical-align: middle;"></iconify-icon> Hapus</button>
                           </div>
                         </td>
                       </tr>
@@ -314,8 +320,10 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         </form>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="closeModal()"><iconify-icon icon="mdi:close" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Batal</button>
-        <button class="btn" onclick="saveRecord()"><iconify-icon icon="mdi:content-save" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Simpan</button>
+        <button class="btn btn-secondary" onclick="closeModal()"><iconify-icon icon="mdi:close"
+            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Batal</button>
+        <button class="btn" onclick="saveRecord()"><iconify-icon icon="mdi:content-save"
+            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Simpan</button>
       </div>
     </div>
   </div>

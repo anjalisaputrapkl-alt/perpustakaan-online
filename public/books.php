@@ -239,7 +239,8 @@ $categories = [
                       <img src="../img/covers/<?= htmlspecialchars($b['cover_image']) ?>"
                         alt="<?= htmlspecialchars($b['title']) ?>">
                     <?php else: ?>
-                      <div class="no-image"><iconify-icon icon="mdi:book-multiple" style="font-size: 48px;"></iconify-icon></div>
+                      <div class="no-image"><iconify-icon icon="mdi:book-multiple" style="font-size: 48px;"></iconify-icon>
+                      </div>
                     <?php endif; ?>
                   </div>
                   <div class="book-info">
@@ -252,10 +253,13 @@ $categories = [
                   </div>
                   <div class="book-actions">
                     <button class="btn btn-sm btn-secondary"
-                      onclick="showDetail(<?= htmlspecialchars(json_encode($b)) ?>)"><iconify-icon icon="mdi:information" style="vertical-align: middle;"></iconify-icon> Detail</button>
-                    <a href="books.php?action=edit&id=<?= $b['id'] ?>" class="btn btn-sm"><iconify-icon icon="mdi:pencil" style="vertical-align: middle;"></iconify-icon> Edit</a>
+                      onclick="showDetail(<?= htmlspecialchars(json_encode($b)) ?>)"><iconify-icon icon="mdi:information"
+                        style="vertical-align: middle;"></iconify-icon> Detail</button>
+                    <a href="books.php?action=edit&id=<?= $b['id'] ?>" class="btn btn-sm"><iconify-icon icon="mdi:pencil"
+                        style="vertical-align: middle;"></iconify-icon> Edit</a>
                     <a href="books.php?action=delete&id=<?= $b['id'] ?>" class="btn btn-sm btn-danger"
-                      onclick="return confirm('Hapus buku ini?')"><iconify-icon icon="mdi:trash-can" style="vertical-align: middle;"></iconify-icon> Hapus</a>
+                      onclick="return confirm('Hapus buku ini?')"><iconify-icon icon="mdi:trash-can"
+                        style="vertical-align: middle;"></iconify-icon> Hapus</a>
                   </div>
                 </div>
               <?php endforeach ?>

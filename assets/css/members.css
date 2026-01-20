@@ -41,7 +41,7 @@ body {
   justify-content: space-between;
   position: fixed;
   top: 0;
-  left: 260px;
+  left: 240px;
   right: 0;
   z-index: 999;
 }
@@ -98,6 +98,7 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 24px;
+  grid-column: 1 / -1;
 }
 
 .card h2 {
@@ -156,10 +157,54 @@ tr {
 th,
 td {
   display: table-cell;
-  padding: 12px;
+  padding: 12px 20px;
   border-bottom: 1px solid var(--border);
   vertical-align: middle;
   text-align: left;
+}
+
+/* Column widths */
+th:nth-child(1),
+td:nth-child(1) {
+  width: 4%;
+  /* ID */
+}
+
+th:nth-child(2),
+td:nth-child(2) {
+  width: 12%;
+  /* Nama */
+}
+
+th:nth-child(3),
+td:nth-child(3) {
+  width: 24%;
+  /* Email */
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 16%;
+  /* No Murid */
+}
+
+th:nth-child(5),
+td:nth-child(5) {
+  width: 16%;
+  /* NISN */
+}
+
+th:nth-child(6),
+td:nth-child(6) {
+  width: 14%;
+  /* Status Akun */
+}
+
+th:nth-child(7),
+td:nth-child(7) {
+  width: 14%;
+  padding-right: 32px;
+  /* Aksi */
 }
 
 th {

@@ -108,7 +108,8 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE created_at >
 
   <div class="app">
     <div class="topbar">
-      <strong><iconify-icon icon="mdi:chart-box-outline" style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Laporan Perpustakaan</strong>
+      <strong><iconify-icon icon="mdi:chart-box-outline"
+          style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Laporan Perpustakaan</strong>
     </div>
 
     <div class="content">
@@ -138,8 +139,10 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE created_at >
             </select>
           </div>
           <div>
-            <button id="btn-apply" class="btn"><iconify-icon icon="mdi:filter" style="vertical-align: middle;"></iconify-icon> Filter</button>
-            <button id="btn-export-excel" class="btn btn-secondary" style="margin-left: 8px;"><iconify-icon icon="mdi:file-excel" style="vertical-align: middle;"></iconify-icon> Export Excel</button>
+            <button id="btn-apply" class="btn"><iconify-icon icon="mdi:filter"
+                style="vertical-align: middle;"></iconify-icon> Filter</button>
+            <button id="btn-export-excel" class="btn btn-secondary" style="margin-left: 8px;"><iconify-icon
+                icon="mdi:file-excel" style="vertical-align: middle;"></iconify-icon> Export Excel</button>
           </div>
         </div>
       </div>
