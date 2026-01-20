@@ -811,9 +811,15 @@ function getLabel($type)
 
         /* Responsive */
         @media (max-width: 768px) {
+            .nav-toggle {
+                display: flex;
+            }
+
             .nav-sidebar {
                 transform: translateX(-100%);
                 transition: transform 0.3s ease;
+                width: 240px;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
             }
 
             .nav-sidebar.active {
@@ -822,28 +828,61 @@ function getLabel($type)
 
             .header {
                 margin-left: 0;
+                padding: 12px 0;
+                padding-left: 12px;
             }
 
-            .container-main {
-                margin-left: 0;
-                padding: 16px;
+            .header-container {
+                flex-wrap: wrap;
+                padding: 0 16px;
+                gap: 12px;
             }
 
-            .nav-toggle {
-                display: flex;
+            .header-brand {
+                flex: 0 1 auto;
+                min-width: auto;
+            }
+
+            .header-brand-icon {
+                font-size: 24px;
+                width: 32px;
+                height: 32px;
+            }
+
+            .header-brand-text h2 {
+                font-size: 14px;
+            }
+
+            .header-brand-text p {
+                font-size: 11px;
             }
 
             .header-user {
-                gap: 8px;
+                flex: 1;
+                justify-content: flex-end;
+                gap: 12px;
+                order: 3;
+                width: 100%;
             }
 
             .header-user-info {
                 display: none;
             }
 
+            .header-user-avatar {
+                width: 36px;
+                height: 36px;
+                font-size: 14px;
+            }
+
             .header-logout {
-                padding: 6px 10px;
-                font-size: 11px;
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+
+            .container-main {
+                margin-left: 0;
+                padding: 16px;
             }
 
             .stats-grid {
