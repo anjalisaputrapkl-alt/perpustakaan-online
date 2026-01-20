@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Notifikasi API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #0b3d61;
+            padding-bottom: 10px;
+        }
+
+        h2 {
+            color: #555;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .test-section {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #0b3d61;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #062d4a;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .info-button {
+            background: #17a2b8;
+        }
+
+        .info-button:hover {
+            background: #138496;
+        }
+
+        .danger-button {
+            background: #dc3545;
+        }
+
+        .danger-button:hover {
+            background: #c82333;
+        }
+
+        .success-button {
+            background: #28a745;
+        }
+
+        .success-button:hover {
+            background: #218838;
+        }
+
+        .output {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .success {
+            color: #28a745;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+
+        .info {
+            color: #17a2b8;
+        }
+
+        .warning {
+            color: #ffc107;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        label {
+            font-size: 13px;
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        th {
+            background: #f0f0f0;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: #f9f9f9;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .status-unread {
+            background: #e0f2fe;
+            color: #0c4a6e;
+        }
+
+        .status-read {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .note {
+            background: #fffbea;
+            border-left: 4px solid #ffc107;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Test API Notifikasi Siswa</h1>
+
+        <!-- GET List Notifikasi -->
+        <div class="test-section">
+            <h2>1. GET - Daftar Notifikasi</h2>
+            <div class="input-group">
+                <div style="flex: 1;">
+                    <label>Sort:</label>
+                    <select id="sortFilter">
+                        <option value="latest">Latest</option>
+                        <option value="oldest">Oldest</option>
+                        <option value="unread">Unread</option>
+                    </select>
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="getNotifications()">Ambil Notifikasi</button>
+                <button class="info-button" onclick="toggleHelper('helper1')">? Bantuan</button>
+            </div>
+            <div class="output" id="output1"></div>
+            <div class="note" id="helper1" style="display:none;">
+                <strong>Cara Kerja:</strong> Mengambil semua notifikasi berdasarkan sort filter (latest/oldest/unread)
+                <div class="code-block">fetch('api/notifications.php?action=list&sort=latest')
+  .then(r => r.json())
+  .then(d => console.log(d.data))</div>
+            </div>
+        </div>
+
+        <!-- GET Detail -->
+        <div class="test-section">
+            <h2>2. GET - Detail Notifikasi</h2>
+            <div class="input-group">
+                <div style="flex: 1;">
+                    <label>ID Notifikasi:</label>
+                    <input type="number" id="detailId" min="1" placeholder="Masukkan ID notifikasi">
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="getNotificationDetail()">Ambil Detail</button>
+                <button class="info-button" onclick="toggleHelper('helper2')">? Bantuan</button>
+            </div>
+            <div class="output" id="output2"></div>
+            <div class="note" id="helper2" style="display:none;">
+                <strong>Cara Kerja:</strong> Mengambil detail 1 notifikasi + otomatis mark sebagai dibaca
+                <div class="code-block">fetch('api/notifications.php?action=detail&id=1')
+  .then(r => r.json())
+  .then(d => console.log(d.data))</div>
+            </div>
+        </div>
+
+        <!-- POST Mark as Read -->
+        <div class="test-section">
+            <h2>3. POST - Tandai Sebagai Dibaca</h2>
+            <div class="input-group">
+                <div style="flex: 1;">
+                    <label>ID Notifikasi:</label>
+                    <input type="number" id="readId" min="1" placeholder="Masukkan ID notifikasi">
+                </div>
+            </div>
+            <div class="button-group">
+                <button onclick="markAsRead()">Tandai Dibaca</button>
+                <button class="info-button" onclick="toggleHelper('helper3')">? Bantuan</button>
+            </div>
+            <div class="output" id="output3"></div>
+            <div class="note" id="helper3" style="display:none;">
+                <strong>Cara Kerja:</strong> Mengubah status notifikasi menjadi "sudah dibaca" (1)
+                <div class="code-block">const fd = new FormData();
+fd.append('id', 1);
+fetch('api/notifications.php?action=mark_read', {
+  method: 'POST',
+  body: fd
+}).then(r => r.json())</div>
+            </div>
+        </div>
+
+        <!-- POST Mark All as Read -->
+        <div class="test-section">
+            <h2>4. POST - Tandai SEMUA Sebagai Dibaca</h2>
+            <div class="button-group">
+                <button class="success-button" onclick="markAllAsRead()">Tandai Semua Dibaca</button>
+                <button class="info-button" onclick="toggleHelper('helper4')">? Bantuan</button>
+            </div>
+            <div class="output" id="output4"></div>
+            <div class="note" id="helper4" style="display:none;">
+                <strong>Cara Kerja:</strong> Mengubah status semua notifikasi belum dibaca menjadi dibaca
+                <div class="code-block">fetch('api/notifications.php?action=mark_all_read', {
+  method: 'POST'
+}).then(r => r.json())</div>
+            </div>
+        </div>
+
+        <!-- POST Delete -->
+        <div class="test-section">
+            <h2>5. POST - Hapus Notifikasi</h2>
+            <div class="input-group">
+                <div style="flex: 1;">
+                    <label>ID Notifikasi:</label>
+                    <input type="number" id="deleteId" min="1" placeholder="Masukkan ID notifikasi">
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="danger-button" onclick="deleteNotification()">Hapus</button>
+                <button class="info-button" onclick="toggleHelper('helper5')">? Bantuan</button>
+            </div>
+            <div class="output" id="output5"></div>
+            <div class="note" id="helper5" style="display:none;">
+                <strong>Cara Kerja:</strong> Menghapus notifikasi dari database
+                <div class="code-block">const fd = new FormData();
+fd.append('id', 1);
+fetch('api/notifications.php?action=delete', {
+  method: 'POST',
+  body: fd
+}).then(r => r.json())</div>
+            </div>
+        </div>
+
+        <!-- GET Unread Count -->
+        <div class="test-section">
+            <h2>6. GET - Hitung Notifikasi Belum Dibaca</h2>
+            <div class="button-group">
+                <button onclick="getUnreadCount()">Hitung Belum Dibaca</button>
+                <button class="info-button" onclick="toggleHelper('helper6')">? Bantuan</button>
+            </div>
+            <div class="output" id="output6"></div>
+            <div class="note" id="helper6" style="display:none;">
+                <strong>Kegunaan:</strong> Untuk menampilkan badge di navbar
+                <div class="code-block">fetch('api/notifications.php?action=unread_count')
+  .then(r => r.json())
+  .then(d => {
+    document.getElementById('badge').innerText = d.unread_count;
+  })</div>
+            </div>
+        </div>
+
+        <!-- GET Statistics -->
+        <div class="test-section">
+            <h2>7. GET - Statistik Notifikasi</h2>
+            <div class="button-group">
+                <button onclick="getStatistics()">Ambil Statistik</button>
+                <button class="info-button" onclick="toggleHelper('helper7')">? Bantuan</button>
+            </div>
+            <div class="output" id="output7"></div>
+            <div class="note" id="helper7" style="display:none;">
+                <strong>Cara Kerja:</strong> Menampilkan statistik per jenis notifikasi (telat, peringatan, dll)
+                <div class="code-block">fetch('api/notifications.php?action=stats')
+  .then(r => r.json())
+  .then(d => console.log(d.data))</div>
+            </div>
+        </div>
+
+        <!-- Info -->
+        <div class="test-section" style="background: #e7f3ff; border-color: #b3d9ff;">
+            <h2>ℹ️ Informasi Penting</h2>
+            <ul style="margin-left: 20px; line-height: 1.8;">
+                <li><strong>Base URL:</strong> /perpustakaan-online/public/api/notifications.php</li>
+                <li><strong>Autentikasi:</strong> Wajib sudah login (session user harus ada)</li>
+                <li><strong>Format Response:</strong> JSON</li>
+                <li><strong>HTTP Methods:</strong> GET dan POST</li>
+                <li><strong>Error Handling:</strong> Cek field "success" (true/false)</li>
+                <li><strong>Security:</strong> PDO prepared statements, HTML escaping, session check</li>
+            </ul>
+        </div>
+
+        <!-- Test Results Table -->
+        <div class="test-section" id="resultsSection" style="display:none;">
+            <h2>📊 Hasil Notifikasi (Table View)</h2>
+            <div id="resultsTable"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/perpustakaan-online/public/api/notifications.php';
+
+        function log(elementId, message, type = 'info') {
+            const elem = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = `[${timestamp}]`;
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            
+            elem.innerHTML += `<span class="${className}">${prefix} ${message}</span>\n`;
+            elem.scrollTop = elem.scrollHeight;
+        }
+
+        function clearOutput(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+
+        function toggleHelper(id) {
+            const elem = document.getElementById(id);
+            elem.style.display = elem.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // 1. Get Notifications
+        async function getNotifications() {
+            clearOutput('output1');
+            log('output1', 'Loading...', 'info');
+            
+            try {
+                const sort = document.getElementById('sortFilter').value;
+                const response = await fetch(`${API_BASE}?action=list&sort=${sort}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('output1', `✓ Berhasil mengambil ${data.total} notifikasi`, 'success');
+                    log('output1', JSON.stringify(data, null, 2), 'success');
+                    
+                    // Display in table
+                    if (data.data.length > 0) {
+                        displayTable(data.data);
+                    }
+                } else {
+                    log('output1', `✗ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('output1', `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // 2. Get Detail
+        async function getNotificationDetail() {
+            clearOutput('output2');
+            const id = document.getElementById('detailId').value;
+            
+            if (!id) {
+                log('output2', '✗ ID notifikasi harus diisi', 'error');
+                return;
+            }
+            
+            log('output2', 'Loading...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}?action=detail&id=${id}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('output2', '✓ Detail notifikasi berhasil diambil (dan ditandai dibaca)', 'success');
+                    log('output2', JSON.stringify(data.data, null, 2), 'success');
+                } else {
+                    log('output2', `✗ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('output2', `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // 3. Mark as Read
+        async function markAsRead() {
+            clearOutput('output3');
+            const id = document.getElementById('readId').value;
+            
+            if (!id) {
+                log('output3', '✗ ID notifikasi harus diisi', 'error');
+                return;
+            }
+            
+            log('output3', 'Loading...', 'info');
+            
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
+                
+                const response = await fetch(`${API_BASE}?action=mark_read`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('output3', `✓ ${data.message}`, 'success');
+                    log('output3', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    log('output3', `✗ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('output3', `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // 4. Mark All as Read
+        async function markAllAsRead() {
+            clearOutput('output4');
+            log('output4', 'Loading...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}?action=mark_all_read`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('output4', `✓ ${data.message}`, 'success');
+                    log('output4', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    log('output4', `✗ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('output4', `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // 5. Delete Notification
+        async function deleteNotification() {
+            clearOutput('output5');
+            const id = document.getElementById('deleteId').value;
+            
+            if (!id) {
+                log('output5', '✗ ID notifikasi harus diisi', 'error');
+                return;
+            }
+            
+            if (!confirm('Yakin ingin menghapus notifikasi ini?')) return;
+            
+            log('output5', 'Loading...', 'info');
+            
+            try {
+                const formData = new FormData();
+                formData.append('id', id);
+                
+                const response = await fetch(`${API_BASE}?action=delete`, {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('output5', `✓ ${data.message}`, 'success');
+                    log('output5', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    log('output5', `✗ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('output5', `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // 6. Get Unread Count
+        async function getUnreadCount() {
+            clearOutput('output6');
+            log('output6', 'Loading...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}?action=unread_count`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('output6', `✓ Notifikasi belum dibaca: ${data.unread_count}`, 'success');
+                    log('output6', JSON.stringify(data, null, 2), 'success');
+                } else {
+                    log('output6', `✗ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('output6', `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // 7. Get Statistics
+        async function getStatistics() {
+            clearOutput('output7');
+            log('output7', 'Loading...', 'info');
+            
+            try {
+                const response = await fetch(`${API_BASE}?action=stats`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('output7', '✓ Statistik notifikasi berhasil diambil', 'success');
+                    log('output7', JSON.stringify(data.data, null, 2), 'success');
+                } else {
+                    log('output7', `✗ Error: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('output7', `✗ Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Display as Table
+        function displayTable(data) {
+            const section = document.getElementById('resultsSection');
+            const tableDiv = document.getElementById('resultsTable');
+            
+            let html = '<table><thead><tr>';
+            html += '<th>ID</th><th>Judul</th><th>Jenis</th><th>Tanggal</th><th>Status</th>';
+            html += '</tr></thead><tbody>';
+            
+            data.forEach(item => {
+                const statusClass = item.status_baca == 0 ? 'status-unread' : 'status-read';
+                const statusText = item.status_baca == 0 ? 'Belum Dibaca' : 'Dibaca';
+                
+                html += '<tr>';
+                html += `<td>${item.id_notifikasi}</td>`;
+                html += `<td>${item.judul}</td>`;
+                html += `<td>${item.jenis_notifikasi}</td>`;
+                html += `<td>${item.tanggal}</td>`;
+                html += `<td><span class="status-badge ${statusClass}">${statusText}</span></td>`;
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            tableDiv.innerHTML = html;
+            section.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
