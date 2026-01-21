@@ -21,6 +21,19 @@ if (!isset($_SESSION['user'])) {
 
 $user = $_SESSION['user'];
 $pageTitle = $pageTitle ?? 'Dashboard Siswa';
+
+// Get student photo from database
+$studentPhoto = null;
+try {
+    $pdo = require __DIR__ . '/../../src/db.php';
+    $userId = (int) $_SESSION['user']['id'];
+    $stmt = $pdo->prepare("SELECT foto FROM siswa WHERE id_siswa = ?");
+    $stmt->execute([$userId]);
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+    $studentPhoto = $result['foto'] ?? null;
+} catch (Exception $e) {
+    error_log('Header photo fetch error: ' . $e->getMessage());
+}
 ?>
 <!-- Header -->
 <header class="header">
@@ -41,7 +54,12 @@ $pageTitle = $pageTitle ?? 'Dashboard Siswa';
                 <p class="role">Siswa</p>
             </div>
             <div class="header-user-avatar">
-                <?php echo strtoupper(substr($user['name'] ?? 'S', 0, 1)); ?>
+                <?php if ($studentPhoto && file_exists(__DIR__ . '/' . $studentPhoto)): ?>
+                    <img src="/perpustakaan-online/public/<?php echo htmlspecialchars($studentPhoto); ?>" alt="Foto Profil"
+                        style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                <?php else: ?>
+                    <?php echo strtoupper(substr($user['name'] ?? 'S', 0, 1)); ?>
+                <?php endif; ?>
             </div>
             <a href="logout.php" class="header-logout">Logout</a>
         </div>

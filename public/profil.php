@@ -8,9 +8,170 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
 }
 
 $pdo = require __DIR__ . '/../src/db.php';
-$siswaId = (int) $_SESSION['user']['school_id'];
+$userId = (int) $_SESSION['user']['id'];
+$schoolId = (int) $_SESSION['user']['school_id'];
 
-// Get student profile
+$success_message = '';
+$error_message = '';
+$isEditing = false;
+
+// Handle photo upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto']) && isset($_POST['upload_photo'])) {
+    try {
+        $file = $_FILES['foto'];
+
+        // Validate file
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception('Upload failed: ' . $file['error']);
+        }
+
+        // Check file size (max 5MB)
+        if ($file['size'] > 5 * 1024 * 1024) {
+            throw new Exception('Ukuran file terlalu besar (max 5MB)');
+        }
+
+        // Check MIME type
+        $allowed_types = ['image/jpeg', 'image/png', 'image/webp'];
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $mime_type = finfo_file($finfo, $file['tmp_name']);
+        finfo_close($finfo);
+
+        if (!in_array($mime_type, $allowed_types)) {
+            throw new Exception('Format file harus JPG, PNG, atau WEBP');
+        }
+
+        // Create upload directory if not exists
+        $upload_dir = __DIR__ . '/uploads/siswa';
+        if (!is_dir($upload_dir)) {
+            mkdir($upload_dir, 0755, true);
+        }
+
+        // Generate unique filename
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'siswa_' . $userId . '_' . time() . '_' . uniqid() . '.' . strtolower($ext);
+        $filepath = $upload_dir . '/' . $filename;
+
+        // Move uploaded file
+        if (!move_uploaded_file($file['tmp_name'], $filepath)) {
+            throw new Exception('Gagal menyimpan file');
+        }
+
+        // Update siswa table with photo path
+        $photo_path = 'uploads/siswa/' . $filename;
+        $update = $pdo->prepare("UPDATE siswa SET foto = ?, updated_at = NOW() WHERE id_siswa = ?");
+        $update->execute([$photo_path, $userId]);
+
+        $success_message = '✅ Foto berhasil diubah!';
+
+        // Refresh siswa data to show new photo
+        $stmt = $pdo->prepare("SELECT foto FROM siswa WHERE id_siswa = ?");
+        $stmt->execute([$userId]);
+        $siswa['foto'] = $stmt->fetch(PDO::FETCH_ASSOC)['foto'];
+    } catch (Exception $e) {
+        $error_message = '❌ Error upload: ' . htmlspecialchars($e->getMessage());
+        error_log('Photo upload error: ' . $e->getMessage());
+    }
+}
+
+// Handle form submission (save custom fields)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
+    try {
+        // Validate and sanitize input
+        $kelas = trim($_POST['kelas'] ?? '');
+        $jurusan = trim($_POST['jurusan'] ?? '');
+        $tanggal_lahir = trim($_POST['tanggal_lahir'] ?? '');
+        $jenis_kelamin = trim($_POST['jenis_kelamin'] ?? '');
+        $alamat = trim($_POST['alamat'] ?? '');
+        $no_hp = trim($_POST['no_hp'] ?? '');
+
+        // Update custom fields in siswa table
+        $update = $pdo->prepare("
+            UPDATE siswa 
+            SET 
+                kelas = ?,
+                jurusan = ?,
+                tanggal_lahir = ?,
+                jenis_kelamin = ?,
+                alamat = ?,
+                no_hp = ?,
+                updated_at = NOW()
+            WHERE id_siswa = ?
+        ");
+        $update->execute([
+            $kelas ?: null,
+            $jurusan ?: null,
+            $tanggal_lahir ?: null,
+            $jenis_kelamin ?: null,
+            $alamat ?: null,
+            $no_hp ?: null,
+            $userId
+        ]);
+
+        $success_message = '✅ Profil berhasil diperbarui!';
+    } catch (Exception $e) {
+        $error_message = '❌ Error: ' . htmlspecialchars($e->getMessage());
+        error_log('Profile update error: ' . $e->getMessage());
+    }
+}
+
+// First, sync data from members to siswa
+try {
+    // Get data from members
+    $stmt = $pdo->prepare("
+        SELECT id, name, nisn, member_no, email, status, created_at
+        FROM members 
+        WHERE id = ? AND school_id = ?
+    ");
+    $stmt->execute([$userId, $schoolId]);
+    $member = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($member) {
+        // Check if siswa record exists
+        $check = $pdo->prepare("SELECT id_siswa FROM siswa WHERE id_siswa = ?");
+        $check->execute([$userId]);
+        $exists = $check->fetch();
+
+        if ($exists) {
+            // Update existing siswa record - only synced fields
+            $update = $pdo->prepare("
+                UPDATE siswa 
+                SET 
+                    nama_lengkap = ?,
+                    nisn = ?,
+                    nis = ?,
+                    email = ?,
+                    updated_at = NOW()
+                WHERE id_siswa = ?
+            ");
+            $update->execute([
+                $member['name'],
+                $member['nisn'],
+                $member['member_no'],
+                $member['email'],
+                $userId
+            ]);
+        } else {
+            // Insert new siswa record from members
+            $insert = $pdo->prepare("
+                INSERT INTO siswa 
+                (id_siswa, nama_lengkap, nisn, nis, email, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+            ");
+            $insert->execute([
+                $userId,
+                $member['name'],
+                $member['nisn'],
+                $member['member_no'],
+                $member['email']
+            ]);
+        }
+    }
+} catch (Exception $e) {
+    // Silent sync error, continue with display
+    error_log('Sync error: ' . $e->getMessage());
+}
+
+// Now get data from siswa table for display
 $stmt = $pdo->prepare("
     SELECT 
         id_siswa, nama_lengkap, nis, nisn, kelas, jurusan,
@@ -19,7 +180,7 @@ $stmt = $pdo->prepare("
     FROM siswa
     WHERE id_siswa = ?
 ");
-$stmt->execute([$siswaId]);
+$stmt->execute([$userId]);
 $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$siswa) {
@@ -32,16 +193,14 @@ $createdAt = !empty($siswa['created_at']) ? date('d M Y, H:i', strtotime($siswa[
 $updatedAt = !empty($siswa['updated_at']) ? date('d M Y, H:i', strtotime($siswa['updated_at'])) : '-';
 
 // Gender display
-$genderDisplay = match ($siswa['jenis_kelamin']) {
+$genderDisplay = match ($siswa['jenis_kelamin'] ?? null) {
     'L', 'M' => 'Laki-laki',
     'P', 'F' => 'Perempuan',
     default => '-'
 };
 
-// Photo
-$photoUrl = !empty($siswa['foto']) && file_exists(__DIR__ . str_replace('/perpustakaan-online/public', '', $siswa['foto']))
-    ? $siswa['foto']
-    : '/perpustakaan-online/assets/img/default-avatar.png';
+// Photo - get from siswa table if exists, otherwise default
+$photoUrl = $siswa['foto'] ? '/perpustakaan-online/public/' . htmlspecialchars($siswa['foto']) : '/perpustakaan-online/assets/img/default-avatar.png';
 
 $pageTitle = 'Profil Saya';
 ?>
@@ -351,6 +510,8 @@ $pageTitle = 'Profil Saya';
             color: white;
             font-weight: 700;
             font-size: 16px;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .header-logout {
@@ -529,6 +690,52 @@ $pageTitle = 'Profil Saya';
             background-color: rgba(220, 38, 38, 0.1);
             color: #7f1d1d;
             border-left-color: var(--danger);
+        }
+
+        /* Form Styles */
+        .profile-form {
+            width: 100%;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: capitalize;
+        }
+
+        .form-input {
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-family: 'Inter', system-ui, sans-serif;
+            font-size: 13px;
+            color: var(--text);
+            background: white;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(11, 61, 97, 0.1);
+            background: white;
+        }
+
+        .form-input::placeholder {
+            color: var(--muted);
+        }
+
+        textarea.form-input {
+            resize: vertical;
+            min-height: 80px;
         }
 
         @media (max-width: 768px) {
@@ -720,82 +927,139 @@ $pageTitle = 'Profil Saya';
                 <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="profile-photo">
                 <div class="profile-info">
                     <h2><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></h2>
-                    <p><?php echo htmlspecialchars($siswa['kelas']); ?> -
-                        <?php echo htmlspecialchars($siswa['jurusan']); ?>
+                    <p><?php echo htmlspecialchars($siswa['nisn'] ?? 'NISN: -'); ?> -
+                        <?php echo htmlspecialchars($siswa['status'] ?? 'active'); ?>
                     </p>
                 </div>
             </div>
 
+            <!-- Photo Upload Section -->
+            <div style="background: #f9fafb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+                <h4 style="color: var(--text); font-size: 14px; font-weight: 600; margin-bottom: 12px;">Ubah Foto Profil
+                </h4>
+                <form method="POST" enctype="multipart/form-data"
+                    style="display: flex; gap: 12px; align-items: flex-start;">
+                    <div style="flex: 1;">
+                        <input type="file" name="foto" accept="image/jpeg,image/png,image/webp" class="form-input"
+                            style="width: 100%;" required>
+                        <small style="color: var(--muted); display: block; margin-top: 4px;">Format: JPG, PNG, WEBP (Max
+                            5MB)</small>
+                    </div>
+                    <button type="submit" name="upload_photo" value="1" class="btn primary"
+                        style="margin-top: 0;">Upload</button>
+                </form>
+            </div>
+
             <div class="divider"></div>
 
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="info-label">Nama Lengkap</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></div>
+            <?php if (!empty($success_message)): ?>
+                <div class="alert alert-success"><?php echo $success_message; ?></div>
+            <?php endif; ?>
+
+            <?php if (!empty($error_message)): ?>
+                <div class="alert alert-error"><?php echo $error_message; ?></div>
+            <?php endif; ?>
+
+            <form method="POST" class="profile-form" id="form-profile">
+                <!-- Read-only Fields (Auto-synced from members) -->
+                <div style="margin-bottom: 24px;">
+                    <h3
+                        style="color: var(--muted); font-size: 12px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">
+                        Informasi dari Registrasi (Tidak dapat diubah)</h3>
+
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Nama Lengkap</span>
+                            <div class="info-value"><?php echo htmlspecialchars($siswa['nama_lengkap'] ?? '-'); ?></div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">NIS</span>
+                            <div class="info-value"><?php echo htmlspecialchars($siswa['nis'] ?? '-'); ?></div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">NISN</span>
+                            <div class="info-value"><?php echo htmlspecialchars($siswa['nisn'] ?? '-'); ?></div>
+                        </div>
+
+                        <div class="info-item">
+                            <span class="info-label">Email</span>
+                            <div class="info-value"><?php echo htmlspecialchars($siswa['email'] ?? '-'); ?></div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="info-item">
-                    <span class="info-label">NIS</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['nis']); ?></div>
+                <!-- Editable Fields -->
+                <div style="margin-bottom: 24px;">
+                    <h3
+                        style="color: var(--muted); font-size: 12px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">
+                        Data Pribadi (Dapat diubah)</h3>
+
+                    <div class="info-grid">
+                        <div class="form-group">
+                            <label class="form-label">Kelas</label>
+                            <input type="text" name="kelas" class="form-input"
+                                value="<?php echo htmlspecialchars($siswa['kelas'] ?? ''); ?>"
+                                placeholder="Contoh: XII RPL">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Jurusan</label>
+                            <input type="text" name="jurusan" class="form-input"
+                                value="<?php echo htmlspecialchars($siswa['jurusan'] ?? ''); ?>"
+                                placeholder="Contoh: Rekayasa Perangkat Lunak">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Jenis Kelamin</label>
+                            <select name="jenis_kelamin" class="form-input">
+                                <option value="">-- Pilih --</option>
+                                <option value="L" <?php echo ($siswa['jenis_kelamin'] === 'L') ? 'selected' : ''; ?>>
+                                    Laki-laki</option>
+                                <option value="P" <?php echo ($siswa['jenis_kelamin'] === 'P') ? 'selected' : ''; ?>>
+                                    Perempuan</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Tanggal Lahir</label>
+                            <input type="date" name="tanggal_lahir" class="form-input"
+                                value="<?php echo htmlspecialchars($siswa['tanggal_lahir'] ?? ''); ?>">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Alamat</label>
+                            <textarea name="alamat" class="form-input" rows="3"
+                                placeholder="Jalan, No., Kelurahan, Kecamatan, Kota"><?php echo htmlspecialchars($siswa['alamat'] ?? ''); ?></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Nomor HP</label>
+                            <input type="tel" name="no_hp" class="form-input"
+                                value="<?php echo htmlspecialchars($siswa['no_hp'] ?? ''); ?>"
+                                placeholder="Contoh: 081234567890">
+                        </div>
+                    </div>
                 </div>
 
-                <div class="info-item">
-                    <span class="info-label">NISN</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['nisn']); ?></div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-label">Kelas</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['kelas']); ?></div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-label">Jurusan</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['jurusan']); ?></div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-label">Jenis Kelamin</span>
-                    <div class="info-value"><?php echo htmlspecialchars($genderDisplay); ?></div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-label">Tanggal Lahir</span>
-                    <div class="info-value"><?php echo htmlspecialchars($tanggalLahir); ?></div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-label">Email</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['email']); ?></div>
-                </div>
-
-                <div class="info-item">
-                    <span class="info-label">Nomor HP</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['no_hp']); ?></div>
-                </div>
-
-                <div class="info-item" style="grid-column: 1 / -1;">
-                    <span class="info-label">Alamat</span>
-                    <div class="info-value"><?php echo htmlspecialchars($siswa['alamat']); ?></div>
-                </div>
-            </div>
+                <input type="hidden" name="save_profile" value="1">
+            </form>
 
             <div class="meta-section">
                 <div class="meta-item">
-                    <strong>Dibuat:</strong>
+                    <strong>Terdaftar:</strong>
                     <span><?php echo htmlspecialchars($createdAt); ?></span>
                 </div>
                 <div class="meta-item">
-                    <strong>Terakhir diperbarui:</strong>
+                    <strong>Diperbarui:</strong>
                     <span><?php echo htmlspecialchars($updatedAt); ?></span>
                 </div>
             </div>
 
             <div class="button-group">
-                <a href="profil-edit.php" class="btn primary">Edit Profil</a>
-                <a href="upload-foto.php" class="btn primary">Ganti Foto</a>
-                <a href="kartu-siswa.php" class="btn primary">Kartu Siswa</a>
-                <a href="student-dashboard.php" class="btn secondary">Kembali</a>
+                <button type="submit" form="form-profile" class="btn primary">💾 Simpan Perubahan</button>
+                <a href="student-dashboard.php" class="btn secondary">← Kembali</a>
             </div>
         </div>
     </div>
