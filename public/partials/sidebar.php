@@ -5,6 +5,30 @@ $user = $_SESSION['user'] ?? null;
 $current = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $base = '/perpustakaan-online/public';
 
+// Load school profile data
+$school = null;
+$school_photo = null;
+$school_email = null;
+$school_npsn = null;
+
+if ($user) {
+    try {
+        $pdo = require __DIR__ . '/../../src/db.php';
+        $stmt = $pdo->prepare('SELECT name, photo_path, email, npsn FROM schools WHERE id = :id');
+        $stmt->execute(['id' => $user['school_id']]);
+        $school = $stmt->fetch();
+
+        if ($school) {
+            $school_photo = $school['photo_path'] ?? null;
+            $school_email = $school['email'] ?? null;
+            $school_npsn = $school['npsn'] ?? null;
+        }
+    } catch (Exception $e) {
+        // Fallback if database query fails
+        error_log('Sidebar error: ' . $e->getMessage());
+    }
+}
+
 function _is_active_sidebar($path, $current)
 {
     $current = rtrim(str_replace('/perpustakaan-online/public', '', $current), '/') ?: '/';
@@ -20,6 +44,7 @@ function _is_active_sidebar($path, $current)
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="<?php echo $base; ?>/../assets/css/school-profile.css">
     <style>
         :root {
             --bg: #f8fafc;
@@ -237,7 +262,57 @@ function _is_active_sidebar($path, $current)
 
 <!-- Navigation Sidebar -->
 <nav class="nav-sidebar" id="navSidebar">
-    <a href="<?php echo $base; ?>/" class="nav-sidebar-header">
+    <!-- School Profile Header -->
+    <div class="school-profile-header">
+        <!-- School Photo -->
+        <div class="school-photo-wrapper">
+            <?php if ($school_photo && file_exists(__DIR__ . '/../../' . $school_photo)): ?>
+                <img src="<?php echo $base; ?>/../<?php echo htmlspecialchars($school_photo); ?>"
+                    alt="<?php echo htmlspecialchars($school['name'] ?? 'School Logo'); ?>" class="school-photo"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="school-photo-placeholder" style="display: none;">
+                    <iconify-icon icon="mdi:school"></iconify-icon>
+                </div>
+            <?php else: ?>
+                <div class="school-photo-placeholder">
+                    <iconify-icon icon="mdi:school"></iconify-icon>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- School Name -->
+        <?php if ($school): ?>
+            <h3 class="school-name"><?php echo htmlspecialchars($school['name']); ?></h3>
+
+            <!-- School Info -->
+            <div class="school-info">
+                <?php if ($school_email): ?>
+                    <div class="school-info-item">
+                        <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                        <span><?php echo htmlspecialchars($school_email); ?></span>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($school_npsn): ?>
+                    <div class="school-info-item">
+                        <iconify-icon icon="mdi:identifier"></iconify-icon>
+                        <span><?php echo htmlspecialchars($school_npsn); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <!-- Edit Profile Button (Admin only) -->
+            <?php if ($user && $user['role'] === 'admin'): ?>
+                <a href="<?php echo $base; ?>/settings.php#school-profile" class="edit-profile-btn">
+                    <iconify-icon icon="mdi:pencil"></iconify-icon>
+                    Edit
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
+    </div>
+
+    <!-- Navigation Menu -->
+    <a href="<?php echo $base; ?>/" class="nav-sidebar-header" style="display: none;">
         <div class="nav-sidebar-header-icon">
             <iconify-icon icon="mdi:library"></iconify-icon>
         </div>

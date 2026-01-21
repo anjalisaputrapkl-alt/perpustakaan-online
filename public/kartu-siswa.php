@@ -7,7 +7,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
 }
 
 $pdo = require __DIR__ . '/../src/db.php';
-$siswaId = (int)$_SESSION['user']['school_id'];
+$siswaId = (int) $_SESSION['user']['school_id'];
 
 // Get student profile
 $stmt = $pdo->prepare("
@@ -34,6 +34,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
 ?>
 <!doctype html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -42,6 +43,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/school-profile.css">
     <style>
         :root {
             --bg: #f8fafc;
@@ -74,6 +76,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -85,6 +88,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -96,6 +100,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -424,6 +429,7 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
         }
     </style>
 </head>
+
 <body>
     <?php require __DIR__ . '/partials/student-sidebar.php'; ?>
 
@@ -443,7 +449,8 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
                         <div class="card-content">
                             <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="card-photo">
                             <div class="card-info">
-                                <p class="card-name"><?php echo htmlspecialchars(substr($siswa['nama_lengkap'], 0, 25)); ?></p>
+                                <p class="card-name">
+                                    <?php echo htmlspecialchars(substr($siswa['nama_lengkap'], 0, 25)); ?></p>
                                 <p class="card-detail">NIS: <?php echo htmlspecialchars($siswa['nis']); ?></p>
                                 <p class="card-detail">Kelas: <?php echo htmlspecialchars($siswa['kelas']); ?></p>
                                 <p class="card-detail">Jurusan: <?php echo htmlspecialchars($siswa['jurusan']); ?></p>
@@ -476,4 +483,5 @@ $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' . 
         </div>
     </div>
 </body>
+
 </html>

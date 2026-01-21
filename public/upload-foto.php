@@ -7,7 +7,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
 }
 
 $pdo = require __DIR__ . '/../src/db.php';
-$siswaId = (int)$_SESSION['user']['school_id'];
+$siswaId = (int) $_SESSION['user']['school_id'];
 
 // Get current photo
 $stmt = $pdo->prepare("SELECT foto FROM siswa WHERE id_siswa = ?");
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 $updateStmt = $pdo->prepare("UPDATE siswa SET foto=?, updated_at=NOW() WHERE id_siswa=?");
                 $updateStmt->execute([$photoUrl, $siswaId]);
                 $message = "Foto berhasil diperbarui!";
-                
+
                 // Refresh current foto
                 $stmt->execute([$siswaId]);
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -90,6 +90,7 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
 ?>
 <!doctype html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -98,6 +99,7 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/school-profile.css">
     <style>
         :root {
             --bg: #f8fafc;
@@ -130,6 +132,7 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -141,6 +144,7 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -152,6 +156,7 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -433,6 +438,7 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
         }
     </style>
 </head>
+
 <body>
     <?php require __DIR__ . '/partials/student-sidebar.php'; ?>
 
@@ -443,38 +449,38 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
     </div>
 
     <div class="container-main">
-            <?php if (!empty($message)): ?>
-                <div class="alert alert-success">
-                    <?php echo htmlspecialchars($message); ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($errorMessage)): ?>
-                <div class="alert alert-error">
-                    <?php echo htmlspecialchars($errorMessage); ?>
-                </div>
-            <?php endif; ?>
-
-            <div class="card">
-                <h2>Foto Saat Ini</h2>
-                <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="photo-preview">
-
-                <h2 style="margin-top: 24px;">Upload Foto Baru</h2>
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="upload-area" id="uploadArea">
-                        <p>Seret file ke sini atau <label class="upload-label" for="fotoInput">pilih file</label></p>
-                        <p class="info-text">Format: JPG, PNG, GIF. Ukuran maksimal: 2MB</p>
-                        <p class="file-name" id="fileName"></p>
-                    </div>
-                    <input type="file" id="fotoInput" name="foto" class="upload-input" accept="image/*">
-
-                    <div class="actions">
-                        <button type="submit" class="btn primary" id="submitBtn" disabled>Upload Foto</button>
-                        <a href="profil.php" class="btn secondary">Batal</a>
-                    </div>
-                </form>
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-success">
+                <?php echo htmlspecialchars($message); ?>
             </div>
+        <?php endif; ?>
+
+        <?php if (!empty($errorMessage)): ?>
+            <div class="alert alert-error">
+                <?php echo htmlspecialchars($errorMessage); ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="card">
+            <h2>Foto Saat Ini</h2>
+            <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="photo-preview">
+
+            <h2 style="margin-top: 24px;">Upload Foto Baru</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <div class="upload-area" id="uploadArea">
+                    <p>Seret file ke sini atau <label class="upload-label" for="fotoInput">pilih file</label></p>
+                    <p class="info-text">Format: JPG, PNG, GIF. Ukuran maksimal: 2MB</p>
+                    <p class="file-name" id="fileName"></p>
+                </div>
+                <input type="file" id="fotoInput" name="foto" class="upload-input" accept="image/*">
+
+                <div class="actions">
+                    <button type="submit" class="btn primary" id="submitBtn" disabled>Upload Foto</button>
+                    <a href="profil.php" class="btn secondary">Batal</a>
+                </div>
+            </form>
         </div>
+    </div>
     </div>
 
     <script>
@@ -517,4 +523,5 @@ $photoUrl = !empty($currentFoto) && file_exists(__DIR__ . str_replace('/perpusta
         });
     </script>
 </body>
+
 </html>

@@ -2,25 +2,100 @@
 require __DIR__ . '/../src/auth.php';
 requireAuth();
 $pdo = require __DIR__ . '/../src/db.php';
+require __DIR__ . '/../src/SchoolProfileModel.php';
+
+// Ensure user is admin
+if ($_SESSION['user']['role'] !== 'admin') {
+    header('Location: student-dashboard.php');
+    exit;
+}
+
 $user = $_SESSION['user'];
 $sid = $user['school_id'];
+$schoolProfileModel = new SchoolProfileModel($pdo);
+$error = null;
+$success = null;
+$profile_error = null;
+$profile_success = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    $slug = trim($_POST['slug'] ?? '');
-    if ($name === '' || $slug === '') {
-        $error = 'Nama dan slug wajib diisi.';
-    } else {
-        // ensure slug unique
-        $stmt = $pdo->prepare('SELECT id FROM schools WHERE slug = :slug AND id != :id');
-        $stmt->execute(['slug' => $slug, 'id' => $sid]);
-        $exists = $stmt->fetchColumn();
-        if ($exists) {
-            $error = 'Slug sudah digunakan oleh sekolah lain.';
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'update_basic') {
+        // Update basic school info
+        $name = trim($_POST['name'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        if ($name === '' || $slug === '') {
+            $error = 'Nama dan slug wajib diisi.';
         } else {
-            $stmt = $pdo->prepare('UPDATE schools SET name = :name, slug = :slug WHERE id = :id');
-            $stmt->execute(['name' => $name, 'slug' => $slug, 'id' => $sid]);
-            $success = 'Pengaturan tersimpan.';
+            // ensure slug unique
+            $stmt = $pdo->prepare('SELECT id FROM schools WHERE slug = :slug AND id != :id');
+            $stmt->execute(['slug' => $slug, 'id' => $sid]);
+            $exists = $stmt->fetchColumn();
+            if ($exists) {
+                $error = 'Slug sudah digunakan oleh sekolah lain.';
+            } else {
+                $stmt = $pdo->prepare('UPDATE schools SET name = :name, slug = :slug WHERE id = :id');
+                $stmt->execute(['name' => $name, 'slug' => $slug, 'id' => $sid]);
+                $success = 'Pengaturan dasar tersimpan.';
+            }
+        }
+    } elseif ($action === 'update_profile') {
+        // Update school profile data
+        try {
+            $data = [
+                'email' => trim($_POST['school_email'] ?? '') ?: null,
+                'phone' => trim($_POST['school_phone'] ?? '') ?: null,
+                'address' => trim($_POST['school_address'] ?? '') ?: null,
+                'npsn' => trim($_POST['school_npsn'] ?? '') ?: null,
+                'website' => trim($_POST['school_website'] ?? '') ?: null,
+            ];
+
+            // Add founded_year if provided
+            if (isset($_POST['school_founded_year']) && $_POST['school_founded_year']) {
+                $data['founded_year'] = intval($_POST['school_founded_year']);
+            }
+
+            $schoolProfileModel->updateSchoolProfile($sid, $data);
+            $profile_success = 'Data profil sekolah berhasil diperbarui.';
+        } catch (Exception $e) {
+            $profile_error = 'Gagal memperbarui data profil: ' . $e->getMessage();
+        }
+    } elseif ($action === 'upload_photo') {
+        // Handle photo upload
+        try {
+            if (!isset($_FILES['school_photo']) || $_FILES['school_photo']['error'] !== UPLOAD_ERR_OK) {
+                throw new Exception('File tidak ditemukan');
+            }
+
+            // Validate file first
+            $schoolProfileModel->validatePhotoFile($_FILES['school_photo']);
+
+            // Delete old photo if exists
+            $old_photo = $schoolProfileModel->getSchoolPhoto($sid);
+            if ($old_photo) {
+                $old_path = __DIR__ . '/' . $old_photo;
+                if (file_exists($old_path)) {
+                    @unlink($old_path);
+                }
+            }
+
+            // Save new photo
+            $filename = $schoolProfileModel->savePhotoFile($_FILES['school_photo']);
+            $photo_path = 'public/uploads/school-photos/' . $filename;
+            $schoolProfileModel->updateSchoolPhoto($sid, $photo_path);
+
+            $profile_success = 'Foto profil sekolah berhasil diunggah.';
+        } catch (Exception $e) {
+            $profile_error = 'Gagal mengunggah foto: ' . $e->getMessage();
+        }
+    } elseif ($action === 'delete_photo') {
+        // Handle photo deletion
+        try {
+            $schoolProfileModel->deleteSchoolPhoto($sid);
+            $profile_success = 'Foto profil sekolah berhasil dihapus.';
+        } catch (Exception $e) {
+            $profile_error = 'Gagal menghapus foto: ' . $e->getMessage();
         }
     }
 }
@@ -28,6 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $stmt = $pdo->prepare('SELECT * FROM schools WHERE id = :id');
 $stmt->execute(['id' => $sid]);
 $school = $stmt->fetch();
+
+// Safety check
+if (!$school) {
+    die('Error: School data not found');
+}
 ?>
 <!doctype html>
 <html lang="id">
@@ -43,6 +123,7 @@ $school = $stmt->fetch();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <link rel="stylesheet" href="../assets/css/animations.css">
+    <link rel="stylesheet" href="../assets/css/school-profile.css">
     <link rel="stylesheet" href="../assets/css/settings.css">
 </head>
 
@@ -116,41 +197,182 @@ $school = $stmt->fetch();
 
                     </div>
 
-                    <!-- School Info Panel -->
-                    <div class="card preview-card">
+                    <!-- School Profile Panel -->
+                    <div class="card preview-card" id="school-profile">
                         <h2 class="school-header"><iconify-icon icon="mdi:school"
-                                class="school-header-icon"></iconify-icon>Informasi Sekolah</h2>
+                                class="school-header-icon"></iconify-icon>Profil Sekolah</h2>
+
+                        <?php if (!empty($profile_error)): ?>
+                            <div class="alert alert-danger">
+                                <span>⚠️</span>
+                                <div><?php echo htmlspecialchars($profile_error); ?></div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($profile_success)): ?>
+                            <div class="alert alert-success">
+                                <span>✓</span>
+                                <div><?php echo htmlspecialchars($profile_success); ?></div>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Photo Upload Section -->
+                        <div class="school-photo-section"
+                            style="margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e2e8f0;">
+                            <h3
+                                style="font-size: 14px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <iconify-icon icon="mdi:image" style="font-size: 18px;"></iconify-icon>
+                                Foto Profil Sekolah
+                            </h3>
+
+                            <!-- Current Photo Preview -->
+                            <div style="margin-bottom: 16px;">
+                                <div
+                                    style="width: 120px; height: 120px; border-radius: 50%; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; border: 2px solid #e2e8f0;">
+                                    <?php if ($school['photo_path'] && file_exists(__DIR__ . '/../' . $school['photo_path'])): ?>
+                                        <img src="../<?php echo htmlspecialchars($school['photo_path']); ?>"
+                                            alt="Foto Profil Sekolah" style="width: 100%; height: 100%; object-fit: cover;"
+                                            onerror="this.parentElement.innerHTML='<iconify-icon icon=\" mdi:school\"
+                                            style=\"font-size: 48px; color: #999;\"></iconify-icon>'">
+                                    <?php else: ?>
+                                        <iconify-icon icon="mdi:school"
+                                            style="font-size: 48px; color: #ccc;"></iconify-icon>
+                                    <?php endif; ?>
+                                </div>
+                                <small style="color: #6b7280; display: block;">Ukuran rekomendasi: 500x500px, Maksimal
+                                    5MB</small>
+                            </div>
+
+                            <!-- Photo Upload Form -->
+                            <form method="post" enctype="multipart/form-data" style="margin-bottom: 12px;">
+                                <input type="hidden" name="action" value="upload_photo">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <input type="file" name="school_photo" id="school_photo"
+                                        accept="image/jpeg,image/png,image/webp" style="display: none;">
+                                    <label for="school_photo"
+                                        style="display: inline-block; padding: 10px 16px; background: #0b3d61; color: white; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s ease;">
+                                        <iconify-icon icon="mdi:upload"
+                                            style="font-size: 16px; vertical-align: middle; margin-right: 6px;"></iconify-icon>
+                                        Pilih Foto
+                                    </label>
+                                    <button type="submit" class="btn btn-submit"
+                                        style="padding: 10px 16px; font-size: 14px;">
+                                        <iconify-icon icon="mdi:check"
+                                            style="font-size: 16px; vertical-align: middle; margin-right: 6px;"></iconify-icon>Unggah
+                                    </button>
+                                </div>
+                                <small id="file-name" style="color: #6b7280; display: block; margin-top: 8px;"></small>
+                            </form>
+
+                            <!-- Delete Photo Button -->
+                            <?php if ($school['photo_path']): ?>
+                                <form method="post" style="display: inline;">
+                                    <input type="hidden" name="action" value="delete_photo">
+                                    <button type="submit" class="btn btn-danger"
+                                        style="padding: 8px 12px; font-size: 13px;">
+                                        <iconify-icon icon="mdi:trash-can-outline"
+                                            style="font-size: 16px; vertical-align: middle; margin-right: 6px;"></iconify-icon>Hapus
+                                        Foto
+                                    </button>
+                                </form>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- School Data Form -->
+                        <form method="post" class="school-form">
+                            <input type="hidden" name="action" value="update_profile">
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label for="school_npsn">NPSN</label>
+                                    <input id="school_npsn" name="school_npsn" type="text" placeholder="20102012"
+                                        value="<?php echo htmlspecialchars($school['npsn'] ?? ''); ?>">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="school_email">Email Sekolah</label>
+                                    <input id="school_email" name="school_email" type="email"
+                                        placeholder="sekolah@example.com"
+                                        value="<?php echo htmlspecialchars($school['email'] ?? ''); ?>">
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label for="school_phone">Nomor Telepon</label>
+                                <input id="school_phone" name="school_phone" type="tel" placeholder="021-1234567"
+                                    value="<?php echo htmlspecialchars($school['phone'] ?? ''); ?>">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 16px;">
+                                <label for="school_address">Alamat Lengkap</label>
+                                <textarea id="school_address" name="school_address" placeholder="Jl. Pendidikan No. 123"
+                                    rows="3"
+                                    style="font-family: inherit; padding: 10px; border: 1px solid #e2e8f0; border-radius: 6px;"><?php echo htmlspecialchars($school['address'] ?? ''); ?></textarea>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                                <div class="form-group">
+                                    <label for="school_website">Website (Opsional)</label>
+                                    <input id="school_website" name="school_website" type="url"
+                                        placeholder="https://example.com"
+                                        value="<?php echo htmlspecialchars($school['website'] ?? ''); ?>">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="school_founded_year">Tahun Berdiri (Opsional)</label>
+                                    <input id="school_founded_year" name="school_founded_year" type="number"
+                                        placeholder="2000" min="1900" max="<?php echo date('Y'); ?>"
+                                        value="<?php echo intval($school['founded_year'] ?? 0) > 0 ? htmlspecialchars($school['founded_year']) : ''; ?>">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-submit">
+                                <iconify-icon icon="mdi:content-save"
+                                    style="font-size: 16px; vertical-align: middle; margin-right: 6px;"></iconify-icon>Simpan
+                                Profil
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Basic School Info Panel -->
+                    <div class="card preview-card">
+                        <h2 class="school-header"><iconify-icon icon="mdi:information"
+                                class="school-header-icon"></iconify-icon>Informasi Dasar</h2>
 
                         <?php if (!empty($error)): ?>
                             <div class="alert alert-danger">
                                 <span>⚠️</span>
-                                <div><?php echo $error; ?></div>
+                                <div><?php echo htmlspecialchars($error); ?></div>
                             </div>
                         <?php endif; ?>
 
                         <?php if (!empty($success)): ?>
                             <div class="alert alert-success">
                                 <span>✓</span>
-                                <div><?php echo $success; ?></div>
+                                <div><?php echo htmlspecialchars($success); ?></div>
                             </div>
                         <?php endif; ?>
 
                         <form method="post" class="school-form">
+                            <input type="hidden" name="action" value="update_basic">
+
                             <div class="form-group">
                                 <label for="name">Nama Sekolah</label>
                                 <input id="name" name="name" required
-                                    value="<?php echo htmlspecialchars($school['name']); ?>">
+                                    value="<?php echo htmlspecialchars($school['name'] ?? ''); ?>">
                             </div>
 
                             <div class="form-group">
                                 <label for="slug">Slug (untuk URL)</label>
                                 <input id="slug" name="slug" required
-                                    value="<?php echo htmlspecialchars($school['slug']); ?>">
+                                    value="<?php echo htmlspecialchars($school['slug'] ?? ''); ?>">
                                 <small>Gunakan huruf kecil, angka, dan tanda hubung (-)</small>
                             </div>
 
                             <button type="submit" class="btn btn-submit">
-                                <iconify-icon icon="mdi:content-save" class="btn-icon"></iconify-icon>Simpan Perubahan
+                                <iconify-icon icon="mdi:content-save"
+                                    style="font-size: 16px; vertical-align: middle; margin-right: 6px;"></iconify-icon>Simpan
+                                Dasar
                             </button>
                         </form>
                     </div>
@@ -201,6 +423,31 @@ $school = $stmt->fetch();
     <?php include __DIR__ . '/partials/footer.php'; ?>
 
     <script src="../assets/js/settings.js"></script>
+    <script>
+        // Handle school photo file input
+        const photoInput = document.getElementById('school_photo');
+        if (photoInput) {
+            photoInput.addEventListener('change', function (e) {
+                const fileName = document.getElementById('file-name');
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    const maxSize = 5 * 1024 * 1024; // 5MB
+
+                    if (file.size > maxSize) {
+                        alert('File terlalu besar. Maksimal ukuran: 5MB');
+                        this.value = '';
+                        fileName.textContent = '';
+                    } else if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                        alert('Format file tidak didukung. Gunakan JPG, PNG, atau WEBP');
+                        this.value = '';
+                        fileName.textContent = '';
+                    } else {
+                        fileName.textContent = 'File dipilih: ' + file.name;
+                    }
+                }
+            });
+        }
+    </script>
 
 
 </body>

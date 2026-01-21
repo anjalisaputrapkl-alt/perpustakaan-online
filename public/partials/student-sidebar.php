@@ -5,13 +5,83 @@
  * Include: <?php include 'partials/student-sidebar.php'; ?>
  */
 
+if (session_status() !== PHP_SESSION_ACTIVE)
+    session_start();
+
 // Get current page
 $currentPage = basename($_SERVER['PHP_SELF']);
+
+// Load school profile data
+$school = null;
+$school_photo = null;
+$school_email = null;
+$school_npsn = null;
+
+// Get school ID from session
+if (isset($_SESSION['user'])) {
+    try {
+        $pdo = require __DIR__ . '/../../src/db.php';
+        $stmt = $pdo->prepare('SELECT name, photo_path, email, npsn FROM schools WHERE id = :id');
+        $stmt->execute(['id' => $_SESSION['user']['school_id']]);
+        $school = $stmt->fetch();
+
+        if ($school) {
+            $school_photo = $school['photo_path'] ?? null;
+            $school_email = $school['email'] ?? null;
+            $school_npsn = $school['npsn'] ?? null;
+        }
+    } catch (Exception $e) {
+        // Fallback if database query fails
+        error_log('Student sidebar error: ' . $e->getMessage());
+    }
+}
 ?>
 
 <!-- Navigation Sidebar -->
 <aside class="nav-sidebar" id="navSidebar">
-    <a href="student-dashboard.php" class="nav-sidebar-header">
+    <!-- School Profile Header -->
+    <div class="school-profile-header">
+        <!-- School Photo -->
+        <div class="school-photo-wrapper">
+            <?php if ($school_photo && file_exists(__DIR__ . '/../../' . $school_photo)): ?>
+                <img src="<?php echo htmlspecialchars($school_photo); ?>"
+                    alt="<?php echo htmlspecialchars($school['name'] ?? 'School Logo'); ?>" class="school-photo"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="school-photo-placeholder" style="display: none;">
+                    <iconify-icon icon="mdi:school"></iconify-icon>
+                </div>
+            <?php else: ?>
+                <div class="school-photo-placeholder">
+                    <iconify-icon icon="mdi:school"></iconify-icon>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- School Name -->
+        <?php if ($school): ?>
+            <h3 class="school-name"><?php echo htmlspecialchars($school['name']); ?></h3>
+
+            <!-- School Info -->
+            <div class="school-info">
+                <?php if ($school_email): ?>
+                    <div class="school-info-item">
+                        <iconify-icon icon="mdi:email-outline"></iconify-icon>
+                        <span><?php echo htmlspecialchars($school_email); ?></span>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($school_npsn): ?>
+                    <div class="school-info-item">
+                        <iconify-icon icon="mdi:identifier"></iconify-icon>
+                        <span><?php echo htmlspecialchars($school_npsn); ?></span>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Navigation Menu -->
+    <a href="student-dashboard.php" class="nav-sidebar-header" style="display: none;">
         <div class="nav-sidebar-header-icon">
             <iconify-icon icon="mdi:library" width="32" height="32"></iconify-icon>
         </div>

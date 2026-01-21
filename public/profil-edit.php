@@ -7,7 +7,7 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
 }
 
 $pdo = require __DIR__ . '/../src/db.php';
-$siswaId = (int)$_SESSION['user']['school_id'];
+$siswaId = (int) $_SESSION['user']['school_id'];
 
 // Get student profile
 $stmt = $pdo->prepare("
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $message = "Profil berhasil diperbarui!";
-            
+
             // Refresh data dari database
             $stmt->execute([$siswaId]);
             $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -74,6 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!doctype html>
 <html lang="id">
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -82,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <link rel="stylesheet" href="../assets/css/school-profile.css">
     <style>
         :root {
             --bg: #f8fafc;
@@ -114,6 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 opacity: 0;
                 transform: translateX(-40px);
             }
+
             to {
                 opacity: 1;
                 transform: translateX(0);
@@ -125,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 opacity: 0;
                 transform: translateY(-30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -136,6 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -397,6 +402,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
+
 <body>
     <?php require __DIR__ . '/partials/student-sidebar.php'; ?>
 
@@ -407,63 +413,68 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <div class="container-main">
-            <?php if (!empty($message)): ?>
-                <div class="alert alert-success">
-                    <?php echo htmlspecialchars($message); ?>
-                </div>
-            <?php endif; ?>
-
-            <?php if (!empty($errorMessage)): ?>
-                <div class="alert alert-error">
-                    <?php echo htmlspecialchars($errorMessage); ?>
-                </div>
-            <?php endif; ?>
-
-            <div class="card">
-                <h2>Ubah Informasi Profil</h2>
-                <form method="POST">
-                    <div class="form-group">
-                        <label>Nama Lengkap</label>
-                        <input type="text" name="nama_lengkap" required value="<?php echo htmlspecialchars($siswa['nama_lengkap']); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" value="<?php echo htmlspecialchars($siswa['email'] ?? ''); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Nomor HP</label>
-                        <input type="tel" name="no_hp" value="<?php echo htmlspecialchars($siswa['no_hp'] ?? ''); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Tanggal Lahir</label>
-                        <input type="date" name="tanggal_lahir" value="<?php echo htmlspecialchars($siswa['tanggal_lahir'] ?? ''); ?>">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Jenis Kelamin</label>
-                        <select name="jenis_kelamin">
-                            <option value="">-- Pilih --</option>
-                            <option value="L" <?php echo $siswa['jenis_kelamin'] === 'L' ? 'selected' : ''; ?>>Laki-laki</option>
-                            <option value="P" <?php echo $siswa['jenis_kelamin'] === 'P' ? 'selected' : ''; ?>>Perempuan</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Alamat</label>
-                        <textarea name="alamat" rows="4"><?php echo htmlspecialchars($siswa['alamat'] ?? ''); ?></textarea>
-                    </div>
-
-                    <div class="actions" style="margin-top: 24px;">
-                        <button type="submit" class="btn primary">Simpan Perubahan</button>
-                        <a href="upload-foto.php" class="btn primary">Ganti Foto</a>
-                        <a href="profil.php" class="btn secondary">Batal</a>
-                    </div>
-                </form>
+        <?php if (!empty($message)): ?>
+            <div class="alert alert-success">
+                <?php echo htmlspecialchars($message); ?>
             </div>
+        <?php endif; ?>
+
+        <?php if (!empty($errorMessage)): ?>
+            <div class="alert alert-error">
+                <?php echo htmlspecialchars($errorMessage); ?>
+            </div>
+        <?php endif; ?>
+
+        <div class="card">
+            <h2>Ubah Informasi Profil</h2>
+            <form method="POST">
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" name="nama_lengkap" required
+                        value="<?php echo htmlspecialchars($siswa['nama_lengkap']); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="<?php echo htmlspecialchars($siswa['email'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Nomor HP</label>
+                    <input type="tel" name="no_hp" value="<?php echo htmlspecialchars($siswa['no_hp'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Tanggal Lahir</label>
+                    <input type="date" name="tanggal_lahir"
+                        value="<?php echo htmlspecialchars($siswa['tanggal_lahir'] ?? ''); ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Jenis Kelamin</label>
+                    <select name="jenis_kelamin">
+                        <option value="">-- Pilih --</option>
+                        <option value="L" <?php echo $siswa['jenis_kelamin'] === 'L' ? 'selected' : ''; ?>>Laki-laki
+                        </option>
+                        <option value="P" <?php echo $siswa['jenis_kelamin'] === 'P' ? 'selected' : ''; ?>>Perempuan
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Alamat</label>
+                    <textarea name="alamat" rows="4"><?php echo htmlspecialchars($siswa['alamat'] ?? ''); ?></textarea>
+                </div>
+
+                <div class="actions" style="margin-top: 24px;">
+                    <button type="submit" class="btn primary">Simpan Perubahan</button>
+                    <a href="upload-foto.php" class="btn primary">Ganti Foto</a>
+                    <a href="profil.php" class="btn secondary">Batal</a>
+                </div>
+            </form>
         </div>
     </div>
+    </div>
 </body>
+
 </html>

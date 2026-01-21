@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 20, 2026 at 08:17 AM
+-- Generation Time: Jan 21, 2026 at 03:45 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -128,7 +128,8 @@ INSERT INTO `members` (`id`, `school_id`, `name`, `email`, `member_no`, `nisn`, 
 (3, 7, 'Uya', 'uya4767@gmail.com', '0853748529', NULL, NULL, 'active', '2026-01-19 01:35:51'),
 (4, 7, 'anjali', 'ada@gmail.com', '4675965903', NULL, NULL, 'active', '2026-01-19 01:36:00'),
 (5, 2, 'Anjali Saputra', 'anjalisaputra@gmail.com', '081292593620', '111111', NULL, 'active', '2026-01-19 07:37:05'),
-(6, 2, 'Surya', 'saya@gmail.com', '085891129163', '222222', NULL, 'active', '2026-01-20 01:31:31');
+(6, 2, 'Surya', 'saya@gmail.com', '085891129163', '222222', NULL, 'active', '2026-01-20 01:31:31'),
+(8, 5, 'surya ali rafsanjani pkl', 'sta@gmail.com', '085891129163', '121212', NULL, 'active', '2026-01-20 07:20:17');
 
 -- --------------------------------------------------------
 
@@ -179,19 +180,24 @@ CREATE TABLE `schools` (
   `phone` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL,
   `description` text DEFAULT NULL,
-  `logo` varchar(255) DEFAULT NULL
+  `logo` varchar(255) DEFAULT NULL,
+  `profile_picture` varchar(255) DEFAULT NULL,
+  `npsn` varchar(20) DEFAULT NULL,
+  `website` varchar(255) DEFAULT NULL,
+  `photo_path` varchar(255) DEFAULT NULL,
+  `founded_year` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `schools`
 --
 
-INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `created_at`, `email`, `phone`, `address`, `description`, `logo`) VALUES
-(1, 'Contoh Sekolah', 'contoh-sekolah', 'pending', NULL, '2026-01-12 06:24:19', NULL, NULL, NULL, NULL, NULL),
-(2, 'SMK BINA MANDIRI MULTIMEDIA', 'smk-bina-mandiri-multimedia', 'active', NULL, '2026-01-12 06:44:08', NULL, NULL, NULL, NULL, NULL),
-(4, 'smp menang 01', 'smp-menang-01', 'pending', NULL, '2026-01-13 01:53:13', NULL, NULL, NULL, NULL, NULL),
-(5, 'smk ahay', 'smk-ahay', 'pending', NULL, '2026-01-13 06:47:10', NULL, NULL, NULL, NULL, NULL),
-(7, 'smk bm3', 'smk-bm3', 'pending', NULL, '2026-01-19 01:33:26', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `created_at`, `email`, `phone`, `address`, `description`, `logo`, `profile_picture`, `npsn`, `website`, `photo_path`, `founded_year`) VALUES
+(1, 'Contoh Sekolah', 'contoh-sekolah', 'pending', NULL, '2026-01-12 06:24:19', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, 'SMK BINA MANDIRI MULTIMEDIA', 'smk-bina-mandiri-multimedia', 'active', NULL, '2026-01-12 06:44:08', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'public/uploads/school-photos/school_1768963427_69703d63a07d0.png', NULL),
+(4, 'smp menang 01', 'smp-menang-01', 'pending', NULL, '2026-01-13 01:53:13', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(5, 'smk ahay', 'smk-ahay', 'pending', NULL, '2026-01-13 06:47:10', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'public/uploads/school-photos/school_1768963474_69703d92e1902.png', NULL),
+(7, 'smk bm3', 'smk-bm3', 'pending', NULL, '2026-01-19 01:33:26', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -215,7 +221,7 @@ CREATE TABLE `school_themes` (
 
 INSERT INTO `school_themes` (`id`, `school_id`, `theme_name`, `custom_colors`, `typography`, `created_at`, `updated_at`) VALUES
 (1, 1, 'dark', '{\"color-text\":\"#ffffff\",\"color-muted\":\"#aabbcc\",\"color-accent\":\"#ff0000\",\"color-danger\":\"#dd0000\",\"color-success\":\"#00ff00\",\"color-border\":\"#0000ff\"}', '{\"font-family\":\"Georgia\",\"font-weight\":\"700\"}', '2026-01-15 03:04:29', '2026-01-15 03:24:34'),
-(2, 2, 'blue', NULL, NULL, '2026-01-15 03:04:29', '2026-01-20 01:45:27'),
+(2, 2, 'light', NULL, NULL, '2026-01-15 03:04:29', '2026-01-21 01:18:41'),
 (4, 5, 'indigo', NULL, NULL, '2026-01-15 03:05:01', '2026-01-15 04:14:18'),
 (7, 4, 'purple', '{\"color-text\":\"#6b21a8\",\"color-muted\":\"#c084fc\",\"color-accent\":\"#d946ef\",\"color-danger\":\"#dc2626\",\"color-success\":\"#a855f7\",\"color-border\":\"#0000FF\"}', '{\"font-family\":\"Merriweather\",\"font-weight\":\"900\"}', '2026-01-15 03:07:50', '2026-01-15 03:13:44'),
 (18, 7, 'green', NULL, NULL, '2026-01-19 01:37:02', '2026-01-20 07:04:24');
@@ -281,7 +287,8 @@ INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `ro
 (4, 5, 'saya', 'saya@gmail.com', NULL, '$2y$10$doKWQAmV8KM5GLIUC5lHB.nk6MbiubNWq32EWDZohp8BR1mroFblm', 'admin', '2026-01-13 06:47:10'),
 (5, 7, 'someone', 'uya4767@gmail.com', NULL, '$2y$10$K7P1nbWS6EqrF69R39PZ5udKqxckTUMDnUDftvP2UmJI.Cvbhfs7y', 'admin', '2026-01-19 01:33:26'),
 (6, 2, 'Anjali Saputra', 'anjalisaputra@gmail.com', '111111', '$2y$10$qAC3LyD.kq/jFmdqOVvOTu8OzkX6e8xLxfnBisb.hWoXYj0qOebKy', 'student', '2026-01-19 07:37:05'),
-(7, 2, 'Surya', 'saya@gmail.com', '222222', '$2y$10$cN.EPRDjv3Us66bGdnZ5e.RDqFc7CnYAoh7Srfa1cm06Ey9546302', 'student', '2026-01-20 01:31:31');
+(7, 2, 'Surya', 'saya@gmail.com', '222222', '$2y$10$cN.EPRDjv3Us66bGdnZ5e.RDqFc7CnYAoh7Srfa1cm06Ey9546302', 'student', '2026-01-20 01:31:31'),
+(8, 5, 'surya ali rafsanjani pkl', 'sta@gmail.com', '121212', '$2y$10$SfhCn0ZCGKg8rq26FiguFexzRw85SrU18jfYxgROFfkKfamD0hCaa', 'student', '2026-01-20 07:20:17');
 
 --
 -- Indexes for dumped tables
@@ -338,7 +345,9 @@ ALTER TABLE `notifikasi` ADD FULLTEXT KEY `ft_search` (`judul`,`pesan`);
 ALTER TABLE `schools`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `slug` (`slug`),
-  ADD KEY `idx_schools_status` (`status`);
+  ADD KEY `idx_schools_status` (`status`),
+  ADD KEY `idx_slug` (`slug`),
+  ADD KEY `idx_status` (`status`);
 
 --
 -- Indexes for table `school_themes`
@@ -391,7 +400,7 @@ ALTER TABLE `borrows`
 -- AUTO_INCREMENT for table `members`
 --
 ALTER TABLE `members`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
@@ -421,7 +430,7 @@ ALTER TABLE `siswa`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Constraints for dumped tables
