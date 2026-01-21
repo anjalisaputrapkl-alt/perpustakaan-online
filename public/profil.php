@@ -162,14 +162,13 @@ try {
                 // No siswa record exists - create new with matching id and nisn
                 $insert = $pdo->prepare("
                     INSERT INTO siswa 
-                    (id_siswa, nama_lengkap, nisn, nis, email, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, NOW(), NOW())
+                    (id_siswa, nama_lengkap, nisn, email, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, NOW(), NOW())
                 ");
                 $insert->execute([
                     $userId,
                     $member['name'],
                     $member['nisn'],
-                    $member['member_no'],
                     $member['email']
                 ]);
             }

@@ -212,6 +212,12 @@ $pageTitle = 'Koleksi Favorit';
             color: white;
         }
 
+        .nav-sidebar-divider {
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 16px 0;
+        }
+
         /* Hamburger Menu Button */
         .nav-toggle {
             display: none;

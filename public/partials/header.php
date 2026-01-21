@@ -219,7 +219,29 @@ function _is_active($path, $current)
     height: 16px;
     flex-shrink: 0;
   }
+</style>
 
+<script>
+  // Tampilkan animasi header hanya di kunjungan pertama
+  document.addEventListener('DOMContentLoaded', function () {
+    const header = document.querySelector('.header');
+    const isFirstVisit = !sessionStorage.getItem('adminHeaderAnimated');
+
+    if (!isFirstVisit) {
+      // Jika bukan kunjungan pertama, hapus animasi
+      const allElements = header.querySelectorAll('*');
+      header.style.animation = 'none';
+      allElements.forEach(el => {
+        el.style.animation = 'none';
+      });
+    }
+
+    // Tandai bahwa header sudah ditampilkan
+    sessionStorage.setItem('adminHeaderAnimated', 'true');
+  });
+</script>
+
+<style>
   @media (max-width: 768px) {
     .header {
       margin-left: 0;

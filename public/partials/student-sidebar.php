@@ -37,6 +37,15 @@ if (isset($_SESSION['user'])) {
 }
 ?>
 
+<style>
+    /* Remove entrance animation on responsive screens */
+    @media (max-width: 768px) {
+        .nav-sidebar {
+            animation: none !important;
+        }
+    }
+</style>
+
 <!-- Navigation Sidebar -->
 <aside class="nav-sidebar" id="navSidebar">
     <!-- School Profile Header -->
@@ -144,3 +153,23 @@ if (isset($_SESSION['user'])) {
         </li>
     </ul>
 </aside>
+
+<script>
+    // Tampilkan animasi hanya di kunjungan pertama
+    document.addEventListener('DOMContentLoaded', function () {
+        const navSidebar = document.getElementById('navSidebar');
+        const isFirstVisit = !sessionStorage.getItem('sidebarAnimated');
+
+        if (!isFirstVisit) {
+            // Jika bukan kunjungan pertama, hapus animasi
+            const allElements = navSidebar.querySelectorAll('*');
+            navSidebar.style.animation = 'none';
+            allElements.forEach(el => {
+                el.style.animation = 'none';
+            });
+        }
+
+        // Tandai bahwa sidebar sudah ditampilkan
+        sessionStorage.setItem('sidebarAnimated', 'true');
+    });
+</script>

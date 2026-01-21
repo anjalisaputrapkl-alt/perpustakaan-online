@@ -399,6 +399,24 @@ function _is_active_sidebar($path, $current)
 </nav>
 
 <script>
+    // Tampilkan animasi sidebar hanya di kunjungan pertama
+    document.addEventListener('DOMContentLoaded', function () {
+        const navSidebar = document.getElementById('navSidebar');
+        const isFirstVisit = !sessionStorage.getItem('adminSidebarAnimated');
+
+        if (!isFirstVisit) {
+            // Jika bukan kunjungan pertama, hapus animasi
+            const allElements = navSidebar.querySelectorAll('*');
+            navSidebar.style.animation = 'none';
+            allElements.forEach(el => {
+                el.style.animation = 'none';
+            });
+        }
+
+        // Tandai bahwa sidebar sudah ditampilkan
+        sessionStorage.setItem('adminSidebarAnimated', 'true');
+    });
+
     // Make sidebar links respond to active page
     document.querySelectorAll('.nav-link').forEach(link => {
         if (link.classList.contains('active')) {
