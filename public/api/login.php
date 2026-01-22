@@ -115,6 +115,14 @@ if ($user_type === 'student') {
             exit;
         }
 
+        // Check if email verified
+        if (isset($user['is_verified']) && !$user['is_verified']) {
+            error_log("LOGIN FAILED: Email belum diverifikasi untuk '$email'");
+            http_response_code(401);
+            echo json_encode(['success' => false, 'message' => 'Silakan verifikasi email Anda terlebih dahulu']);
+            exit;
+        }
+
         if (!password_verify($password, $user['password'])) {
             error_log("LOGIN FAILED: Password tidak match untuk email '$email'");
             http_response_code(401);

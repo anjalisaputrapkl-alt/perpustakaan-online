@@ -644,6 +644,53 @@
       </div>
     </div>
 
+    <!-- EMAIL VERIFICATION MODAL -->
+    <div id="verificationModal" class="modal" onclick="closeVerificationModal(event)">
+      <div class="modal-content verification-modal-content" onclick="event.stopPropagation()">
+        <button class="modal-close" onclick="closeVerificationModal()">&times;</button>
+
+        <div class="verification-icon">✉️</div>
+        <h2 class="verification-title">Verifikasi Email Anda</h2>
+        <p class="verification-subtitle">Kode verifikasi telah dikirim ke email Anda</p>
+
+        <div class="verification-email-info">
+          Kode dikirim ke: <strong id="verificationEmail"></strong>
+        </div>
+
+        <div class="verification-error" id="verificationError"></div>
+        <div class="verification-success" id="verificationSuccess">✓ Verifikasi berhasil! Mengalihkan...</div>
+
+        <form id="verificationForm" style="display: flex; flex-direction: column;">
+          <input type="hidden" id="verificationUserId" name="user_id">
+
+          <label style="font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 12px;">Masukkan Kode
+            Verifikasi (6 digit)</label>
+
+          <div class="code-input-group">
+            <input type="text" class="code-input" id="code1" maxlength="1" inputmode="numeric" required>
+            <input type="text" class="code-input" id="code2" maxlength="1" inputmode="numeric" required>
+            <input type="text" class="code-input" id="code3" maxlength="1" inputmode="numeric" required>
+            <input type="text" class="code-input" id="code4" maxlength="1" inputmode="numeric" required>
+            <input type="text" class="code-input" id="code5" maxlength="1" inputmode="numeric" required>
+            <input type="text" class="code-input" id="code6" maxlength="1" inputmode="numeric" required>
+          </div>
+
+          <div class="verification-info-box">
+            <strong>💡 Tip:</strong> Kode verifikasi terdiri dari 6 digit angka yang telah dikirim ke email Anda. Kode
+            berlaku selama 15 menit.
+          </div>
+
+          <button type="submit" class="btn-verify">Verifikasi Email</button>
+        </form>
+
+        <div class="verification-resend">
+          <span class="verification-timer">Kode kadaluarsa dalam <span id="timerMinutes">15</span>:<span
+              id="timerSeconds">00</span></span>
+          <button type="button" class="btn-resend" id="resendBtn" disabled>Kirim Ulang</button>
+        </div>
+      </div>
+    </div>
+
     <script>
       // Check if login is required and auto-open modal
       if (new URLSearchParams(window.location.search).get('login_required') === '1') {
@@ -735,9 +782,12 @@
                 : 'public/index.php';
               window.location.href = redirectUrl;
             } else {
-              alert(data.message || 'Login gagal');
+              // Show detailed error message
+              console.error('Login Error:', data);
+              alert(data.message || 'Login gagal. Silakan coba lagi.');
             }
           } catch (error) {
+            console.error('Login Request Error:', error);
             alert('Terjadi kesalahan: ' + error.message);
           }
         }
@@ -772,22 +822,210 @@
         const formData = new FormData(e.target);
 
         try {
+          console.log('Submitting registration form...');
           const response = await fetch('public/api/register.php', {
             method: 'POST',
             body: formData
           });
 
-          const data = await response.json();
-          if (data.success) {
-            alert('Pendaftaran berhasil! Silakan login dengan akun Anda.');
-            closeRegisterModal();
-            openLoginModal();
-          } else {
-            alert(data.message || 'Pendaftaran gagal');
+          console.log('Response status:', response.status);
+          console.log('Response headers:', response.headers);
+
+          const text = await response.text();
+          console.log('Raw response:', text);
+
+          try {
+            const data = JSON.parse(text);
+            if (data.success) {
+              // Tutup register modal dan buka verification modal
+              closeRegisterModal();
+
+              // Log code untuk development
+              console.log('✅ Registrasi berhasil!');
+              console.log('User ID:', data.user_id);
+              console.log('Email:', data.email);
+              console.log('📧 VERIFICATION CODE:', data.verification_code);
+              console.log('⚠️ Copy kode di atas dan masukkan ke form verifikasi');
+
+              openVerificationModal(data.user_id, data.email, data.verification_code);
+            } else {
+              alert(data.message || 'Pendaftaran gagal');
+            }
+          } catch (parseError) {
+            console.error('JSON Parse Error:', parseError);
+            console.error('Response was:', text);
+            alert('Kesalahan respons dari server: ' + text.substring(0, 200));
           }
         } catch (error) {
+          console.error('Fetch Error:', error);
           alert('Terjadi kesalahan: ' + error.message);
         }
+      });
+
+      // ====== EMAIL VERIFICATION FUNCTIONS ======
+      let verificationTimer = null;
+      let remainingTime = 15 * 60; // 15 minutes in seconds
+
+      function openVerificationModal(userId, email, verificationCode) {
+        document.getElementById('verificationUserId').value = userId;
+        document.getElementById('verificationEmail').textContent = email;
+        document.getElementById('verificationModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        // Show verification code in modal for development
+        if (verificationCode) {
+          const codeDisplay = document.createElement('div');
+          codeDisplay.style.cssText = 'background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin: 15px 0; text-align: center;';
+          codeDisplay.innerHTML = `
+            <p style="color: #856404; margin: 0 0 8px 0; font-size: 12px;">KODE VERIFIKASI (untuk development):</p>
+            <div style="font-size: 32px; font-weight: bold; color: #ffc107; letter-spacing: 4px; font-family: 'Courier New', monospace;">${verificationCode}</div>
+            <p style="color: #856404; margin: 8px 0 0 0; font-size: 11px;">Copy kode di atas dan masukkan ke input field</p>
+          `;
+          const formContainer = document.querySelector('.verification-modal-content form');
+          formContainer.parentNode.insertBefore(codeDisplay, formContainer);
+        }
+
+        // Reset form
+        document.querySelectorAll('.code-input').forEach(input => {
+          input.value = '';
+          input.classList.remove('error');
+        });
+        document.getElementById('verificationError').classList.remove('show');
+        document.getElementById('verificationSuccess').classList.remove('show');
+
+        // Start countdown timer
+        startVerificationTimer();
+      }
+
+      function closeVerificationModal(e) {
+        if (e && e.target.id !== 'verificationModal') return;
+        document.getElementById('verificationModal').style.display = 'none';
+        document.body.style.overflow = 'auto';
+        if (verificationTimer) clearInterval(verificationTimer);
+      }
+
+      function startVerificationTimer() {
+        remainingTime = 15 * 60;
+        if (verificationTimer) clearInterval(verificationTimer);
+
+        verificationTimer = setInterval(() => {
+          remainingTime--;
+          const minutes = Math.floor(remainingTime / 60);
+          const seconds = remainingTime % 60;
+
+          document.getElementById('timerMinutes').textContent = String(minutes).padStart(2, '0');
+          document.getElementById('timerSeconds').textContent = String(seconds).padStart(2, '0');
+
+          // Enable resend button at 1 minute mark
+          if (remainingTime <= 60 && remainingTime > 0) {
+            document.getElementById('timerMinutes').parentElement.classList.add('expires-soon');
+            document.getElementById('resendBtn').disabled = false;
+          }
+
+          // Time expired
+          if (remainingTime <= 0) {
+            clearInterval(verificationTimer);
+            document.getElementById('verificationError').classList.add('show');
+            document.getElementById('verificationError').textContent = 'Kode verifikasi telah kadaluarsa. Silakan daftar ulang.';
+            document.querySelectorAll('.code-input').forEach(input => input.disabled = true);
+            document.querySelector('.btn-verify').disabled = true;
+          }
+        }, 1000);
+      }
+
+      // Handle code input auto-focus
+      document.querySelectorAll('.code-input').forEach((input, index) => {
+        input.addEventListener('input', (e) => {
+          // Clear error on input
+          document.getElementById('verificationError').classList.remove('show');
+          input.classList.remove('error');
+
+          // Only allow numbers
+          e.target.value = e.target.value.replace(/[^0-9]/g, '');
+
+          // Auto focus to next input
+          if (e.target.value && index < 5) {
+            document.getElementById('code' + (index + 2)).focus();
+          }
+        });
+
+        input.addEventListener('keydown', (e) => {
+          // Handle backspace
+          if (e.key === 'Backspace' && !input.value && index > 0) {
+            document.getElementById('code' + index).focus();
+          }
+        });
+      });
+
+      // Handle verification form submission
+      document.getElementById('verificationForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Get verification code from inputs
+        const codeInputs = document.querySelectorAll('.code-input');
+        const verificationCode = Array.from(codeInputs).map(input => input.value).join('');
+
+        // Validate
+        if (verificationCode.length !== 6) {
+          document.getElementById('verificationError').classList.add('show');
+          document.getElementById('verificationError').textContent = 'Silakan masukkan 6 digit kode verifikasi';
+          codeInputs.forEach(input => input.classList.add('error'));
+          return;
+        }
+
+        const userId = document.getElementById('verificationUserId').value;
+        const submitBtn = document.querySelector('.btn-verify');
+
+        // Show loading state
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        try {
+          const formData = new FormData();
+          formData.append('user_id', userId);
+          formData.append('verification_code', verificationCode);
+
+          const response = await fetch('public/api/verify-email.php', {
+            method: 'POST',
+            body: formData
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Show success message
+            document.getElementById('verificationSuccess').classList.add('show');
+            clearInterval(verificationTimer);
+
+            // Redirect after 2 seconds
+            setTimeout(() => {
+              window.location.href = 'public/' + data.redirect_url;
+            }, 2000);
+          } else {
+            // Show error
+            document.getElementById('verificationError').classList.add('show');
+            document.getElementById('verificationError').textContent = data.message || 'Verifikasi gagal';
+
+            // Add error state to inputs
+            codeInputs.forEach(input => input.classList.add('error'));
+
+            // Reset button
+            submitBtn.classList.remove('loading');
+            submitBtn.disabled = false;
+          }
+        } catch (error) {
+          document.getElementById('verificationError').classList.add('show');
+          document.getElementById('verificationError').textContent = 'Terjadi kesalahan: ' + error.message;
+          submitBtn.classList.remove('loading');
+          submitBtn.disabled = false;
+        }
+      });
+
+      // Resend verification code button (implementation for future enhancement)
+      document.getElementById('resendBtn').addEventListener('click', async (e) => {
+        e.preventDefault();
+        // Implementation untuk mengirim ulang kode
+        alert('Fitur mengirim ulang kode akan segera tersedia');
       });
 
       // Stat Counter Animation
