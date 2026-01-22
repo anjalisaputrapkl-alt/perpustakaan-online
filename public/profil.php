@@ -114,105 +114,87 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
     }
 }
 
-// First, sync data from members to siswa
+// First, get user data from users table (source of truth for login)
 try {
-    // Get data from members using ID (from session)
     $stmt = $pdo->prepare("
-        SELECT id, name, nisn, member_no, email, status, created_at
-        FROM members 
+        SELECT id, school_id, name, nisn, email, role, is_verified, created_at
+        FROM users 
         WHERE id = ? AND school_id = ?
     ");
     $stmt->execute([$userId, $schoolId]);
-    $member = $stmt->fetch(PDO::FETCH_ASSOC);
+    $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($member) {
-        // IMPORTANT: Use id_siswa = id AND nisn = nisn to prevent mismatch
-        $check = $pdo->prepare("SELECT id_siswa FROM siswa WHERE id_siswa = ? AND nisn = ?");
-        $check->execute([$userId, $member['nisn']]);
-        $exists = $check->fetch();
+    if (!$userData) {
+        die("User tidak ditemukan. Hubungi administrator.");
+    }
+} catch (Exception $e) {
+    error_log('Error fetching user: ' . $e->getMessage());
+    die("Terjadi kesalahan saat memuat data pengguna.");
+}
 
-        if ($exists) {
-            // Record exists and NISN matches - safe to update
-            $update = $pdo->prepare("
-                UPDATE siswa 
-                SET 
-                    nama_lengkap = ?,
-                    email = ?,
-                    updated_at = NOW()
-                WHERE id_siswa = ? AND nisn = ?
+// Now try to get extended profile from siswa table
+// If not exists, create from user data
+try {
+    $stmt = $pdo->prepare("
+        SELECT 
+            id_siswa, nama_lengkap, nisn, kelas, jurusan,
+            tanggal_lahir, jenis_kelamin, alamat, email, no_hp, foto,
+            created_at, updated_at
+        FROM siswa
+        WHERE id_siswa = ?
+    ");
+    $stmt->execute([$userId]);
+    $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // If siswa record doesn't exist, create one from user data
+    if (!$siswa) {
+        try {
+            $insert = $pdo->prepare("
+                INSERT INTO siswa 
+                (id_siswa, nama_lengkap, nisn, email, created_at, updated_at)
+                VALUES (?, ?, ?, ?, NOW(), NOW())
             ");
-            $update->execute([
-                $member['name'],
-                $member['email'],
+            $insert->execute([
                 $userId,
-                $member['nisn']
+                $userData['name'],
+                $userData['nisn'],
+                $userData['email']
             ]);
-        } else {
-            // Check if any siswa record exists for this ID
-            $checkAny = $pdo->prepare("SELECT id_siswa, nisn FROM siswa WHERE id_siswa = ?");
-            $checkAny->execute([$userId]);
-            $existingSiswa = $checkAny->fetch();
 
-            if ($existingSiswa) {
-                // Siswa exists but NISN doesn't match - THIS IS A PROBLEM
-                error_log("DATA INTEGRITY ERROR: Siswa ID=$userId has NISN=" . $existingSiswa['nisn'] . " but member has NISN=" . $member['nisn']);
-                // Don't update - this needs manual intervention
-                $error_message = "⚠️ Terjadi kesalahan data integritas. Hubungi administrator (Error: NISN mismatch for ID " . $userId . ")";
-            } else {
-                // No siswa record exists - create new with matching id and nisn
-                $insert = $pdo->prepare("
-                    INSERT INTO siswa 
-                    (id_siswa, nama_lengkap, nisn, email, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, NOW(), NOW())
-                ");
-                $insert->execute([
-                    $userId,
-                    $member['name'],
-                    $member['nisn'],
-                    $member['email']
-                ]);
-            }
+            // Fetch the newly created record
+            $stmt = $pdo->prepare("
+                SELECT 
+                    id_siswa, nama_lengkap, nisn, kelas, jurusan,
+                    tanggal_lahir, jenis_kelamin, alamat, email, no_hp, foto,
+                    created_at, updated_at
+                FROM siswa
+                WHERE id_siswa = ?
+            ");
+            $stmt->execute([$userId]);
+            $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            error_log('Error creating siswa record: ' . $e->getMessage());
+            // Fallback: use user data
+            $siswa = [
+                'id_siswa' => $userData['id'],
+                'nama_lengkap' => $userData['name'],
+                'nisn' => $userData['nisn'],
+                'email' => $userData['email'],
+                'kelas' => null,
+                'jurusan' => null,
+                'tanggal_lahir' => null,
+                'jenis_kelamin' => null,
+                'alamat' => null,
+                'no_hp' => null,
+                'foto' => null,
+                'created_at' => $userData['created_at'],
+                'updated_at' => null
+            ];
         }
     }
 } catch (Exception $e) {
-    // Silent sync error, continue with display
-    error_log('Sync error: ' . $e->getMessage());
-}
-
-// Now get data from siswa table for display
-// CRITICAL: Must verify this is the correct student by checking NISN
-$stmt = $pdo->prepare("
-    SELECT 
-        id_siswa, nama_lengkap, nisn, kelas, jurusan,
-        tanggal_lahir, jenis_kelamin, alamat, email, no_hp, foto,
-        created_at, updated_at
-    FROM siswa
-    WHERE id_siswa = ?
-");
-$stmt->execute([$userId]);
-$siswa = $stmt->fetch(PDO::FETCH_ASSOC);
-
-if (!$siswa) {
-    die("Profil siswa tidak ditemukan. Hubungi administrator.");
-}
-
-// SECURITY CHECK: Verify this siswa actually belongs to this user's school
-// by checking against member data
-try {
-    $memberVerify = $pdo->prepare("
-        SELECT nisn FROM members WHERE id = ? AND school_id = ?
-    ");
-    $memberVerify->execute([$userId, $schoolId]);
-    $memberData = $memberVerify->fetch(PDO::FETCH_ASSOC);
-
-    if ($memberData && $memberData['nisn'] !== $siswa['nisn']) {
-        // NISN mismatch - user is trying to access wrong profile!
-        error_log("SECURITY: User ID=$userId school_id=$schoolId has NISN mismatch. Member NISN=" . $memberData['nisn'] . " but siswa NISN=" . $siswa['nisn']);
-        die("⚠️ Terjadi kesalahan data. Silakan logout dan login kembali.");
-    }
-} catch (Exception $e) {
-    error_log('Verification error: ' . $e->getMessage());
-    // Continue anyway - might be member hasn't synced yet
+    error_log('Error fetching siswa: ' . $e->getMessage());
+    die("Terjadi kesalahan saat memuat profil.");
 }
 
 // Format dates

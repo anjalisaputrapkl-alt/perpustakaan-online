@@ -1,8 +1,27 @@
 <?php
 session_start();
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
-$pdo = require __DIR__ . '/../../src/db.php';
+// Catch any output before JSON
+ob_start();
+
+try {
+    $pdo = require __DIR__ . '/../../src/db.php';
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed: ' . $e->getMessage()]);
+    exit;
+}
+
+try {
+    require __DIR__ . '/../../src/EmailHelper.php';
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'EmailHelper load failed: ' . $e->getMessage()]);
+    exit;
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(400);
@@ -43,20 +62,40 @@ try {
     $stmt->execute(['name' => $school_name, 'slug' => $slug]);
     $school_id = $pdo->lastInsertId();
 
-    // Create admin user
+    // Generate verification code
+    $verification_code = generateVerificationCode();
+
+    // Create admin user dengan status is_verified = 0
     $password_hash = password_hash($admin_password, PASSWORD_DEFAULT);
-    $stmt = $pdo->prepare('INSERT INTO users (school_id, name, email, password, role) VALUES (:school_id, :name, :email, :password, "admin")');
+    $stmt = $pdo->prepare(
+        'INSERT INTO users (school_id, name, email, password, verification_code, is_verified, role) 
+         VALUES (:school_id, :name, :email, :password, :verification_code, 0, "admin")'
+    );
     $stmt->execute([
         'school_id' => $school_id,
         'name' => $admin_name,
         'email' => $admin_email,
-        'password' => $password_hash
+        'password' => $password_hash,
+        'verification_code' => $verification_code
     ]);
+    $user_id = $pdo->lastInsertId();
 
-    echo json_encode(['success' => true, 'message' => 'Pendaftaran berhasil']);
+    // Send verification email
+    $email_sent = sendVerificationEmail($admin_email, $school_name, $admin_name, $verification_code);
+
+    // Even if email fails, continue - we've logged it
+    // Return user_id, email, and verification code for frontend verification modal
+    echo json_encode([
+        'success' => true,
+        'message' => 'Pendaftaran berhasil. Silakan verifikasi email Anda.',
+        'user_id' => $user_id,
+        'email' => $admin_email,
+        'verification_code' => $verification_code
+    ]);
     exit;
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan server']);
+    echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan server: ' . $e->getMessage()]);
     exit;
 }
+?>

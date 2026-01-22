@@ -56,12 +56,69 @@ try {
         }
     }
 
-    // 3. Show final schema
+    // 3. Email Verification columns migration
     echo "═══════════════════════════════════════════\n";
-    echo "📋 Current Schools Table Schema:\n";
+    echo "📧 Email Verification System Migration\n";
     echo "═══════════════════════════════════════════\n\n";
 
-    $stmt = $pdo->query("SHOW COLUMNS FROM schools");
+    // Check verification_code column
+    $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'verification_code'");
+    if ($stmt->rowCount() === 0) {
+        echo "⏳ Adding verification_code column...\n";
+        $pdo->exec("ALTER TABLE users ADD COLUMN verification_code VARCHAR(10) NULL AFTER password");
+        echo "✅ verification_code column added\n";
+    } else {
+        echo "ℹ️  verification_code column already exists\n";
+    }
+
+    // Check is_verified column
+    $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'is_verified'");
+    if ($stmt->rowCount() === 0) {
+        echo "⏳ Adding is_verified column...\n";
+        $pdo->exec("ALTER TABLE users ADD COLUMN is_verified TINYINT(1) DEFAULT 0 AFTER verification_code");
+        echo "✅ is_verified column added\n";
+    } else {
+        echo "ℹ️  is_verified column already exists\n";
+    }
+
+    // Check verified_at column
+    $stmt = $pdo->query("SHOW COLUMNS FROM users LIKE 'verified_at'");
+    if ($stmt->rowCount() === 0) {
+        echo "⏳ Adding verified_at column...\n";
+        $pdo->exec("ALTER TABLE users ADD COLUMN verified_at TIMESTAMP NULL AFTER is_verified");
+        echo "✅ verified_at column added\n";
+    } else {
+        echo "ℹ️  verified_at column already exists\n";
+    }
+
+    // Add index for verification_code
+    $indexes = $pdo->query("SHOW INDEX FROM users WHERE Column_name='verification_code'")->fetchAll();
+    if (empty($indexes)) {
+        echo "⏳ Adding index for verification_code...\n";
+        $pdo->exec("ALTER TABLE users ADD INDEX idx_verification_code (verification_code)");
+        echo "✅ Index added for verification_code\n";
+    } else {
+        echo "ℹ️  Index for verification_code already exists\n";
+    }
+
+    // Add index for is_verified
+    $indexes = $pdo->query("SHOW INDEX FROM users WHERE Column_name='is_verified'")->fetchAll();
+    if (empty($indexes)) {
+        echo "⏳ Adding index for is_verified...\n";
+        $pdo->exec("ALTER TABLE users ADD INDEX idx_is_verified (is_verified)");
+        echo "✅ Index added for is_verified\n";
+    } else {
+        echo "ℹ️  Index for is_verified already exists\n";
+    }
+
+    echo "\n";
+
+    // 4. Show final schema
+    echo "═══════════════════════════════════════════\n";
+    echo "📋 Current Users Table Schema:\n";
+    echo "═══════════════════════════════════════════\n\n";
+
+    $stmt = $pdo->query("SHOW COLUMNS FROM users");
     $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($columns as $col) {
@@ -70,12 +127,13 @@ try {
         printf("%-20s %-30s %s\n", $col['Field'], $type, $null);
     }
 
-    echo "\n✅ Migration completed successfully!\n";
-
+    echo "\n✅ All migrations completed successfully!\n";
+} catch (PDOException $e) {
+    echo "❌ Database Error: " . $e->getMessage() . "\n";
+    echo "Error Code: " . $e->getCode() . "\n";
 } catch (Exception $e) {
     echo "❌ Error: " . $e->getMessage() . "\n";
-    echo "\nStack trace:\n";
-    echo $e->getTraceAsString();
 }
 
 echo "</pre>";
+?>
