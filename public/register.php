@@ -13,6 +13,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $errors[] = 'Semua field wajib diisi.';
   }
 
+  // Validasi email harus menggunakan domain @sch.id
+  if (!empty($admin_email) && !preg_match('/@sch\.id$/', $admin_email)) {
+    $errors[] = 'Email harus menggunakan domain @sch.id (contoh: admin@sch.id)';
+  }
+
   if (empty($errors)) {
     try {
       // create slug
@@ -85,7 +90,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <div class="form-group">
           <label for="admin_email">Email Admin</label>
-          <input id="admin_email" name="admin_email" type="email" required placeholder="admin@sekolah.com">
+          <input id="admin_email" name="admin_email" type="email" required placeholder="admin@sch.id"
+            pattern=".*@sch\.id$" title="Email harus menggunakan domain @sch.id">
+          <small style="color: var(--text-muted); display: block; margin-top: 6px; font-size: 12px;">ⓘ Email harus
+            menggunakan domain @sch.id (contoh: admin@sch.id)</small>
         </div>
         <div class="form-group">
           <label for="admin_password">Password Admin</label>
@@ -93,6 +101,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
         <button type="submit" class="btn" style="width: 100%; justify-content: center;">✓ Daftarkan Sekolah</button>
       </form>
+
+      <script>
+        // Validasi real-time untuk email
+        const emailInput = document.getElementById('admin_email');
+        const form = document.querySelector('form');
+
+        emailInput.addEventListener('input', function () {
+          const email = this.value.trim();
+          if (email && !email.endsWith('@sch.id')) {
+            this.setCustomValidity('Email harus menggunakan domain @sch.id');
+          } else {
+            this.setCustomValidity('');
+          }
+        });
+
+        // Validasi saat submit
+        form.addEventListener('submit', function (e) {
+          const email = emailInput.value.trim();
+          if (!email.endsWith('@sch.id')) {
+            e.preventDefault();
+            emailInput.setCustomValidity('Email harus menggunakan domain @sch.id');
+            emailInput.reportValidity();
+          }
+        });
+      </script>
 
       <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border);">
         <p style="margin: 0 0 12px 0; color: var(--text-muted); font-size: 13px;">Sudah punya akun?</p>

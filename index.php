@@ -622,7 +622,10 @@
 
           <div class="form-group">
             <label>Email Admin</label>
-            <input type="email" name="admin_email" required placeholder="admin@sekolah.com">
+            <input type="email" name="admin_email" required placeholder="admin@sch.id" pattern=".*@sch\.id$"
+              title="Email harus menggunakan domain @sch.id">
+            <small style="color: #6b7280; display: block; margin-top: 6px; font-size: 11px;">ⓘ Email harus menggunakan
+              domain @sch.id</small>
           </div>
 
           <div class="form-group">
@@ -756,6 +759,16 @@
       // Handle register form submission
       document.getElementById('registerForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+        const emailInput = document.querySelector('#registerForm input[name="admin_email"]');
+        const email = emailInput.value.trim();
+
+        // Validasi email harus @sch.id
+        if (!email.endsWith('@sch.id')) {
+          emailInput.setCustomValidity('Email harus menggunakan domain @sch.id');
+          emailInput.reportValidity();
+          return;
+        }
+
         const formData = new FormData(e.target);
 
         try {
