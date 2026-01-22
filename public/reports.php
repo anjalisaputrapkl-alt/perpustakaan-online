@@ -4,17 +4,18 @@ require __DIR__ . '/../src/auth.php';
 requireAuth();
 
 $pdo = $pdo;
+$schoolId = (int) $_SESSION['user']['school_id'];
 
 // Summary stats
-$tot_books = (int) $pdo->query('SELECT COUNT(*) FROM books')->fetchColumn();
-$tot_borrows_month = (int) $pdo->query("SELECT COUNT(*) FROM borrows WHERE MONTH(borrowed_at) = MONTH(CURRENT_DATE()) AND YEAR(borrowed_at)=YEAR(CURRENT_DATE())")->fetchColumn();
-$tot_returns_month = (int) $pdo->query("SELECT COUNT(*) FROM borrows WHERE returned_at IS NOT NULL AND MONTH(returned_at)=MONTH(CURRENT_DATE()) AND YEAR(returned_at)=YEAR(CURRENT_DATE())")->fetchColumn();
-$active_members = (int) $pdo->query("SELECT COUNT(DISTINCT member_id) FROM borrows WHERE borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)")->fetchColumn();
+$tot_books = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = $schoolId")->fetchColumn();
+$tot_borrows_month = (int) $pdo->query("SELECT COUNT(*) FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND MONTH(br.borrowed_at) = MONTH(CURRENT_DATE()) AND YEAR(br.borrowed_at)=YEAR(CURRENT_DATE())")->fetchColumn();
+$tot_returns_month = (int) $pdo->query("SELECT COUNT(*) FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.returned_at IS NOT NULL AND MONTH(br.returned_at)=MONTH(CURRENT_DATE()) AND YEAR(br.returned_at)=YEAR(CURRENT_DATE())")->fetchColumn();
+$active_members = (int) $pdo->query("SELECT COUNT(DISTINCT br.member_id) FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)")->fetchColumn();
 
 // Total fines
 $per_day = 1000;
 $fines = 0;
-$rows = $pdo->query("SELECT due_at, returned_at FROM borrows WHERE due_at IS NOT NULL AND (returned_at IS NOT NULL OR CURRENT_DATE() > due_at)")->fetchAll();
+$rows = $pdo->query("SELECT br.due_at, br.returned_at FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.due_at IS NOT NULL AND (br.returned_at IS NOT NULL OR CURRENT_DATE() > br.due_at)")->fetchAll();
 foreach ($rows as $r) {
   $due = new DateTime($r['due_at']);
   $returned = $r['returned_at'] ? new DateTime($r['returned_at']) : new DateTime();
@@ -24,8 +25,8 @@ foreach ($rows as $r) {
 }
 
 // Trend
-$trendStmt = $pdo->prepare("SELECT DATE(borrowed_at) as d, COUNT(*) as c FROM borrows WHERE borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 29 DAY) GROUP BY DATE(borrowed_at) ORDER BY d ASC");
-$trendStmt->execute();
+$trendStmt = $pdo->prepare("SELECT DATE(br.borrowed_at) as d, COUNT(*) as c FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = ? AND br.borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 29 DAY) GROUP BY DATE(br.borrowed_at) ORDER BY d ASC");
+$trendStmt->execute([$schoolId]);
 $trend = $trendStmt->fetchAll();
 $trend_labels = [];
 $trend_data = [];
@@ -45,8 +46,8 @@ $category_labels = [];
 $category_data = [];
 $hasCategory = (bool) $pdo->query("SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME='books' AND COLUMN_NAME='category'")->fetchColumn();
 if ($hasCategory) {
-  $catStmt = $pdo->prepare("SELECT b.category, COUNT(*) as c FROM borrows br JOIN books b ON br.book_id = b.id GROUP BY b.category ORDER BY c DESC LIMIT 10");
-  $catStmt->execute();
+  $catStmt = $pdo->prepare("SELECT b.category, COUNT(*) as c FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = ? GROUP BY b.category ORDER BY c DESC LIMIT 10");
+  $catStmt->execute([$schoolId]);
   foreach ($catStmt->fetchAll() as $r) {
     $category_labels[] = $r['category'] ?: 'Uncategorized';
     $category_data[] = (int) $r['c'];
@@ -54,8 +55,8 @@ if ($hasCategory) {
 }
 
 // Members
-$memStmt = $pdo->prepare("SELECT DATE_FORMAT(created_at,'%Y-%m') month, COUNT(*) c FROM members WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 11 MONTH) GROUP BY month ORDER BY month ASC");
-$memStmt->execute();
+$memStmt = $pdo->prepare("SELECT DATE_FORMAT(created_at,'%Y-%m') month, COUNT(*) c FROM members WHERE school_id = ? AND created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 11 MONTH) GROUP BY month ORDER BY month ASC");
+$memStmt->execute([$schoolId]);
 $mem = $memStmt->fetchAll();
 $mem_labels = [];
 $mem_data = [];
@@ -71,19 +72,19 @@ foreach ($period as $d) {
 }
 
 // Heatmap
-$hourStmt = $pdo->prepare("SELECT HOUR(borrowed_at) h, COUNT(*) c FROM borrows WHERE borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 29 DAY) GROUP BY h");
-$hourStmt->execute();
+$hourStmt = $pdo->prepare("SELECT HOUR(br.borrowed_at) h, COUNT(*) c FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = ? AND br.borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 29 DAY) GROUP BY h");
+$hourStmt->execute([$schoolId]);
 $hours = array_fill(0, 24, 0);
 foreach ($hourStmt->fetchAll() as $r)
   $hours[(int) $r['h']] = (int) $r['c'];
 
 // Tables
-$borrowTable = $pdo->query("SELECT br.id, br.borrowed_at, b.title as book_title, m.name as member_name, br.status, br.due_at, br.returned_at FROM borrows br JOIN books b ON br.book_id=b.id JOIN members m ON br.member_id=m.id ORDER BY br.borrowed_at DESC LIMIT 500")->fetchAll();
-$returnsTable = $pdo->query("SELECT br.id, br.borrowed_at, br.returned_at, DATEDIFF(br.returned_at, br.due_at) as days_late, b.title as book_title, m.name as member_name FROM borrows br JOIN books b ON br.book_id=b.id JOIN members m ON br.member_id=m.id WHERE br.returned_at IS NOT NULL ORDER BY br.returned_at DESC LIMIT 500")->fetchAll();
-$booksTable = $pdo->query("SELECT id, title, author, copies, created_at FROM books ORDER BY title LIMIT 1000")->fetchAll();
+$borrowTable = $pdo->query("SELECT br.id, br.borrowed_at, b.title as book_title, m.name as member_name, br.status, br.due_at, br.returned_at FROM borrows br JOIN books b ON br.book_id=b.id JOIN members m ON br.member_id=m.id WHERE b.school_id = $schoolId ORDER BY br.borrowed_at DESC LIMIT 500")->fetchAll();
+$returnsTable = $pdo->query("SELECT br.id, br.borrowed_at, br.returned_at, DATEDIFF(br.returned_at, br.due_at) as days_late, b.title as book_title, m.name as member_name FROM borrows br JOIN books b ON br.book_id=b.id JOIN members m ON br.member_id=m.id WHERE b.school_id = $schoolId AND br.returned_at IS NOT NULL ORDER BY br.returned_at DESC LIMIT 500")->fetchAll();
+$booksTable = $pdo->query("SELECT id, title, author, copies, created_at FROM books WHERE school_id = $schoolId ORDER BY title LIMIT 1000")->fetchAll();
 
-$new_members_30 = (int) $pdo->query("SELECT COUNT(*) FROM members WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)")->fetchColumn();
-$new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)")->fetchColumn();
+$new_members_30 = (int) $pdo->query("SELECT COUNT(*) FROM members WHERE school_id = $schoolId AND created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)")->fetchColumn();
+$new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = $schoolId AND created_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 30 DAY)")->fetchColumn();
 
 ?>
 <!DOCTYPE html>

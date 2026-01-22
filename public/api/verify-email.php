@@ -74,7 +74,7 @@ try {
         'success' => true,
         'message' => 'Email berhasil diverifikasi! Anda sekarang dapat login.',
         'user' => $verified_user,
-        'redirect_url' => 'admin-dashboard.php'
+        'redirect_url' => 'index.php'
     ]);
     exit;
 

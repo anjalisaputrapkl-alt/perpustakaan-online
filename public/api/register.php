@@ -64,7 +64,7 @@ try {
 
     // Generate verification code
     $verification_code = generateVerificationCode();
-    
+
     // Create admin user dengan status is_verified = 0
     $password_hash = password_hash($admin_password, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare(
@@ -82,16 +82,15 @@ try {
 
     // Send verification email
     $email_sent = sendVerificationEmail($admin_email, $school_name, $admin_name, $verification_code);
-    
+
     // Even if email fails, continue - we've logged it
     // Return user_id, email, and verification code for frontend verification modal
     echo json_encode([
-        'success' => true, 
+        'success' => true,
         'message' => 'Pendaftaran berhasil. Silakan verifikasi email Anda.',
         'user_id' => $user_id,
         'email' => $admin_email,
         'verification_code' => $verification_code
-    ]);
     ]);
     exit;
 } catch (Exception $e) {
@@ -100,4 +99,3 @@ try {
     exit;
 }
 ?>
-

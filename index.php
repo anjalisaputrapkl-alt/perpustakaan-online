@@ -764,7 +764,7 @@
 
       // Handle login form submission (works for both student and school forms)
       document.addEventListener('submit', async (e) => {
-        if (e.target.classList.contains('login-modal-form')) {
+        if (e.target.classList.contains('login-modal-form') && e.target.id !== 'registerForm') {
           e.preventDefault();
           const formData = new FormData(e.target);
 
@@ -820,6 +820,12 @@
         }
 
         const formData = new FormData(e.target);
+
+        // Debug: log semua form data
+        console.log('Form Data:');
+        for (let [key, value] of formData.entries()) {
+          console.log(`${key}: ${value}`);
+        }
 
         try {
           console.log('Submitting registration form...');
@@ -999,7 +1005,7 @@
 
             // Redirect after 2 seconds
             setTimeout(() => {
-              window.location.href = 'public/' + data.redirect_url;
+              window.location.href = 'public/' + (data.redirect_url || 'index.php');
             }, 2000);
           } else {
             // Show error
