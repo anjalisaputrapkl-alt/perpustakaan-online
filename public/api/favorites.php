@@ -2,6 +2,7 @@
 session_start();
 $pdo = require __DIR__ . '/../../src/db.php';
 require_once __DIR__ . '/../../src/FavoriteModel.php';
+require_once __DIR__ . '/../../src/NotificationsHelper.php';
 
 // Check authentication
 if (!isset($_SESSION['user'])) {
@@ -11,10 +12,12 @@ if (!isset($_SESSION['user'])) {
 }
 
 $studentId = $_SESSION['user']['id'];
+$schoolId = $_SESSION['user']['school_id'];
 $action = $_GET['action'] ?? null;
 
 try {
     $model = new FavoriteModel($pdo);
+    $helper = new NotificationsHelper($pdo);
 
     switch ($action) {
         case 'categories':
@@ -47,8 +50,8 @@ try {
                 exit;
             }
 
-            $bookId = $_POST['id_buku'] ?? null;
-            $category = $_POST['kategori'] ?? null;
+            $bookId = $_POST['book_id'] ?? $_POST['id_buku'] ?? null;
+            $category = $_POST['category'] ?? $_POST['kategori'] ?? null;
 
             if (!$bookId || !is_numeric($bookId)) {
                 http_response_code(400);
@@ -56,7 +59,39 @@ try {
                 exit;
             }
 
-            $model->addFavorite($studentId, (int)$bookId, $category);
+            // Cek duplikasi
+            $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM favorites WHERE student_id = ? AND book_id = ?');
+            $stmt->execute([$studentId, (int)$bookId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            if ($result['total'] > 0) {
+                http_response_code(400);
+                echo json_encode(['success' => false, 'message' => 'Buku sudah ada di favorit Anda']);
+                exit;
+            }
+
+            // Get book title for notification
+            $bookStmt = $pdo->prepare('SELECT title FROM books WHERE id = ?');
+            $bookStmt->execute([(int)$bookId]);
+            $book = $bookStmt->fetch(PDO::FETCH_ASSOC);
+            $bookTitle = $book['title'] ?? 'Buku';
+
+            // Insert ke tabel favorites
+            $insertStmt = $pdo->prepare(
+                'INSERT INTO favorites (student_id, book_id, category, created_at) 
+                 VALUES (?, ?, ?, NOW())'
+            );
+            $insertStmt->execute([$studentId, (int)$bookId, $category]);
+
+            // Create notification
+            $helper->createNotification(
+                $schoolId,
+                $studentId,
+                'info',
+                'Buku Ditambahkan ke Favorit',
+                'Anda telah menambahkan "' . htmlspecialchars($bookTitle) . '" ke koleksi favorit Anda.'
+            );
+
             http_response_code(200);
             echo json_encode([
                 'success' => true,
@@ -67,7 +102,23 @@ try {
         case 'list':
             // Ambil list favorit
             $category = $_GET['category'] ?? null;
-            $favorites = $model->getFavorites($studentId, $category);
+            $stmt = $pdo->prepare(
+                'SELECT f.id, f.student_id, f.book_id, f.category, f.created_at, 
+                        b.title, b.author, b.category as book_category, b.cover_image
+                 FROM favorites f
+                 JOIN books b ON f.book_id = b.id
+                 WHERE f.student_id = ?
+                 ' . ($category ? ' AND f.category = ?' : '') . '
+                 ORDER BY f.created_at DESC'
+            );
+            
+            if ($category) {
+                $stmt->execute([$studentId, $category]);
+            } else {
+                $stmt->execute([$studentId]);
+            }
+            
+            $favorites = $stmt->fetchAll(PDO::FETCH_ASSOC);
             http_response_code(200);
             echo json_encode([
                 'success' => true,
@@ -84,7 +135,7 @@ try {
                 exit;
             }
 
-            $favoriteId = $_POST['id_favorit'] ?? null;
+            $favoriteId = $_POST['id'] ?? $_POST['favorite_id'] ?? null;
 
             if (!$favoriteId || !is_numeric($favoriteId)) {
                 http_response_code(400);
@@ -92,7 +143,20 @@ try {
                 exit;
             }
 
-            $model->removeFavorite($studentId, (int)$favoriteId);
+            // Verify ownership
+            $checkStmt = $pdo->prepare('SELECT student_id FROM favorites WHERE id = ?');
+            $checkStmt->execute([(int)$favoriteId]);
+            $favorite = $checkStmt->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$favorite || $favorite['student_id'] != $studentId) {
+                http_response_code(403);
+                echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+                exit;
+            }
+
+            $deleteStmt = $pdo->prepare('DELETE FROM favorites WHERE id = ? AND student_id = ?');
+            $deleteStmt->execute([(int)$favoriteId, $studentId]);
+
             http_response_code(200);
             echo json_encode([
                 'success' => true,
@@ -102,11 +166,13 @@ try {
 
         case 'count':
             // Hitung total favorit
-            $count = $model->countFavorites($studentId);
+            $stmt = $pdo->prepare('SELECT COUNT(*) as total FROM favorites WHERE student_id = ?');
+            $stmt->execute([$studentId]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
             http_response_code(200);
             echo json_encode([
                 'success' => true,
-                'count' => $count
+                'count' => (int)$result['total']
             ]);
             break;
 

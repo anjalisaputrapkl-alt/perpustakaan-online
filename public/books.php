@@ -3,6 +3,8 @@ require __DIR__ . '/../src/auth.php';
 requireAuth();
 
 $pdo = require __DIR__ . '/../src/db.php';
+require_once __DIR__ . '/../src/NotificationsHelper.php';
+
 $user = $_SESSION['user'];
 $sid = $user['school_id'];
 $action = $_GET['action'] ?? 'list';
@@ -46,6 +48,29 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'copies' => (int) $_POST['copies'],
         'cover_image' => $coverImage
       ]);
+  
+  // Get all students in this school to notify them about new book
+  $studentsStmt = $pdo->prepare(
+    'SELECT id FROM users WHERE school_id = :school_id AND role = "student"'
+  );
+  $studentsStmt->execute(['school_id' => $sid]);
+  $students = $studentsStmt->fetchAll(PDO::FETCH_COLUMN);
+  
+  // Broadcast notification to all students
+  if (!empty($students)) {
+    $helper = new NotificationsHelper($pdo);
+    $bookTitle = $_POST['title'];
+    $notificationMessage = 'Buku "' . htmlspecialchars($bookTitle) . '" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!';
+    
+    $helper->broadcastNotification(
+      $sid,
+      $students,
+      'new_book',
+      'Buku Baru Tersedia',
+      $notificationMessage
+    );
+  }
+  
   header('Location: books.php');
   exit;
 }

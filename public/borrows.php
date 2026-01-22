@@ -5,24 +5,9 @@ requireAuth();
 $pdo = require __DIR__ . '/../src/db.php';
 $user = $_SESSION['user'];
 $sid = $user['school_id'];
-$action = $_GET['action'] ?? 'list';
 
-if ($action === 'new' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-  $stmt = $pdo->prepare(
-    'INSERT INTO borrows (school_id, book_id, member_id, due_at)
-     VALUES (:sid,:book,:member,:due)'
-  );
-  $stmt->execute([
-    'sid' => $sid,
-    'book' => (int) $_POST['book_id'],
-    'member' => (int) $_POST['member_id'],
-    'due' => $_POST['due_at'] ?: null
-  ]);
-  header('Location: borrows.php');
-  exit;
-}
-
-if ($action === 'return' && isset($_GET['id'])) {
+// Handle return confirmation
+if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])) {
   $stmt = $pdo->prepare(
     'UPDATE borrows SET returned_at=NOW(), status="returned"
      WHERE id=:id AND school_id=:sid'
@@ -35,13 +20,15 @@ if ($action === 'return' && isset($_GET['id'])) {
   exit;
 }
 
+// Update overdue status
 $pdo->prepare(
   'UPDATE borrows SET status="overdue"
    WHERE school_id=:sid AND returned_at IS NULL AND due_at < NOW()'
 )->execute(['sid' => $sid]);
 
+// Get all borrowing data
 $stmt = $pdo->prepare(
-  'SELECT b.*, bk.title, bk.cover_image, m.name AS member_name
+  'SELECT b.*, bk.title, m.name AS member_name
    FROM borrows b
    JOIN books bk ON b.book_id = bk.id
    JOIN members m ON b.member_id = m.id
@@ -51,13 +38,11 @@ $stmt = $pdo->prepare(
 $stmt->execute(['sid' => $sid]);
 $borrows = $stmt->fetchAll();
 
-$books = $pdo->prepare('SELECT id,title FROM books WHERE school_id=:sid');
-$books->execute(['sid' => $sid]);
-$books = $books->fetchAll();
-
-$members = $pdo->prepare('SELECT id,name FROM members WHERE school_id=:sid');
-$members->execute(['sid' => $sid]);
-$members = $members->fetchAll();
+// Calculate statistics
+$totalBorrows = count($borrows);
+$activeBorrows = count(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return'));
+$overdueBorrows = count(array_filter($borrows, fn($b) => $b['status'] === 'overdue'));
+$pendingReturns = count(array_filter($borrows, fn($b) => $b['status'] === 'pending_return'));
 ?>
 <!doctype html>
 <html lang="id">
@@ -65,7 +50,7 @@ $members = $members->fetchAll();
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pinjam & Kembalikan</title>
+  <title>Manajemen Peminjaman</title>
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -74,6 +59,222 @@ $members = $members->fetchAll();
   <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/borrows.css">
+  <style>
+    .content {
+      grid-template-columns: 1fr;
+    }
+
+    .main {
+      grid-template-columns: 1fr;
+    }
+
+    .main > div {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .stats-section {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .borrows-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .borrows-table thead {
+      background: #f9fafb;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .borrows-table th {
+      padding: 16px 12px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .borrows-table td {
+      padding: 16px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .borrows-table tbody tr:hover {
+      background: #fafbfc;
+    }
+
+    .borrows-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .table-no {
+      color: var(--muted);
+      font-weight: 500;
+      width: 40px;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .status-borrowed {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+
+    .status-overdue {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .status-returned {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .btn-return {
+      display: inline-block;
+      padding: 8px 16px;
+      background: var(--success);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-return:hover {
+      background: #15803d;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(22, 163, 74, 0.2);
+    }
+
+    .btn-return:active {
+      transform: translateY(0);
+    }
+
+    .btn-confirm-return {
+      display: inline-block;
+      padding: 8px 16px;
+      background: #06b6d4;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-confirm-return:hover {
+      background: #0891b2;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(6, 182, 212, 0.2);
+    }
+
+    .btn-confirm-return:active {
+      transform: translateY(0);
+    }
+
+    .btn-disabled {
+      background: #d1d5db;
+      color: #6b7280;
+      cursor: not-allowed;
+    }
+
+    .btn-disabled:hover {
+      background: #d1d5db;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--muted);
+    }
+
+    .empty-state iconify-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .stats-section {
+        grid-template-columns: 1fr;
+      }
+
+      .borrows-table {
+        font-size: 12px;
+      }
+
+      .borrows-table th,
+      .borrows-table td {
+        padding: 12px 8px;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -82,193 +283,209 @@ $members = $members->fetchAll();
   <div class="app">
 
     <div class="topbar">
-      <strong>Pinjam & Kembalikan</strong>
+      <strong>Manajemen Peminjaman</strong>
     </div>
 
     <div class="content">
-
       <div class="main">
-
         <div>
+          <!-- Statistics Section -->
+          <div class="stats-section">
+            <div class="stat-card">
+              <div class="stat-label">Total Peminjaman</div>
+              <div class="stat-value"><?= $totalBorrows ?></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Sedang Dipinjam</div>
+              <div class="stat-value"><?= $activeBorrows ?></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Terlambat</div>
+              <div class="stat-value" style="color: var(--danger);"><?= $overdueBorrows ?></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Menunggu Konfirmasi</div>
+              <div class="stat-value" style="color: #f59e0b;"><?= $pendingReturns ?></div>
+            </div>
+          </div>
+
+          <!-- Pending Return Requests -->
           <div class="card">
-            <h2>Pinjam Buku Baru</h2>
-            <form method="post" action="borrows.php?action=new">
-              <div class="form-group">
-                <label>Buku</label>
-                <select name="book_id" required>
-                  <option value="">Pilih buku</option>
-                  <?php foreach ($books as $b): ?>
-                    <option value="<?= $b['id'] ?>"><?= htmlspecialchars($b['title']) ?></option>
-                  <?php endforeach ?>
-                </select>
+            <h2>Permintaan Pengembalian Menunggu Konfirmasi</h2>
+            <?php if (empty(array_filter($borrows, fn($b) => $b['status'] === 'pending_return'))): ?>
+              <div class="empty-state">
+                <iconify-icon icon="mdi:inbox-outline"></iconify-icon>
+                <p>Tidak ada permintaan pengembalian</p>
               </div>
-              <div class="form-group">
-                <label>Anggota</label>
-                <select name="member_id" required>
-                  <option value="">Pilih anggota</option>
-                  <?php foreach ($members as $m): ?>
-                    <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['name']) ?></option>
-                  <?php endforeach ?>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Jatuh Tempo</label>
-                <input type="date" name="due_at">
-              </div>
-              <button class="btn" type="submit"><iconify-icon icon="mdi:book-open"
-                  style="vertical-align: middle;"></iconify-icon> Pinjamkan Buku</button>
-            </form>
+            <?php else: ?>
+              <table class="borrows-table">
+                <thead>
+                  <tr>
+                    <th class="table-no">No</th>
+                    <th>Nama Buku</th>
+                    <th>Nama Siswa</th>
+                    <th>Tanggal Pinjam</th>
+                    <th>Jatuh Tempo</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php 
+                  $no = 1;
+                  foreach ($borrows as $br): 
+                    if ($br['status'] !== 'pending_return') continue;
+                  ?>
+                    <tr>
+                      <td class="table-no"><?= $no++ ?></td>
+                      <td><strong><?= htmlspecialchars($br['title']) ?></strong></td>
+                      <td><?= htmlspecialchars($br['member_name']) ?></td>
+                      <td><?= date('d/m/Y', strtotime($br['borrowed_at'])) ?></td>
+                      <td><?= $br['due_at'] ? date('d/m/Y', strtotime($br['due_at'])) : '-' ?></td>
+                      <td>
+                        <span class="status-badge status-pending">Menunggu Konfirmasi</span>
+                      </td>
+                      <td>
+                        <button class="btn-confirm-return" onclick="confirmReturn(<?= $br['id'] ?>)">
+                          <iconify-icon icon="mdi:check" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                          Konfirmasi Pengembalian
+                        </button>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            <?php endif; ?>
           </div>
 
+          <!-- Borrowing List Table -->
           <div class="card">
-            <h2>Statistik Peminjaman</h2>
-            <div class="stats-container">
-              <div class="stat-card">
-                <div class="stat-label">Total Peminjaman</div>
-                <div class="stat-value"><?= count($borrows) ?></div>
+            <h2>Daftar Peminjaman Aktif</h2>
+            <?php if (empty(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return'))): ?>
+              <div class="empty-state">
+                <iconify-icon icon="mdi:book-off-outline"></iconify-icon>
+                <p>Tidak ada peminjaman aktif saat ini</p>
               </div>
-              <div class="stat-card">
-                <div class="stat-label">Sedang Dipinjam</div>
-                <div class="stat-value"><?= count(array_filter($borrows, fn($b) => $b['status'] !== 'returned')) ?>
-                </div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-label">Terlambat</div>
-                <div class="stat-value"><?= count(array_filter($borrows, fn($b) => $b['status'] === 'overdue')) ?></div>
-              </div>
-            </div>
+            <?php else: ?>
+              <table class="borrows-table">
+                <thead>
+                  <tr>
+                    <th class="table-no">No</th>
+                    <th>Nama Buku</th>
+                    <th>Nama Siswa</th>
+                    <th>Tanggal Pinjam</th>
+                    <th>Jatuh Tempo</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php 
+                  $no = 1;
+                  foreach ($borrows as $br): 
+                    if ($br['status'] === 'returned' || $br['status'] === 'pending_return') continue;
+                  ?>
+                    <tr>
+                      <td class="table-no"><?= $no++ ?></td>
+                      <td><strong><?= htmlspecialchars($br['title']) ?></strong></td>
+                      <td><?= htmlspecialchars($br['member_name']) ?></td>
+                      <td><?= date('d/m/Y', strtotime($br['borrowed_at'])) ?></td>
+                      <td><?= $br['due_at'] ? date('d/m/Y', strtotime($br['due_at'])) : '-' ?></td>
+                      <td>
+                        <?php if ($br['status'] === 'overdue'): ?>
+                          <span class="status-badge status-overdue">Terlambat</span>
+                        <?php else: ?>
+                          <span class="status-badge status-borrowed">Dipinjam</span>
+                        <?php endif; ?>
+                      </td>
+                      <td>
+                        <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn-return">
+                          <iconify-icon icon="mdi:check" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                          Konfirmasi Pengembalian
+                        </a>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            <?php endif; ?>
           </div>
-        </div>
 
-        <div>
+          <!-- Returned Books History -->
           <div class="card">
-            <h2>Daftar Peminjaman (<?= count($borrows) ?>)</h2>
-            <div class="borrows-grid">
-              <?php foreach ($borrows as $br): ?>
-                <div class="borrow-card">
-                  <div class="book-cover">
-                    <?php if (!empty($br['cover_image']) && file_exists(__DIR__ . '/../img/covers/' . $br['cover_image'])): ?>
-                      <img src="../img/covers/<?= htmlspecialchars($br['cover_image']) ?>"
-                        alt="<?= htmlspecialchars($br['title']) ?>">
-                    <?php else: ?>
-                      <div class="no-image"><iconify-icon icon="mdi:book-multiple" style="font-size: 48px;"></iconify-icon>
-                      </div>
-                    <?php endif; ?>
-                  </div>
-                  <div class="borrow-info">
-                    <div class="borrow-title"><?= htmlspecialchars($br['title']) ?></div>
-                    <div class="borrow-member"><?= htmlspecialchars($br['member_name']) ?></div>
-                    <div class="borrow-dates">
-                      <small><iconify-icon icon="mdi:calendar"
-                          style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
-                        <?= date('d/m/Y', strtotime($br['borrowed_at'])) ?></small>
-                      <?php if ($br['due_at']): ?>
-                        <small><iconify-icon icon="mdi:clock-outline"
-                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
-                          <?= date('d/m/Y', strtotime($br['due_at'])) ?></small>
-                      <?php endif; ?>
-                    </div>
-                    <div class="borrow-status">
-                      <?php if ($br['status'] === 'overdue'): ?>
-                        <span class="status-badge overdue">Terlambat</span>
-                      <?php elseif ($br['status'] === 'returned'): ?>
-                        <span class="status-badge returned">Dikembalikan</span>
-                      <?php else: ?>
-                        <span class="status-badge borrowed">Dipinjam</span>
-                      <?php endif ?>
-                    </div>
-                  </div>
-                  <div class="borrow-actions">
-                    <button class="btn btn-sm btn-secondary"
-                      onclick="showBorrowDetail(<?= htmlspecialchars(json_encode($br)) ?>)"><iconify-icon
-                        icon="mdi:information" style="vertical-align: middle;"></iconify-icon> Detail</button>
-                    <?php if ($br['status'] !== 'returned'): ?>
-                      <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn btn-sm btn-success"><iconify-icon
-                          icon="mdi:check" style="vertical-align: middle;"></iconify-icon> Kembalikan</a>
-                    <?php else: ?>
-                      <button class="btn btn-sm btn-secondary" disabled><iconify-icon icon="mdi:check-circle"
-                          style="vertical-align: middle;"></iconify-icon> Dikembalikan</button>
-                    <?php endif ?>
-                  </div>
-                </div>
-              <?php endforeach ?>
-            </div>
-          </div>
-
-          <div class="card">
-            <h2>Pertanyaan Umum</h2>
-            <div class="faq-item">
-              <div class="faq-question">Bagaimana cara menambah peminjaman baru? <span>+</span></div>
-              <div class="faq-answer">Pilih buku dan anggota dari dropdown di form atas, atur tanggal jatuh tempo
-                (opsional), lalu klik "Pinjamkan Buku".</div>
-            </div>
-            <div class="faq-item">
-              <div class="faq-question">Bagaimana cara mengembalikan buku? <span>+</span></div>
-              <div class="faq-answer">Cari peminjaman di daftar, jika status masih "Dipinjam" atau "Terlambat", klik
-                tombol "Kembalikan" untuk menyelesaikan peminjaman.</div>
-            </div>
-            <div class="faq-item">
-              <div class="faq-question">Apa itu status "Terlambat"? <span>+</span></div>
-              <div class="faq-answer">Status terlambat muncul ketika tanggal jatuh tempo sudah berlalu tetapi buku belum
-                dikembalikan. Segera kembalikan buku untuk menghindari denda.</div>
-            </div>
-            <div class="faq-item">
-              <div class="faq-question">Bisakah saya mengubah tanggal jatuh tempo? <span>+</span></div>
-              <div class="faq-answer">Saat ini, Anda perlu mengembalikan buku lalu meminjam ulang dengan tanggal baru.
-                Atau hubungi admin untuk bantuan lebih lanjut.</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
-
-  <!-- Detail Modal -->
-  <div id="borrowDetailModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Detail Peminjaman</h2>
-        <button class="modal-close" onclick="closeBorrowDetail()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="detail-layout">
-          <div class="detail-image">
-            <img id="borrowDetailCover" src="" alt="Book Cover">
-          </div>
-          <div class="detail-info">
-            <div class="detail-field">
-              <label>Judul Buku</label>
-              <div id="borrowDetailTitle"></div>
-            </div>
-            <div class="detail-field">
-              <label>Anggota</label>
-              <div id="borrowDetailMember"></div>
-            </div>
-            <div class="detail-field">
-              <label>Tanggal Pinjam</label>
-              <div id="borrowDetailBorrowDate"></div>
-            </div>
-            <div class="detail-field">
-              <label>Jatuh Tempo</label>
-              <div id="borrowDetailDueDate"></div>
-            </div>
-            <div class="detail-field">
-              <label>Tanggal Kembali</label>
-              <div id="borrowDetailReturnDate"></div>
-            </div>
-            <div class="detail-field">
-              <label>Status</label>
-              <div id="borrowDetailStatus"></div>
-            </div>
+            <h2>Riwayat Pengembalian Buku</h2>
+            <?php if (empty(array_filter($borrows, fn($b) => $b['status'] === 'returned'))): ?>
+              <div class="empty-state">
+                <iconify-icon icon="mdi:history"></iconify-icon>
+                <p>Belum ada riwayat pengembalian</p>
+              </div>
+            <?php else: ?>
+              <table class="borrows-table">
+                <thead>
+                  <tr>
+                    <th class="table-no">No</th>
+                    <th>Nama Buku</th>
+                    <th>Nama Siswa</th>
+                    <th>Tanggal Pinjam</th>
+                    <th>Tanggal Kembali</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <?php 
+                  $no = 1;
+                  foreach ($borrows as $br): 
+                    if ($br['status'] !== 'returned') continue;
+                  ?>
+                    <tr>
+                      <td class="table-no"><?= $no++ ?></td>
+                      <td><strong><?= htmlspecialchars($br['title']) ?></strong></td>
+                      <td><?= htmlspecialchars($br['member_name']) ?></td>
+                      <td><?= date('d/m/Y', strtotime($br['borrowed_at'])) ?></td>
+                      <td><?= $br['returned_at'] ? date('d/m/Y', strtotime($br['returned_at'])) : '-' ?></td>
+                      <td>
+                        <span class="status-badge status-returned">Dikembalikan</span>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                </tbody>
+              </table>
+            <?php endif; ?>
           </div>
         </div>
       </div>
     </div>
+
   </div>
 
-  <script src="../assets/js/borrows.js"></script>
+  <script>
+    function confirmReturn(borrowId) {
+      if (!confirm('Konfirmasi pengembalian buku ini?')) {
+        return;
+      }
+
+      fetch('api/admin-confirm-return.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'borrow_id=' + borrowId
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Pengembalian buku telah dikonfirmasi!');
+            location.reload();
+          } else {
+            alert(data.message || 'Gagal mengkonfirmasi pengembalian');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan');
+        });
+    }
+  </script>
 
 </body>
 

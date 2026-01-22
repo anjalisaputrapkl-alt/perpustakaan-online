@@ -13,30 +13,22 @@ class NotificationsService {
     }
 
     /**
-     * Ambil semua notifikasi dari berbagai sumber
+     * Ambil semua notifikasi dari tabel notifications
      */
     public function getAllNotifications($studentId) {
-        $notifications = [];
-
         try {
-            // 1. Buku hampir jatuh tempo (3 hari ke depan)
-            $notifications = array_merge($notifications, $this->getUpcomingNotifications($studentId));
-
-            // 2. Buku sudah jatuh tempo
-            $notifications = array_merge($notifications, $this->getOverdueNotifications($studentId));
-
-            // 3. Buku berhasil dikembalikan (3 hari terakhir)
-            $notifications = array_merge($notifications, $this->getReturnedNotifications($studentId));
-
-            // 4. Buku baru ditambahkan (7 hari terakhir)
-            $notifications = array_merge($notifications, $this->getNewBooksNotifications($studentId));
-
-            // Urutkan berdasarkan tanggal terbaru
-            usort($notifications, function($a, $b) {
-                return strtotime($b['tanggal']) - strtotime($a['tanggal']);
-            });
-
-            return $notifications;
+            $stmt = $this->pdo->prepare(
+                'SELECT id, school_id, student_id, title as judul, message as pesan, 
+                        type as jenis_notifikasi, is_read as status_baca, 
+                        created_at as tanggal
+                 FROM notifications
+                 WHERE student_id = :student_id
+                 ORDER BY created_at DESC'
+            );
+            
+            $stmt->execute([':student_id' => $studentId]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?? [];
+            
         } catch (Exception $e) {
             throw new Exception('Error: ' . $e->getMessage());
         }
@@ -246,12 +238,12 @@ class NotificationsService {
      */
     public static function getIcon($type) {
         $icons = [
-            'telat' => 'mdi:alert-circle',
-            'peringatan' => 'mdi:alert-triangle',
-            'pengembalian' => 'mdi:package-variant-closed',
-            'info' => 'mdi:information',
-            'sukses' => 'mdi:check-circle',
-            'buku' => 'mdi:book-open-page-variant',
+            'borrow' => 'mdi:book-check',
+            'return_request' => 'mdi:package-variant-closed',
+            'return_confirm' => 'mdi:check-circle',
+            'late_warning' => 'mdi:alert-circle',
+            'info' => 'mdi:information-outline',
+            'new_book' => 'mdi:book-plus-multiple',
             'default' => 'mdi:bell'
         ];
         return $icons[$type] ?? $icons['default'];
@@ -262,12 +254,12 @@ class NotificationsService {
      */
     public static function getLabel($type) {
         $labels = [
-            'telat' => 'Keterlambatan',
-            'peringatan' => 'Peringatan',
-            'pengembalian' => 'Pengembalian Buku',
+            'borrow' => 'Peminjaman',
+            'return_request' => 'Ajukan Pengembalian',
+            'return_confirm' => 'Pengembalian Dikonfirmasi',
+            'late_warning' => 'Keterlambatan',
             'info' => 'Informasi',
-            'sukses' => 'Sukses',
-            'buku' => 'Buku Baru',
+            'new_book' => 'Buku Baru',
             'default' => 'Notifikasi'
         ];
         return $labels[$type] ?? $labels['default'];
@@ -278,12 +270,12 @@ class NotificationsService {
      */
     public static function getBadgeClass($type) {
         $classes = [
-            'telat' => 'notification-badge-overdue',
-            'peringatan' => 'notification-badge-warning',
-            'pengembalian' => 'notification-badge-return',
+            'borrow' => 'notification-badge-return',
+            'return_request' => 'notification-badge-return',
+            'return_confirm' => 'notification-badge-success',
+            'late_warning' => 'notification-badge-overdue',
             'info' => 'notification-badge-info',
-            'sukses' => 'notification-badge-success',
-            'buku' => 'notification-badge-book',
+            'new_book' => 'notification-badge-book',
             'default' => 'notification-badge-default'
         ];
         return $classes[$type] ?? $classes['default'];
@@ -298,12 +290,11 @@ class NotificationsService {
         $stats = [
             'total' => count($notifications),
             'unread' => count(array_filter($notifications, fn($n) => !$n['status_baca'])),
-            'overdue' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'telat')),
-            'warning' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'peringatan')),
-            'return' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'pengembalian')),
+            'overdue' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'late_warning')),
+            'warning' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'info')),
+            'return' => count(array_filter($notifications, fn($n) => in_array($n['jenis_notifikasi'], ['return_request', 'return_confirm']))),
             'info' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'info')),
-            'success' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'sukses')),
-            'newbooks' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'buku'))
+            'newbooks' => count(array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === 'new_book'))
         ];
 
         return $stats;

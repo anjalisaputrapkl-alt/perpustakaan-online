@@ -671,12 +671,12 @@ $pageTitle = 'Riwayat Peminjaman';
             color: #065f46;
         }
 
-        .badge-overdue {
-            background: #fee2e2;
-            color: #991b1b;
+        .badge-pending {
+            background: #fef3c7;
+            color: #92400e;
         }
 
-        /* Date Info */
+        /* Empty State */
         .date-cell {
             font-size: 13px;
         }
@@ -1131,6 +1131,10 @@ $pageTitle = 'Riwayat Peminjaman';
                                                 $statusClass = 'badge-overdue';
                                                 $statusText = 'Telat';
                                                 break;
+                                            case 'pending_return':
+                                                $statusClass = 'badge-pending';
+                                                $statusText = 'Menunggu Konfirmasi';
+                                                break;
                                             default:
                                                 $statusClass = '';
                                                 $statusText = htmlspecialchars($item['status']);
@@ -1139,6 +1143,13 @@ $pageTitle = 'Riwayat Peminjaman';
                                         <span class="badge <?php echo $statusClass; ?>">
                                             <?php echo $statusText; ?>
                                         </span>
+                                        <?php if ($item['status'] === 'borrowed' || $item['status'] === 'overdue'): ?>
+                                            <div style="margin-top: 8px;">
+                                                <button onclick="requestReturn(<?php echo $item['borrow_id']; ?>)" style="padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
+                                                    Ajukan Pengembalian
+                                                </button>
+                                            </div>
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -1173,6 +1184,34 @@ $pageTitle = 'Riwayat Peminjaman';
                     navSidebar.classList.remove('active');
                 }
             });
+        }
+
+        // Request return function
+        function requestReturn(borrowId) {
+            if (!confirm('Apakah Anda ingin mengajukan pengembalian buku ini?')) {
+                return;
+            }
+
+            fetch('api/student-request-return.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: 'borrow_id=' + borrowId
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Permintaan pengembalian telah dikirim ke admin!');
+                        location.reload();
+                    } else {
+                        alert(data.message || 'Gagal mengajukan pengembalian');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan');
+                });
         }
     </script>
 </body>
