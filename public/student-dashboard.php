@@ -217,7 +217,7 @@ $pageTitle = 'Dashboard Siswa';
                     <?php if (!empty($books)): ?>
                         <?php foreach ($books as $book): ?>
                             <?php
-                            $isAvailable = ($book['copies'] ?? 1) > 0;
+                            $isAvailable = $book['copies'] > 0;
                             $statusClass = $isAvailable ? 'available' : 'unavailable';
                             $statusText = $isAvailable ? 'Tersedia' : 'Tidak Tersedia';
                             ?>
@@ -450,7 +450,7 @@ $pageTitle = 'Dashboard Siswa';
             document.getElementById('modalBookShelf').textContent = (bookData.shelf || '-') + (bookData.row_number ? ' (Baris ' + bookData.row_number + ')' : '');
 
             // Set status
-            const isAvailable = (bookData.copies || 1) > 0;
+            const isAvailable = bookData.copies > 0;
             const statusEl = document.getElementById('modalBookStatus');
             if (isAvailable) {
                 statusEl.textContent = 'Tersedia';
