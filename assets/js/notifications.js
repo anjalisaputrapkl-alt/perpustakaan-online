@@ -1,6 +1,6 @@
 // Toggle sidebar on mobile
 const navToggle = document.getElementById('navToggle');
-const navSidebar = document.getElementById('navSidebar');
+const navSidebar = document.querySelector('.nav-sidebar');
 
 if (navToggle && navSidebar) {
     navToggle.addEventListener('click', () => {

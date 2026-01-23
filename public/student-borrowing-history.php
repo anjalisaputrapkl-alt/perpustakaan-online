@@ -352,23 +352,7 @@ $pageTitle = 'Riwayat Peminjaman';
         </div>
     </div>
 
-    <script>
-        // Toggle sidebar on mobile
-        const navToggle = document.getElementById('navToggle');
-        const navSidebar = document.getElementById('navSidebar');
-
-        if (navToggle) {
-            navToggle.addEventListener('click', () => {
-                navSidebar.classList.toggle('active');
-            });
-
-            // Close sidebar when clicking outside
-            document.addEventListener('click', (e) => {
-                if (!navSidebar.contains(e.target) && !navToggle.contains(e.target)) {
-                    navSidebar.classList.remove('active');
-                }
-            });
-        }
+    <script src="../assets/js/student-borrowing-history.js"></script>
 
         // Request return function
         function requestReturn(borrowId) {

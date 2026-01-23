@@ -239,23 +239,7 @@ function getLabel($type)
         <?php endif; ?>
     </div>
 
-    <script>
-        // Toggle sidebar on mobile
-        const navToggle = document.getElementById('navToggle');
-        const navSidebar = document.getElementById('navSidebar');
-
-        if (navToggle) {
-            navToggle.addEventListener('click', () => {
-                navSidebar.classList.toggle('active');
-            });
-
-            document.addEventListener('click', (e) => {
-                if (!navSidebar.contains(e.target) && !navToggle.contains(e.target)) {
-                    navSidebar.classList.remove('active');
-                }
-            });
-        }
-    </script>
+    <script src="../assets/js/notifications.js"></script>
 </body>
 
 </html>
