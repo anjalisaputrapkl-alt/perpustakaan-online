@@ -219,7 +219,7 @@ $pageTitle = 'Dashboard Siswa';
                             <?php
                             $isAvailable = $book['copies'] > 0;
                             $statusClass = $isAvailable ? 'available' : 'unavailable';
-                            $statusText = $isAvailable ? 'Tersedia' : 'Tidak Tersedia';
+                            $statusText = $isAvailable ? 'Tersedia' : 'HABIS';
                             ?>
                             <div class="book-card" data-book-id="<?php echo $book['id']; ?>">
                                 <div class="book-cover">
@@ -456,7 +456,7 @@ $pageTitle = 'Dashboard Siswa';
                 statusEl.textContent = 'Tersedia';
                 statusEl.className = 'modal-book-status available';
             } else {
-                statusEl.textContent = 'Tidak Tersedia';
+                statusEl.textContent = 'HABIS';
                 statusEl.className = 'modal-book-status unavailable';
             }
 
