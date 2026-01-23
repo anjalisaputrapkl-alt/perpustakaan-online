@@ -407,7 +407,9 @@ body {
 .stat-card-label iconify-icon {
     width: 16px;
     height: 16px;
-    display: flex;
+    min-width: 16px;
+    min-height: 16px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--text-muted);
