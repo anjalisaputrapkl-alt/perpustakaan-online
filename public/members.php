@@ -12,14 +12,13 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   try {
     // Insert into members table
     $stmt = $pdo->prepare(
-      'INSERT INTO members (school_id,name,email,member_no,nisn)
-       VALUES (:sid,:name,:email,:no,:nisn)'
+      'INSERT INTO members (school_id,name,email,nisn)
+       VALUES (:sid,:name,:email,:nisn)'
     );
     $stmt->execute([
       'sid' => $sid,
       'name' => $_POST['name'],
       'email' => $_POST['email'],
-      'no' => $_POST['member_no'],
       'nisn' => $_POST['nisn']
     ]);
 
