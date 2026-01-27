@@ -272,7 +272,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
         <table id="tbl-borrows" class="datatable">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Tanggal</th>
               <th>Buku</th>
               <th>Anggota</th>
@@ -284,7 +283,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
           <tbody>
             <?php foreach ($borrowTable as $r): ?>
               <tr>
-                <td><?php echo $r['id']; ?></td>
                 <td><?php echo $r['borrowed_at']; ?></td>
                 <td><?php echo htmlspecialchars($r['book_title']); ?></td>
                 <td><?php echo htmlspecialchars($r['member_name']); ?></td>
@@ -300,7 +298,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
         <table id="tbl-returns" class="datatable">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Pinjam</th>
               <th>Kembali</th>
               <th>Terlambat (hari)</th>
@@ -311,7 +308,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
           <tbody>
             <?php foreach ($returnsTable as $r): ?>
               <tr>
-                <td><?php echo $r['id']; ?></td>
                 <td><?php echo $r['borrowed_at']; ?></td>
                 <td><?php echo $r['returned_at']; ?></td>
                 <td><?php echo max(0, (int) $r['days_late']); ?></td>
@@ -326,7 +322,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
         <table id="tbl-books" class="datatable">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Judul</th>
               <th>Penulis</th>
               <th>Stok</th>
@@ -336,7 +331,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
           <tbody>
             <?php foreach ($booksTable as $r): ?>
               <tr>
-                <td><?php echo $r['id']; ?></td>
                 <td><?php echo htmlspecialchars($r['title']); ?></td>
                 <td><?php echo htmlspecialchars($r['author']); ?></td>
                 <td><?php echo (int) $r['copies']; ?></td>
@@ -353,19 +347,22 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
             style="padding: 16px; background-color: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
             <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">Total Denda Kerusakan</div>
             <div style="font-size: 20px; font-weight: 600; color: #dc2626;">Rp
-              <?php echo number_format($totalDamageFines); ?></div>
+              <?php echo number_format($totalDamageFines); ?>
+            </div>
           </div>
           <div
             style="padding: 16px; background-color: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #ef4444;">
             <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">Denda Tertunda</div>
             <div style="font-size: 20px; font-weight: 600; color: #ef4444;">Rp
-              <?php echo number_format($pendingDamageFines); ?></div>
+              <?php echo number_format($pendingDamageFines); ?>
+            </div>
           </div>
           <div
             style="padding: 16px; background-color: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
             <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">Denda Terbayar</div>
             <div style="font-size: 20px; font-weight: 600; color: #10b981;">Rp
-              <?php echo number_format($paidDamageFines); ?></div>
+              <?php echo number_format($paidDamageFines); ?>
+            </div>
           </div>
         </div>
 
@@ -404,7 +401,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
         <table id="tbl-damage-fines" class="datatable">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Anggota</th>
               <th>Buku</th>
               <th>Tipe Kerusakan</th>
@@ -417,7 +413,6 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
             <?php if (!empty($damageRecords)): ?>
               <?php foreach ($damageRecords as $record): ?>
                 <tr>
-                  <td><?php echo $record['id']; ?></td>
                   <td><?php echo htmlspecialchars($record['member_name']); ?></td>
                   <td><?php echo htmlspecialchars($record['book_title']); ?></td>
                   <td><?php echo htmlspecialchars($record['damage_type']); ?></td>

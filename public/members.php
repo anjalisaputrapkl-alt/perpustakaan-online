@@ -207,7 +207,6 @@ $members = $stmt->fetchAll();
             <table>
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Nama</th>
                   <th>Email</th>
                   <th>NISN</th>
@@ -223,7 +222,6 @@ $members = $stmt->fetchAll();
                   $userExists = $checkUserStmt->fetch() ? true : false;
                   ?>
                   <tr>
-                    <td>#<?= $m['id'] ?></td>
                     <td><strong><?= htmlspecialchars($m['name']) ?></strong></td>
                     <td><?= htmlspecialchars($m['email']) ?></td>
                     <td><strong><?= htmlspecialchars($m['nisn']) ?></strong></td>

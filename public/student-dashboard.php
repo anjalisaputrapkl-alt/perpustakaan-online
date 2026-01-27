@@ -154,22 +154,19 @@ $pageTitle = 'Dashboard Siswa';
             <!-- Sidebar -->
             <aside class="sidebar">
                 <!-- Total Denda -->
-                <div class="sidebar-section">
+                <div class="sidebar-section" style="animation: fadeInSlideUp 0.4s ease-out;">
                     <h3><iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon> Denda Anda</h3>
                     <div
-                        style="padding: 12px; background-color: <?php echo $totalMemberDenda > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)'; ?>; border-radius: 6px; border-left: 4px solid <?php echo $totalMemberDenda > 0 ? '#ef4444' : '#10b981'; ?>;">
-                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Total Denda</div>
+                        style="padding: 12px; background-color: <?php echo $pendingMemberDenda > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)'; ?>; border-radius: 6px; border-left: 4px solid <?php echo $pendingMemberDenda > 0 ? '#ef4444' : '#10b981'; ?>;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Denda Tertunda</div>
                         <div
-                            style="font-size: 18px; font-weight: 700; color: <?php echo $totalMemberDenda > 0 ? '#dc2626' : '#059669'; ?>; margin-bottom: 8px;">
-                            Rp <?php echo number_format($totalMemberDenda, 0, ',', '.'); ?></div>
-                        <?php if ($totalMemberDenda > 0): ?>
-                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Tertunda: <strong
-                                    style="color: #ef4444;">Rp
-                                    <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></strong></div>
+                            style="font-size: 18px; font-weight: 700; color: <?php echo $pendingMemberDenda > 0 ? '#dc2626' : '#059669'; ?>; margin-bottom: 8px;">
+                            Rp <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></div>
+                        <?php if ($pendingMemberDenda > 0): ?>
                             <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.5;">Denda dari
                                 kerusakan buku saat peminjaman. Silakan hubungi admin untuk detail.</p>
                         <?php else: ?>
-                            <p style="font-size: 11px; color: #10b981; margin: 0;">✓ Tidak ada denda kerusakan</p>
+                            <p style="font-size: 11px; color: #10b981; margin: 0;">✓ Tidak ada denda tertunda</p>
                         <?php endif; ?>
                     </div>
                 </div>

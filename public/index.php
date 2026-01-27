@@ -158,16 +158,16 @@ if ($is_authenticated) {
                                                         <?php
                                                         switch ($activity['type']) {
                                                             case 'borrow':
-                                                                echo '📖 Dipinjam oleh ' . htmlspecialchars($activity['name']);
+                                                                echo '<iconify-icon icon="mdi:book-open" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dipinjam oleh ' . htmlspecialchars($activity['name']);
                                                                 break;
                                                             case 'return':
-                                                                echo '📥 Dikembalikan oleh ' . htmlspecialchars($activity['name']);
+                                                                echo '<iconify-icon icon="mdi:inbox" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dikembalikan oleh ' . htmlspecialchars($activity['name']);
                                                                 break;
                                                             case 'member':
-                                                                echo '👥 Anggota baru terdaftar';
+                                                                echo '<iconify-icon icon="mdi:account-multiple" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Anggota baru terdaftar';
                                                                 break;
                                                             case 'book':
-                                                                echo '📚 Buku baru ditambahkan';
+                                                                echo '<iconify-icon icon="mdi:library" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Buku baru ditambahkan';
                                                                 break;
                                                         }
                                                         ?>
@@ -192,7 +192,10 @@ if ($is_authenticated) {
                                             <div class="activity-item">
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
-                                                    <div class="member-name">Dipinjam oleh
+                                                    <div class="member-name">
+                                                        <iconify-icon icon="mdi:book-open"
+                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dipinjam
+                                                        oleh
                                                         <?= htmlspecialchars($activity['name']) ?>
                                                     </div>
                                                 </div>
@@ -215,7 +218,10 @@ if ($is_authenticated) {
                                             <div class="activity-item">
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
-                                                    <div class="member-name">Dikembalikan oleh
+                                                    <div class="member-name">
+                                                        <iconify-icon icon="mdi:inbox"
+                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dikembalikan
+                                                        oleh
                                                         <?= htmlspecialchars($activity['name']) ?>
                                                     </div>
                                                 </div>
@@ -238,7 +244,11 @@ if ($is_authenticated) {
                                             <div class="activity-item">
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
-                                                    <div class="member-name">Anggota baru terdaftar</div>
+                                                    <div class="member-name">
+                                                        <iconify-icon icon="mdi:account-multiple"
+                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Anggota
+                                                        baru terdaftar
+                                                    </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>
                                             </div>
@@ -259,7 +269,11 @@ if ($is_authenticated) {
                                             <div class="activity-item">
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
-                                                    <div class="member-name">Buku baru ditambahkan</div>
+                                                    <div class="member-name">
+                                                        <iconify-icon icon="mdi:library"
+                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Buku
+                                                        baru ditambahkan
+                                                    </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>
                                             </div>

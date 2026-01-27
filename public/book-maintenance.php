@@ -115,9 +115,8 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 
   <div class="app">
 
-    <div class="topbar">
-      <strong><iconify-icon icon="mdi:alert-circle"
-          style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Laporan Kerusakan Buku</strong>
+    <div class="topbar" style="margin-left: -20px;">
+      <strong>Laporan Kerusakan Buku</strong>
       <div class="topbar-actions">
         <button class="btn btn-secondary" onclick="exportCSV()"><iconify-icon icon="mdi:file-excel"
             style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Export Excel</button>
@@ -187,7 +186,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
           <div class="table-wrap">
             <table>
               <colgroup>
-                <col class="id">
                 <col class="member">
                 <col class="book">
                 <col class="damage">
@@ -200,7 +198,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Anggota</th>
                   <th>Buku</th>
                   <th>Tipe Kerusakan</th>
@@ -215,7 +212,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
               <tbody>
                 <?php foreach ($records as $r): ?>
                   <tr>
-                    <td style="color: black;">#<?= $r['id'] ?></td>
                     <td style="color: black;"><strong><?= htmlspecialchars($r['member_name']) ?></strong></td>
                     <td style="color: black;"><?= htmlspecialchars($r['book_title']) ?></td>
                     <td style="color: black;">

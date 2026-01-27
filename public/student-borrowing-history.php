@@ -188,18 +188,17 @@ $pageTitle = 'Riwayat Peminjaman';
         </div>
 
         <!-- Total Denda Section -->
-        <div style="margin-bottom: 24px; padding: 16px; background-color: <?php echo $totalMemberDenda > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)'; ?>; border-radius: 8px; border-left: 4px solid <?php echo $totalMemberDenda > 0 ? '#ef4444' : '#10b981'; ?>; display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 24px; color: <?php echo $totalMemberDenda > 0 ? '#dc2626' : '#059669'; ?>;">
-                <iconify-icon icon="<?php echo $totalMemberDenda > 0 ? 'mdi:alert-circle' : 'mdi:check-circle'; ?>" width="24" height="24"></iconify-icon>
+        <div style="animation: fadeInSlideUp 0.4s ease-out; margin-bottom: 24px; padding: 16px; background-color: <?php echo $pendingMemberDenda > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)'; ?>; border-radius: 8px; border-left: 4px solid <?php echo $pendingMemberDenda > 0 ? '#ef4444' : '#10b981'; ?>; display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 24px; color: <?php echo $pendingMemberDenda > 0 ? '#dc2626' : '#059669'; ?>;">
+                <iconify-icon icon="<?php echo $pendingMemberDenda > 0 ? 'mdi:alert-circle' : 'mdi:check-circle'; ?>" width="24" height="24"></iconify-icon>
             </div>
             <div style="flex: 1;">
-                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Denda Anda</div>
-                <div style="font-size: 24px; font-weight: 700; color: <?php echo $totalMemberDenda > 0 ? '#dc2626' : '#059669'; ?>;">Rp <?php echo number_format($totalMemberDenda, 0, ',', '.'); ?></div>
-                <?php if ($totalMemberDenda > 0): ?>
-                    <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Tertunda: <strong style="color: #ef4444;">Rp <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></strong></div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Denda Tertunda</div>
+                <div style="font-size: 24px; font-weight: 700; color: <?php echo $pendingMemberDenda > 0 ? '#dc2626' : '#059669'; ?>;">Rp <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></div>
+                <?php if ($pendingMemberDenda > 0): ?>
                     <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0; line-height: 1.5;">Denda dari kerusakan buku saat peminjaman. Hubungi admin untuk detail lebih lanjut.</p>
                 <?php else: ?>
-                    <p style="font-size: 12px; color: #10b981; margin: 4px 0 0 0;">✓ Tidak ada denda kerusakan</p>
+                    <p style="font-size: 12px; color: #10b981; margin: 4px 0 0 0;">✓ Tidak ada denda tertunda</p>
                 <?php endif; ?>
             </div>
         </div>
@@ -208,28 +207,24 @@ $pageTitle = 'Riwayat Peminjaman';
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="stat-card-label">
-                    <iconify-icon icon="mdi:book-open-variant" width="16" height="16"></iconify-icon>
                     Total Peminjaman
                 </div>
                 <div class="stat-card-value"><?php echo $totalBooks; ?></div>
             </div>
             <div class="stat-card borrowed">
                 <div class="stat-card-label">
-                    <iconify-icon icon="mdi:hourglass-half" width="16" height="16"></iconify-icon>
                     Sedang Dipinjam
                 </div>
                 <div class="stat-card-value"><?php echo $borrowedBooks; ?></div>
             </div>
             <div class="stat-card returned">
                 <div class="stat-card-label">
-                    <iconify-icon icon="mdi:check-circle" width="16" height="16"></iconify-icon>
                     Sudah Dikembalikan
                 </div>
                 <div class="stat-card-value"><?php echo $returnedBooks; ?></div>
             </div>
             <div class="stat-card overdue">
                 <div class="stat-card-label">
-                    <iconify-icon icon="mdi:alert-triangle" width="16" height="16"></iconify-icon>
                     Telat Dikembalikan
                 </div>
                 <div class="stat-card-value"><?php echo $overdueBooks; ?></div>
