@@ -960,3 +960,8 @@ iconify-icon {
     display: inline-block;
     vertical-align: middle;
 }
+
+/* Override untuk geser NPSN lebih kebawah */
+.school-info-item:last-child {
+    margin-top: 5px !important;
+}
