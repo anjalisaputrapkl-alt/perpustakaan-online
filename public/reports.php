@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../src/db.php';
 require __DIR__ . '/../src/auth.php';
+require_once __DIR__ . '/../src/maintenance/DamageController.php';
 requireAuth();
 
 $pdo = $pdo;
@@ -12,7 +13,7 @@ $tot_borrows_month = (int) $pdo->query("SELECT COUNT(*) FROM borrows br JOIN boo
 $tot_returns_month = (int) $pdo->query("SELECT COUNT(*) FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.returned_at IS NOT NULL AND MONTH(br.returned_at)=MONTH(CURRENT_DATE()) AND YEAR(br.returned_at)=YEAR(CURRENT_DATE())")->fetchColumn();
 $active_members = (int) $pdo->query("SELECT COUNT(DISTINCT br.member_id) FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)")->fetchColumn();
 
-// Total fines
+// Total fines (late return fines)
 $per_day = 1000;
 $fines = 0;
 $rows = $pdo->query("SELECT br.due_at, br.returned_at FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.due_at IS NOT NULL AND (br.returned_at IS NOT NULL OR CURRENT_DATE() > br.due_at)")->fetchAll();
@@ -23,6 +24,14 @@ foreach ($rows as $r) {
   if ($diff > 0)
     $fines += $diff * $per_day;
 }
+
+// Damage/book condition fines
+$damageController = new DamageController($pdo, $schoolId);
+$damageRecords = $damageController->getAll();
+$totalDamageFines = $damageController->getTotalFines();
+$pendingDamageFines = $damageController->getTotalFines('pending');
+$paidDamageFines = $damageController->getTotalFines('paid');
+$finesByMember = $damageController->getFinesByMember();
 
 // Trend
 $trendStmt = $pdo->prepare("SELECT DATE(br.borrowed_at) as d, COUNT(*) as c FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = ? AND br.borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 29 DAY) GROUP BY DATE(br.borrowed_at) ORDER BY d ASC");
@@ -185,8 +194,16 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
         <div class="kpi-card">
           <div class="kpi-icon"><iconify-icon icon="mdi:cash-multiple"></iconify-icon></div>
           <div>
-            <div class="kpi-title">Total Denda</div>
+            <div class="kpi-title">Total Denda Keterlambatan</div>
             <div class="kpi-value">Rp <?php echo number_format($fines); ?></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon"><iconify-icon icon="mdi:alert-circle"></iconify-icon></div>
+          <div>
+            <div class="kpi-title">Denda Kerusakan Buku</div>
+            <div class="kpi-value">Rp <?php echo number_format($totalDamageFines); ?></div>
           </div>
         </div>
       </div>
@@ -326,6 +343,99 @@ $new_books_30 = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = 
                 <td><?php echo $r['created_at']; ?></td>
               </tr>
             <?php endforeach; ?>
+          </tbody>
+        </table>
+
+        <!-- Denda / Fine Report Section -->
+        <h4 style="margin-top: 24px;">Laporan Denda Kerusakan Buku</h4>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+          <div
+            style="padding: 16px; background-color: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #3b82f6;">
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">Total Denda Kerusakan</div>
+            <div style="font-size: 20px; font-weight: 600; color: #dc2626;">Rp
+              <?php echo number_format($totalDamageFines); ?></div>
+          </div>
+          <div
+            style="padding: 16px; background-color: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #ef4444;">
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">Denda Tertunda</div>
+            <div style="font-size: 20px; font-weight: 600; color: #ef4444;">Rp
+              <?php echo number_format($pendingDamageFines); ?></div>
+          </div>
+          <div
+            style="padding: 16px; background-color: rgba(59, 130, 246, 0.05); border-radius: 8px; border-left: 4px solid #10b981;">
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 4px;">Denda Terbayar</div>
+            <div style="font-size: 20px; font-weight: 600; color: #10b981;">Rp
+              <?php echo number_format($paidDamageFines); ?></div>
+          </div>
+        </div>
+
+        <h5 style="margin-top: 16px; margin-bottom: 12px;">Daftar Denda Per Anggota</h5>
+        <table id="tbl-fines-by-member" class="datatable">
+          <thead>
+            <tr>
+              <th>Nama Anggota</th>
+              <th>Jumlah Kerusakan</th>
+              <th>Total Denda</th>
+              <th>Terbayar</th>
+              <th>Tertunda</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (!empty($finesByMember)): ?>
+              <?php foreach ($finesByMember as $member): ?>
+                <tr>
+                  <td><strong><?php echo htmlspecialchars($member['name']); ?></strong></td>
+                  <td><?php echo (int) $member['damage_count'] ?: 0; ?></td>
+                  <td style="color: #dc2626; font-weight: 600;">Rp <?php echo number_format($member['total_fine'] ?: 0); ?>
+                  </td>
+                  <td style="color: #10b981;">Rp <?php echo number_format($member['paid_amount'] ?: 0); ?></td>
+                  <td style="color: #ef4444;">Rp <?php echo number_format($member['pending_amount'] ?: 0); ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <tr>
+                <td colspan="5" style="text-align: center; color: var(--muted);">Belum ada laporan kerusakan</td>
+              </tr>
+            <?php endif; ?>
+          </tbody>
+        </table>
+
+        <h5 style="margin-top: 24px; margin-bottom: 12px;">Riwayat Denda Kerusakan</h5>
+        <table id="tbl-damage-fines" class="datatable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Anggota</th>
+              <th>Buku</th>
+              <th>Tipe Kerusakan</th>
+              <th>Denda</th>
+              <th>Status</th>
+              <th>Tanggal Lapor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <?php if (!empty($damageRecords)): ?>
+              <?php foreach ($damageRecords as $record): ?>
+                <tr>
+                  <td><?php echo $record['id']; ?></td>
+                  <td><?php echo htmlspecialchars($record['member_name']); ?></td>
+                  <td><?php echo htmlspecialchars($record['book_title']); ?></td>
+                  <td><?php echo htmlspecialchars($record['damage_type']); ?></td>
+                  <td style="color: #dc2626; font-weight: 600;">Rp <?php echo number_format($record['fine_amount']); ?></td>
+                  <td>
+                    <span
+                      style="display: inline-block; padding: 4px 8px; background-color: <?php echo $record['status'] === 'paid' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'; ?>; color: <?php echo $record['status'] === 'paid' ? '#10b981' : '#ef4444'; ?>; border-radius: 4px; font-size: 11px; font-weight: 600;">
+                      <?php echo $record['status'] === 'paid' ? 'Lunas' : 'Tertunda'; ?>
+                    </span>
+                  </td>
+                  <td><?php echo date('d M Y H:i', strtotime($record['created_at'])); ?></td>
+                </tr>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--muted);">Belum ada laporan kerusakan</td>
+              </tr>
+            <?php endif; ?>
           </tbody>
         </table>
       </div>

@@ -3,18 +3,21 @@ require __DIR__ . '/../src/auth.php';
 requireAuth();
 
 require_once __DIR__ . '/../src/db.php';
-require_once __DIR__ . '/../src/maintenance/MaintenanceController.php';
+require_once __DIR__ . '/../src/maintenance/DamageController.php';
 
 // Get school_id from session
 $school_id = $_SESSION['user']['school_id'];
 
 // Pass school_id to controller
-$controller = new MaintenanceController($pdo, $school_id);
+$controller = new DamageController($pdo, $school_id);
 
-// Get all records and books FIRST
+// Get all damage records and active borrows
 $records = $controller->getAll();
-$books = $controller->getBooks();
+$activeBorrows = $controller->getActiveBorrows();
 $totalRecords = $controller->getCount();
+$totalFines = $controller->getTotalFines();
+$pendingFines = $controller->getTotalFines('pending');
+$damageTypes = $controller->getDamageTypes();
 
 // Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['action'])) {
@@ -25,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['action'])) {
 // Handle Export CSV
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   header('Content-Type: application/vnd.ms-excel; charset=utf-8');
-  header('Content-Disposition: attachment; filename="maintenance-' . date('Y-m-d-H-i-s') . '.xls"');
+  header('Content-Disposition: attachment; filename="damage-fines-' . date('Y-m-d-H-i-s') . '.xls"');
 
   echo '<!DOCTYPE html>';
   echo '<html>';
@@ -37,12 +40,11 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   echo 'td { padding: 10px; border: 1px solid #ddd; }';
   echo 'tr:nth-child(even) { background-color: #f9fafb; }';
   echo 'col.id { width: 50px; }';
-  echo 'col.title { width: 200px; }';
-  echo 'col.author { width: 150px; }';
+  echo 'col.member { width: 150px; }';
+  echo 'col.book { width: 200px; }';
+  echo 'col.damage { width: 120px; }';
+  echo 'col.fine { width: 100px; }';
   echo 'col.status { width: 100px; }';
-  echo 'col.priority { width: 100px; }';
-  echo 'col.notes { width: 200px; }';
-  echo 'col.followup { width: 120px; }';
   echo 'col.date { width: 120px; }';
   echo '</style>';
   echo '</head>';
@@ -50,24 +52,22 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   echo '<table>';
   echo '<colgroup>';
   echo '<col class="id">';
-  echo '<col class="title">';
-  echo '<col class="author">';
+  echo '<col class="member">';
+  echo '<col class="book">';
+  echo '<col class="damage">';
+  echo '<col class="fine">';
   echo '<col class="status">';
-  echo '<col class="priority">';
-  echo '<col class="notes">';
-  echo '<col class="followup">';
   echo '<col class="date">';
   echo '</colgroup>';
   echo '<thead>';
   echo '<tr>';
   echo '<th>ID</th>';
+  echo '<th>Anggota</th>';
   echo '<th>Judul Buku</th>';
-  echo '<th>Penulis</th>';
+  echo '<th>Tipe Kerusakan</th>';
+  echo '<th>Denda</th>';
   echo '<th>Status</th>';
-  echo '<th>Prioritas</th>';
-  echo '<th>Catatan</th>';
-  echo '<th>Follow-up</th>';
-  echo '<th>Tanggal Update</th>';
+  echo '<th>Tanggal</th>';
   echo '</tr>';
   echo '</thead>';
   echo '<tbody>';
@@ -75,13 +75,12 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   foreach ($records as $r) {
     echo '<tr>';
     echo '<td>' . htmlspecialchars($r['id']) . '</td>';
+    echo '<td>' . htmlspecialchars($r['member_name']) . '</td>';
     echo '<td>' . htmlspecialchars($r['book_title']) . '</td>';
-    echo '<td>' . htmlspecialchars($r['book_author']) . '</td>';
+    echo '<td>' . htmlspecialchars($damageTypes[$r['damage_type']]['name'] ?? $r['damage_type']) . '</td>';
+    echo '<td>Rp ' . number_format($r['fine_amount'], 0, ',', '.') . '</td>';
     echo '<td>' . htmlspecialchars($r['status']) . '</td>';
-    echo '<td>' . htmlspecialchars($r['priority'] ?? 'Normal') . '</td>';
-    echo '<td>' . htmlspecialchars($r['notes'] ?? '') . '</td>';
-    echo '<td>' . (isset($r['follow_up_date']) && $r['follow_up_date'] ? date('d-m-Y', strtotime($r['follow_up_date'])) : '') . '</td>';
-    echo '<td>' . date('d-m-Y', strtotime($r['updated_at'])) . '</td>';
+    echo '<td>' . date('d-m-Y H:i', strtotime($r['created_at'])) . '</td>';
     echo '</tr>';
   }
 
@@ -100,7 +99,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pemeliharaan Buku</title>
+  <title>Laporan Kerusakan Buku</title>
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -109,7 +108,6 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/book-maintenance.css">
-  <link rel="stylesheet" href="../assets/css/damage-section.css">
 </head>
 
 <body>
@@ -118,66 +116,84 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   <div class="app">
 
     <div class="topbar">
-      <strong><iconify-icon icon="mdi:wrench"
-          style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Pemeliharaan Buku</strong>
+      <strong><iconify-icon icon="mdi:alert-circle"
+          style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Laporan Kerusakan Buku</strong>
       <div class="topbar-actions">
         <button class="btn btn-secondary" onclick="exportCSV()"><iconify-icon icon="mdi:file-excel"
             style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Export Excel</button>
         <button class="btn" onclick="openAddModal()" style="margin-left: 8px;"><iconify-icon icon="mdi:plus"
-            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Tambah Catatan</button>
+            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Lapor Kerusakan</button>
       </div>
     </div>
 
     <div class="content">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon"><iconify-icon icon="mdi:alert"></iconify-icon></div>
+          <div>
+            <div class="kpi-title">Total Laporan</div>
+            <div class="kpi-value"><?= $totalRecords ?></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon"><iconify-icon icon="mdi:cash-multiple"></iconify-icon></div>
+          <div>
+            <div class="kpi-title">Total Denda</div>
+            <div class="kpi-value">Rp <?= number_format($totalFines, 0, ',', '.') ?></div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon"><iconify-icon icon="mdi:clock-alert"></iconify-icon></div>
+          <div>
+            <div class="kpi-title">Denda Tertunda</div>
+            <div class="kpi-value">Rp <?= number_format($pendingFines, 0, ',', '.') ?></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Filter Section -->
       <div class="card">
-        <h2>Filter & Statistik</h2>
+        <h2>Filter & Pencarian</h2>
         <div class="filter-bar">
-          <input type="text" id="searchInput" placeholder="Cari judul buku...">
+          <input type="text" id="searchInput" placeholder="Cari anggota atau buku...">
           <select id="statusFilter">
-            <option value="">Status</option>
-            <option value="Good">Good</option>
-            <option value="Worn Out">Worn Out</option>
-            <option value="Damaged">Damaged</option>
-            <option value="Missing">Missing</option>
-            <option value="Need Repair">Need Repair</option>
+            <option value="">Semua Status</option>
+            <option value="pending">Tertunda</option>
+            <option value="paid">Lunas</option>
           </select>
-          <select id="priorityFilter">
-            <option value="">Prioritas</option>
-            <option value="Low">Low</option>
-            <option value="Normal">Normal</option>
-            <option value="High">High</option>
-            <option value="Urgent">Urgent</option>
+          <select id="damageTypeFilter">
+            <option value="">Semua Tipe Kerusakan</option>
+            <?php foreach ($damageTypes as $key => $type): ?>
+              <option value="<?= htmlspecialchars($key) ?>"><?= htmlspecialchars($type['name']) ?></option>
+            <?php endforeach; ?>
           </select>
           <button class="btn btn-danger" onclick="resetFilter();"><iconify-icon icon="mdi:redo"></iconify-icon>
             Reset</button>
-        </div>
-        <div class="stats-bar">
-          <div class="stat-item">
-            <div class="stat-label">Total</div>
-            <div class="stat-value"><?= $totalRecords ?></div>
-          </div>
         </div>
       </div>
 
       <!-- Table Section -->
       <div class="card">
-        <h2>Daftar Catatan (<?= count($records) ?>)</h2>
+        <h2>Daftar Laporan (<?= count($records) ?>)</h2>
         <?php if (empty($records)): ?>
           <p style="text-align: center; color: var(--muted); padding: 32px 0;">
-            Belum ada catatan maintenance.
+            Belum ada laporan kerusakan.
           </p>
         <?php else: ?>
           <div class="table-wrap">
             <table>
               <colgroup>
                 <col class="id">
-                <col class="title">
-                <col class="author">
+                <col class="member">
+                <col class="book">
+                <col class="damage">
+                <col class="description">
+                <col class="fine">
                 <col class="status">
-                <col class="priority">
-                <col class="notes">
-                <col class="followup">
                 <col class="date">
                 <col class="action">
               </colgroup>
@@ -185,13 +201,13 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Judul Buku</th>
-                  <th>Penulis</th>
+                  <th>Anggota</th>
+                  <th>Buku</th>
+                  <th>Tipe Kerusakan</th>
+                  <th>Deskripsi</th>
+                  <th>Denda</th>
                   <th>Status</th>
-                  <th>Prioritas</th>
-                  <th>Catatan</th>
-                  <th>Follow-up</th>
-                  <th>Update</th>
+                  <th>Tanggal</th>
                   <th class="text-center">Aksi</th>
                 </tr>
               </thead>
@@ -199,44 +215,33 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
               <tbody>
                 <?php foreach ($records as $r): ?>
                   <tr>
-                    <td>#<?= $r['id'] ?></td>
-                    <td><strong><?= htmlspecialchars($r['book_title']) ?></strong></td>
-                    <td><?= htmlspecialchars($r['book_author']) ?></td>
-                    <td>
-                      <span class="status-badge status-<?= strtolower(str_replace(' ', '-', $r['status'])) ?>">
-                        <?= htmlspecialchars($r['status']) ?>
+                    <td style="color: black;">#<?= $r['id'] ?></td>
+                    <td style="color: black;"><strong><?= htmlspecialchars($r['member_name']) ?></strong></td>
+                    <td style="color: black;"><?= htmlspecialchars($r['book_title']) ?></td>
+                    <td style="color: black;">
+                      <span class="damage-badge" style="background-color: rgba(220, 38, 38, 0.1); color: #dc2626;">
+                        <?= htmlspecialchars($damageTypes[$r['damage_type']]['name'] ?? $r['damage_type']) ?>
                       </span>
                     </td>
-                    <td>
-                      <?php
-                      $priority = $r['priority'] ?? 'Normal';
-                      $priority_color = $priority === 'Urgent' ? '#dc2626' : ($priority === 'High' ? '#f59e0b' : '#6b7280');
-                      ?>
-                      <span
-                        style="display: inline-block; padding: 4px 8px; background: rgba(220, 38, 38, 0.1); color: <?= $priority_color ?>; border-radius: 4px; font-size: 11px; font-weight: 600;">
-                        <?= htmlspecialchars($priority) ?>
+                    <td style="font-size: 12px; color: black;">
+                      <?= $r['damage_description'] ? htmlspecialchars(substr($r['damage_description'], 0, 30)) . (strlen($r['damage_description']) > 30 ? '...' : '') : '-' ?>
+                    </td>
+                    <td style="font-weight: 600; color: #dc2626;">Rp <?= number_format($r['fine_amount'], 0, ',', '.') ?>
+                    </td>
+                    <td style="color: black;">
+                      <span class="status-badge status-<?= strtolower($r['status']) ?>">
+                        <?= $r['status'] === 'paid' ? 'Lunas' : 'Tertunda' ?>
                       </span>
                     </td>
-                    <td>
-                      <?= $r['notes'] ? htmlspecialchars(substr($r['notes'], 0, 30)) . (strlen($r['notes']) > 30 ? '...' : '') : '-' ?>
-                    </td>
-                    <td style="font-size: 12px;">
-                      <?php
-                      $followup = $r['follow_up_date'] ?? null;
-                      if ($followup) {
-                        echo date('d M Y', strtotime($followup));
-                      } else {
-                        echo '-';
-                      }
-                      ?>
-                    </td>
-                    <td style="font-size: 12px;"><?= date('d M Y', strtotime($r['updated_at'])) ?></td>
-                    <td class="text-center">
+                    <td style="font-size: 12px; color: black;"><?= date('d M Y H:i', strtotime($r['created_at'])) ?></td>
+                    <td class="text-center" style="color: black;">
                       <div class="actions">
-                        <button class="btn btn-sm btn-secondary" onclick="openEditModal(<?= $r['id'] ?>)"><iconify-icon
-                            icon="mdi:pencil" style="vertical-align: middle;"></iconify-icon> Edit</button>
-                        <button class="btn btn-sm btn-danger" onclick="deleteRecord(<?= $r['id'] ?>)"><iconify-icon
-                            icon="mdi:trash-can" style="vertical-align: middle;"></iconify-icon> Hapus</button>
+                        <?php if ($r['status'] === 'pending'): ?>
+                          <button class="btn btn-sm btn-success" onclick="markAsPaid(<?= $r['id'] ?>)"
+                            title="Tandai Sebagai Lunas"><iconify-icon icon="mdi:check"></iconify-icon></button>
+                        <?php endif; ?>
+                        <button class="btn btn-sm btn-danger" onclick="deleteRecord(<?= $r['id'] ?>)"
+                          title="Hapus"><iconify-icon icon="mdi:trash-can"></iconify-icon></button>
                       </div>
                     </td>
                   </tr>
@@ -246,79 +251,75 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
           </div>
         <?php endif; ?>
       </div>
+
     </div>
 
-    <!-- Modal Add/Edit -->
-    <div id="maintenanceModal" class="modal">
+    <!-- Modal Add Damage Report -->
+    <div id="damageModal" class="modal">
       <div class="modal-content">
-        <div class="modal-header" id="modalTitle">Tambah Catatan Maintenance</div>
+        <div class="modal-header">Lapor Kerusakan Buku</div>
         <div class="modal-body">
-          <form id="maintenanceForm">
-            <input type="hidden" id="recordId" name="id" value="">
-
+          <form id="damageForm">
             <div class="form-group">
-              <label for="bookId">Pilih Buku</label>
-              <select id="bookId" name="book_id" required>
-                <option value="">-- Pilih Buku --</option>
-                <?php foreach ($books as $b): ?>
-                  <option value="<?= $b['id'] ?>">
-                    <?= htmlspecialchars($b['title']) . ' - ' . htmlspecialchars($b['author']) ?>
+              <label for="borrowId">Pilih Peminjaman</label>
+              <select id="borrowId" name="borrow_id" required onchange="onBorrowSelected()">
+                <option value="">-- Pilih Peminjaman --</option>
+                <?php foreach ($activeBorrows as $b): ?>
+                  <option value="<?= $b['id'] ?>" data-member-id="<?= $b['member_id'] ?>"
+                    data-book-id="<?= $b['book_id'] ?>">
+                    <?= htmlspecialchars($b['member_name']) ?> - <?= htmlspecialchars($b['book_title']) ?>
+                    (<?= date('d M Y', strtotime($b['borrowed_at'])) ?>)
                   </option>
                 <?php endforeach; ?>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="status">Status</label>
-              <select id="status" name="status" required>
-                <option value="">-- Pilih Status --</option>
-                <option value="Good">Good (Bagus)</option>
-                <option value="Worn Out">Worn Out (Aus)</option>
-                <option value="Damaged">Damaged (Rusak)</option>
-                <option value="Missing">Missing (Hilang)</option>
-                <option value="Need Repair">Need Repair (Perlu Perbaikan)</option>
-                <option value="Replaced">Replaced (Diganti)</option>
+              <label for="damageType">Tipe Kerusakan</label>
+              <select id="damageType" name="damage_type" required onchange="onDamageTypeChanged()">
+                <option value="">-- Pilih Tipe Kerusakan --</option>
+                <?php foreach ($damageTypes as $key => $type): ?>
+                  <option value="<?= htmlspecialchars($key) ?>" data-fine="<?= $type['fine'] ?>">
+                    <?= htmlspecialchars($type['name']) ?>
+                  </option>
+                <?php endforeach; ?>
               </select>
             </div>
 
             <div class="form-group">
-              <label for="priority">Prioritas</label>
-              <select id="priority" name="priority">
-                <option value="Normal">Normal</option>
-                <option value="Low">Low</option>
-                <option value="High">High</option>
-                <option value="Urgent">Urgent</option>
-              </select>
+              <label for="damageDescription">Deskripsi Kerusakan (Opsional)</label>
+              <textarea id="damageDescription" name="damage_description"
+                placeholder="Jelaskan detail kerusakan..."></textarea>
             </div>
 
             <div class="form-group">
-              <label for="followUpDate">Tanggal Follow-up (Opsional)</label>
-              <input type="date" id="followUpDate" name="follow_up_date">
-            </div>
-
-            <div class="form-group">
-              <label for="notes">Catatan / Keterangan</label>
-              <textarea id="notes" name="notes" placeholder="Deskripsikan kondisi buku..."></textarea>
+              <label>Denda Otomatis</label>
+              <div
+                style="padding: 12px; background-color: rgba(220, 38, 38, 0.05); border-radius: 6px; border-left: 4px solid #dc2626;">
+                <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">Berdasarkan tipe kerusakan:</div>
+                <div id="fineAmount" style="font-size: 20px; font-weight: 600; color: #dc2626;">Rp 0</div>
+              </div>
+              <input type="hidden" id="fineAmountInput" name="fine_amount" value="0">
             </div>
           </form>
         </div>
         <div class="modal-footer">
           <button class="btn btn-secondary" onclick="closeModal()"><iconify-icon icon="mdi:close"
               style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Batal</button>
-          <button class="btn" onclick="saveRecord()"><iconify-icon icon="mdi:content-save"
-              style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Simpan</button>
+          <button class="btn" onclick="saveDamageReport()"><iconify-icon icon="mdi:content-save"
+              style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Lapor Kerusakan</button>
         </div>
       </div>
     </div>
 
-    <!-- Include Damage Tracking Section -->
-    <?php include __DIR__ . '/partials/damage-section.php'; ?>
-
     <script>
       // Data untuk digunakan di book-maintenance.js
       window.recordsData = <?php echo json_encode($records); ?>;
+      window.damageTypesData = <?php echo json_encode($damageTypes); ?>;
     </script>
     <script src="../assets/js/book-maintenance.js"></script>
+
+  </div>
 
 </body>
 

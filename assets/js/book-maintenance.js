@@ -16,89 +16,85 @@ function exportCSV() {
 function filterTable() {
   const searchText = document.getElementById('searchInput').value.toLowerCase();
   const statusFilter = document.getElementById('statusFilter').value;
-  const priorityFilter = document.getElementById('priorityFilter').value;
+  const damageTypeFilter = document.getElementById('damageTypeFilter').value;
   const rows = document.querySelectorAll('tbody tr');
 
   rows.forEach(row => {
-    const title = row.cells[1].textContent.toLowerCase();
-    const author = row.cells[2].textContent.toLowerCase();
-    const status = row.cells[3].textContent.trim();
-    const priority = row.cells[4].textContent.trim();
+    const memberName = row.cells[1].textContent.toLowerCase();
+    const bookTitle = row.cells[2].textContent.toLowerCase();
+    const damageType = row.cells[3].getAttribute('data-damage-type') || '';
+    const status = row.cells[6].textContent.trim();
 
-    const matchSearch = title.includes(searchText) || author.includes(searchText);
-    const matchStatus = !statusFilter || status.includes(statusFilter);
-    const matchPriority = !priorityFilter || priority.includes(priorityFilter);
+    const matchSearch = memberName.includes(searchText) || bookTitle.includes(searchText);
+    const matchStatus = !statusFilter || status.toLowerCase().includes(statusFilter.toLowerCase());
+    const matchDamage = !damageTypeFilter || damageType === damageTypeFilter;
 
-    row.style.display = matchSearch && matchStatus && matchPriority ? '' : 'none';
+    row.style.display = matchSearch && matchStatus && matchDamage ? '' : 'none';
   });
 }
 
 function resetFilter() {
   document.getElementById('searchInput').value = '';
   document.getElementById('statusFilter').value = '';
-  document.getElementById('priorityFilter').value = '';
+  document.getElementById('damageTypeFilter').value = '';
   filterTable();
 }
 
 function openAddModal() {
-  document.getElementById('recordId').value = '';
-  document.getElementById('maintenanceForm').reset();
-  document.getElementById('modalTitle').innerText = 'Tambah Catatan Maintenance';
-  document.getElementById('maintenanceModal').classList.add('active');
-}
-
-function openEditModal(id) {
-  fetch('?action=get&id=' + id)
-    .then(r => r.json())
-    .then(data => {
-      if (data.success && data.data) {
-        const record = data.data;
-        document.getElementById('recordId').value = record.id;
-        document.getElementById('bookId').value = record.book_id;
-        document.getElementById('status').value = record.status;
-        document.getElementById('priority').value = record.priority || 'Normal';
-        document.getElementById('followUpDate').value = record.follow_up_date || '';
-        document.getElementById('notes').value = record.notes || '';
-        document.getElementById('modalTitle').innerText = 'Edit Catatan Maintenance';
-        document.getElementById('maintenanceModal').classList.add('active');
-      }
-    });
+  document.getElementById('damageForm').reset();
+  document.getElementById('fineAmount').innerText = 'Rp 0';
+  document.getElementById('fineAmountInput').value = '0';
+  document.getElementById('damageModal').classList.add('active');
 }
 
 function closeModal() {
-  document.getElementById('maintenanceModal').classList.remove('active');
+  document.getElementById('damageModal').classList.remove('active');
 }
 
-function saveRecord() {
-  const id = document.getElementById('recordId').value;
-  const bookId = document.getElementById('bookId').value;
-  const status = document.getElementById('status').value;
-  const priority = document.getElementById('priority').value;
-  const followUpDate = document.getElementById('followUpDate').value;
-  const notes = document.getElementById('notes').value;
+function onBorrowSelected() {
+  // If needed in future for auto-filling member info
+}
 
-  if (!bookId || !status) {
-    showToast('Buku dan Status harus dipilih!', 'error');
+function onDamageTypeChanged() {
+  const select = document.getElementById('damageType');
+  const selectedOption = select.options[select.selectedIndex];
+  const fineAmount = selectedOption.getAttribute('data-fine') || '0';
+  
+  document.getElementById('fineAmount').innerText = 'Rp ' + formatCurrency(fineAmount);
+  document.getElementById('fineAmountInput').value = fineAmount;
+}
+
+function formatCurrency(value) {
+  return parseFloat(value).toLocaleString('id-ID');
+}
+
+function saveDamageReport() {
+  const borrowId = document.getElementById('borrowId').value;
+  const damageType = document.getElementById('damageType').value;
+  const damageDescription = document.getElementById('damageDescription').value;
+  const fineAmount = document.getElementById('fineAmountInput').value;
+
+  if (!borrowId || !damageType) {
+    showToast('Peminjaman dan Tipe Kerusakan harus dipilih!', 'error');
     return;
   }
 
+  // Get member_id and book_id from selected option
+  const borrowOption = document.getElementById('borrowId').options[document.getElementById('borrowId').selectedIndex];
+  const memberId = borrowOption.getAttribute('data-member-id');
+  const bookId = borrowOption.getAttribute('data-book-id');
+
   const formData = new FormData();
-  formData.append('action', id ? 'update' : 'add');
+  formData.append('action', 'add');
+  formData.append('borrow_id', borrowId);
+  formData.append('member_id', memberId);
   formData.append('book_id', bookId);
-  formData.append('status', status);
-  formData.append('priority', priority);
-  formData.append('follow_up_date', followUpDate);
-  formData.append('notes', notes);
-  if (id) formData.append('id', id);
+  formData.append('damage_type', damageType);
+  formData.append('damage_description', damageDescription);
+  formData.append('fine_amount', fineAmount);
 
   fetch(window.location.pathname, { method: 'POST', body: formData })
-    .then(r => r.text().then(text => {
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        throw new Error('Invalid JSON');
-      }
-    }))
+    .then(r => r.json())
     .then(data => {
       if (data.success) {
         showToast(data.message);
@@ -113,21 +109,16 @@ function saveRecord() {
     });
 }
 
-function deleteRecord(id) {
-  if (!confirm('Yakin hapus catatan ini?')) return;
+function markAsPaid(id) {
+  if (!confirm('Tandai denda ini sebagai lunas?')) return;
 
   const formData = new FormData();
-  formData.append('action', 'delete');
+  formData.append('action', 'update_status');
   formData.append('id', id);
+  formData.append('status', 'paid');
 
   fetch(window.location.pathname, { method: 'POST', body: formData })
-    .then(r => r.text().then(text => {
-      try {
-        return JSON.parse(text);
-      } catch (e) {
-        throw new Error('Invalid JSON');
-      }
-    }))
+    .then(r => r.json())
     .then(data => {
       if (data.success) {
         showToast(data.message);
@@ -141,28 +132,43 @@ function deleteRecord(id) {
     });
 }
 
-// Update stats on page load
-document.addEventListener('DOMContentLoaded', () => {
-  const records = window.recordsData;
-  const good = records.filter(r => r.status === 'Good').length;
-  const damaged = records.filter(r =>
-    ['Damaged', 'Need Repair', 'Missing'].includes(r.status)
-  ).length;
+function deleteRecord(id) {
+  if (!confirm('Yakin hapus catatan denda ini?')) return;
 
-  document.getElementById('goodCount').innerText = good;
-  document.getElementById('damagedCount').innerText = damaged;
+  const formData = new FormData();
+  formData.append('action', 'delete');
+  formData.append('id', id);
+
+  fetch(window.location.pathname, { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        showToast(data.message);
+        setTimeout(() => location.reload(), 800);
+      } else {
+        showToast(data.message || 'Terjadi kesalahan', 'error');
+      }
+    })
+    .catch(err => {
+      showToast('Error: ' + err.message, 'error');
+    });
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('searchInput');
+  const statusFilter = document.getElementById('statusFilter');
+  const damageTypeFilter = document.getElementById('damageTypeFilter');
+
+  if (searchInput) searchInput.addEventListener('input', filterTable);
+  if (statusFilter) statusFilter.addEventListener('change', filterTable);
+  if (damageTypeFilter) damageTypeFilter.addEventListener('change', filterTable);
 });
 
 // Close modal on outside click
-document.getElementById('maintenanceModal').addEventListener('click', (e) => {
-  if (e.target.id === 'maintenanceModal') closeModal();
-});
-
-// FAQ toggle functionality
-document.querySelectorAll('.faq-question').forEach(q => {
-  q.onclick = () => {
-    const p = q.parentElement;
-    p.classList.toggle('active');
-    q.querySelector('span').textContent = p.classList.contains('active') ? '−' : '+';
+document.addEventListener('click', (e) => {
+  const modal = document.getElementById('damageModal');
+  if (e.target === modal) {
+    closeModal();
   }
 });

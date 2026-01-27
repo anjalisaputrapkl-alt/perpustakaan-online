@@ -2,6 +2,7 @@
 session_start();
 $pdo = require __DIR__ . '/../src/db.php';
 require_once __DIR__ . '/../src/MemberHelper.php';
+require_once __DIR__ . '/../src/maintenance/DamageController.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['user'])) {
@@ -15,6 +16,18 @@ $school_id = $user['school_id'];
 // Get member_id dengan auto-create jika belum ada
 $memberHelper = new MemberHelper($pdo);
 $member_id = $memberHelper->getMemberId($user);
+
+// Get damage fines for this member
+$damageController = new DamageController($pdo, $school_id);
+$memberDamageFines = $damageController->getByMember($member_id);
+$totalMemberDenda = 0;
+$pendingMemberDenda = 0;
+foreach ($memberDamageFines as $fine) {
+    $totalMemberDenda += $fine['fine_amount'];
+    if ($fine['status'] === 'pending') {
+        $pendingMemberDenda += $fine['fine_amount'];
+    }
+}
 
 // ===================== QUERY PEMINJAMAN SISWA =====================
 // Update overdue status
@@ -140,13 +153,25 @@ $pageTitle = 'Dashboard Siswa';
         <div class="content-wrapper">
             <!-- Sidebar -->
             <aside class="sidebar">
-                <!-- Search Tips -->
+                <!-- Total Denda -->
                 <div class="sidebar-section">
-                    <h3><iconify-icon icon="mdi:lightbulb-on" width="16" height="16"></iconify-icon> Tips</h3>
-                    <p style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
-                        Gunakan search untuk mencari buku berdasarkan judul atau pengarang. Filter kategori membantu
-                        Anda menemukan buku yang Anda inginkan.
-                    </p>
+                    <h3><iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon> Denda Anda</h3>
+                    <div
+                        style="padding: 12px; background-color: <?php echo $totalMemberDenda > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)'; ?>; border-radius: 6px; border-left: 4px solid <?php echo $totalMemberDenda > 0 ? '#ef4444' : '#10b981'; ?>;">
+                        <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 6px;">Total Denda</div>
+                        <div
+                            style="font-size: 18px; font-weight: 700; color: <?php echo $totalMemberDenda > 0 ? '#dc2626' : '#059669'; ?>; margin-bottom: 8px;">
+                            Rp <?php echo number_format($totalMemberDenda, 0, ',', '.'); ?></div>
+                        <?php if ($totalMemberDenda > 0): ?>
+                            <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Tertunda: <strong
+                                    style="color: #ef4444;">Rp
+                                    <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></strong></div>
+                            <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.5;">Denda dari
+                                kerusakan buku saat peminjaman. Silakan hubungi admin untuk detail.</p>
+                        <?php else: ?>
+                            <p style="font-size: 11px; color: #10b981; margin: 0;">✓ Tidak ada denda kerusakan</p>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <!-- Category Filter -->

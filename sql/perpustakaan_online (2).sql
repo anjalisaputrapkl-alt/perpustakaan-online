@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 27, 2026 at 03:23 AM
+-- Generation Time: Jan 27, 2026 at 04:57 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -57,6 +57,33 @@ INSERT INTO `books` (`id`, `school_id`, `title`, `author`, `isbn`, `category`, `
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `book_damage_fines`
+--
+
+CREATE TABLE `book_damage_fines` (
+  `id` int(11) NOT NULL,
+  `school_id` int(11) NOT NULL,
+  `borrow_id` int(11) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `book_id` int(11) NOT NULL,
+  `damage_type` varchar(50) NOT NULL,
+  `damage_description` text DEFAULT NULL,
+  `fine_amount` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `status` enum('pending','paid') DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `book_damage_fines`
+--
+
+INSERT INTO `book_damage_fines` (`id`, `school_id`, `borrow_id`, `member_id`, `book_id`, `damage_type`, `damage_description`, `fine_amount`, `status`, `created_at`, `updated_at`) VALUES
+(1, 4, 1, 1, 1, 'minor_tear', 'Robekan di pinggir bawah halaman 10', 25000.00, 'pending', '2026-01-27 03:40:23', '2026-01-27 03:40:23');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `book_maintenance`
 --
 
@@ -99,7 +126,7 @@ CREATE TABLE `borrows` (
 INSERT INTO `borrows` (`id`, `school_id`, `book_id`, `member_id`, `borrowed_at`, `due_at`, `returned_at`, `status`) VALUES
 (1, 4, 1, 1, '2026-01-26 10:08:29', '2026-02-02 10:08:29', NULL, 'borrowed'),
 (2, 4, 7, 1, '2026-01-27 08:40:22', '2026-02-03 08:40:22', '2026-01-27 09:11:15', 'returned'),
-(3, 4, 5, 1, '2026-01-27 09:17:32', '2026-02-03 09:17:32', NULL, 'borrowed'),
+(3, 4, 5, 1, '2026-01-27 09:17:32', '2026-02-03 09:17:32', NULL, 'pending_return'),
 (4, 4, 4, 1, '2026-01-27 09:17:43', '2026-02-03 09:17:43', NULL, 'borrowed');
 
 -- --------------------------------------------------------
@@ -147,7 +174,8 @@ CREATE TABLE `members` (
 --
 
 INSERT INTO `members` (`id`, `school_id`, `name`, `email`, `nisn`, `status`, `created_at`) VALUES
-(1, 4, 'Anjali Saputra', 'anjalisaputra@gmail.com', '0094234', 'active', '2026-01-26 03:06:14');
+(1, 4, 'Anjali Saputra', 'anjalisaputra@gmail.com', '0094234', 'active', '2026-01-26 03:06:14'),
+(2, 4, 'Surya', 'surz@gmail.com', '000000', 'active', '2026-01-27 03:56:53');
 
 -- --------------------------------------------------------
 
@@ -185,7 +213,8 @@ INSERT INTO `notifications` (`id`, `school_id`, `student_id`, `title`, `message`
 (12, 4, 4, 'Buku Ditambahkan ke Favorit', 'Anda telah menambahkan \"B.J. Habibie : Sebuah Biografi\" ke koleksi favorit Anda.', 'info', 0, '2026-01-27 02:11:42', '2026-01-27 02:11:42'),
 (13, 4, 4, 'Buku Ditambahkan ke Favorit', 'Anda telah menambahkan \"The Psychology of Money\" ke koleksi favorit Anda.', 'info', 0, '2026-01-27 02:17:21', '2026-01-27 02:17:21'),
 (14, 4, 4, 'Peminjaman Berhasil', 'Anda telah meminjam buku \"The Psychology of Money\". Harap dikembalikan sebelum tanggal 03/02/2026.', 'borrow', 0, '2026-01-27 02:17:32', '2026-01-27 02:17:32'),
-(15, 4, 4, 'Peminjaman Berhasil', 'Anda telah meminjam buku \"Sebuah Seni Untuk Bersikap Bodoamat\". Harap dikembalikan sebelum tanggal 03/02/2026.', 'borrow', 0, '2026-01-27 02:17:43', '2026-01-27 02:17:43');
+(15, 4, 4, 'Peminjaman Berhasil', 'Anda telah meminjam buku \"Sebuah Seni Untuk Bersikap Bodoamat\". Harap dikembalikan sebelum tanggal 03/02/2026.', 'borrow', 0, '2026-01-27 02:17:43', '2026-01-27 02:17:43'),
+(16, 4, 4, 'Permintaan Pengembalian Dikirim', 'Permintaan pengembalian untuk buku \"The Psychology of Money\" menunggu konfirmasi admin.', 'return_request', 0, '2026-01-27 03:41:36', '2026-01-27 03:41:36');
 
 -- --------------------------------------------------------
 
@@ -264,7 +293,7 @@ CREATE TABLE `school_themes` (
 
 INSERT INTO `school_themes` (`id`, `school_id`, `theme_name`, `custom_colors`, `typography`, `created_at`, `updated_at`) VALUES
 (1, 3, 'light', NULL, NULL, '2026-01-26 02:41:21', '2026-01-26 02:41:21'),
-(2, 4, 'light', NULL, NULL, '2026-01-26 02:43:32', '2026-01-26 04:29:04');
+(2, 4, 'dark', NULL, NULL, '2026-01-26 02:43:32', '2026-01-27 03:56:30');
 
 -- --------------------------------------------------------
 
@@ -327,7 +356,8 @@ INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `ve
 (5, 5, 'Gani', 'sdfdf@sch.id', NULL, '$2y$10$y5RgsJjO.nbQ3XXqFeQ4X.5zkiCKKAXEZnH.EhVXPdyvOPc/.MRDm', NULL, '2026-01-25 22:52:04', 1, '2026-01-26 04:37:14', 'admin', '2026-01-26 04:37:04'),
 (6, 7, 'sdfsdfasdasd', 'sdfsdfsf@sch.id', NULL, '$2y$10$qTK44/muE8jMTShecEdkZuPoFN3Kh9dDnc80qmzQo1bLNL6zgQ3ua', NULL, '2026-01-25 22:54:59', 1, '2026-01-26 04:40:09', 'admin', '2026-01-26 04:39:59'),
 (7, 8, 'sghdfgdf', 'sdsdfsfdf@sch.id', NULL, '$2y$10$E3CEHA.8I4ICe1cYR7hdve6bfeEtSuhXHjrf4q.D.Ux9h.QyZpaQG', NULL, '2026-01-25 22:57:48', 1, '2026-01-26 04:42:57', 'admin', '2026-01-26 04:42:48'),
-(8, 9, 'ertert', 'hgdfgdfg@sch.id', NULL, '$2y$10$kIJvRguAWIEKu6XrYqSjLOM8SRIDa0Tgz5PxDcTD1Lkdx7D0QpIpW', NULL, NULL, 1, '2026-01-26 04:44:53', 'admin', '2026-01-26 04:44:45');
+(8, 9, 'ertert', 'hgdfgdfg@sch.id', NULL, '$2y$10$kIJvRguAWIEKu6XrYqSjLOM8SRIDa0Tgz5PxDcTD1Lkdx7D0QpIpW', NULL, NULL, 1, '2026-01-26 04:44:53', 'admin', '2026-01-26 04:44:45'),
+(9, 4, 'Surya', 'surz@gmail.com', '000000', '$2y$10$pCjvGGyhUHrozsbvjWHwAebllSThpZ1VCIGvhwf7l9YbOq.Kchbwq', NULL, NULL, 0, NULL, 'student', '2026-01-27 03:56:53');
 
 --
 -- Indexes for dumped tables
@@ -339,6 +369,18 @@ INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `ve
 ALTER TABLE `books`
   ADD PRIMARY KEY (`id`),
   ADD KEY `school_id` (`school_id`);
+
+--
+-- Indexes for table `book_damage_fines`
+--
+ALTER TABLE `book_damage_fines`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_school_id` (`school_id`),
+  ADD KEY `idx_borrow_id` (`borrow_id`),
+  ADD KEY `idx_member_id` (`member_id`),
+  ADD KEY `idx_book_id` (`book_id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_created_at` (`created_at`);
 
 --
 -- Indexes for table `book_maintenance`
@@ -447,6 +489,12 @@ ALTER TABLE `books`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
+-- AUTO_INCREMENT for table `book_damage_fines`
+--
+ALTER TABLE `book_damage_fines`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
 -- AUTO_INCREMENT for table `book_maintenance`
 --
 ALTER TABLE `book_maintenance`
@@ -468,13 +516,13 @@ ALTER TABLE `favorites`
 -- AUTO_INCREMENT for table `members`
 --
 ALTER TABLE `members`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
@@ -504,7 +552,7 @@ ALTER TABLE `siswa`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- Constraints for dumped tables
@@ -515,6 +563,15 @@ ALTER TABLE `users`
 --
 ALTER TABLE `books`
   ADD CONSTRAINT `books_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `book_damage_fines`
+--
+ALTER TABLE `book_damage_fines`
+  ADD CONSTRAINT `fk_damage_book` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_damage_borrow` FOREIGN KEY (`borrow_id`) REFERENCES `borrows` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_damage_member` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_damage_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `book_maintenance`
