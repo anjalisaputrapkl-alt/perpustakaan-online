@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Dashboard Stats API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .test-btn {
+            padding: 12px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        
+        .test-btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .output {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #2d3748;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .output.success {
+            background: #f0fdf4;
+            border-color: #86efac;
+            color: #166534;
+        }
+        
+        .output.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-box {
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-box .label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+            color: #0c5aa0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Dashboard Stats API</h1>
+        <p class="subtitle">Test endpoint: /api/dashboard-stats.php</p>
+        
+        <div class="info-box">
+            <strong>Info:</strong> Endpoint ini digunakan untuk auto-load chart dan stat values pada dashboard.
+        </div>
+        
+        <button class="test-btn" onclick="testAPI()">Test Dashboard Stats API</button>
+        
+        <div id="output" class="output" style="display: none;"></div>
+        
+        <div id="stats-display" style="display: none;">
+            <h3 style="margin-top: 30px;">Statistics Preview:</h3>
+            <div class="stats-grid" id="stats-grid"></div>
+        </div>
+    </div>
+    
+    <script>
+        async function testAPI() {
+            const output = document.getElementById('output');
+            output.style.display = 'block';
+            output.className = 'output';
+            output.textContent = '⏳ Loading dashboard stats...';
+            
+            try {
+                console.log('Testing API endpoint...');
+                const response = await fetch('/perpustakaan-online/public/api/dashboard-stats.php', {
+                    credentials: 'include',
+                    method: 'GET'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                output.className = data.success ? 'output success' : 'output error';
+                let resultText = `✅ API Test Result\n\n`;
+                resultText += `Status: ${response.status} ${response.statusText}\n`;
+                resultText += `Success: ${data.success}\n\n`;
+                resultText += `Response Data:\n`;
+                resultText += JSON.stringify(data, null, 2);
+                
+                output.textContent = resultText;
+                
+                // Display stats preview
+                if (data.success) {
+                    displayStatsPreview(data.stats);
+                }
+                
+                console.log('✅ API Test Passed:', data);
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `❌ API Test Failed\n\nError: ${error.message}\n\nMake sure:\n1. You are logged in\n2. Server is running\n3. Database has data`;
+                console.error('❌ API Test Failed:', error);
+            }
+        }
+        
+        function displayStatsPreview(stats) {
+            const display = document.getElementById('stats-display');
+            const grid = document.getElementById('stats-grid');
+            
+            grid.innerHTML = `
+                <div class="stat-box">
+                    <div class="label">Total Buku</div>
+                    <div class="value">${stats.total_books}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Total Anggota</div>
+                    <div class="value">${stats.total_members}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Tersedia</div>
+                    <div class="value">${stats.total_available}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Dipinjam</div>
+                    <div class="value">${stats.total_borrowed}</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Terlambat</div>
+                    <div class="value">${stats.total_overdue}</div>
+                </div>
+            `;
+            
+            display.style.display = 'block';
+        }
+        
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            console.log('Page loaded - ready to test API');
+        });
+    </script>
+</body>
+</html>

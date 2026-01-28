@@ -9,18 +9,6 @@ if ($is_authenticated) {
     $user = $_SESSION['user'];
     $school_id = $user['school_id'];
 
-    function countData($pdo, $sql, $sid)
-    {
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['sid' => $sid]);
-        return $stmt->fetchColumn();
-    }
-
-    $total_books = countData($pdo, "SELECT COUNT(*) FROM books WHERE school_id = :sid", $school_id);
-    $total_members = countData($pdo, "SELECT COUNT(*) FROM members WHERE school_id = :sid", $school_id);
-    $total_borrowed = countData($pdo, "SELECT COUNT(*) FROM borrows WHERE school_id = :sid AND returned_at IS NULL", $school_id);
-    $total_overdue = countData($pdo, "SELECT COUNT(*) FROM borrows WHERE school_id = :sid AND status='overdue'", $school_id);
-
     // Recent borrows
     $stmt = $pdo->prepare("SELECT b.title, m.name, br.borrowed_at as timestamp, 'borrow' as type FROM borrows br 
         JOIN books b ON br.book_id = b.id 
@@ -58,22 +46,6 @@ if ($is_authenticated) {
     usort($all_activities, function ($a, $b) {
         return strtotime($b['timestamp']) - strtotime($a['timestamp']);
     });
-
-    // Get monthly borrow data for current year
-    $stmt = $pdo->prepare("SELECT MONTH(borrowed_at) as month, COUNT(*) as count FROM borrows 
-        WHERE school_id = :sid AND YEAR(borrowed_at) = YEAR(NOW())
-        GROUP BY MONTH(borrowed_at)
-        ORDER BY MONTH(borrowed_at)");
-    $stmt->execute(['sid' => $school_id]);
-    $monthly_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Create array with 0 for all months first
-    $monthly_borrows = array_fill(0, 12, 0);
-
-    // Fill in actual data
-    foreach ($monthly_data as $row) {
-        $monthly_borrows[$row['month'] - 1] = $row['count'];
-    }
 }
 ?>
 <!doctype html>
@@ -110,20 +82,28 @@ if ($is_authenticated) {
                 <div class="main">
 
                     <div class="stats">
-                        <div class="stat"><small>Total Buku</small><strong><?= $total_books ?></strong></div>
-                        <div class="stat"><small>Total Anggota</small><strong><?= $total_members ?></strong></div>
-                        <div class="stat"><small>Dipinjam</small><strong><?= $total_borrowed ?></strong></div>
-                        <div class="stat alert"><small>Terlambat</small><strong><?= $total_overdue ?></strong></div>
+                        <div class="stat" data-stat-type="books" data-tooltip="Total seluruh buku yang sudah terdaftar di perpustakaan">
+                            <small>Total Buku</small><strong class="stat-value" id="stat-books">-</strong>
+                        </div>
+                        <div class="stat" data-stat-type="members" data-tooltip="Total seluruh anggota perpustakaan yang terdaftar">
+                            <small>Total Anggota</small><strong class="stat-value" id="stat-members">-</strong>
+                        </div>
+                        <div class="stat" data-stat-type="borrowed" data-tooltip="Total buku yang sedang dipinjam oleh anggota">
+                            <small>Dipinjam</small><strong class="stat-value" id="stat-borrowed">-</strong>
+                        </div>
+                        <div class="stat alert" data-stat-type="overdue" data-tooltip="Total peminjaman yang sudah melewati batas waktu pengembalian">
+                            <small>Terlambat</small><strong class="stat-value" id="stat-overdue">-</strong>
+                        </div>
                     </div>
 
                     <div class="charts">
                         <div class="chart-box">
                             <h2>Peminjaman per Bulan</h2>
-                            <canvas id="borrowChart"></canvas>
+                            <canvas id="borrowChart" width="400" height="200"></canvas>
                         </div>
                         <div class="chart-box">
                             <h2>Status Buku</h2>
-                            <canvas id="statusChart"></canvas>
+                            <canvas id="statusChart" width="400" height="300"></canvas>
                         </div>
                     </div>
 
@@ -291,11 +271,31 @@ if ($is_authenticated) {
             </div>
         </div>
 
+        <script src="../assets/js/stats-modal.js"></script>
         <script src="../assets/js/index.js"></script>
+
+        <!-- Modal untuk Stats -->
+        <div class="modal-overlay" id="statsModal">
+            <div class="modal-container">
+                <div class="modal-header">
+                    <h2>Detail Data</h2>
+                    <button class="modal-close" type="button">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-loading">Memuat data...</div>
+                </div>
+            </div>
+        </div>
+
         <script>
-            // Initialize charts dengan data
-            initializeCharts(<?= json_encode($monthly_borrows) ?>);
-            initializeStatusChart(<?= $total_books ?>, <?= $total_borrowed ?>, <?= $total_overdue ?>);
+            document.addEventListener("DOMContentLoaded", function () {
+                console.log("📌 DOM Loaded → Load Dashboard Stats");
+                initLoadDashboardStats();
+                // Also initialize modal manager
+                if (typeof modalManager !== 'undefined') {
+                    modalManager.init();
+                }
+            });
         </script>
     <?php endif; ?>
 

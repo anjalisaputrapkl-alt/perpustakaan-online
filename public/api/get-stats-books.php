@@ -1,0 +1,54 @@
+<?php
+header('Content-Type: application/json');
+require __DIR__ . '/../../src/auth.php';
+requireAuth();
+
+$pdo = require __DIR__ . '/../../src/db.php';
+$user = $_SESSION['user'];
+$school_id = $user['school_id'];
+
+try {
+    $stmt = $pdo->prepare("
+        SELECT 
+            b.id,
+            b.title,
+            b.author,
+            b.category,
+            b.copies,
+            (SELECT COUNT(*) FROM borrows WHERE book_id = b.id AND returned_at IS NULL AND school_id = :sid) as borrowed_count
+        FROM books b
+        WHERE b.school_id = :sid
+        ORDER BY b.created_at DESC
+    ");
+    
+    $stmt->execute(['sid' => $school_id]);
+    $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    $data = [];
+    foreach ($books as $book) {
+        $available = max(0, $book['copies'] - $book['borrowed_count']);
+        $data[] = [
+            'id' => $book['id'],
+            'title' => htmlspecialchars($book['title']),
+            'author' => htmlspecialchars($book['author'] ?? '-'),
+            'category' => htmlspecialchars($book['category']),
+            'total' => $book['copies'],
+            'borrowed' => $book['borrowed_count'],
+            'available' => $available,
+            'status' => $available > 0 ? 'Tersedia' : 'Habis'
+        ];
+    }
+    
+    echo json_encode([
+        'success' => true,
+        'data' => $data,
+        'total' => count($data)
+    ]);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error: ' . $e->getMessage()
+    ]);
+}
+?>

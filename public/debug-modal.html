@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Stats Modal</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f5f5f5; }
+        .box { background: white; padding: 20px; margin: 10px 0; border-radius: 5px; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
+        pre { background: #f0f0f0; padding: 10px; overflow: auto; }
+    </style>
+</head>
+<body>
+
+<h1>🔧 Debug Modal Stats</h1>
+
+<div class="box">
+    <h2>1. Check Files Exist</h2>
+    <button onclick="checkFiles()">Run Check</button>
+    <pre id="check-files"></pre>
+</div>
+
+<div class="box">
+    <h2>2. Test AJAX Endpoints</h2>
+    <button onclick="testEndpoints()">Run Test</button>
+    <pre id="test-endpoints"></pre>
+</div>
+
+<div class="box">
+    <h2>3. Check HTML Elements</h2>
+    <button onclick="checkElements()">Run Check</button>
+    <pre id="check-elements"></pre>
+</div>
+
+<div class="box">
+    <h2>4. Manual Open Modal</h2>
+    <button onclick="manualOpenModal('books')">Open Books Modal</button>
+    <button onclick="manualOpenModal('members')">Open Members Modal</button>
+    <button onclick="manualOpenModal('borrowed')">Open Borrowed Modal</button>
+    <button onclick="manualOpenModal('overdue')">Open Overdue Modal</button>
+    <pre id="manual-test"></pre>
+</div>
+
+<script>
+function log(id, text) {
+    document.getElementById(id).innerHTML += text + '\n';
+}
+
+function checkFiles() {
+    const id = 'check-files';
+    document.getElementById(id).innerHTML = '';
+    log(id, '✓ Checking files...\n');
+    
+    // Can't directly check server files, but can check if scripts loaded
+    log(id, '✓ index.php loaded: YES');
+    log(id, '✓ stats-modal.js loaded: ' + (typeof modalManager !== 'undefined' ? 'YES' : 'NO'));
+    log(id, '✓ Checking endpoints...\n');
+    
+    const endpoints = [
+        'api/get-stats-books.php',
+        'api/get-stats-members.php',
+        'api/get-stats-borrowed.php',
+        'api/get-stats-overdue.php'
+    ];
+    
+    endpoints.forEach(ep => {
+        fetch(ep, { method: 'HEAD' })
+            .then(r => log(id, `✓ ${ep}: ${r.status}`))
+            .catch(e => log(id, `✗ ${ep}: ERROR - ${e.message}`));
+    });
+}
+
+function testEndpoints() {
+    const id = 'test-endpoints';
+    document.getElementById(id).innerHTML = '';
+    log(id, '✓ Testing AJAX endpoints...\n');
+    
+    const endpoints = {
+        'books': 'api/get-stats-books.php',
+        'members': 'api/get-stats-members.php',
+        'borrowed': 'api/get-stats-borrowed.php',
+        'overdue': 'api/get-stats-overdue.php'
+    };
+    
+    Object.entries(endpoints).forEach(([name, url]) => {
+        fetch(url)
+            .then(r => {
+                log(id, `\n[${name}]`);
+                log(id, `Status: ${r.status} ${r.ok ? '✓' : '✗'}`);
+                return r.json();
+            })
+            .then(data => {
+                log(id, `Success: ${data.success ? '✓' : '✗'}`);
+                log(id, `Data count: ${data.data ? data.data.length : 0}`);
+                if (!data.success) log(id, `Error: ${data.message}`);
+            })
+            .catch(e => log(id, `ERROR: ${e.message}`));
+    });
+}
+
+function checkElements() {
+    const id = 'check-elements';
+    document.getElementById(id).innerHTML = '';
+    
+    // Check modal
+    const modal = document.getElementById('statsModal');
+    log(id, `Modal HTML: ${modal ? '✓ EXISTS' : '✗ NOT FOUND'}\n`);
+    
+    // Check cards
+    const cards = document.querySelectorAll('.stat');
+    log(id, `Stat cards: ${cards.length} found\n`);
+    
+    // Check attributes
+    log(id, 'Card attributes:');
+    cards.forEach((card, i) => {
+        const type = card.dataset.statType;
+        const tooltip = card.dataset.tooltip;
+        log(id, `Card ${i+1}: type="${type}" tooltip="${tooltip ? 'YES' : 'NO'}"`);
+    });
+    
+    // Check modal manager
+    log(id, `\nmodalManager: ${typeof modalManager !== 'undefined' ? '✓ EXISTS' : '✗ NOT FOUND'}`);
+    
+    // Check event listeners
+    log(id, '\nChecking event listeners... (check console for details)');
+    console.log('Cards:', cards);
+    console.log('modalManager:', modalManager);
+}
+
+function manualOpenModal(type) {
+    const id = 'manual-test';
+    document.getElementById(id).innerHTML = '';
+    log(id, `Opening ${type} modal...\n`);
+    
+    if (typeof modalManager !== 'undefined') {
+        modalManager.openModal(type);
+        log(id, `✓ Modal opened\n`);
+        log(id, `Check if modal appears on screen`);
+        log(id, `Check F12 → Network tab untuk AJAX request`);
+        log(id, `Check F12 → Console untuk errors`);
+    } else {
+        log(id, `✗ modalManager not found!`);
+    }
+}
+</script>
+
+</body>
+</html>

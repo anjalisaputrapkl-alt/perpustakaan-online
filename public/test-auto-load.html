@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Auto-Load Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Test Auto-Load Dashboard</h1>
+    <div id="test-stats">
+        <p>Stat Books: <span id="stat-books">-</span></p>
+        <p>Stat Members: <span id="stat-members">-</span></p>
+        <p>Stat Borrowed: <span id="stat-borrowed">-</span></p>
+        <p>Stat Overdue: <span id="stat-overdue">-</span></p>
+    </div>
+    <canvas id="statusChart" width="400" height="400"></canvas>
+    <canvas id="borrowChart" width="400" height="200"></canvas>
+    
+    <h2>Console Log:</h2>
+    <div id="console-output" style="border: 1px solid #ccc; padding: 10px; font-family: monospace; height: 300px; overflow-y: auto; background: #f0f0f0;"></div>
+    
+    <script>
+        // Redirect console to page
+        const consoleOutput = document.getElementById('console-output');
+        const originalLog = console.log;
+        const originalError = console.error;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+            consoleOutput.innerHTML += '<div style="color: blue;">' + msg + '</div>';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            const msg = args.map(a => typeof a === 'object' ? JSON.stringify(a) : String(a)).join(' ');
+            consoleOutput.innerHTML += '<div style="color: red;">ERROR: ' + msg + '</div>';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        console.log('Page loaded, document.readyState:', document.readyState);
+    </script>
+    
+    <!-- Include the dashboard functions -->
+    <script>
+        // Chart instances (global for potential updates)
+        let borrowChart = null;
+        let statusChart = null;
+
+        // Initialize charts with data
+        function initializeCharts(monthlyBorrows) {
+            console.log('initializeCharts called with:', monthlyBorrows);
+            const borrowChartEl = document.getElementById('borrowChart');
+            if (borrowChartEl && borrowChart === null) {
+                borrowChart = new Chart(borrowChartEl, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                        datasets: [{
+                            data: monthlyBorrows,
+                            borderColor: '#2563eb',
+                            tension: 0.3
+                        }]
+                    },
+                    options: { plugins: { legend: { display: false } } }
+                });
+                console.log('borrowChart initialized');
+            }
+        }
+
+        function initializeStatusChart(totalAvailable, totalBorrowed, totalOverdue) {
+            console.log('initializeStatusChart called with:', {totalAvailable, totalBorrowed, totalOverdue});
+            const statusChartEl = document.getElementById('statusChart');
+            if (statusChartEl && statusChart === null) {
+                statusChart = new Chart(statusChartEl, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Tersedia', 'Dipinjam', 'Terlambat'],
+                        datasets: [{
+                            data: [
+                                totalAvailable,
+                                totalBorrowed,
+                                totalOverdue
+                            ],
+                            backgroundColor: ['#16a34a', '#2563eb', '#dc2626']
+                        }]
+                    },
+                    options: { plugins: { legend: { position: 'bottom' } } }
+                });
+                console.log('statusChart initialized');
+            }
+        }
+
+        // Auto-fetch dashboard statistics and initialize charts
+        async function loadDashboardStats() {
+            try {
+                console.log('Loading dashboard statistics...');
+                const url = '/perpustakaan-online/public/api/dashboard-stats.php';
+                console.log('Fetching from:', url);
+                
+                const response = await fetch(url, {
+                    credentials: 'include',
+                    method: 'GET'
+                });
+
+                console.log('Response status:', response.status, response.ok);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                if (data.success) {
+                    console.log('Dashboard stats loaded:', data.stats);
+                    
+                    // Update stat card values
+                    document.getElementById('stat-books').textContent = data.stats.total_books;
+                    document.getElementById('stat-members').textContent = data.stats.total_members;
+                    document.getElementById('stat-borrowed').textContent = data.stats.total_borrowed;
+                    document.getElementById('stat-overdue').textContent = data.stats.total_overdue;
+                    
+                    // Initialize charts with fetched data
+                    initializeCharts(data.chart_data.monthly_chart);
+                    initializeStatusChart(
+                        data.stats.total_available,
+                        data.stats.total_borrowed,
+                        data.stats.total_overdue
+                    );
+                    console.log('✅ Charts initialized successfully');
+                } else {
+                    console.error('Failed to load statistics:', data.message);
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                // Fallback: Initialize with default values if API fails
+                console.warn('Initializing charts with default values');
+                initializeCharts([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+                initializeStatusChart(0, 0, 0);
+            }
+        }
+
+        // Load stats when DOM is ready
+        console.log('Script block 1: readyState:', document.readyState);
+        if (document.readyState === 'loading') {
+            console.log('Adding DOMContentLoaded listener');
+            document.addEventListener('DOMContentLoaded', () => {
+                console.log('DOMContentLoaded event fired');
+                loadDashboardStats();
+            });
+        } else {
+            console.log('DOM already loaded, calling loadDashboardStats immediately');
+            loadDashboardStats();
+        }
+    </script>
+</body>
+</html>

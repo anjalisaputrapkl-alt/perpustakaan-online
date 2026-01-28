@@ -1,4 +1,8 @@
--- phpMyAdmin SQL Dump
+1. Open http://localhost/perpustakaan-online/public/index.php
+2. Press F12 (buka DevTools)
+3. Go to Console tab
+4. Klik card "Total Buku"
+5. Lihat modal muncul dengan data?-- phpMyAdmin SQL Dump
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --

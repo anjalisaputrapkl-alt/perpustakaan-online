@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Modal Stats</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .section {
+            margin-bottom: 40px;
+        }
+        
+        .section h2 {
+            font-size: 20px;
+            color: #667eea;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .test-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.4);
+        }
+        
+        .btn-warning {
+            background: #ed8936;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #dd6b20;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(237, 137, 54, 0.4);
+        }
+        
+        .btn-danger {
+            background: #f56565;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+        }
+        
+        .output {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #2d3748;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .output.success {
+            background: #f0fdf4;
+            border-color: #86efac;
+            color: #166534;
+        }
+        
+        .output.error {
+            background: #fef2f2;
+            border-color: #fecaca;
+            color: #991b1b;
+        }
+        
+        .output.loading {
+            background: #eff6ff;
+            border-color: #93c5fd;
+            color: #1e40af;
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #0c5aa0;
+        }
+        
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .stats-demo {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .stat-card {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .stat-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status.ready {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .status.error {
+            background: #f56565;
+            color: white;
+        }
+        
+        .status.loading {
+            background: #ed8936;
+            color: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        
+        table th {
+            background: #f7fafc;
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #2d3748;
+        }
+        
+        table td {
+            border: 1px solid #e2e8f0;
+            padding: 10px;
+            color: #4a5568;
+        }
+        
+        table tr:hover {
+            background: #f7fafc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Modal Stats Debugger</h1>
+        <p class="subtitle">Test endpoint API dan verifikasi modal functionality</p>
+        
+        <div class="info-box">
+            <strong>📌 Petunjuk:</strong>
+            Halaman ini berguna untuk test apakah endpoint API bekerja dengan benar. Jika semua test PASS, maka modal di dashboard seharusnya juga berfungsi.
+        </div>
+        
+        <!-- SECTION 1: API Endpoints Test -->
+        <div class="section">
+            <h2>🌐 Test API Endpoints</h2>
+            
+            <div class="test-buttons">
+                <button class="btn btn-primary" onclick="testEndpoint('books')">
+                    📚 Test Books Endpoint
+                </button>
+                <button class="btn btn-primary" onclick="testEndpoint('members')">
+                    👥 Test Members Endpoint
+                </button>
+                <button class="btn btn-primary" onclick="testEndpoint('borrowed')">
+                    🔄 Test Borrowed Endpoint
+                </button>
+                <button class="btn btn-primary" onclick="testEndpoint('overdue')">
+                    ⏰ Test Overdue Endpoint
+                </button>
+            </div>
+            
+            <div id="endpoint-output" class="output" style="display: none;"></div>
+        </div>
+        
+        <!-- SECTION 2: Session Test -->
+        <div class="section">
+            <h2>🔐 Session & Auth Test</h2>
+            
+            <div class="test-buttons">
+                <button class="btn btn-success" onclick="checkSession()">
+                    ✓ Check Session
+                </button>
+                <button class="btn btn-success" onclick="checkAuth()">
+                    ✓ Check Auth
+                </button>
+                <button class="btn btn-warning" onclick="testCredentials()">
+                    🔑 Test Credentials Flag
+                </button>
+            </div>
+            
+            <div id="session-output" class="output" style="display: none;"></div>
+        </div>
+        
+        <!-- SECTION 3: Performance Test -->
+        <div class="section">
+            <h2>⚡ Performance Test</h2>
+            
+            <div class="test-buttons">
+                <button class="btn btn-warning" onclick="benchmarkEndpoint('books')">
+                    ⏱️ Benchmark Books (Speed)
+                </button>
+                <button class="btn btn-warning" onclick="benchmarkEndpoint('members')">
+                    ⏱️ Benchmark Members (Speed)
+                </button>
+            </div>
+            
+            <div id="perf-output" class="output" style="display: none;"></div>
+        </div>
+        
+        <!-- SECTION 4: Data Preview -->
+        <div class="section">
+            <h2>📊 Live Data Preview</h2>
+            
+            <div class="stats-demo">
+                <div class="stat-card" onclick="previewData('books')">
+                    <h3>Total Buku</h3>
+                    <div class="stat-value" id="stat-books-count">-</div>
+                    <div class="status" id="stat-books-status">Loading...</div>
+                </div>
+                <div class="stat-card" onclick="previewData('members')">
+                    <h3>Anggota</h3>
+                    <div class="stat-value" id="stat-members-count">-</div>
+                    <div class="status" id="stat-members-status">Loading...</div>
+                </div>
+                <div class="stat-card" onclick="previewData('borrowed')">
+                    <h3>Dipinjam Sekarang</h3>
+                    <div class="stat-value" id="stat-borrowed-count">-</div>
+                    <div class="status" id="stat-borrowed-status">Loading...</div>
+                </div>
+                <div class="stat-card" onclick="previewData('overdue')">
+                    <h3>Terlambat</h3>
+                    <div class="stat-value" id="stat-overdue-count">-</div>
+                    <div class="status" id="stat-overdue-status">Loading...</div>
+                </div>
+            </div>
+            
+            <div id="data-output" class="output" style="display: none;"></div>
+        </div>
+        
+        <!-- SECTION 5: Console Logs Monitor -->
+        <div class="section">
+            <h2>📝 Console Monitor</h2>
+            
+            <div class="info-box">
+                Buka F12 → Console untuk melihat logs saat testing. Log akan muncul di sini jika JavaScript mengirimnya.
+            </div>
+            
+            <div class="test-buttons">
+                <button class="btn btn-danger" onclick="clearLogs()">
+                    🗑️ Clear Logs
+                </button>
+            </div>
+            
+            <div id="console-output" class="output">
+                [Logs akan muncul di sini...]
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Setup console capture
+        const consoleLogs = [];
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        console.log = function(...args) {
+            originalLog.apply(console, args);
+            addLog('log', args.join(' '));
+        };
+        
+        console.error = function(...args) {
+            originalError.apply(console, args);
+            addLog('error', args.join(' '));
+        };
+        
+        console.warn = function(...args) {
+            originalWarn.apply(console, args);
+            addLog('warn', args.join(' '));
+        };
+        
+        function addLog(type, message) {
+            const output = document.getElementById('console-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : 'ℹ️';
+            output.textContent += `${prefix} [${timestamp}] ${message}\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+        
+        function clearLogs() {
+            document.getElementById('console-output').textContent = '[Logs cleared - monitoring...]\n';
+        }
+        
+        // Test Functions
+        async function testEndpoint(type) {
+            const output = document.getElementById('endpoint-output');
+            output.style.display = 'block';
+            output.className = 'output loading';
+            output.textContent = `⏳ Testing ${type} endpoint...`;
+            
+            try {
+                const startTime = performance.now();
+                const response = await fetch(`/perpustakaan-online/public/api/get-stats-${type}.php`, {
+                    credentials: 'include',
+                    method: 'GET'
+                });
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                output.className = data.success ? 'output success' : 'output error';
+                let resultText = `✅ Endpoint Response (${duration}ms)\n`;
+                resultText += `Status: ${response.status}\n`;
+                resultText += `Success: ${data.success}\n`;
+                resultText += `Total Records: ${data.total || 0}\n\n`;
+                resultText += 'Response Data:\n';
+                resultText += JSON.stringify(data, null, 2);
+                
+                output.textContent = resultText;
+                console.log(`✅ ${type} endpoint tested successfully`);
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `❌ Error:\n${error.message}\n\nStack:\n${error.stack}`;
+                console.error(`❌ Error testing ${type}:`, error);
+            }
+        }
+        
+        async function checkSession() {
+            const output = document.getElementById('session-output');
+            output.style.display = 'block';
+            output.className = 'output loading';
+            output.textContent = '⏳ Checking session...';
+            
+            try {
+                // Try to access check-auth endpoint
+                const response = await fetch('/perpustakaan-online/public/api/check-auth.php', {
+                    credentials: 'include',
+                    method: 'GET'
+                });
+                
+                const data = await response.json();
+                
+                output.className = data.authenticated ? 'output success' : 'output error';
+                let resultText = `Session Status:\n`;
+                resultText += `Authenticated: ${data.authenticated}\n`;
+                resultText += `User: ${JSON.stringify(data.user, null, 2)}\n`;
+                resultText += `School ID: ${data.school_id || 'N/A'}`;
+                
+                output.textContent = resultText;
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `❌ Cannot reach check-auth endpoint\n\nError: ${error.message}`;
+            }
+        }
+        
+        async function checkAuth() {
+            const output = document.getElementById('session-output');
+            output.style.display = 'block';
+            output.className = 'output loading';
+            output.textContent = '⏳ Checking authentication...';
+            
+            try {
+                // Test if we can access a protected endpoint
+                const response = await fetch('/perpustakaan-online/public/api/get-stats-books.php', {
+                    credentials: 'include',
+                    method: 'GET'
+                });
+                
+                if (response.status === 302 || response.redirected) {
+                    output.className = 'output error';
+                    output.textContent = '❌ Not Authenticated\n\nResponse: Redirect to Login\n\nFix: Make sure you are logged in before testing';
+                    return;
+                }
+                
+                const data = await response.json();
+                output.className = data.success ? 'output success' : 'output error';
+                let resultText = `✅ Authentication Check Passed\n\n`;
+                resultText += `Endpoint: get-stats-books.php\n`;
+                resultText += `Response: ${response.status} ${response.statusText}\n`;
+                resultText += `Can access protected endpoint: YES`;
+                
+                output.textContent = resultText;
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `❌ Auth Error:\n${error.message}`;
+            }
+        }
+        
+        async function testCredentials() {
+            const output = document.getElementById('session-output');
+            output.style.display = 'block';
+            output.className = 'output loading';
+            output.textContent = '⏳ Testing credentials flag...';
+            
+            try {
+                // Test with credentials
+                const response1 = await fetch('/perpustakaan-online/public/api/get-stats-books.php', {
+                    credentials: 'include'
+                });
+                
+                const data1 = await response1.json();
+                const withCredentials = data1.success;
+                
+                output.className = 'output success';
+                let resultText = `Credentials Flag Test:\n\n`;
+                resultText += `With credentials: 'include' → ${withCredentials ? '✅ SUCCESS' : '❌ FAILED'}\n`;
+                resultText += `Status Code: ${response1.status}\n\n`;
+                resultText += `Conclusion:\n`;
+                resultText += withCredentials ? 
+                    '✅ Session cookies are being sent correctly!' :
+                    '❌ Session cookies not sent or expired';
+                
+                output.textContent = resultText;
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `❌ Test Error:\n${error.message}`;
+            }
+        }
+        
+        async function benchmarkEndpoint(type) {
+            const output = document.getElementById('perf-output');
+            output.style.display = 'block';
+            output.className = 'output loading';
+            output.textContent = `⏳ Benchmarking ${type} endpoint...`;
+            
+            const iterations = 5;
+            const times = [];
+            
+            try {
+                for (let i = 0; i < iterations; i++) {
+                    const start = performance.now();
+                    const response = await fetch(`/perpustakaan-online/public/api/get-stats-${type}.php`, {
+                        credentials: 'include'
+                    });
+                    await response.json();
+                    const end = performance.now();
+                    times.push(end - start);
+                }
+                
+                const avg = times.reduce((a, b) => a + b) / times.length;
+                const min = Math.min(...times);
+                const max = Math.max(...times);
+                
+                output.className = avg < 500 ? 'output success' : 'output warning';
+                let resultText = `Performance Benchmark (${iterations} requests):\n\n`;
+                resultText += `Endpoint: get-stats-${type}.php\n`;
+                resultText += `Average: ${avg.toFixed(2)}ms\n`;
+                resultText += `Min: ${min.toFixed(2)}ms\n`;
+                resultText += `Max: ${max.toFixed(2)}ms\n\n`;
+                resultText += `Times: ${times.map(t => t.toFixed(2) + 'ms').join(', ')}\n\n`;
+                resultText += `Status: ${avg < 500 ? '✅ Good Performance' : '⚠️ Slow Response'}`;
+                
+                output.textContent = resultText;
+            } catch (error) {
+                output.className = 'output error';
+                output.textContent = `❌ Benchmark Error:\n${error.message}`;
+            }
+        }
+        
+        async function previewData(type) {
+            const output = document.getElementById('data-output');
+            output.style.display = 'block';
+            output.className = 'output loading';
+            output.textContent = `⏳ Loading ${type} data...`;
+            
+            try {
+                const response = await fetch(`/perpustakaan-online/public/api/get-stats-${type}.php`, {
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Update stat card
+                const statElement = document.getElementById(`stat-${type}-count`);
+                const statusElement = document.getElementById(`stat-${type}-status`);
+                
+                if (data.success) {
+                    statElement.textContent = data.total;
+                    statusElement.className = 'status ready';
+                    statusElement.textContent = '✓ Ready';
+                } else {
+                    statusElement.className = 'status error';
+                    statusElement.textContent = '✗ Error';
+                }
+                
+                // Show preview
+                output.className = 'output success';
+                let resultText = `📊 ${type.toUpperCase()} Data Preview\n\n`;
+                resultText += `Total Records: ${data.total}\n`;
+                resultText += `Success: ${data.success}\n\n`;
+                
+                if (data.data && data.data.length > 0) {
+                    resultText += `First 5 Records:\n`;
+                    resultText += JSON.stringify(data.data.slice(0, 5), null, 2);
+                } else {
+                    resultText += 'No data found';
+                }
+                
+                output.textContent = resultText;
+            } catch (error) {
+                document.getElementById(`stat-${type}-status`).className = 'status error';
+                document.getElementById(`stat-${type}-status`).textContent = '✗ Error';
+                
+                output.className = 'output error';
+                output.textContent = `❌ Error:\n${error.message}`;
+            }
+        }
+        
+        // Auto-load stats on page load
+        window.addEventListener('load', () => {
+            ['books', 'members', 'borrowed', 'overdue'].forEach(type => {
+                previewData(type);
+            });
+        });
+    </script>
+</body>
+</html>
