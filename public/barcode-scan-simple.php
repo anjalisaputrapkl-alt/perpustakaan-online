@@ -1,3 +1,7 @@
+<?php
+require __DIR__ . '/../src/auth.php';
+requireAuth();
+?>
 <!DOCTYPE html>
 <html lang="id">
 
@@ -56,22 +60,6 @@
             font-size: 20px;
             margin-bottom: 16px;
             color: #1a1a1a;
-        }
-
-        .input-field {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            margin-bottom: 16px;
-            transition: all 0.3s ease;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: #667eea;
-            background-color: #f8f9ff;
         }
 
         .reader {
@@ -136,105 +124,195 @@
             margin-bottom: 12px;
         }
 
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #f0f0f0;
-            color: #333;
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: #e0e0e0;
-        }
-
         .btn-danger {
             background: #ef4444;
             color: white;
         }
 
-        .btn-danger:hover:not(:disabled) {
+        .btn-danger:hover {
             background: #dc2626;
         }
 
-        .scanned-items {
-            margin-top: 24px;
-            padding: 16px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            max-height: 250px;
-            overflow-y: auto;
-        }
-
-        .scanned-items h3 {
-            font-size: 13px;
-            color: #666;
-            text-transform: uppercase;
-            margin-bottom: 12px;
-            font-weight: 600;
-        }
-
-        .scanned-item {
-            background: white;
+        .mode-indicator {
+            margin-bottom: 16px;
             padding: 12px;
+            background: #e0f2fe;
             border-radius: 6px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #0284c7;
         }
 
-        .scanned-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .scanned-item .item-name {
-            font-weight: 500;
-            color: #333;
-        }
-
-        .scanned-item .item-code {
+        .mode-text {
             font-size: 12px;
-            color: #999;
+            font-weight: 600;
+            color: #0c4a6e;
+            margin-bottom: 8px;
         }
 
-        .empty-message {
-            text-align: center;
-            padding: 24px;
-            color: #999;
+        .mode-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .mode-btn.active {
+            background: #0284c7;
+            color: white;
+        }
+
+        .mode-btn.inactive {
+            background: #cbd5e1;
+            color: #1e293b;
+        }
+
+        .member-display {
+            display: none;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #d1fae5;
+            border-radius: 6px;
+            border-left: 4px solid #059669;
+        }
+
+        .member-display.show {
+            display: block;
+        }
+
+        .member-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #065f46;
+            margin-bottom: 8px;
+        }
+
+        .member-info {
+            font-size: 14px;
+            font-weight: 600;
+            color: #047857;
+        }
+
+        .scan-count {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f0fdf4;
+            border-radius: 6px;
+            border-left: 4px solid #22c55e;
             font-size: 13px;
+            color: #166534;
+            font-weight: 500;
+        }
+
+        .scanned-items {
+            margin-bottom: 16px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+        }
+
+        .scanned-items table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .scanned-items th {
+            background: #f3f4f6;
+            padding: 10px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .scanned-items td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .scanned-items tr:last-child td {
+            border-bottom: none;
+        }
+
+        .scanned-items tbody tr:hover {
+            background: #f0fdf4;
         }
 
         .btn-remove {
+            padding: 4px 8px;
             background: #ef4444;
             color: white;
             border: none;
-            padding: 4px 8px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
         }
 
         .btn-remove:hover {
             background: #dc2626;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 12px 16px;
+            background: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            background: #059669;
+        }
+
+        .btn-primary:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 12px 16px;
+            background: #6b7280;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .instruction {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #fef3c7;
+            border-radius: 6px;
+            border-left: 4px solid #d97706;
+            font-size: 13px;
+            color: #b45309;
         }
 
         .loading-overlay {
@@ -290,11 +368,10 @@
         </div>
 
         <div class="card">
-            <!-- Scanner Section -->
             <h2>Pemindai Barcode</h2>
 
             <div class="info-text">
-                ✓ Arahkan kamera ke barcode anggota atau buku untuk memulai pemindaian
+                ✓ Arahkan kamera ke barcode untuk memulai pemindaian
             </div>
 
             <!-- QR Reader -->
@@ -303,76 +380,60 @@
             <!-- Status Message -->
             <div id="statusMessage" class="status-message info" style="display: none;"></div>
 
-            <!-- Scan Mode Indicator -->
-            <div
-                style="margin-bottom: 16px; padding: 12px; background: #e0f2fe; border-radius: 6px; border-left: 4px solid #0284c7;">
-                <div style="font-size: 12px; font-weight: 600; color: #0c4a6e; margin-bottom: 8px;">
-                    📋 Mode Pemindaian Saat Ini:
-                </div>
-                <div style="display: flex; gap: 8px;">
-                    <button class="scan-mode-btn active" data-mode="member" id="btnModeMember"
-                        style="flex: 1; padding: 8px; background: #0284c7; color: white; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 12px;">
-                        1️⃣ Scan Anggota (NISN)
-                    </button>
-                    <button class="scan-mode-btn" data-mode="book" id="btnModeBook"
-                        style="flex: 1; padding: 8px; background: #cbd5e1; color: #1e293b; border: none; border-radius: 4px; font-weight: 600; cursor: pointer; font-size: 12px;">
-                        2️⃣ Scan Buku (ISBN)
-                    </button>
+            <!-- Mode Indicator -->
+            <div class="mode-indicator">
+                <div class="mode-text">📋 Mode Pemindaian:</div>
+                <div class="mode-buttons">
+                    <button class="mode-btn active" id="btnModeMember">1️⃣ Scan Anggota</button>
+                    <button class="mode-btn inactive" id="btnModeBook">2️⃣ Scan Buku</button>
                 </div>
             </div>
 
-            <!-- Current Member Display -->
-            <div id="memberDisplay"
-                style="display: none; margin-bottom: 16px; padding: 12px; background: #d1fae5; border-radius: 6px; border-left: 4px solid #059669;">
-                <div style="font-size: 12px; font-weight: 600; color: #065f46; margin-bottom: 8px;">
-                    ✓ Anggota Terpilih:
-                </div>
-                <div style="font-size: 14px; font-weight: 600; color: #047857;">
+            <!-- Member Display -->
+            <div class="member-display" id="memberDisplay">
+                <div class="member-label">✓ Anggota Terpilih:</div>
+                <div class="member-info">
                     <span id="memberName"></span> (NISN: <span id="memberNisn"></span>)
                 </div>
             </div>
 
-            <!-- Debug Panel -->
-            <div
-                style="margin-bottom: 16px; padding: 12px; background: #e8f4f8; border-radius: 6px; border-left: 4px solid #0c5460;">
-                <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px;">
-                    🔧 Debug Panel - Nilai Scan Terakhir:
-                </label>
-                <div id="debugPanel"
-                    style="background: white; padding: 8px; border-radius: 4px; font-family: monospace; font-size: 12px; color: #666; min-height: 30px; word-break: break-all;">
-                    Menunggu scan...
-                </div>
+            <!-- Scan Count -->
+            <div class="scan-count" id="scanCount" style="display: none;">
+                📚 Buku yang di-scan: <strong id="bookCount">0</strong>
             </div>
 
-            <!-- Manual Input Option -->
-            <div
-                style="margin-bottom: 16px; padding: 12px; background: #ffffcc; border-radius: 6px; border-left: 4px solid #ffa500;">
-                <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 8px;">
-                    🔍 Input Manual (Jika Kamera Tidak Bekerja):
-                </label>
-                <input type="text" id="manualBarcode" class="input-field" placeholder="Masukkan barcode manual"
-                    style="margin-bottom: 8px;">
-                <button class="btn btn-secondary" id="btnManualSubmit">
-                    Proses Manual
-                </button>
-            </div>
-
-            <!-- Scanned Items Section -->
-            <div class="scanned-items">
-                <h3>📋 Data Peminjaman</h3>
-                <div id="scannedList">
-                    <p class="empty-message">Belum ada data peminjaman</p>
-                </div>
+            <!-- Scanned Items List -->
+            <div class="scanned-items" id="scannedItems" style="display: none;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Buku</th>
+                            <th style="width: 50px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="scannedItemsList">
+                    </tbody>
+                </table>
             </div>
 
             <!-- Action Buttons -->
-            <div style="margin-top: 24px;">
-                <button class="btn btn-secondary" id="btnClear">
+            <div class="btn-group" id="actionButtons" style="display: none;">
+                <button class="btn-primary" id="btnSubmit" onclick="submitScannedBooks()">
+                    ✓ Kirim Data
+                </button>
+                <button class="btn-secondary" id="btnClear" onclick="clearScannedBooks()">
                     🗑️ Hapus Semua
                 </button>
-                <button class="btn btn-primary" id="btnSubmit">
-                    ✓ Selesai & Kirim Data
-                </button>
+            </div>
+
+            <!-- Instruction -->
+            <div class="instruction">
+                ℹ️ Silakan scan NISN Anda terlebih dahulu, kemudian scan barcode buku yang ingin dipinjam. Data akan
+                tampil di sistem admin secara realtime.
+            </div>
+
+            <!-- Logout Button -->
+            <div style="margin-top: 24px;">
                 <button class="btn btn-danger" id="btnLogout">
                     🚪 Logout
                 </button>
@@ -395,133 +456,89 @@
         // ============================================================================
 
         let scanner = null;
-        let scannedItems = [];
-        let lastScannedTime = 0;
-        const SCAN_DELAY = 1000; // Prevent duplicate scans
-
-        let scanMode = 'member'; // 'member' atau 'book'
+        let scanMode = 'member';
         let currentMember = null;
-        let borrowRecords = []; // Array untuk track (member + book) pairs
-        let statusTimeoutId = null; // Track status timeout
+        let scannedBooks = []; // Array to store scanned books
+        let lastScannedTime = 0;
+        const SCAN_DELAY = 1000;
+        let statusTimeoutId = null;
 
         // ============================================================================
         // Initialize Scanner
         // ============================================================================
 
         function initScanner() {
-            console.log('[INIT] Starting scanner initialization...');
-
-            const readerDiv = document.getElementById('reader');
-
+            console.log('[INIT] Starting scanner...');
             scanner = new Html5Qrcode("reader");
-
-            const qrConfig = {
-                fps: 10,
-                qrbox: 250
-            };
 
             scanner.start(
                 { facingMode: "environment" },
-                qrConfig,
+                { fps: 10, qrbox: 250 },
                 onScanSuccess,
                 onScanError
             ).then(() => {
-                console.log('[SCANNER] ✓ Camera started successfully');
+                console.log('[SCANNER] ✓ Started');
                 showStatus('✓ Kamera aktif - siap memindai barcode', 'info');
             }).catch(err => {
-                console.error('[SCANNER] ✗ Error:', err);
-                showStatus('⚠️ Gagal mengakses kamera. Coba gunakan input manual.', 'error');
+                console.error('[SCANNER] Error:', err);
+                showStatus('⚠️ Gagal mengakses kamera', 'error');
             });
         }
 
         function onScanSuccess(text) {
             const now = Date.now();
-
-            // Update debug panel
-            const debugPanel = document.getElementById('debugPanel');
-            debugPanel.innerHTML = `<strong>✓ Terdeteksi:</strong> "${text}" (${text.length} karakter)`;
-
-            console.log('[SCAN] ✓ Barcode detected:', text);
-            console.log('[SCAN] Length:', text.length);
-            console.log('[SCAN] Type:', typeof text);
-            console.log('[SCAN] Trimmed:', text.trim());
-
-            // Prevent duplicate scans too quickly
-            if (now - lastScannedTime < SCAN_DELAY) {
-                console.log('[SCAN] Duplicate scan ignored (too quick)');
-                return;
-            }
-
+            if (now - lastScannedTime < SCAN_DELAY) return;
             lastScannedTime = now;
+
             processBarcode(text.trim());
         }
 
         function onScanError(error) {
-            // Silently ignore - scanner keeps trying
+            // Silently ignore
         }
 
         // ============================================================================
-        // Parse Barcode - Extract value from formats like "NISN:0094234" or "ISBN:982384"
+        // Parse Barcode
         // ============================================================================
 
         function parseBarcode(rawBarcode) {
-            // Try to extract from formatted patterns
-            // Patterns: "NISN:0094234", "ISBN:982384", "ID:123", etc.
             const patterns = [
-                /^(?:NISN|nisn|ID|id)[:=]?(.+)$/,  // NISN:0094234 or ID:123
-                /^(?:ISBN|isbn)[:=]?(.+)$/,         // ISBN:982384
-                /^[\*=](.+)[\*=]$/                  // *0094234* or =0094234=
+                /^(?:NISN|nisn|ID|id)[:=]?(.+)$/,
+                /^(?:ISBN|isbn)[:=]?(.+)$/,
+                /^[\*=](.+)[\*=]$/
             ];
 
             for (let pattern of patterns) {
                 const match = rawBarcode.match(pattern);
-                if (match && match[1]) {
-                    return match[1].trim();
-                }
+                if (match && match[1]) return match[1].trim();
             }
 
-            // If no pattern matched, return as-is
             return rawBarcode.trim();
         }
 
         // ============================================================================
-        // Process Barcode - Beda logic untuk member vs book
+        // Process Barcode
         // ============================================================================
 
         async function processBarcode(barcode) {
-            if (!barcode) return;
-
-            // Parse barcode to extract actual value
             const parsedBarcode = parseBarcode(barcode);
-            console.log('[PARSE] Original:', barcode);
-            console.log('[PARSE] Parsed:', parsedBarcode);
-            console.log('[MODE] Current mode:', scanMode);
+            console.log('[PROCESS] Barcode:', parsedBarcode, 'Mode:', scanMode);
 
             showLoading(true);
             showStatus(`Memproses barcode ${scanMode}...`, 'info');
 
             try {
-                console.log('[API] Sending barcode:', parsedBarcode);
-
-                // Send barcode to server
                 const response = await fetch('./api/process-barcode.php', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        barcode: parsedBarcode
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ barcode: parsedBarcode })
                 });
 
                 const data = await response.json();
                 console.log('[API] Response:', data);
-                console.log('[API] HTTP Status:', response.status);
 
                 if (!data.success) {
-                    const msg = `❌ Barcode "${parsedBarcode}" tidak ditemukan. ${data.message ? '(' + data.message + ')' : ''}`;
-                    showStatus(msg, 'error');
-                    console.log('[API] Error response:', data);
+                    showStatus('❌ Barcode tidak ditemukan', 'error');
                     showLoading(false);
                     return;
                 }
@@ -529,209 +546,42 @@
                 // Handle member scan
                 if (scanMode === 'member') {
                     if (data.data.type !== 'member') {
-                        showStatus('❌ Barcode ini adalah buku, bukan anggota. Scan NISN anggota terlebih dahulu!', 'error');
+                        showStatus('❌ Ini buku, bukan anggota!', 'error');
                         showLoading(false);
                         return;
                     }
                     currentMember = data.data;
-                    displayMemberInfo();
-                    switchScanMode('book');
-                    showStatus('✓ Anggota dipilih. Sekarang scan barcode buku', 'success');
-                    showLoading(false);
+                    displayMember();
+                    switchMode('book');
+                    scannedBooks = []; // Reset books list
+                    updateScannedList();
+                    showStatus('✓ Anggota dipilih. Sekarang scan buku', 'success');
                 }
                 // Handle book scan
                 else if (scanMode === 'book') {
                     if (!currentMember) {
-                        showStatus('❌ Silakan scan NISN anggota terlebih dahulu!', 'error');
-                        switchScanMode('member');
+                        showStatus('❌ Scan anggota dulu!', 'error');
+                        switchMode('member');
                         showLoading(false);
                         return;
                     }
                     if (data.data.type !== 'book') {
-                        showStatus('❌ Barcode ini adalah anggota, bukan buku. Scan ISBN buku!', 'error');
+                        showStatus('❌ Ini anggota, bukan buku!', 'error');
                         showLoading(false);
                         return;
                     }
-                    addBorrowRecord(currentMember, data.data);
-                    showStatus('✓ Buku berhasil ditambahkan. Scan buku lain atau selesai', 'success');
-                    showLoading(false);
+
+                    // Add to local array
+                    scannedBooks.push({
+                        member_id: currentMember.id,
+                        member_name: currentMember.name,
+                        book_id: data.data.id,
+                        book_title: data.data.name
+                    });
+
+                    updateScannedList();
+                    showStatus('✓ ' + data.data.name + ' ditambahkan', 'success');
                 }
-
-            } catch (error) {
-                console.error('[ERROR]', error);
-                showStatus('❌ Error: ' + error.message, 'error');
-                showLoading(false);
-            }
-        }
-
-        // ============================================================================
-        // Scan Mode Management
-        // ============================================================================
-
-        function switchScanMode(mode) {
-            scanMode = mode;
-            console.log('[MODE] Switched to:', mode);
-
-            const btnMember = document.getElementById('btnModeMember');
-            const btnBook = document.getElementById('btnModeBook');
-
-            if (mode === 'member') {
-                btnMember.style.background = '#0284c7';
-                btnMember.style.color = 'white';
-                btnBook.style.background = '#cbd5e1';
-                btnBook.style.color = '#1e293b';
-            } else {
-                btnMember.style.background = '#cbd5e1';
-                btnMember.style.color = '#1e293b';
-                btnBook.style.background = '#0284c7';
-                btnBook.style.color = 'white';
-            }
-        }
-
-        function displayMemberInfo() {
-            const memberDisplay = document.getElementById('memberDisplay');
-            document.getElementById('memberName').textContent = currentMember.name;
-            document.getElementById('memberNisn').textContent = currentMember.barcode;
-            memberDisplay.style.display = 'block';
-        }
-
-        // ============================================================================
-        // Borrow Record Management
-        // ============================================================================
-
-        function addBorrowRecord(member, book) {
-            borrowRecords.push({
-                member_id: member.id,
-                member_name: member.name,
-                member_nisn: member.barcode,
-                book_id: book.id,
-                book_title: book.name,
-                book_isbn: book.barcode
-            });
-            updateBorrowList();
-            console.log('[BORROW] Record added:', borrowRecords.length);
-        }
-
-        function updateBorrowList() {
-            const scannedList = document.getElementById('scannedList');
-
-            if (borrowRecords.length === 0) {
-                scannedList.innerHTML = '<p class="empty-message">Belum ada data peminjaman</p>';
-                return;
-            }
-
-            scannedList.innerHTML = borrowRecords.map((record, index) => `
-                <div class="scanned-item">
-                    <div style="flex: 1;">
-                        <div class="item-name">📖 ${escapeHtml(record.book_title)}</div>
-                        <div class="item-code">ISBN: ${escapeHtml(record.book_isbn)}</div>
-                        <div class="item-code">👤 ${escapeHtml(record.member_name)} (${record.member_nisn})</div>
-                    </div>
-                    <button class="btn-remove" onclick="removeRecord(${index})">Hapus</button>
-                </div>
-            `).join('');
-        }
-
-        function removeRecord(index) {
-            borrowRecords.splice(index, 1);
-            updateBorrowList();
-            if (borrowRecords.length === 0) {
-                currentMember = null;
-                document.getElementById('memberDisplay').style.display = 'none';
-                switchScanMode('member');
-            }
-            console.log('[BORROW] Record removed');
-        }
-
-        // ============================================================================
-        // Scanned Items Management (untuk compatibility)
-        // ============================================================================
-
-        function addScannedItem(item) {
-            scannedItems.push(item);
-            updateScannedList();
-            console.log('[ITEM] Added:', item);
-        }
-
-        function updateScannedList() {
-            const scannedList = document.getElementById('scannedList');
-
-            if (scannedItems.length === 0) {
-                scannedList.innerHTML = '<p class="empty-message">Belum ada item yang dipindai</p>';
-                return;
-            }
-
-            scannedList.innerHTML = scannedItems.map((item, index) => `
-                <div class="scanned-item">
-                    <div>
-                        <div class="item-name">${escapeHtml(item.name || item.title || 'Unknown')}</div>
-                        <div class="item-code">Barcode: ${escapeHtml(item.barcode)}</div>
-                    </div>
-                    <button class="btn-remove" onclick="removeItem(${index})">Hapus</button>
-                </div>
-            `).join('');
-        }
-
-        function removeItem(index) {
-            scannedItems.splice(index, 1);
-            updateScannedList();
-            console.log('[ITEM] Removed index:', index);
-        }
-
-        function clearAll() {
-            if (!confirm('Hapus semua data peminjaman?')) return;
-            borrowRecords = [];
-            currentMember = null;
-            updateBorrowList();
-            document.getElementById('memberDisplay').style.display = 'none';
-            switchScanMode('member');
-            showStatus('✓ Semua data telah dihapus', 'success');
-        }
-
-        // ============================================================================
-        // Form Submission
-        // ============================================================================
-
-        async function submitData() {
-            if (borrowRecords.length === 0) {
-                alert('Belum ada data peminjaman. Silakan scan anggota dan buku.');
-                return;
-            }
-
-            if (!confirm(`Submit ${borrowRecords.length} peminjaman buku?`)) {
-                return;
-            }
-
-            showLoading(true);
-            showStatus('Mengirim data...', 'info');
-
-            try {
-                const response = await fetch('./api/submit-borrow.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        borrows: borrowRecords
-                    })
-                });
-
-                const data = await response.json();
-                console.log('[SUBMIT] Response:', data);
-
-                if (!data.success) {
-                    showStatus('❌ ' + (data.message || 'Gagal mengirim data'), 'error');
-                    showLoading(false);
-                    return;
-                }
-
-                showStatus('✓ Data berhasil dikirim!', 'success');
-                alert('Peminjaman berhasil dicatat! Total ' + borrowRecords.length + ' transaksi telah diproses.');
-
-                // Reset
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
 
             } catch (error) {
                 console.error('[ERROR]', error);
@@ -741,33 +591,152 @@
             showLoading(false);
         }
 
-        function handleLogout() {
-            if (!confirm('Logout dari sistem?')) return;
-            if (scanner) {
-                scanner.stop();
+        // ============================================================================
+        // Handle Scanned Books List
+        // ============================================================================
+
+        function updateScannedList() {
+            const container = document.getElementById('scannedItems');
+            const tbody = document.getElementById('scannedItemsList');
+            const actionButtons = document.getElementById('actionButtons');
+            const scanCount = document.getElementById('scanCount');
+
+            if (scannedBooks.length === 0) {
+                container.style.display = 'none';
+                actionButtons.style.display = 'none';
+                scanCount.style.display = 'none';
+            } else {
+                container.style.display = 'block';
+                actionButtons.style.display = 'flex';
+                scanCount.style.display = 'block';
+
+                document.getElementById('bookCount').textContent = scannedBooks.length;
+
+                tbody.innerHTML = scannedBooks.map((book, index) => `
+                    <tr>
+                        <td>${escapeHtml(book.book_title)}</td>
+                        <td>
+                            <button class="btn-remove" onclick="removeBook(${index})">Hapus</button>
+                        </td>
+                    </tr>
+                `).join('');
             }
-            location.href = './logout.php';
+        }
+
+        function removeBook(index) {
+            scannedBooks.splice(index, 1);
+            updateScannedList();
+        }
+
+        function clearScannedBooks() {
+            if (confirm('Hapus semua buku yang sudah di-scan?')) {
+                scannedBooks = [];
+                updateScannedList();
+                showStatus('Daftar buku dihapus', 'info');
+            }
+        }
+
+        async function submitScannedBooks() {
+            if (scannedBooks.length === 0) {
+                showStatus('❌ Tidak ada buku untuk dikirim', 'error');
+                return;
+            }
+
+            const btnSubmit = document.getElementById('btnSubmit');
+            const btnClear = document.getElementById('btnClear');
+            btnSubmit.disabled = true;
+            btnClear.disabled = true;
+
+            showLoading(true);
+            showStatus('Mengirim data...', 'info');
+
+            try {
+                const response = await fetch('./api/submit-borrow.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        borrows: scannedBooks.map(book => ({
+                            member_id: book.member_id,
+                            book_id: book.book_id
+                        }))
+                    })
+                });
+
+                const data = await response.json();
+                console.log('[SUBMIT] Response:', data);
+
+                if (data.success) {
+                    showStatus(`✓ ${data.inserted} peminjaman berhasil disimpan! Tunggu konfirmasi admin.`, 'success');
+                    scannedBooks = [];
+                    updateScannedList();
+                    currentMember = null;
+                    document.getElementById('memberDisplay').classList.remove('show');
+                    switchMode('member');
+                } else {
+                    showStatus('❌ Error: ' + (data.message || 'Gagal menyimpan'), 'error');
+                    btnSubmit.disabled = false;
+                    btnClear.disabled = false;
+                }
+            } catch (error) {
+                console.error('[SUBMIT] Error:', error);
+                showStatus('❌ Error: ' + error.message, 'error');
+                btnSubmit.disabled = false;
+                btnClear.disabled = false;
+            }
+
+            showLoading(false);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
         }
 
         // ============================================================================
-        // UI Helpers
+        // UI Management
         // ============================================================================
 
-        function showStatus(message, type = 'info') {
-            const statusDiv = document.getElementById('statusMessage');
+        function switchMode(mode) {
+            scanMode = mode;
+            const btnMember = document.getElementById('btnModeMember');
+            const btnBook = document.getElementById('btnModeBook');
 
-            // Clear previous timeout
-            if (statusTimeoutId) {
-                clearTimeout(statusTimeoutId);
+            if (mode === 'member') {
+                btnMember.classList.add('active');
+                btnMember.classList.remove('inactive');
+                btnBook.classList.remove('active');
+                btnBook.classList.add('inactive');
+            } else {
+                btnMember.classList.remove('active');
+                btnMember.classList.add('inactive');
+                btnBook.classList.add('active');
+                btnBook.classList.remove('inactive');
             }
+        }
 
-            statusDiv.textContent = message;
-            statusDiv.className = 'status-message ' + type;
-            statusDiv.style.display = 'block';
+        function displayMember() {
+            document.getElementById('memberName').textContent = currentMember.name;
+            document.getElementById('memberNisn').textContent = currentMember.barcode;
+            document.getElementById('memberDisplay').classList.add('show');
+        }
+
+        function showStatus(message, type = 'info') {
+            const div = document.getElementById('statusMessage');
+            if (statusTimeoutId) clearTimeout(statusTimeoutId);
+
+            div.textContent = message;
+            div.className = 'status-message ' + type;
+            div.style.display = 'block';
 
             if (type === 'success') {
                 statusTimeoutId = setTimeout(() => {
-                    statusDiv.style.display = 'none';
+                    div.style.display = 'none';
                 }, 4000);
             }
         }
@@ -781,57 +750,40 @@
             }
         }
 
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
         // ============================================================================
         // Event Listeners
         // ============================================================================
 
-        document.getElementById('btnManualSubmit').addEventListener('click', () => {
-            const barcode = document.getElementById('manualBarcode').value.trim();
-            if (!barcode) {
-                alert('Masukkan barcode terlebih dahulu');
-                return;
-            }
-            document.getElementById('manualBarcode').value = '';
-            processBarcode(barcode);
-        });
-
-        document.getElementById('manualBarcode').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                document.getElementById('btnManualSubmit').click();
+        document.getElementById('btnLogout').addEventListener('click', () => {
+            if (confirm('Logout?')) {
+                if (scanner) scanner.stop();
+                location.href = './logout.php';
             }
         });
 
-        document.getElementById('btnClear').addEventListener('click', clearAll);
-        document.getElementById('btnSubmit').addEventListener('click', submitData);
-        document.getElementById('btnLogout').addEventListener('click', handleLogout);
+        document.getElementById('btnModeMember').addEventListener('click', () => {
+            switchMode('member');
+        });
 
-        // Mode buttons
-        document.getElementById('btnModeMember').addEventListener('click', () => switchScanMode('member'));
         document.getElementById('btnModeBook').addEventListener('click', () => {
-            if (currentMember) switchScanMode('book');
-            else showStatus('❌ Scan NISN anggota terlebih dahulu!', 'error');
+            if (!currentMember) {
+                showStatus('❌ Scan anggota dulu!', 'error');
+            } else {
+                switchMode('book');
+            }
         });
 
         // ============================================================================
-        // Page Initialization
+        // Initialization
         // ============================================================================
 
         window.addEventListener('load', () => {
-            console.log('[PAGE] Loading complete');
+            console.log('[PAGE] Load complete');
             initScanner();
         });
 
-        // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
-            if (scanner) {
-                scanner.stop();
-            }
+            if (scanner) scanner.stop();
         });
     </script>
 </body>

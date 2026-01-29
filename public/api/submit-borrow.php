@@ -6,6 +6,9 @@
 
 header('Content-Type: application/json');
 
+require __DIR__ . '/../../src/auth.php';
+requireAuth();
+
 $input = json_decode(file_get_contents('php://input'), true);
 $borrows = $input['borrows'] ?? [];
 
@@ -21,11 +24,9 @@ if (empty($borrows)) {
 try {
     $pdo = require __DIR__ . '/../../src/db.php';
 
-    // Get school_id from session if available, otherwise use default
-    $school_id = 4; // Default school_id
-    if (isset($_SESSION['user'])) {
-        $school_id = $_SESSION['user']['school_id'];
-    }
+    // Get school_id from session
+    $user = $_SESSION['user'];
+    $school_id = $user['school_id'];
 
     $inserted = 0;
     $errors = [];
@@ -44,10 +45,10 @@ try {
             // Calculate due date (7 days from now)
             $dueDate = date('Y-m-d H:i:s', strtotime('+7 days'));
 
-            // Insert into borrows table
+            // Insert into borrows table with pending_confirmation status
             $stmt = $pdo->prepare(
                 'INSERT INTO borrows (school_id, member_id, book_id, borrowed_at, due_at, status)
-                 VALUES (:school_id, :member_id, :book_id, NOW(), :due_at, "borrowed")'
+                 VALUES (:school_id, :member_id, :book_id, NOW(), :due_at, "pending_confirmation")'
             );
             $stmt->execute([
                 'school_id' => $school_id,
