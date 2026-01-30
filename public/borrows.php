@@ -28,7 +28,7 @@ $pdo->prepare(
 
 // Get all borrowing data
 $stmt = $pdo->prepare(
-  'SELECT b.*, bk.title, m.name AS member_name
+  'SELECT b.*, bk.title, m.name AS member_name, m.nisn
    FROM borrows b
    JOIN books bk ON b.book_id = bk.id
    JOIN members m ON b.member_id = m.id
@@ -40,9 +40,10 @@ $borrows = $stmt->fetchAll();
 
 // Calculate statistics
 $totalBorrows = count($borrows);
-$activeBorrows = count(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return'));
+$activeBorrows = count(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return' && $b['status'] !== 'pending_confirmation'));
 $overdueBorrows = count(array_filter($borrows, fn($b) => $b['status'] === 'overdue'));
 $pendingReturns = count(array_filter($borrows, fn($b) => $b['status'] === 'pending_return'));
+$pendingConfirmation = count(array_filter($borrows, fn($b) => $b['status'] === 'pending_confirmation'));
 $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 ?>
 <!doctype html>
@@ -117,7 +118,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 
     .stats-section {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 20px;
     }
 
@@ -228,8 +229,10 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
     }
 
     .btn-return {
-      display: inline-block;
-      padding: 8px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
       background: var(--success);
       color: white;
       border: none;
@@ -240,7 +243,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
       text-decoration: none;
       transition: all 0.2s ease;
       white-space: nowrap;
-      margin-left: -50px;
+      margin-left: 0;
     }
 
     .btn-return:hover {
@@ -276,6 +279,33 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
     }
 
     .btn-confirm-return:active {
+      transform: translateY(0);
+    }
+
+    .btn-extend-due {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-extend-due:hover {
+      background: #d97706;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(217, 119, 6, 0.2);
+    }
+
+    .btn-extend-due:active {
       transform: translateY(0);
     }
 
@@ -338,85 +368,12 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
       <div class="main">
         <div>
           <!-- Barcode Scanner Button -->
-          <div style="display: flex; gap: 12px; margin-bottom: 24px; align-items: center;">
-            <button id="btnStartBarcodeSession" class="btn-barcode-start"
-              style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 14px;">
+          <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+            <a href="barcode-scan-simple.php" class="btn-barcode-start"
+              style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 14px; text-decoration: none;">
               <iconify-icon icon="mdi:barcode-scan"></iconify-icon>
-              Mulai Peminjaman Barcode
-            </button>
-
-            <div id="barcodeSessionDisplay"
-              style="display: none; padding: 12px 16px; background: #e0f2fe; border: 1px solid #0284c7; border-radius: 8px; flex: 1;">
-              <div
-                style="font-size: 12px; color: #0369a1; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">
-                Kode Sesi Aktif</div>
-              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
-                <code id="sessionTokenDisplay"
-                  style="font-family: 'Monaco', 'Courier New', monospace; font-weight: 600; font-size: 13px; color: #0369a1; background: white; padding: 8px 12px; border-radius: 4px; flex: 1; user-select: all;">---</code>
-                <button id="btnCopySessionToken" class="btn-copy"
-                  style="padding: 8px 12px; background: white; color: #0369a1; border: 1px solid #0284c7; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease;">
-                  Salin
-                </button>
-                <button id="btnEndBarcodeSession" class="btn-end"
-                  style="padding: 8px 12px; background: white; color: #0369a1; border: 1px solid #0284c7; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s ease;">
-                  Selesai
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Barcode Session Live Data -->
-          <div id="barcodeSessionPanel" style="display: none; margin-bottom: 24px;">
-            <div class="card"
-              style="background: linear-gradient(135deg, #f0f4ff 0%, #f8f1ff 100%); border: 2px solid #667eea;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h2 style="margin: 0;">📱 Sesi Pemindaian Aktif</h2>
-                <span id="sessionStatus"
-                  style="padding: 4px 12px; background: #10b981; color: white; border-radius: 20px; font-size: 12px; font-weight: 600;">AKTIF</span>
-              </div>
-
-              <div id="barcodeSessionContent">
-                <div style="text-align: center; padding: 24px; color: #667eea;">
-                  <p style="font-size: 14px; margin-bottom: 8px;">Tunggu pemindaian dari smartphone...</p>
-                  <div
-                    style="display: inline-block; width: 32px; height: 32px; border: 3px solid #667eea; border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite;">
-                  </div>
-                </div>
-              </div>
-
-              <div style="margin-top: 16px; padding: 16px; background: white; border-radius: 8px;">
-                <h3
-                  style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600;">
-                  Info Sesi</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 13px;">
-                  <div>
-                    <span style="color: #999;">Anggota:</span>
-                    <div id="sessionMemberInfo" style="font-weight: 600; color: #1a1a1a; margin-top: 4px;">-</div>
-                  </div>
-                  <div>
-                    <span style="color: #999;">Buku Terscan:</span>
-                    <div id="sessionBooksCount" style="font-weight: 600; color: #1a1a1a; margin-top: 4px;">0</div>
-                  </div>
-                </div>
-              </div>
-
-              <div id="sessionBooksDisplay" style="margin-top: 16px; display: none;">
-                <h3
-                  style="font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; font-weight: 600;">
-                  Buku yang Dipindai</h3>
-                <div id="sessionBooksList" style="display: flex; flex-direction: column; gap: 8px;"></div>
-              </div>
-
-              <div style="margin-top: 16px; display: flex; gap: 12px;">
-                <input type="date" id="barcodeDueDate" class="barcode-input-due"
-                  style="flex: 1; padding: 10px 12px; border: 1px solid #667eea; border-radius: 6px; font-size: 13px;"
-                  placeholder="Pilih jatuh tempo">
-                <button id="btnCompleteBarcodeSession" class="btn-complete"
-                  style="padding: 10px 20px; background: #10b981; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 13px; transition: all 0.3s ease; white-space: nowrap;">
-                  Simpan Peminjaman
-                </button>
-              </div>
-            </div>
+              Buka Pemindai Barcode
+            </a>
           </div>
 
           <!-- Statistics Section -->
@@ -434,9 +391,159 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
               <div class="stat-value"><?= $overdueBorrows ?></div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Menunggu Konfirmasi</div>
+              <div class="stat-label">Form Menunggu Konfirmasi</div>
+              <div class="stat-value"><?= $pendingConfirmation ?></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Pengembalian Menunggu Konfirmasi</div>
               <div class="stat-value"><?= $pendingReturns ?></div>
             </div>
+          </div>
+
+          <!-- Realtime Scan Form -->
+          <div class="card">
+            <h2>Form Peminjaman Menunggu Konfirmasi</h2>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">
+              Data peminjaman dari siswa yang menunggu konfirmasi admin
+            </p>
+
+            <?php $pendingConfirm = array_filter($borrows, fn($b) => $b['status'] === 'pending_confirmation'); ?>
+
+            <?php if (empty($pendingConfirm)): ?>
+              <div class="empty-state">
+                <iconify-icon icon="mdi:inbox-outline"></iconify-icon>
+                <p>Tidak ada peminjaman yang menunggu konfirmasi</p>
+              </div>
+            <?php else: ?>
+              <?php
+              // Group by member_id
+              $groupedByMember = [];
+              foreach ($pendingConfirm as $b) {
+                if (!isset($groupedByMember[$b['member_id']])) {
+                  $groupedByMember[$b['member_id']] = [
+                    'member_name' => $b['member_name'],
+                    'member_id' => $b['member_id'],
+                    'nisn' => $b['nisn'],
+                    'books' => []
+                  ];
+                }
+                $groupedByMember[$b['member_id']]['books'][] = $b;
+              }
+              ?>
+
+              <?php foreach ($groupedByMember as $studentId => $studentData): ?>
+                <div
+                  style="background: white; border: 2px solid #E0EFF9; border-radius: 12px; padding: 0; margin-bottom: 24px; overflow: hidden; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);">
+
+                  <!-- Header dengan Warna Biru Langit -->
+                  <div style="background: #5BA3F5; padding: 20px 24px; color: white;">
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;">
+                      <div>
+                        <div
+                          style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95; margin-bottom: 10px;">
+                          <iconify-icon icon="mdi:account"
+                            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Nama Siswa
+                        </div>
+                        <div style="font-size: 17px; font-weight: 700; word-break: break-word;">
+                          <?= htmlspecialchars($studentData['member_name']) ?>
+                        </div>
+                      </div>
+                      <div>
+                        <div
+                          style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95; margin-bottom: 10px;">
+                          <iconify-icon icon="mdi:card-account-details"
+                            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> NISN
+                        </div>
+                        <div style="font-size: 17px; font-weight: 700;"><?= htmlspecialchars($studentData['nisn']) ?></div>
+                      </div>
+                      <div>
+                        <div
+                          style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95; margin-bottom: 10px;">
+                          <iconify-icon icon="mdi:book-multiple"
+                            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Total Buku
+                        </div>
+                        <div style="font-size: 17px; font-weight: 700;"><?= count($studentData['books']) ?> Buku</div>
+                      </div>
+                      <div>
+                        <div
+                          style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.95; margin-bottom: 10px;">
+                          <iconify-icon icon="mdi:calendar-clock"
+                            style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Waktu Scan
+                        </div>
+                        <div style="font-size: 17px; font-weight: 700;">
+                          <?= date('d/m H:i', strtotime($studentData['books'][0]['borrowed_at'])) ?>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Books List Section -->
+                  <div style="padding: 24px;">
+                    <h3
+                      style="font-size: 13px; font-weight: 700; color: #333; margin: 0 0 20px 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center;">
+                      <iconify-icon icon="mdi:book-open" style="margin-right: 8px; color: #5BA3F5;"></iconify-icon>
+                      Daftar Buku yang Dipinjam
+                    </h3>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 14px;">
+                      <?php foreach ($studentData['books'] as $idx => $book): ?>
+                        <div
+                          style="background: white; border: 1px solid #E0EFF9; border-left: 4px solid #5BA3F5; border-radius: 8px; padding: 16px; display: grid; grid-template-columns: 1fr 140px 100px; gap: 16px; align-items: center;">
+                          <div>
+                            <div
+                              style="font-size: 11px; color: #5BA3F5; font-weight: 700; margin-bottom: 8px; text-transform: uppercase;">
+                              Buku #<?= $idx + 1 ?></div>
+                            <div style="font-size: 14px; font-weight: 600; color: #333;">
+                              <?= htmlspecialchars($book['title']) ?>
+                            </div>
+                          </div>
+                          <div style="text-align: center;">
+                            <div
+                              style="font-size: 11px; color: #999; margin-bottom: 6px; text-transform: uppercase; font-weight: 600;">
+                              Tenggat</div>
+                            <div style="font-size: 14px; font-weight: 700; color: #FF6B6B;">
+                              <?= date('d/m/Y', strtotime($book['due_at'])) ?>
+                            </div>
+                          </div>
+                          <div style="text-align: center;">
+                            <span
+                              style="display: inline-block; background: #FFF3E0; color: #F57C00; padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: 700;">Menunggu</span>
+                          </div>
+                        </div>
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+
+                  <!-- Action Buttons -->
+                  <div
+                    style="padding: 20px 24px; background: #F8FBFF; border-top: 1px solid #E0EFF9; display: grid; grid-template-columns: 200px 1fr auto auto; gap: 16px; align-items: end;">
+                    <div>
+                      <label
+                        style="display: block; font-size: 11px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                        <iconify-icon icon="mdi:calendar" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                        Tenggat (Hari)
+                      </label>
+                      <input type="number" id="dueDays_<?= $studentId ?>" value="7" min="1" max="365"
+                        style="width: 100%; padding: 10px 12px; border: 2px solid #5BA3F5; border-radius: 6px; font-size: 14px; font-weight: 600; color: #5BA3F5; box-sizing: border-box;">
+                    </div>
+                    <div></div>
+                    <?php
+                    $bookIds = array_map(fn($b) => $b['id'], $studentData['books']);
+                    $bookIdsJson = json_encode($bookIds);
+                    $bookIdsHtml = htmlspecialchars($bookIdsJson);
+                    ?>
+                    <button type="button"
+                      onclick="approveAllBorrowWithDue('<?= $bookIdsHtml ?>', 'dueDays_<?= $studentId ?>')"
+                      style="background: #5BA3F5; padding: 12px 20px; border: none; border-radius: 6px; color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                      <iconify-icon icon="mdi:check-circle"></iconify-icon> Terima
+                    </button>
+                    <button type="button" onclick="rejectAllBorrow('<?= $bookIdsHtml ?>')"
+                      style="background: #FF6B6B; padding: 12px 20px; border: none; border-radius: 6px; color: white; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; font-size: 14px;">
+                      <iconify-icon icon="mdi:close-circle"></iconify-icon> Tolak
+                    </button>
+                  </div>
+                </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
 
           <!-- Pending Return Requests -->
@@ -492,7 +599,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
           <!-- Borrowing List Table -->
           <div class="card">
             <h2>Daftar Peminjaman Aktif</h2>
-            <?php if (empty(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return'))): ?>
+            <?php if (empty(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return' && $b['status'] !== 'pending_confirmation'))): ?>
               <div class="empty-state">
                 <iconify-icon icon="mdi:book-off-outline"></iconify-icon>
                 <p>Tidak ada peminjaman aktif saat ini</p>
@@ -515,7 +622,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                   <?php
                   $no = 1;
                   foreach ($borrows as $br):
-                    if ($br['status'] === 'returned' || $br['status'] === 'pending_return')
+                    if ($br['status'] === 'returned' || $br['status'] === 'pending_return' || $br['status'] === 'pending_confirmation')
                       continue;
                     ?>
                     <tr>
@@ -543,10 +650,19 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                         <?php endif; ?>
                       </td>
                       <td>
-                        <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn-return">
-                          <iconify-icon icon="mdi:check" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
-                          Konfirmasi Pengembalian
-                        </a>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                          <button type="button"
+                            onclick="extendDueDate(<?= $br['id'] ?>, '<?= htmlspecialchars($br['title']) ?>')"
+                            class="btn-extend-due"
+                            style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
+                            <iconify-icon icon="mdi:calendar-plus" style="vertical-align: middle;"></iconify-icon>
+                            Perpanjang
+                          </button>
+                          <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn-return" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: var(--success); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s ease; white-space: nowrap; margin-left: 0;">
+                            <iconify-icon icon="mdi:check" style="vertical-align: middle;"></iconify-icon>
+                            Kembali
+                          </a>
+                        </div>
                       </td>
                     </tr>
                   <?php endforeach; ?>
@@ -616,306 +732,306 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 
   <script>
     // ========================================================================
-    // Barcode Scanner Session Management
+    // Approve/Reject Borrow
     // ========================================================================
 
-    let currentBarcodeSessionId = null;
-    let currentBarcodeToken = null;
-    let pollingInterval = null;
-
-    // localStorage functions
-    function saveBarcodeSessionToStorage() {
-      const sessionState = {
-        sessionId: currentBarcodeSessionId,
-        token: currentBarcodeToken,
-        timestamp: Date.now()
-      };
-      localStorage.setItem('barcodeSession', JSON.stringify(sessionState));
-    }
-
-    function restoreBarcodeSessionFromStorage() {
-      const stored = localStorage.getItem('barcodeSession');
-      if (!stored) return false;
-
-      try {
-        const session = JSON.parse(stored);
-        const ageMinutes = (Date.now() - session.timestamp) / 1000 / 60;
-
-        // Session expired after 30 minutes
-        if (ageMinutes > 30) {
-          localStorage.removeItem('barcodeSession');
-          return false;
-        }
-
-        // Restore session
-        currentBarcodeSessionId = session.sessionId;
-        currentBarcodeToken = session.token;
-        return true;
-      } catch (e) {
-        console.error('Error restoring barcode session:', e);
-        return false;
+    function approveBorrow(borrowId) {
+      if (!confirm('Terima peminjaman ini?')) {
+        return;
       }
-    }
 
-    function clearBarcodeSessionStorage() {
-      localStorage.removeItem('barcodeSession');
-    }
-
-    const btnStartBarcodeSession = document.getElementById('btnStartBarcodeSession');
-    const btnEndBarcodeSession = document.getElementById('btnEndBarcodeSession');
-    const btnCopySessionToken = document.getElementById('btnCopySessionToken');
-    const btnCompleteBarcodeSession = document.getElementById('btnCompleteBarcodeSession');
-    const barcodeSessionDisplay = document.getElementById('barcodeSessionDisplay');
-    const barcodeSessionPanel = document.getElementById('barcodeSessionPanel');
-    const sessionTokenDisplay = document.getElementById('sessionTokenDisplay');
-    const barcodeDueDate = document.getElementById('barcodeDueDate');
-
-    // Try to restore barcode session from localStorage on page load
-    if (restoreBarcodeSessionFromStorage()) {
-      console.log('✓ Barcode session restored from localStorage');
-      console.log('Session ID:', currentBarcodeSessionId);
-
-      // Show session display
-      sessionTokenDisplay.textContent = currentBarcodeToken;
-      barcodeSessionDisplay.style.display = 'flex';
-      barcodeSessionPanel.style.display = 'block';
-
-      // Hide start button
-      btnStartBarcodeSession.style.display = 'none';
-
-      // Resume polling
-      startPolling();
-    }
-
-    // Start Barcode Session
-    btnStartBarcodeSession.addEventListener('click', async () => {
-      btnStartBarcodeSession.disabled = true;
-      btnStartBarcodeSession.style.opacity = '0.6';
-
-      try {
-        const response = await fetch('api/create-barcode-session.php', {
-          method: 'POST'
+      fetch('api/approve-borrow.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'borrow_id=' + borrowId
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Peminjaman telah diterima!');
+            location.reload();
+          } else {
+            alert(data.message || 'Gagal menerima peminjaman');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan');
         });
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          alert('Gagal membuat sesi barcode: ' + (data.message || 'Unknown error'));
-          btnStartBarcodeSession.disabled = false;
-          btnStartBarcodeSession.style.opacity = '1';
-          return;
-        }
-
-        // Store session info
-        currentBarcodeSessionId = data.data.session_id;
-        currentBarcodeToken = data.data.token;
-
-        // Save to localStorage
-        saveBarcodeSessionToStorage();
-
-        // Show session display
-        sessionTokenDisplay.textContent = currentBarcodeToken;
-        barcodeSessionDisplay.style.display = 'flex';
-        barcodeSessionPanel.style.display = 'block';
-
-        // Hide start button
-        btnStartBarcodeSession.style.display = 'none';
-
-        // Start polling for updates
-        startPolling();
-
-        // Set default due date (7 days from today)
-        const today = new Date();
-        const dueDate = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-        barcodeDueDate.valueAsDate = dueDate;
-
-        alert('Sesi barcode dibuat!\n\nToken: ' + currentBarcodeToken + '\n\nBuka link berikut di smartphone:\nhttp://localhost/perpustakaan-online/public/barcode-scan.php');
-
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan: ' + error.message);
-        btnStartBarcodeSession.disabled = false;
-        btnStartBarcodeSession.style.opacity = '1';
-      }
-    });
-
-    // Copy Session Token
-    btnCopySessionToken.addEventListener('click', () => {
-      const token = sessionTokenDisplay.textContent;
-      navigator.clipboard.writeText(token).then(() => {
-        btnCopySessionToken.textContent = '✓ Tersalin';
-        setTimeout(() => {
-          btnCopySessionToken.textContent = 'Salin';
-        }, 2000);
-      });
-    });
-
-    // Start Polling
-    function startPolling() {
-      if (pollingInterval) clearInterval(pollingInterval);
-
-      // Poll every 2 seconds
-      pollingInterval = setInterval(pollSessionData, 2000);
-
-      // Initial poll
-      pollSessionData();
     }
 
-    // Poll Session Data
-    async function pollSessionData() {
-      if (!currentBarcodeSessionId) return;
-
-      try {
-        const response = await fetch(`api/get-barcode-session-data.php?session_id=${currentBarcodeSessionId}`);
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-          return;
-        }
-
-        // Save session data to keep it alive
-        saveBarcodeSessionToStorage();
-
-        const sessionData = data.data;
-
-        // Update member info
-        const memberInfo = sessionData.member;
-        if (memberInfo) {
-          document.getElementById('sessionMemberInfo').textContent = memberInfo.name;
-        }
-
-        // Update books count
-        const booksCount = sessionData.books_count || 0;
-        document.getElementById('sessionBooksCount').textContent = booksCount;
-
-        // Update books list
-        const booksList = document.getElementById('sessionBooksList');
-        if (sessionData.books_scanned && sessionData.books_scanned.length > 0) {
-          booksList.innerHTML = '';
-          sessionData.books_scanned.forEach((book, index) => {
-            const bookItem = document.createElement('div');
-            bookItem.style.cssText = 'padding: 8px 12px; background: white; border-left: 3px solid #667eea; border-radius: 4px; font-size: 13px;';
-            bookItem.innerHTML = `
-              <div style="font-weight: 600; color: #1a1a1a;">${escapeHtml(book.title)}</div>
-              <div style="font-size: 11px; color: #999; margin-top: 2px;">ISBN: ${escapeHtml(book.isbn || '-')}</div>
-            `;
-            booksList.appendChild(bookItem);
-          });
-          document.getElementById('sessionBooksDisplay').style.display = 'block';
-        }
-
-      } catch (error) {
-        console.error('Polling error:', error);
-      }
-    }
-
-    // End Barcode Session
-    btnEndBarcodeSession.addEventListener('click', () => {
-      if (confirm('Akhiri sesi pemindaian?')) {
-        stopPolling();
-        resetBarcodeSession();
-      }
-    });
-
-    // Complete Barcode Borrowing
-    btnCompleteBarcodeSession.addEventListener('click', async () => {
-      const dueDate = barcodeDueDate.value;
-
-      if (!dueDate) {
-        alert('Pilih tanggal jatuh tempo');
+    function approveAllBorrow(borrowIds) {
+      if (!confirm('Terima SEMUA peminjaman siswa ini?')) {
         return;
       }
 
-      if (!confirm('Simpan peminjaman dengan tanggal jatuh tempo: ' + dueDate + '?')) {
-        return;
-      }
+      const ids = JSON.parse(borrowIds);
+      let approved = 0;
+      let failed = 0;
 
-      btnCompleteBarcodeSession.disabled = true;
-      btnCompleteBarcodeSession.style.opacity = '0.6';
-
-      try {
-        const response = await fetch('api/complete-barcode-borrowing.php', {
+      // Approve each borrow sequentially
+      Promise.all(ids.map(id =>
+        fetch('api/approve-borrow.php', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            session_id: currentBarcodeSessionId,
-            due_date: dueDate
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'borrow_id=' + id
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data.success) approved++;
+            else failed++;
           })
-        });
+          .catch(() => failed++)
+      )).then(() => {
+        if (failed === 0) {
+          alert(`${approved} peminjaman telah diterima!`);
+          location.reload();
+        } else {
+          alert(`${approved} diterima, ${failed} gagal`);
+          location.reload();
+        }
+      });
+    }
 
-        const data = await response.json();
+    function approveAllBorrowWithDue(borrowIds, inputId) {
+      console.log('[APPROVE] Starting with borrowIds:', borrowIds, 'inputId:', inputId);
 
-        if (!response.ok || !data.success) {
-          alert('Gagal menyimpan peminjaman: ' + (data.message || 'Unknown error'));
-          btnCompleteBarcodeSession.disabled = false;
-          btnCompleteBarcodeSession.style.opacity = '1';
+      let ids;
+
+      // Handle both string and object
+      if (typeof borrowIds === 'string') {
+        try {
+          // Check if it's already a JSON string
+          ids = JSON.parse(borrowIds);
+          console.log('[APPROVE] Parsed JSON string:', ids);
+        } catch (e) {
+          console.error('[APPROVE] JSON parse error:', e.message);
+          alert('Error: Format data peminjaman tidak valid.\n\nDetail: ' + e.message);
           return;
         }
+      } else if (Array.isArray(borrowIds)) {
+        ids = borrowIds;
+        console.log('[APPROVE] Already an array:', ids);
+      } else {
+        console.error('[APPROVE] Invalid borrowIds type:', typeof borrowIds, borrowIds);
+        alert('Error: Tipe data peminjaman tidak valid (expected string atau array)');
+        return;
+      }
 
-        alert('✓ Peminjaman berhasil disimpan!\n\n' + data.data.borrows_created + ' buku telah dipinjam.');
+      if (!Array.isArray(ids) || ids.length === 0) {
+        console.error('[APPROVE] IDs is not valid array or empty:', ids);
+        alert('Error: Data peminjaman kosong. Silakan refresh halaman.');
+        return;
+      }
 
-        // Reset and reload
-        stopPolling();
-        resetBarcodeSession();
-        setTimeout(() => {
+      const inputElement = document.getElementById(inputId);
+      console.log('[APPROVE] Input element:', inputElement, 'Value:', inputElement?.value);
+
+      if (!inputElement) {
+        console.error('[APPROVE] Input element not found with ID:', inputId);
+        alert('Error: Input tenggat tidak ditemukan dengan ID ' + inputId);
+        return;
+      }
+
+      const dueDays = parseInt(inputElement.value, 10) || 7;
+      console.log('[APPROVE] Parsed dueDays:', dueDays);
+
+      if (dueDays < 1 || dueDays > 365) {
+        alert('Tenggat harus antara 1-365 hari');
+        return;
+      }
+
+      if (!confirm(`Terima SEMUA peminjaman siswa ini dengan tenggat ${dueDays} hari?`)) {
+        console.log('[APPROVE] User cancelled');
+        return;
+      }
+
+      const dueDate = new Date();
+      dueDate.setDate(dueDate.getDate() + dueDays);
+
+      // Format: YYYY-MM-DD HH:MM:SS
+      const dueString = dueDate.toISOString().slice(0, 10) + ' ' + dueDate.toTimeString().slice(0, 8);
+
+      console.log('[APPROVE] Due date calculated:', dueString, 'for', dueDays, 'days');
+
+      let approved = 0;
+      let failed = 0;
+      const errors = [];
+
+      // Approve each borrow with custom due date
+      Promise.all(ids.map(id => {
+        console.log('[APPROVE] Processing ID:', id);
+        return fetch('api/approve-borrow.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'borrow_id=' + id + '&due_at=' + encodeURIComponent(dueString)
+        })
+          .then(r => {
+            console.log('[APPROVE] Response status:', r.status, 'for ID:', id);
+            return r.json().then(data => ({
+              status: r.status,
+              data: data,
+              id: id
+            }));
+          })
+          .then(result => {
+            console.log('[APPROVE] Response data for ID', result.id, ':', result.data);
+            if (result.data.success) {
+              approved++;
+            } else {
+              failed++;
+              errors.push(`ID ${result.id}: ${result.data.message}`);
+            }
+          })
+          .catch(err => {
+            console.error('[APPROVE] Error for ID', id, ':', err);
+            failed++;
+            errors.push(`ID ${id}: ${err.message}`);
+          })
+      })).then(() => {
+        console.log('[APPROVE] Complete - Approved:', approved, 'Failed:', failed);
+        if (failed === 0) {
+          alert(`✓ ${approved} peminjaman telah diterima!\nTenggat: ${dueString}`);
           location.reload();
-        }, 1500);
+        } else {
+          const errorMsg = errors.length > 0 ? errors.slice(0, 3).join('\n') : 'Unknown error';
+          alert(`${approved} diterima, ${failed} gagal\n\n${errorMsg}`);
+          location.reload();
+        }
+      });
+    }
 
-      } catch (error) {
-        console.error('Error:', error);
-        alert('Terjadi kesalahan: ' + error.message);
-        btnCompleteBarcodeSession.disabled = false;
-        btnCompleteBarcodeSession.style.opacity = '1';
+    function rejectAllBorrow(borrowIds) {
+      console.log('[REJECT] Starting with borrowIds:', borrowIds);
+
+      let ids;
+
+      // Handle both string and object
+      if (typeof borrowIds === 'string') {
+        try {
+          ids = JSON.parse(borrowIds);
+          console.log('[REJECT] Parsed JSON string:', ids);
+        } catch (e) {
+          console.error('[REJECT] JSON parse error:', e.message);
+          alert('Error: Format data peminjaman tidak valid.\n\nDetail: ' + e.message);
+          return;
+        }
+      } else if (Array.isArray(borrowIds)) {
+        ids = borrowIds;
+        console.log('[REJECT] Already an array:', ids);
+      } else {
+        console.error('[REJECT] Invalid borrowIds type:', typeof borrowIds, borrowIds);
+        alert('Error: Tipe data peminjaman tidak valid (expected string atau array)');
+        return;
       }
-    });
 
-    // Stop Polling
-    function stopPolling() {
-      if (pollingInterval) {
-        clearInterval(pollingInterval);
-        pollingInterval = null;
+      if (!Array.isArray(ids) || ids.length === 0) {
+        console.error('[REJECT] IDs is not valid array or empty:', ids);
+        alert('Error: Data peminjaman kosong. Silakan refresh halaman.');
+        return;
       }
+
+      if (!confirm(`Tolak SEMUA ${ids.length} peminjaman siswa ini?`)) {
+        console.log('[REJECT] User cancelled');
+        return;
+      }
+
+      console.log('[REJECT] IDs:', ids);
+
+      let rejected = 0;
+      let failed = 0;
+      const errors = [];
+
+      // Reject each borrow
+      Promise.all(ids.map(id => {
+        console.log('[REJECT] Processing ID:', id);
+        return fetch('api/reject-borrow.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'borrow_id=' + id
+        })
+          .then(r => {
+            console.log('[REJECT] Response status:', r.status, 'for ID:', id);
+            return r.json().then(data => ({
+              status: r.status,
+              data: data,
+              id: id
+            }));
+          })
+          .then(result => {
+            console.log('[REJECT] Response data for ID', result.id, ':', result.data);
+            if (result.data.success) {
+              rejected++;
+            } else {
+              failed++;
+              errors.push(`ID ${result.id}: ${result.data.message}`);
+            }
+          })
+          .catch(err => {
+            console.error('[REJECT] Error for ID', id, ':', err);
+            failed++;
+            errors.push(`ID ${id}: ${err.message}`);
+          })
+      })).then(() => {
+        console.log('[REJECT] Complete - Rejected:', rejected, 'Failed:', failed);
+        if (failed === 0) {
+          alert(`✓ ${rejected} peminjaman telah ditolak!`);
+          location.reload();
+        } else {
+          const errorMsg = errors.length > 0 ? errors.slice(0, 3).join('\n') : 'Unknown error';
+          alert(`${rejected} ditolak, ${failed} gagal\n\n${errorMsg}`);
+          location.reload();
+        }
+      });
     }
 
-    // Reset Barcode Session UI
-    function resetBarcodeSession() {
-      currentBarcodeSessionId = null;
-      currentBarcodeToken = null;
+    // ========================================================================
+    // Extend Due Date Function
+    // ========================================================================
 
-      // Clear storage
-      clearBarcodeSessionStorage();
+    function extendDueDate(borrowId, bookTitle) {
+      const days = prompt(`Perpanjang tenggat untuk "${bookTitle}":\n\nMasukkan jumlah hari perpanjangan (1-365):`, '7');
 
-      barcodeSessionDisplay.style.display = 'none';
-      barcodeSessionPanel.style.display = 'none';
-      btnStartBarcodeSession.style.display = 'inline-flex';
-      btnStartBarcodeSession.disabled = false;
-      btnStartBarcodeSession.style.opacity = '1';
+      if (days === null) {
+        return; // User cancelled
+      }
 
-      document.getElementById('sessionMemberInfo').textContent = '-';
-      document.getElementById('sessionBooksCount').textContent = '0';
-      document.getElementById('sessionBooksList').innerHTML = '';
-      document.getElementById('sessionBooksDisplay').style.display = 'none';
-      barcodeDueDate.value = '';
+      const daysInt = parseInt(days, 10);
 
-      btnCompleteBarcodeSession.disabled = false;
-      btnCompleteBarcodeSession.style.opacity = '1';
+      if (isNaN(daysInt) || daysInt < 1 || daysInt > 365) {
+        alert('Jumlah hari harus antara 1-365');
+        return;
+      }
+
+      // Send request to extend due date
+      fetch('api/extend-due-date.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'borrow_id=' + borrowId + '&extend_days=' + daysInt
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert(`✓ Tenggat waktu diperpanjang!\n\nBuku: ${data.book_title}\nSiswa: ${data.member_name}\nTenggat Baru: ${data.new_due_date}`);
+            location.reload();
+          } else {
+            alert('❌ Gagal memperpanjang tenggat:\n' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan saat memperpanjang tenggat');
+        });
     }
 
-    // Utility function
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
-    }
+    // ========================================================================
+    // Confirm Return Function (Admin)
+    // ========================================================================
 
-    // Cleanup on page unload
-    window.addEventListener('beforeunload', () => {
-      stopPolling();
-    });
-
-    // Original confirmReturn function
     function confirmReturn(borrowId) {
       if (!confirm('Konfirmasi pengembalian buku ini?')) {
         return;
@@ -942,15 +1058,6 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
           alert('Terjadi kesalahan');
         });
     }
-
-    // Add spin animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes spin {
-        to { transform: rotate(360deg); }
-      }
-    `;
-    document.head.appendChild(style);
   </script>
 
 </body>
