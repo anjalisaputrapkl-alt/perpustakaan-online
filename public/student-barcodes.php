@@ -720,6 +720,46 @@ $school = $stmt->fetch();
             }
         }
 
+        /* Dark Mode Support */
+        @media (prefers-color-scheme: dark) {
+            .stat-card {
+                background: var(--card) !important;
+                border-color: var(--border) !important;
+            }
+
+            .student-card {
+                background: var(--card) !important;
+                border-color: var(--border) !important;
+            }
+
+            .toolbar {
+                background: var(--card) !important;
+                border-color: var(--border) !important;
+            }
+
+            .search-input {
+                background: var(--surface) !important;
+                color: var(--text) !important;
+                border-color: var(--border) !important;
+            }
+
+            .detail-row {
+                background: var(--surface) !important;
+                border-color: var(--border) !important;
+            }
+
+            .barcode-section {
+                background: var(--muted-surface) !important;
+                border-color: var(--border) !important;
+            }
+
+            .barcode-id {
+                background: var(--surface) !important;
+                border-color: var(--border) !important;
+                color: var(--text) !important;
+            }
+        }
+
         /* Print Styles */
         @media print {
 
