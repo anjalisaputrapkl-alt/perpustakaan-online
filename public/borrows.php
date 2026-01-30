@@ -43,6 +43,7 @@ $totalBorrows = count($borrows);
 $activeBorrows = count(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return' && $b['status'] !== 'pending_confirmation'));
 $overdueBorrows = count(array_filter($borrows, fn($b) => $b['status'] === 'overdue'));
 $pendingReturns = count(array_filter($borrows, fn($b) => $b['status'] === 'pending_return'));
+$pendingConfirmation = count(array_filter($borrows, fn($b) => $b['status'] === 'pending_confirmation'));
 $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 ?>
 <!doctype html>
@@ -117,7 +118,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 
     .stats-section {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 20px;
     }
 
@@ -228,8 +229,10 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
     }
 
     .btn-return {
-      display: inline-block;
-      padding: 8px 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
       background: var(--success);
       color: white;
       border: none;
@@ -240,7 +243,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
       text-decoration: none;
       transition: all 0.2s ease;
       white-space: nowrap;
-      margin-left: -50px;
+      margin-left: 0;
     }
 
     .btn-return:hover {
@@ -276,6 +279,33 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
     }
 
     .btn-confirm-return:active {
+      transform: translateY(0);
+    }
+
+    .btn-extend-due {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 12px;
+      background: #f59e0b;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .btn-extend-due:hover {
+      background: #d97706;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(217, 119, 6, 0.2);
+    }
+
+    .btn-extend-due:active {
       transform: translateY(0);
     }
 
@@ -361,7 +391,11 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
               <div class="stat-value"><?= $overdueBorrows ?></div>
             </div>
             <div class="stat-card">
-              <div class="stat-label">Menunggu Konfirmasi</div>
+              <div class="stat-label">Form Menunggu Konfirmasi</div>
+              <div class="stat-value"><?= $pendingConfirmation ?></div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Pengembalian Menunggu Konfirmasi</div>
               <div class="stat-value"><?= $pendingReturns ?></div>
             </div>
           </div>
@@ -616,10 +650,19 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                         <?php endif; ?>
                       </td>
                       <td>
-                        <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn-return">
-                          <iconify-icon icon="mdi:check" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
-                          Konfirmasi Pengembalian
-                        </a>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                          <button type="button"
+                            onclick="extendDueDate(<?= $br['id'] ?>, '<?= htmlspecialchars($br['title']) ?>')"
+                            class="btn-extend-due"
+                            style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
+                            <iconify-icon icon="mdi:calendar-plus" style="vertical-align: middle;"></iconify-icon>
+                            Perpanjang
+                          </button>
+                          <a href="borrows.php?action=return&id=<?= $br['id'] ?>" class="btn-return" style="display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px; background: var(--success); color: white; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; text-decoration: none; transition: all 0.2s ease; white-space: nowrap; margin-left: 0;">
+                            <iconify-icon icon="mdi:check" style="vertical-align: middle;"></iconify-icon>
+                            Kembali
+                          </a>
+                        </div>
                       </td>
                     </tr>
                   <?php endforeach; ?>
@@ -942,6 +985,47 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
           location.reload();
         }
       });
+    }
+
+    // ========================================================================
+    // Extend Due Date Function
+    // ========================================================================
+
+    function extendDueDate(borrowId, bookTitle) {
+      const days = prompt(`Perpanjang tenggat untuk "${bookTitle}":\n\nMasukkan jumlah hari perpanjangan (1-365):`, '7');
+
+      if (days === null) {
+        return; // User cancelled
+      }
+
+      const daysInt = parseInt(days, 10);
+
+      if (isNaN(daysInt) || daysInt < 1 || daysInt > 365) {
+        alert('Jumlah hari harus antara 1-365');
+        return;
+      }
+
+      // Send request to extend due date
+      fetch('api/extend-due-date.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'borrow_id=' + borrowId + '&extend_days=' + daysInt
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert(`✓ Tenggat waktu diperpanjang!\n\nBuku: ${data.book_title}\nSiswa: ${data.member_name}\nTenggat Baru: ${data.new_due_date}`);
+            location.reload();
+          } else {
+            alert('❌ Gagal memperpanjang tenggat:\n' + data.message);
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('Terjadi kesalahan saat memperpanjang tenggat');
+        });
     }
 
     // ========================================================================
