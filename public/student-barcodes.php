@@ -36,6 +36,7 @@ $school = $stmt->fetch();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <link rel="stylesheet" href="../assets/css/animations.css">
+    <link rel="stylesheet" href="../assets/css/theme.css">
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/index.css">
     <style>
@@ -43,6 +44,7 @@ $school = $stmt->fetch();
         body {
             margin: 0;
             padding: 0;
+            background: var(--bg);
         }
 
         .app {
@@ -54,7 +56,7 @@ $school = $stmt->fetch();
         }
 
         .topbar {
-            padding: 20px 24px;
+            padding: 20px 34px;
             font-size: 16px;
             font-weight: 600;
             border-bottom: 1px solid var(--border);
@@ -62,7 +64,8 @@ $school = $stmt->fetch();
         }
 
         .topbar strong {
-            font-size: 20px;
+            margin-top: 3px;
+            font-size: 16px;
             font-weight: 700;
         }
 
@@ -74,45 +77,114 @@ $school = $stmt->fetch();
         }
 
         .main {
-            padding: 24px;
-            max-width: 100%;
+            padding: 32px;
+            max-width: 1600px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 28px;
         }
 
         /* Page Header */
         .page-header {
             margin: 0;
+            padding-bottom: 8px;
         }
 
         .page-title {
-            font-size: 28px;
+            font-size: 32px;
             font-weight: 700;
             margin: 0 0 8px 0;
+            color: var(--text);
+            letter-spacing: -0.02em;
         }
 
         .page-subtitle {
-            font-size: 14px;
+            font-size: 15px;
             margin: 0;
+            color: var(--text-muted);
+            font-weight: 500;
         }
 
         /* Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
             margin: 0;
         }
 
         .stat-card {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 20px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+            background: var(--card);
+        }
+
+        .stat-card:hover::before {
+            transform: scaleX(1);
         }
 
         .stat-icon {
             flex-shrink: 0;
+            width: 56px;
+            height: 56px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-icon::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: inherit;
+            opacity: 0.1;
+            filter: blur(20px);
+        }
+
+        .stat-icon.blue {
+            background: linear-gradient(135deg, #3B82F6, #2563EB);
+        }
+
+        .stat-icon.green {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .stat-icon.orange {
+            background: linear-gradient(135deg, #F59E0B, #D97706);
         }
 
         .stat-content {
@@ -120,37 +192,68 @@ $school = $stmt->fetch();
         }
 
         .stat-label {
-            font-size: 12px;
-            margin: 0 0 4px 0;
+            font-size: 13px;
+            margin: 0 0 6px 0;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
         .stat-value {
-            font-size: 28px;
+            font-size: 32px;
             margin: 0;
             line-height: 1;
+            font-weight: 700;
+            color: var(--text);
         }
 
         /* Toolbar */
         .toolbar {
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
             display: flex;
             align-items: center;
             gap: 16px;
-            padding: 0;
-            margin: 0;
-            background: transparent;
-            border: none;
+            flex-wrap: wrap;
+            box-shadow: var(--shadow-sm);
         }
 
         .search-box {
             flex: 1;
+            min-width: 280px;
             position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            color: var(--text-muted);
+            pointer-events: none;
         }
 
         .search-input {
             width: 100%;
-            padding: 12px 16px 12px 44px;
+            padding: 13px 16px 13px 48px;
             border: 1.5px solid var(--border);
-            border-radius: 8px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--text);
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(58, 127, 242, 0.1);
         }
 
         .toolbar-actions {
@@ -159,77 +262,58 @@ $school = $stmt->fetch();
         }
 
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             transition: all 0.2s ease;
             white-space: nowrap;
+            font-family: inherit;
         }
 
         .btn-secondary {
-            background: var(--border);
+            background: var(--muted-surface);
             color: var(--text);
+            border: 1.5px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
         }
 
         .btn-secondary:hover {
-            background: var(--text-muted);
-            color: white;
+            background: var(--border);
+            color: var(--text);
+            border-color: var(--border);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
         }
 
         /* Students Grid */
         .students-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            margin: 0;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 60px 24px;
-            grid-column: 1 / -1;
-        }
-
-        .empty-icon {
-            font-size: 48px;
-            opacity: 0.4;
-            margin-bottom: 16px;
-        }
-
-        .empty-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0 0 8px 0;
-        }
-
-        .empty-text {
-            font-size: 14px;
-            margin: 0;
-        }
-
-        /* Barcode-specific custom styles */
-        .students-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
             gap: 24px;
+            margin: 0;
         }
 
         .student-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s ease;
+            background: var(--card);
+            border: 1.5px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            box-shadow: var(--shadow-sm);
         }
 
         .student-card::before {
@@ -238,137 +322,172 @@ $school = $stmt->fetch();
             top: 0;
             left: 0;
             right: 0;
-            height: 3px;
+            height: 4px;
             background: linear-gradient(90deg, var(--primary), var(--primary-light));
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
         }
 
         .student-card:hover {
             border-color: var(--primary);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-6px);
         }
 
         .student-card:hover::before {
-            opacity: 1;
+            transform: scaleX(1);
         }
 
         .student-badge {
             position: absolute;
-            top: 16px;
-            right: 16px;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 10px;
+            top: 20px;
+            right: 20px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             z-index: 1;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .badge-active {
-            background: var(--success-light);
-            color: #065F46;
+            background: linear-gradient(135deg, #10B981, #059669);
+            color: white;
         }
 
         .badge-inactive {
-            background: var(--danger-light);
-            color: #991B1B;
+            background: linear-gradient(135deg, #EF4444, #DC2626);
+            color: white;
         }
 
         .student-header {
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1.5px solid var(--border);
         }
 
         .student-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-weight: 700;
-            font-size: 20px;
+            font-size: 24px;
             flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(58, 127, 242, 0.3);
+            box-shadow: 0 4px 12px rgba(58, 127, 242, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .student-avatar::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), transparent);
         }
 
         .student-info-header {
             flex: 1;
             min-width: 0;
+            padding-right: 80px;
         }
 
         .student-name {
-            font-size: 15px;
-            font-weight: 600;
-            margin: 0 0 4px 0;
+            font-size: 17px;
+            font-weight: 700;
+            margin: 0 0 6px 0;
             line-height: 1.3;
+            color: var(--text);
             word-break: break-word;
         }
 
         .student-nisn {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-muted);
             font-weight: 500;
             margin: 0;
+            font-family: 'Courier New', monospace;
         }
 
         .barcode-section {
-            background: white;
+            background: var(--muted-surface);
             border: 2px dashed var(--border);
-            border-radius: 8px;
-            padding: 16px;
-            margin: 16px 0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 0 0 20px 0;
             text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .student-card:hover .barcode-section {
+            background: var(--muted-surface);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 transparent;
         }
 
         .barcode-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 70px;
+            min-height: 80px;
+            margin-bottom: 12px;
         }
 
         .barcode-display {
             max-width: 100%;
             height: auto;
-            max-height: 60px;
+            max-height: 70px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .barcode-id {
-            margin-top: 8px;
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text);
             font-family: 'Courier New', monospace;
+            background: var(--surface);
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 6px;
+            border: 1.5px solid var(--border);
         }
 
         .student-details {
-            margin: 16px 0;
+            margin: 0 0 20px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
         .detail-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 12px;
+            padding: 12px;
+            background: var(--surface);
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border);
         }
 
-        .detail-row:last-child {
-            border-bottom: none;
+        .detail-row:hover {
+            background: var(--muted-surface);
+            border-color: var(--border);
         }
 
         .detail-label {
@@ -376,70 +495,109 @@ $school = $stmt->fetch();
             color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
         }
 
         .detail-value {
-            font-weight: 600;
+            font-weight: 700;
             color: var(--text);
         }
 
         .detail-icon {
-            font-size: 14px;
+            font-size: 18px;
             color: var(--primary);
         }
 
         .student-actions {
             display: flex;
-            gap: 8px;
+            gap: 10px;
             margin-top: auto;
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
+            padding-top: 16px;
+            border-top: 1.5px solid var(--border);
         }
 
         .btn-action {
             flex: 1;
-            padding: 10px 12px;
+            padding: 12px 16px;
             border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
             font-family: inherit;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
             transition: all 0.2s ease;
             text-decoration: none;
             white-space: nowrap;
         }
 
         .btn-print {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-2));
             color: white;
+            box-shadow: 0 2px 8px rgba(58, 127, 242, 0.2);
+            border: none;
         }
 
         .btn-print:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-print:active {
+            transform: translateY(0);
         }
 
         .btn-edit {
-            background: transparent;
+            background: var(--surface);
             color: var(--text);
             border: 1.5px solid var(--border);
         }
 
         .btn-edit:hover {
-            border-color: var(--text-muted);
-            background: var(--bg);
+            border-color: var(--primary);
+            background: var(--muted-surface);
+            color: var(--primary);
+            box-shadow: 0 0 0 transparent;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 24px;
+            grid-column: 1 / -1;
+            background: var(--muted-surface);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+        }
+
+        .empty-icon {
+            font-size: 64px;
+            opacity: 0.3;
+            margin-bottom: 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0 0 8px 0;
+            color: var(--text);
+        }
+
+        .empty-text {
+            font-size: 15px;
+            margin: 0;
+            color: var(--text-muted);
         }
 
         /* Responsive */
         @media (max-width: 1200px) {
             .students-grid {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             }
         }
 
@@ -449,43 +607,40 @@ $school = $stmt->fetch();
             }
 
             .main {
-                padding: 16px;
+                padding: 20px;
+                gap: 20px;
             }
 
-            .topbar {
-                padding: 16px;
-            }
-
-            .topbar strong {
-                font-size: 18px;
+            .page-title {
+                font-size: 26px;
             }
 
             .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                gap: 12px;
+                grid-template-columns: 1fr;
+                gap: 16px;
             }
 
             .stat-card {
-                flex-direction: column;
-                text-align: center;
-                padding: 12px;
+                padding: 20px;
             }
 
             .stat-icon {
-                font-size: 24px !important;
-            }
-
-            .stat-value {
+                width: 48px;
+                height: 48px;
                 font-size: 24px;
             }
 
+            .stat-value {
+                font-size: 28px;
+            }
+
             .toolbar {
-                flex-direction: column;
-                align-items: stretch;
+                padding: 16px;
             }
 
             .search-box {
                 width: 100%;
+                min-width: unset;
             }
 
             .toolbar-actions {
@@ -498,48 +653,70 @@ $school = $stmt->fetch();
 
             .students-grid {
                 grid-template-columns: 1fr;
+                gap: 20px;
             }
 
             .student-badge {
                 position: static;
-                margin-bottom: 8px;
+                margin-bottom: 12px;
                 width: fit-content;
+            }
+
+            .student-info-header {
+                padding-right: 0;
             }
 
             .student-header {
                 flex-wrap: wrap;
             }
-
-            .page-title {
-                font-size: 22px;
-            }
         }
 
         @media (max-width: 480px) {
             .main {
-                padding: 12px;
+                padding: 16px;
                 gap: 16px;
             }
 
-            .topbar {
-                padding: 12px 16px;
+            .page-title {
+                font-size: 22px;
             }
 
-            .page-title {
-                font-size: 20px;
+            .page-subtitle {
+                font-size: 14px;
+            }
+
+            .stat-card {
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .stat-icon {
+                width: 44px;
+                height: 44px;
+                font-size: 22px;
             }
 
             .stat-value {
+                font-size: 24px;
+            }
+
+            .student-card {
+                padding: 20px;
+            }
+
+            .student-avatar {
+                width: 48px;
+                height: 48px;
                 font-size: 20px;
             }
 
             .student-name {
-                font-size: 14px;
+                font-size: 15px;
             }
 
             .btn-action {
-                font-size: 11px;
-                padding: 8px 10px;
+                font-size: 12px;
+                padding: 10px 12px;
             }
         }
 
@@ -547,7 +724,8 @@ $school = $stmt->fetch();
         @media print {
 
             .toolbar,
-            .student-actions {
+            .student-actions,
+            .student-badge {
                 display: none !important;
             }
 
@@ -560,14 +738,15 @@ $school = $stmt->fetch();
                 page-break-inside: avoid;
                 border: 2px solid #000;
                 box-shadow: none;
-            }
-
-            .student-card:hover {
-                transform: none;
+                transform: none !important;
             }
 
             .barcode-section {
                 border: 1px solid #000;
+                background: white;
+            }
+
+            body {
                 background: white;
             }
         }
@@ -588,14 +767,13 @@ $school = $stmt->fetch();
                 <!-- Page Header -->
                 <div class="page-header">
                     <h1 class="page-title">Barcode Siswa</h1>
-                    <p class="page-subtitle"><?= htmlspecialchars($school['name'] ?? 'Sekolah') ?></p>
                 </div>
 
                 <!-- Stats Section -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-icon blue">
-                            <iconify-icon icon="mdi:account-group"></iconify-icon>
+                            <iconify-icon icon="solar:users-group-rounded-bold"></iconify-icon>
                         </div>
                         <div class="stat-content">
                             <div class="stat-label">Total Siswa</div>
@@ -605,7 +783,7 @@ $school = $stmt->fetch();
 
                     <div class="stat-card">
                         <div class="stat-icon green">
-                            <iconify-icon icon="mdi:account-check"></iconify-icon>
+                            <iconify-icon icon="solar:user-check-rounded-bold"></iconify-icon>
                         </div>
                         <div class="stat-content">
                             <div class="stat-label">Siswa Aktif</div>
@@ -617,7 +795,7 @@ $school = $stmt->fetch();
 
                     <div class="stat-card">
                         <div class="stat-icon orange">
-                            <iconify-icon icon="mdi:book-open-variant"></iconify-icon>
+                            <iconify-icon icon="solar:book-bookmark-bold"></iconify-icon>
                         </div>
                         <div class="stat-content">
                             <div class="stat-label">Peminjam Aktif</div>
@@ -631,13 +809,13 @@ $school = $stmt->fetch();
                 <!-- Toolbar -->
                 <div class="toolbar">
                     <div class="search-box">
-                        <iconify-icon icon="mdi:magnify" class="search-icon"></iconify-icon>
+                        <iconify-icon icon="solar:magnifer-bold" class="search-icon"></iconify-icon>
                         <input type="text" id="searchInput" class="search-input"
                             placeholder="Cari nama atau NISN siswa..." onkeyup="filterStudents()">
                     </div>
                     <div class="toolbar-actions">
                         <button onclick="window.print()" class="btn btn-secondary">
-                            <iconify-icon icon="mdi:printer"></iconify-icon>
+                            <iconify-icon icon="solar:printer-bold"></iconify-icon>
                             Cetak Semua
                         </button>
                     </div>
@@ -647,7 +825,7 @@ $school = $stmt->fetch();
                 <?php if (empty($members)): ?>
                     <div class="empty-state">
                         <div class="empty-icon">
-                            <iconify-icon icon="mdi:account-group-outline"></iconify-icon>
+                            <iconify-icon icon="solar:users-group-rounded-broken"></iconify-icon>
                         </div>
                         <h3 class="empty-title">Tidak Ada Siswa</h3>
                         <p class="empty-text">Belum ada siswa yang terdaftar di sekolah ini</p>
@@ -660,7 +838,7 @@ $school = $stmt->fetch();
                                 <span
                                     class="student-badge <?= $member['status'] === 'active' ? 'badge-active' : 'badge-inactive' ?>">
                                     <iconify-icon
-                                        icon="<?= $member['status'] === 'active' ? 'mdi:check-circle' : 'mdi:close-circle' ?>"></iconify-icon>
+                                        icon="<?= $member['status'] === 'active' ? 'solar:check-circle-bold' : 'solar:close-circle-bold' ?>"></iconify-icon>
                                     <?= $member['status'] === 'active' ? 'Aktif' : 'Nonaktif' ?>
                                 </span>
 
@@ -685,21 +863,21 @@ $school = $stmt->fetch();
                                 <div class="student-details">
                                     <div class="detail-row">
                                         <span class="detail-label">
-                                            <iconify-icon icon="mdi:identifier" class="detail-icon"></iconify-icon>
+                                            <iconify-icon icon="solar:card-bold" class="detail-icon"></iconify-icon>
                                             Member ID
                                         </span>
                                         <span class="detail-value"><?= str_pad($member['id'], 6, '0', STR_PAD_LEFT) ?></span>
                                     </div>
                                     <div class="detail-row">
                                         <span class="detail-label">
-                                            <iconify-icon icon="mdi:book-multiple" class="detail-icon"></iconify-icon>
+                                            <iconify-icon icon="solar:book-2-bold" class="detail-icon"></iconify-icon>
                                             Peminjaman Aktif
                                         </span>
                                         <span class="detail-value"><?= $member['active_borrows'] ?> buku</span>
                                     </div>
                                     <div class="detail-row">
                                         <span class="detail-label">
-                                            <iconify-icon icon="mdi:calendar-check" class="detail-icon"></iconify-icon>
+                                            <iconify-icon icon="solar:calendar-mark-bold" class="detail-icon"></iconify-icon>
                                             Bergabung
                                         </span>
                                         <span class="detail-value"><?= date('d/m/Y', strtotime($member['created_at'])) ?></span>
@@ -710,11 +888,11 @@ $school = $stmt->fetch();
                                     <button
                                         onclick="printBarcode(<?= $member['id'] ?>, '<?= htmlspecialchars($member['name']) ?>')"
                                         class="btn-action btn-print">
-                                        <iconify-icon icon="mdi:printer"></iconify-icon>
+                                        <iconify-icon icon="solar:printer-bold"></iconify-icon>
                                         Cetak
                                     </button>
                                     <a href="members.php?action=edit&id=<?= $member['id'] ?>" class="btn-action btn-edit">
-                                        <iconify-icon icon="mdi:pencil"></iconify-icon>
+                                        <iconify-icon icon="solar:pen-bold"></iconify-icon>
                                         Edit
                                     </a>
                                 </div>
@@ -741,9 +919,6 @@ $school = $stmt->fetch();
                     item.style.display = 'none';
                 }
             });
-
-            // Optional: Show a message if no results found
-            // You can add this functionality if needed
         }
 
         function printBarcode(memberId, memberName) {
@@ -757,12 +932,16 @@ $school = $stmt->fetch();
             }
         }
 
-        // Add keyboard shortcut for search
+        // Keyboard shortcuts
         document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('searchInput').addEventListener('keydown', function (e) {
+            const searchInput = document.getElementById('searchInput');
+
+            // Clear search on Escape
+            searchInput.addEventListener('keydown', function (e) {
                 if (e.key === 'Escape') {
                     this.value = '';
                     filterStudents();
+                    this.blur();
                 }
             });
 
@@ -770,7 +949,8 @@ $school = $stmt->fetch();
             document.addEventListener('keydown', function (e) {
                 if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
                     e.preventDefault();
-                    document.getElementById('searchInput').focus();
+                    searchInput.focus();
+                    searchInput.select();
                 }
             });
         });
