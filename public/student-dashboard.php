@@ -29,6 +29,47 @@ foreach ($memberDamageFines as $fine) {
     }
 }
 
+// ===================== STATISTIK DASHBOARD =====================
+// 1. Total Buku di sekolah ini
+try {
+    $totalBooksStmt = $pdo->prepare('SELECT COUNT(*) as total FROM books WHERE school_id = :school_id');
+    $totalBooksStmt->execute(['school_id' => $school_id]);
+    $totalBooks = (int) ($totalBooksStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+} catch (Exception $e) {
+    $totalBooks = 0;
+}
+
+// 2. Jumlah buku yang sedang dipinjam siswa ini
+try {
+    $borrowCountStmt = $pdo->prepare(
+        'SELECT COUNT(*) as total FROM borrows 
+         WHERE school_id = :school_id 
+         AND member_id = :member_id 
+         AND returned_at IS NULL'
+    );
+    $borrowCountStmt->execute(['school_id' => $school_id, 'member_id' => $member_id]);
+    $borrowCount = (int) ($borrowCountStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+} catch (Exception $e) {
+    $borrowCount = 0;
+}
+
+// 3. Denda tertunda (overdue fines) dari keterlambatan peminjaman
+// Menghitung denda keterlambatan (bukan damage fine, melainkan denda dari due date yang terlewat)
+try {
+    $lateFinesStmt = $pdo->prepare(
+        'SELECT COUNT(*) as total FROM borrows 
+         WHERE school_id = :school_id 
+         AND member_id = :member_id 
+         AND returned_at IS NULL 
+         AND due_at < NOW()'
+    );
+    $lateFinesStmt->execute(['school_id' => $school_id, 'member_id' => $member_id]);
+    $overdueCount = (int) ($lateFinesStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
+} catch (Exception $e) {
+    $overdueCount = 0;
+}
+// ===================== END STATISTIK DASHBOARD =====================
+
 // ===================== QUERY PEMINJAMAN SISWA =====================
 // Update overdue status
 $pdo->prepare(
@@ -101,20 +142,38 @@ try {
 
 // Get categories for filter
 try {
-    $catStmt = $pdo->prepare('SELECT DISTINCT category FROM books WHERE school_id = :school_id ORDER BY category');
+    $catStmt = $pdo->prepare('SELECT DISTINCT category FROM books WHERE school_id = :school_id AND category IS NOT NULL AND category != "" ORDER BY category');
     $catStmt->execute(['school_id' => $school_id]);
     $categories = $catStmt->fetchAll(PDO::FETCH_COLUMN);
 } catch (Exception $e) {
     $categories = [];
 }
 
-// Get borrow counts for statistics
+// Tambahkan default categories untuk option yang komprehensif
+$defaultCategories = ['Fiksi', 'Non-Fiksi', 'Referensi', 'Biografi', 'Sejarah', 'Seni & Budaya', 'Teknologi', 'Pendidikan', 'Anak-anak', 'Komik', 'Majalah', 'Lainnya'];
+
+// Merge dengan database categories untuk menampilkan semua opsi
+$categories = array_unique(array_merge($categories, $defaultCategories));
+sort($categories);
+
+
+
+// Daftar semua buku sekolah (untuk ditampilkan ketika siswa klik 'Total Buku')
 try {
-    $borrowStmt = $pdo->prepare('SELECT COUNT(*) as total_borrows FROM borrows WHERE school_id = :school_id AND status = "borrowed"');
-    $borrowStmt->execute(['school_id' => $school_id]);
-    $borrowStats = $borrowStmt->fetch();
+    $booksAvailStmt = $pdo->prepare('SELECT id, title, author, cover_image, category, isbn, shelf, row_number, copies, created_at, view_count FROM books WHERE school_id = :school_id ORDER BY created_at DESC');
+    $booksAvailStmt->execute(['school_id' => $school_id]);
+    $books_available = $booksAvailStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
-    $borrowStats = ['total_borrows' => 0];
+    $books_available = [];
+}
+
+// Top viewed books (to represent 'buku yang sedang dilihat' apabila tidak ada tracking per-user)
+try {
+    $topViewedStmt = $pdo->prepare('SELECT id, title, author, cover_image, view_count FROM books WHERE school_id = :school_id ORDER BY view_count DESC LIMIT 10');
+    $topViewedStmt->execute(['school_id' => $school_id]);
+    $top_viewed_books = $topViewedStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $top_viewed_books = [];
 }
 
 $pageTitle = 'Dashboard Siswa';
@@ -134,6 +193,93 @@ $pageTitle = 'Dashboard Siswa';
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/school-profile.css">
     <link rel="stylesheet" href="../assets/css/student-dashboard.css">
+    <style>
+        /* Small animation for sidebar stat when clicked */
+        .stat-click-anim { transition: transform .18s ease, box-shadow .18s ease; }
+        /* No movement on select — only subtle background change on hover */
+        .stat-selected { transform: none !important; box-shadow: none !important; background: color-mix(in srgb, var(--primary) 8%, transparent); border-left: none !important; }
+        .stat-hover { background: color-mix(in srgb, var(--primary) 10%, transparent); }
+        .stat-box { transition: background .18s ease, box-shadow .18s ease; }
+            .stat-preview-box {
+                position: absolute;
+                min-width: 220px;
+                max-width: 320px;
+                padding: 10px 12px;
+                border-radius: 8px;
+                background: var(--card, #fff);
+                box-shadow: 0 10px 28px rgba(0,0,0,0.12);
+                transform-origin: top left;
+                animation: previewIn .16s ease;
+                z-index: 2300;
+                font-weight: 600;
+            }
+            @keyframes previewIn { from { transform: translateY(-6px) scale(.99); opacity: 0 } to { transform: translateY(0) scale(1); opacity: 1 } }
+
+        /* Category Dropdown Select Styling */
+        .category-dropdown-select {
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--text);
+            background: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .category-dropdown-select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(58, 127, 242, 0.15);
+            border-color: var(--primary-2);
+        }
+
+        .category-dropdown-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(58, 127, 242, 0.2);
+            font-weight: 500;
+        }
+
+        /* Books Grid Animation */
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Search Form Responsive */
+        .modern-search-bar-form {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+
+        .search-bar-wrapper {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        @media (max-width: 768px) {
+            .modern-search-bar-form {
+                flex-direction: column;
+            }
+
+            .search-bar-wrapper,
+            .category-dropdown-select {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -173,45 +319,32 @@ $pageTitle = 'Dashboard Siswa';
 
                 <!-- Category Filter -->
                 <?php if (!empty($categories)): ?>
-                    <div class="sidebar-section">
-                        <h3><iconify-icon icon="mdi:folder-multiple" width="16" height="16"></iconify-icon> Kategori</h3>
-                        <form method="get" class="filter-group">
-                            <?php if (!empty($search)): ?>
-                                <input type="hidden" name="search" value="<?php echo htmlspecialchars($search); ?>">
-                            <?php endif; ?>
-                            <?php foreach ($categories as $cat): ?>
-                                <div class="filter-item">
-                                    <input type="radio" id="cat-<?php echo htmlspecialchars($cat); ?>" name="category"
-                                        value="<?php echo htmlspecialchars($cat); ?>" <?php echo $category === $cat ? 'checked' : ''; ?>>
-                                    <label
-                                        for="cat-<?php echo htmlspecialchars($cat); ?>"><?php echo htmlspecialchars($cat); ?></label>
-                                </div>
-                            <?php endforeach; ?>
-                            <div class="filter-item" style="margin-top: 12px;">
-                                <input type="radio" id="cat-all" name="category" value="" <?php echo empty($category) ? 'checked' : ''; ?>>
-                                <label for="cat-all"><strong>Semua Kategori</strong></label>
-                            </div>
-                            <button type="submit" class="btn-search" style="width: 100%; margin-top: 12px;">Filter</button>
-                        </form>
-                    </div>
                 <?php endif; ?>
 
                 <!-- Quick Stats -->
                 <div class="sidebar-section">
                     <h3><iconify-icon icon="mdi:chart-box" width="16" height="16"></iconify-icon> Statistik</h3>
-                    <div style="display: flex; flex-direction: column; gap: 12px;">
-                        <div>
-                            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Total Buku</p>
-                            <p style="font-size: 20px; font-weight: 700; color: var(--primary);">
-                                <?php echo count($books); ?>
-                            </p>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Total Buku Card -->
+                        <div style="padding: 14px; background: color-mix(in srgb, var(--primary) 8%, transparent); border-radius: 8px; border-left: 4px solid var(--primary); cursor: pointer; transition: all 0.2s ease;">
+                            <p style="font-size: 10px; color: var(--text-muted); margin: 0 0 6px 0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Total Buku</p>
+                            <div style="display: flex; align-items: baseline; gap: 8px;">
+                                <p style="font-size: 28px; font-weight: 700; color: var(--primary); margin: 0;">
+                                    <?php echo $totalBooks; ?>
+                                </p>
+                                <iconify-icon icon="mdi:book-multiple" width="20" height="20" style="color: var(--primary); opacity: 0.6;"></iconify-icon>
+                            </div>
                         </div>
-                        <div>
-                            <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 4px;">Sedang Dipinjam
-                            </p>
-                            <p style="font-size: 20px; font-weight: 700; color: var(--danger);">
-                                <?php echo $borrowStats['total_borrows']; ?>
-                            </p>
+
+                        <!-- Sedang Dipinjam Card -->
+                        <div style="padding: 14px; background: color-mix(in srgb, var(--danger) 8%, transparent); border-radius: 8px; border-left: 4px solid var(--danger); cursor: pointer; transition: all 0.2s ease;">
+                            <p style="font-size: 10px; color: var(--text-muted); margin: 0 0 6px 0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px;">Sedang Dipinjam</p>
+                            <div style="display: flex; align-items: baseline; gap: 8px;">
+                                <p style="font-size: 28px; font-weight: 700; color: var(--danger); margin: 0;">
+                                    <?php echo $borrowCount; ?>
+                                </p>
+                                <iconify-icon icon="mdi:clock-outline" width="20" height="20" style="color: var(--danger); opacity: 0.6;"></iconify-icon>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -219,20 +352,25 @@ $pageTitle = 'Dashboard Siswa';
 
             <!-- Main Content -->
             <div class="main-content">
-                <!-- Search & Sort Bar -->
-                <div class="search-sort-bar">
-                    <form method="get" style="display: flex; gap: 16px; flex: 1; align-items: center;">
-                        <input type="text" name="search" class="search-input"
-                            placeholder="Cari buku berdasarkan judul atau pengarang..."
-                            value="<?php echo htmlspecialchars($search); ?>">
-                        <select name="sort" class="sort-select" onchange="this.form.submit()">
-                            <option value="newest" <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Terbaru</option>
-                            <option value="oldest" <?php echo $sort === 'oldest' ? 'selected' : ''; ?>>Terlama</option>
-                            <option value="popular" <?php echo $sort === 'popular' ? 'selected' : ''; ?>>Populer</option>
-                        </select>
-                        <button type="submit" class="btn-search">Cari</button>
-                    </form>
-                </div>
+                <!-- Modern Search Bar with Category Dropdown -->
+                <form method="get" class="modern-search-bar-form" onsubmit="return false;">
+                    <!-- Search Bar (Dominant) -->
+                    <div class="search-bar-wrapper">
+                        <div class="search-bar-container">
+                            <iconify-icon icon="mdi:magnify" class="search-icon"></iconify-icon>
+                            <input type="text" name="search" class="modern-search-input"
+                                placeholder="Cari buku…"
+                                value="">
+                        </div>
+                    </div>
+
+                    <!-- Category Dropdown - Select Element -->
+                    <select id="categorySelect" class="category-dropdown-select">
+                        <option value="">Semua Kategori</option>
+                    </select>
+
+                    <input type="hidden" name="category" id="categoryInput" value="">
+                </form>
 
                 <!-- Books Grid -->
                 <div class="books-grid">
@@ -352,6 +490,118 @@ $pageTitle = 'Dashboard Siswa';
         let currentBookData = null;
         let favorites = new Set();
 
+        // ====== CATEGORY FILTER FUNCTIONALITY ======
+        let allBooks = <?php echo json_encode($books); ?>;
+        let filteredBooks = [...allBooks];
+        let currentCategoryFilter = '';
+
+        // Get unique categories from books
+        function getUniqueCategoriesFromBooks() {
+            const categories = new Set();
+            allBooks.forEach(book => {
+                if (book.category) {
+                    categories.add(book.category);
+                }
+            });
+            return Array.from(categories).sort();
+        }
+
+        // Initialize category filter dropdown
+        function initCategoryFilter() {
+            const categorySelect = document.getElementById('categorySelect');
+            if (!categorySelect) return;
+
+            const categories = getUniqueCategoriesFromBooks();
+            const currentValue = categorySelect.value;
+
+            // Clear existing options except the first one
+            while (categorySelect.children.length > 1) {
+                categorySelect.removeChild(categorySelect.lastChild);
+            }
+
+            // Add categories
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                categorySelect.appendChild(option);
+            });
+
+            // Restore previous value if it exists
+            if (currentValue && categories.includes(currentValue)) {
+                categorySelect.value = currentValue;
+                currentCategoryFilter = currentValue;
+            }
+        }
+
+        // Handle category filter change
+        function onCategoryChange(event) {
+            currentCategoryFilter = event.target.value;
+            filterAndDisplayBooks();
+        }
+
+        // Filter books by search and category
+        function filterAndDisplayBooks() {
+            const searchInput = document.querySelector('input[name="search"]');
+            const searchTerm = (searchInput?.value || '').toLowerCase();
+
+            filteredBooks = allBooks.filter(book => {
+                const matchSearch = !searchTerm || 
+                    (book.title || '').toLowerCase().includes(searchTerm) || 
+                    (book.author || '').toLowerCase().includes(searchTerm);
+                const matchCategory = !currentCategoryFilter || book.category === currentCategoryFilter;
+                return matchSearch && matchCategory;
+            });
+
+            updateBooksDisplay();
+        }
+
+        // Update books grid display
+        function updateBooksDisplay() {
+            const booksGrid = document.querySelector('.books-grid');
+            if (!booksGrid) return;
+
+            if (filteredBooks.length === 0) {
+                booksGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 60px 24px;">
+                        <iconify-icon icon="mdi:book-search-outline" style="font-size: 48px; opacity: 0.3; margin-bottom: 12px; display: block;"></iconify-icon>
+                        <h3 style="margin: 0 0 8px 0; color: var(--text);">Tidak ada buku</h3>
+                        <p style="margin: 0; color: var(--text-muted);">Coba ubah filter atau pencarian Anda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            booksGrid.innerHTML = filteredBooks.map(book => `
+                <div class="book-card" style="animation: fadeInScale 0.3s ease-out;">
+                    <div class="book-card-cover" style="position: relative;">
+                        ${book.cover_image ? 
+                            `<img src="../img/covers/${book.cover_image}" alt="${book.title}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                            `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white;"><iconify-icon icon="mdi:book-open-variant" width="48" height="48"></iconify-icon></div>`
+                        }
+                        <button class="btn-love ${favorites.has(book.id) ? 'loved' : ''}" onclick="toggleFavorite(event, ${book.id}, '${(book.title || '').replace(/'/g, "\\'")}')">
+                            <iconify-icon icon="mdi:heart"></iconify-icon>
+                        </button>
+                    </div>
+                    <div class="book-card-body">
+                        <h3 class="book-card-title">${book.title}</h3>
+                        <p class="book-card-author">${book.author || '-'}</p>
+                        <p class="book-card-category">${book.category || 'Umum'}</p>
+                        <div class="book-card-actions">
+                            <button class="btn-borrow" onclick="borrowBook(${book.id}, '${(book.title || '').replace(/'/g, "\\'")}')">
+                                <iconify-icon icon="mdi:cart-plus"></iconify-icon>
+                                Pinjam
+                            </button>
+                            <button class="btn-detail" onclick="openBookModal({id: ${book.id}, title: '${(book.title || '').replace(/'/g, "\\'")}', author: '${(book.author || '').replace(/'/g, "\\'")}', category: '${(book.category || '').replace(/'/g, "\\'")}', isbn: '${(book.isbn || '').replace(/'/g, "\\'")}', copies: ${book.copies || 0}, cover_image: '${book.cover_image || ''}'})">
+                                <iconify-icon icon="mdi:information"></iconify-icon>
+                                Detail
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         // Load favorites on page load
         async function loadFavorites() {
             try {
@@ -416,6 +666,19 @@ $pageTitle = 'Dashboard Siswa';
         // Load favorites when page loads
         document.addEventListener('DOMContentLoaded', () => {
             loadFavorites();
+            initCategoryFilter();
+
+            // Add search event listener for real-time filtering
+            const searchInput = document.querySelector('input[name="search"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', filterAndDisplayBooks);
+            }
+
+            // Add category change listener
+            const categorySelect = document.getElementById('categorySelect');
+            if (categorySelect) {
+                categorySelect.addEventListener('change', onCategoryChange);
+            }
         });
 
         // Modal functions
@@ -534,6 +797,368 @@ $pageTitle = 'Dashboard Siswa';
                     alert('Terjadi kesalahan');
                 });
         }
+    </script>
+    <script>
+        // ----- backend-provided data for stats lists (full book objects) -----
+        const BOOKS_AVAILABLE_SERVER = <?php echo json_encode(array_map(function($b){ return ['title' => $b['title'] ?? '', 'author' => $b['author'] ?? '-', 'category' => $b['category'] ?? '-', 'isbn' => $b['isbn'] ?? '-', 'copies' => $b['copies'] ?? 0]; }, $books_available ?? []), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?> || [];
+        const BOOKS_AVAILABLE_FALLBACK = <?php echo json_encode(array_map(function($b){ return ['title' => $b['title'] ?? '', 'author' => $b['author'] ?? '-', 'category' => $b['category'] ?? '-', 'isbn' => $b['isbn'] ?? '-', 'copies' => $b['copies'] ?? 0]; }, $books ?? []), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?> || [];
+        const BOOKS_AVAILABLE = (Array.isArray(BOOKS_AVAILABLE_SERVER) && BOOKS_AVAILABLE_SERVER.length > 0) ? BOOKS_AVAILABLE_SERVER : BOOKS_AVAILABLE_FALLBACK;
+        const TOP_VIEWED_BOOKS = <?php echo json_encode(array_map(function($b){ return ['title' => $b['title'] ?? '', 'author' => $b['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0]; }, $top_viewed_books ?? []), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?> || [];
+        // use $my_borrows (already fetched) and filter returned_at IS NULL
+        const STUDENT_CURRENT_BORROWS = <?php echo json_encode(array_values(array_map(function($r){ return ['title' => $r['title'] ?? '', 'author' => $r['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0]; }, array_filter($my_borrows, function($r){ return is_null($r['returned_at']); }))), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?> || [];
+
+        function createListOverlay(title, itemsHtml) {
+            const existing = document.getElementById('statsListOverlay');
+            if (existing) existing.remove();
+
+            const overlay = document.createElement('div');
+            overlay.id = 'statsListOverlay';
+            overlay.className = 'modal-overlay active';
+            overlay.style.position = 'fixed';
+            overlay.style.top = '0';
+            overlay.style.left = '0';
+            overlay.style.right = '0';
+            overlay.style.bottom = '0';
+            overlay.style.background = 'rgba(0, 0, 0, 0.6)';
+            overlay.style.display = 'flex';
+            overlay.style.alignItems = 'center';
+            overlay.style.justifyContent = 'center';
+            overlay.style.zIndex = '2200';
+            overlay.style.opacity = '1';
+            overlay.style.transition = 'opacity 0.3s ease';
+            overlay.style.backdropFilter = 'blur(2px)';
+
+            const container = document.createElement('div');
+            container.className = 'modal-container';
+            container.style.background = 'var(--card, #fff)';
+            container.style.borderRadius = '14px';
+            container.style.maxWidth = '900px';
+            container.style.width = '90%';
+            container.style.maxHeight = '75vh';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column';
+            container.style.boxShadow = '0 20px 60px rgba(0, 0, 0, 0.2)';
+            container.style.transform = 'scale(0.95)';
+            container.style.transition = 'transform 0.3s ease';
+            container.style.border = '1px solid var(--border, #e0e0e0)';
+            container.style.animation = 'scaleIn 0.3s ease-out';
+
+            // Header
+            const header = document.createElement('div');
+            header.className = 'modal-header';
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.alignItems = 'center';
+            header.style.padding = '24px';
+            header.style.borderBottom = '1px solid var(--border, #e0e0e0)';
+            header.style.flexShrink = '0';
+            header.style.background = 'linear-gradient(135deg, var(--muted, #f5f5f5) 0%, transparent 100%)';
+
+            const h = document.createElement('h2');
+            h.textContent = title;
+            h.style.margin = '0';
+            h.style.fontSize = '18px';
+            h.style.fontWeight = '700';
+            h.style.color = 'var(--text, #333)';
+            h.style.letterSpacing = '0.5px';
+            header.appendChild(h);
+
+            const closeBtn = document.createElement('button');
+            closeBtn.className = 'modal-close';
+            closeBtn.textContent = '×';
+            closeBtn.style.background = 'rgba(58, 127, 242, 0.1)';
+            closeBtn.style.border = 'none';
+            closeBtn.style.fontSize = '28px';
+            closeBtn.style.cursor = 'pointer';
+            closeBtn.style.color = 'var(--primary, #3a7ff2)';
+            closeBtn.style.padding = '0';
+            closeBtn.style.width = '36px';
+            closeBtn.style.height = '36px';
+            closeBtn.style.display = 'flex';
+            closeBtn.style.alignItems = 'center';
+            closeBtn.style.justifyContent = 'center';
+            closeBtn.style.borderRadius = '8px';
+            closeBtn.style.transition = 'all 0.2s ease';
+            closeBtn.onmouseover = () => {
+                closeBtn.style.background = 'rgba(58, 127, 242, 0.2)';
+                closeBtn.style.transform = 'rotate(90deg)';
+            };
+            closeBtn.onmouseout = () => {
+                closeBtn.style.background = 'rgba(58, 127, 242, 0.1)';
+                closeBtn.style.transform = 'rotate(0deg)';
+            };
+            closeBtn.onclick = () => {
+                overlay.style.opacity = '0';
+                overlay.style.pointerEvents = 'none';
+                setTimeout(() => overlay.remove(), 300);
+            };
+            header.appendChild(closeBtn);
+            container.appendChild(header);
+
+            // Body
+            const body = document.createElement('div');
+            body.className = 'modal-body';
+            body.style.flex = '1';
+            body.style.overflowY = 'auto';
+            body.style.padding = '24px';
+            body.style.fontSize = '14px';
+            body.style.color = 'var(--text, #333)';
+            body.innerHTML = itemsHtml;
+            container.appendChild(body);
+
+            overlay.appendChild(container);
+            document.body.appendChild(overlay);
+            
+            // Trigger animation
+            setTimeout(() => {
+                container.style.transform = 'scale(1)';
+            }, 10);
+        }
+
+        // Render detailed book list with complete information - styled as table
+        function renderBooksListHtml(list) {
+            if (!list || list.length === 0) return '<div style="text-align: center; color: var(--text-muted); padding: 40px 16px;"><iconify-icon icon="mdi:book-search-outline" width="48" height="48" style="opacity: 0.3; margin-bottom: 12px; display: block;"></iconify-icon><p style="margin: 0;">Tidak ada data</p></div>';
+            
+            let html = `
+                <div style="overflow-x: auto; border-radius: 8px; border: 1px solid var(--border);">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, var(--muted) 0%, transparent 100%); border-bottom: 2px solid var(--border);">
+                                <th style="padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text); letter-spacing: 0.5px; white-space: nowrap;">Judul Buku</th>
+                                <th style="padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text); letter-spacing: 0.5px; white-space: nowrap;">Penulis</th>
+                                <th style="padding: 14px 16px; text-align: left; font-weight: 700; color: var(--text); letter-spacing: 0.5px; white-space: nowrap;">Kategori</th>
+                                <th style="padding: 14px 16px; text-align: center; font-weight: 700; color: var(--text); letter-spacing: 0.5px; white-space: nowrap;">Stok</th>
+                                <th style="padding: 14px 16px; text-align: center; font-weight: 700; color: var(--text); letter-spacing: 0.5px; white-space: nowrap;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            list.forEach((item, idx) => {
+                const title = (item.title || '-').toString();
+                const author = (item.author || '-').toString();
+                const category = (item.category || '-').toString();
+                const copies = item.copies || 0;
+                const statusClass = copies > 0 ? 'tersedia' : 'habis';
+                const statusText = copies > 0 ? 'Tersedia' : 'HABIS';
+                const bgColor = idx % 2 === 0 ? 'transparent' : 'rgba(58, 127, 242, 0.02)';
+                
+                html += `
+                    <tr style="background: ${bgColor}; border-bottom: 1px solid var(--border); transition: all 0.2s ease;" 
+                        onmouseover="this.style.backgroundColor='rgba(58, 127, 242, 0.08)'; this.style.boxShadow='inset 4px 0 0 var(--primary)';"
+                        onmouseout="this.style.backgroundColor='${bgColor}'; this.style.boxShadow='none';">
+                        <td style="padding: 12px 16px; color: var(--text); font-weight: 500;">${escapeHtml(title)}</td>
+                        <td style="padding: 12px 16px; color: var(--text-muted);">${escapeHtml(author)}</td>
+                        <td style="padding: 12px 16px; color: var(--text-muted);">${escapeHtml(category)}</td>
+                        <td style="padding: 12px 16px; text-align: center; color: var(--text); font-weight: 600;">${copies}</td>
+                        <td style="padding: 12px 16px; text-align: center;">
+                            <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; background: ${copies > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)'}; color: ${copies > 0 ? '#059669' : '#dc2626'};">
+                                ${statusText}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            return html;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .toString()
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // ===== CATEGORY DROPDOWN - COMPLETE IMPLEMENTATION =====
+        
+        /**
+         * Toggle dropdown visibility
+         * Buka/tutup menu dropdown kategori
+         */
+        function toggleCategoryDropdown(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            const btn = event.currentTarget;
+            const dropdown = document.getElementById('categoryDropdown');
+            const isOpen = dropdown.classList.contains('active');
+            
+            console.log('🔧 Dropdown toggle clicked - Current state:', isOpen);
+            console.log('🔧 Dropdown element:', dropdown);
+            console.log('🔧 Button element:', btn);
+            
+            if (isOpen) {
+                // Tutup dropdown
+                console.log('✅ Closing dropdown');
+                dropdown.classList.remove('active');
+                btn.classList.remove('open');
+            } else {
+                // Buka dropdown
+                console.log('✅ Opening dropdown');
+                dropdown.classList.add('active');
+                btn.classList.add('open');
+            }
+            
+            console.log('🔧 After toggle - dropdown classes:', dropdown.className);
+        }
+
+        /**
+         * Handle kategori selection
+         * 1. Update hidden input value
+         * 2. Update button label text
+         * 3. Set active class pada item yang dipilih
+         * 4. Tutup dropdown
+         * 5. Submit form untuk filter
+         */
+        function selectCategoryOption(event, categoryValue) {
+            event.preventDefault();
+            event.stopPropagation();
+            
+            // ✅ Step 1: Update hidden input
+            const categoryInput = document.getElementById('categoryInput');
+            categoryInput.value = categoryValue;
+            
+            // ✅ Step 2: Update button label
+            const label = document.getElementById('categoryLabel');
+            label.textContent = categoryValue === '' ? 'Kategori' : categoryValue;
+            
+            // ✅ Step 3: Update active class on dropdown items
+            const items = document.querySelectorAll('.dropdown-item');
+            items.forEach(item => {
+                item.classList.remove('active');
+                const itemText = item.textContent.trim();
+                const expectedText = categoryValue === '' ? 'Semua Kategori' : categoryValue;
+                if (itemText === expectedText) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // ✅ Step 4: Tutup dropdown
+            closeAllDropdowns();
+            
+            // ✅ Step 5: Submit form (akan trigger filter dengan GET parameters: search, category, sort)
+            const form = document.querySelector('.modern-search-bar-form');
+            if (form) {
+                form.submit();
+            }
+        }
+
+        /**
+         * Close all open dropdowns
+         */
+        function closeAllDropdowns() {
+            const dropdown = document.getElementById('categoryDropdown');
+            const btn = document.querySelector('.category-dropdown-btn');
+            
+            if (dropdown) {
+                dropdown.classList.remove('active');
+            }
+            if (btn) {
+                btn.classList.remove('open');
+            }
+        }
+
+        /**
+         * Close dropdown ketika user click di luar area dropdown
+         * Gunakan DOMContentLoaded untuk pastikan element sudah di-load
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            document.addEventListener('click', function(event) {
+                const wrapper = document.querySelector('.category-dropdown-wrapper');
+                
+                // Jika click di DALAM wrapper (button, dropdown menu), jangan close
+                if (wrapper && wrapper.contains(event.target)) {
+                    return;
+                }
+                
+                // Jika click di LUAR wrapper, tutup dropdown
+                closeAllDropdowns();
+            });
+        });
+
+        // Category selection function (dari kategori pill)
+        function selectCategory(e, category) {
+            e.preventDefault();
+            
+            // Update pills
+            document.querySelectorAll('.category-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            e.target.closest('.category-pill').classList.add('active');
+            
+            // Update dropdown dan kategori input
+            document.getElementById('categoryInput').value = category;
+            document.getElementById('categoryLabel').textContent = category;
+            
+            // Update dropdown items
+            const items = document.querySelectorAll('.dropdown-item');
+            items.forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent.trim() === category) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Trigger filter
+            const form = document.querySelector('.modern-search-bar-form');
+            form.submit();
+        }
+
+        function toggleAllCategories() {
+            // Placeholder for showing all categories modal/dropdown
+            alert('Fitur melihat semua kategori akan ditampilkan di sini');
+        }
+
+        (function attachStatsHandlers(){
+            const sections = Array.from(document.querySelectorAll('.sidebar-section'));
+            const statSection = sections.find(s => (s.textContent||'').trim().startsWith('Statistik')) || sections[0];
+            if (!statSection) return;
+
+            const container = statSection.querySelector('div[style*="flex-direction: column"]') || statSection.querySelector('div');
+            if (!container) return;
+
+            const statBoxes = Array.from(container.children).filter(n => n.nodeType === 1);
+            if (statBoxes.length < 1) return;
+
+            // Hover -> subtle background only. Click -> show overlay with data.
+            statBoxes.forEach((box, idx) => {
+                box.classList.add('stat-box');
+                box.style.cursor = 'pointer';
+
+                box.addEventListener('mouseenter', () => {
+                    box.classList.add('stat-hover');
+                });
+
+                box.addEventListener('mouseleave', () => {
+                    box.classList.remove('stat-hover');
+                });
+
+                box.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    // debug: print arrays to console to verify data
+                    try {
+                        console.debug('BOOKS_AVAILABLE length:', Array.isArray(BOOKS_AVAILABLE) ? BOOKS_AVAILABLE.length : typeof BOOKS_AVAILABLE, BOOKS_AVAILABLE);
+                        console.debug('STUDENT_CURRENT_BORROWS length:', Array.isArray(STUDENT_CURRENT_BORROWS) ? STUDENT_CURRENT_BORROWS.length : typeof STUDENT_CURRENT_BORROWS, STUDENT_CURRENT_BORROWS);
+                        console.debug('TOP_VIEWED_BOOKS length:', Array.isArray(TOP_VIEWED_BOOKS) ? TOP_VIEWED_BOOKS.length : typeof TOP_VIEWED_BOOKS, TOP_VIEWED_BOOKS);
+                    } catch (err) {
+                        console.error('Debug log error:', err);
+                    }
+                    if (idx === 0) createListOverlay('Semua Buku', renderBooksListHtml(BOOKS_AVAILABLE));
+                    else if (idx === 1) createListOverlay('Buku yang Sedang Anda Pinjam', renderBooksListHtml(STUDENT_CURRENT_BORROWS));
+                    else createListOverlay('Daftar', renderBooksListHtml(TOP_VIEWED_BOOKS));
+                });
+            });
+        })();
     </script>
     <script src="../assets/js/sidebar.js"></script>
 </body>

@@ -141,9 +141,17 @@ try {
     }
 
     http_response_code(500);
+    // Log error untuk debugging
+    error_log('Borrow Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    error_log('Stack trace: ' . $e->getTraceAsString());
+    
     echo json_encode([
         'success' => false,
-        'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+        'message' => 'Terjadi kesalahan: ' . $e->getMessage(),
+        'debug' => [
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ]
     ]);
 }
 ?>

@@ -417,6 +417,242 @@ body {
     color: var(--danger);
 }
 
+/* ===== INTERACTIVE EXPANDABLE STAT CARDS ===== */
+.stats-grid-interactive {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+    animation: slideInUp 0.5s ease-out;
+}
+
+.stat-card-interactive {
+    background: var(--card);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--primary);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.stat-card-interactive:hover {
+    box-shadow: 0 4px 12px rgba(58, 127, 242, 0.15);
+    transform: translateY(-2px);
+}
+
+.stat-card-interactive:nth-child(2) {
+    border-left-color: #f59e0b;
+}
+
+.stat-card-interactive:nth-child(3) {
+    border-left-color: #10b981;
+}
+
+.stat-card-interactive:nth-child(4) {
+    border-left-color: #ef4444;
+}
+
+.stat-card-interactive.expanded {
+    box-shadow: 0 8px 24px rgba(58, 127, 242, 0.15);
+}
+
+.stat-card-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    background: transparent;
+    border-bottom: none;
+    min-height: 90px;
+}
+
+.stat-card-header > div:first-child {
+    flex: 1;
+}
+
+.stat-card-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.stat-card-value {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-card-interactive[onclick*="'borrowed'"] .stat-card-value {
+    color: var(--warning);
+}
+
+.stat-card-interactive[onclick*="'returned'"] .stat-card-value {
+    color: var(--success);
+}
+
+.stat-card-interactive[onclick*="'overdue'"] .stat-card-value {
+    color: var(--danger);
+}
+
+.stat-card-chevron {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: rgba(58, 127, 242, 0.08);
+    color: var(--primary);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.stat-card-interactive:hover .stat-card-chevron {
+    background: rgba(58, 127, 242, 0.15);
+}
+
+.stat-card-interactive.expanded .stat-card-chevron {
+    background: rgba(58, 127, 242, 0.2);
+}
+
+.stat-card-detail {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.320, 1);
+}
+
+.stat-card-interactive.expanded .stat-card-detail {
+    opacity: 1;
+}
+
+.stat-detail-content {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.stat-detail-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.stat-detail-item {
+    display: flex;
+    gap: 16px;
+    padding: 14px;
+    background: var(--muted);
+    border-radius: 10px;
+    transition: all 0.2s ease;
+}
+
+.stat-detail-item:hover {
+    background: rgba(58, 127, 242, 0.08);
+    transform: translateX(4px);
+}
+
+.detail-item-cover {
+    flex-shrink: 0;
+    width: 60px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+}
+
+.detail-item-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--accent) 0%, #062d4a 100%);
+    color: white;
+}
+
+.detail-item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.detail-item-info h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.detail-author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.detail-author iconify-icon {
+    width: 14px;
+    height: 14px;
+}
+
+.detail-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.detail-dates span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.detail-item-status {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.stat-detail-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.stat-detail-empty iconify-icon {
+    opacity: 0.3;
+    color: var(--text-muted);
+}
+
+.stat-detail-empty p {
+    margin: 0;
+    font-size: 13px;
+}
+
 /* History Card */
 .history-card {
     background: var(--card);
@@ -715,6 +951,11 @@ body {
         gap: 12px;
     }
 
+    .stats-grid-interactive {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
     .stat-card {
         padding: 16px;
     }
@@ -933,6 +1174,10 @@ body {
         grid-template-columns: 1fr;
     }
 
+    .stats-grid-interactive {
+        grid-template-columns: 1fr;
+    }
+
     .table {
         font-size: 11px;
     }
@@ -1041,4 +1286,215 @@ iconify-icon {
 /* Override untuk geser NPSN lebih kebawah */
 .school-info-item:last-child {
     margin-top: 5px !important;
+}
+
+/* ===== BORROWING MODAL STYLES ===== */
+
+/* Modal Overlay */
+.borrowing-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.borrowing-modal-overlay.active {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Modal Content */
+.borrowing-modal-content {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.95);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.borrowing-modal-overlay.active .borrowing-modal-content {
+    transform: scale(1);
+}
+
+/* Modal Header */
+.borrowing-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--card);
+}
+
+.borrowing-modal-header h2 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.borrowing-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.borrowing-modal-close:hover {
+    background: var(--muted);
+    color: var(--text);
+}
+
+/* Modal Body */
+.borrowing-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+    background: var(--card);
+}
+
+/* Modal Table */
+.borrowing-modal-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.borrowing-modal-table thead {
+    background: var(--muted);
+    position: sticky;
+    top: 0;
+}
+
+.borrowing-modal-table thead th {
+    padding: 14px 16px;
+    text-align: left;
+    font-weight: 700;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.borrowing-modal-table tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.2s ease;
+}
+
+.borrowing-modal-table tbody tr:hover {
+    background: var(--muted);
+}
+
+.borrowing-modal-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.borrowing-modal-table tbody td {
+    padding: 14px 16px;
+    color: var(--text);
+    vertical-align: middle;
+}
+
+.borrowing-modal-table .title-cell {
+    font-weight: 500;
+    max-width: 350px;
+    word-break: break-word;
+}
+
+/* Empty State */
+.borrowing-modal-overlay .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.borrowing-modal-overlay .empty-state p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Badges dalam modal */
+.borrowing-modal-table .badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.borrowing-modal-table .badge-borrowed {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
+}
+
+.borrowing-modal-table .badge-returned {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+}
+
+.borrowing-modal-table .badge-overdue {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .borrowing-modal-content {
+        max-height: 90vh;
+        border-radius: 12px 12px 0 0;
+        max-width: 95vw;
+    }
+    
+    .borrowing-modal-header {
+        padding: 16px;
+    }
+    
+    .borrowing-modal-header h2 {
+        font-size: 14px;
+    }
+    
+    .borrowing-modal-body {
+        padding: 0;
+    }
+    
+    .borrowing-modal-table {
+        font-size: 12px;
+    }
+    
+    .borrowing-modal-table thead th,
+    .borrowing-modal-table tbody td {
+        padding: 12px 14px;
+    }
 }

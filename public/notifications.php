@@ -27,8 +27,26 @@ try {
     $validSorts = ['latest', 'oldest'];
     $sort = in_array($sort, $validSorts) ? $sort : 'latest';
 
+    // Get type filter from GET
+    $typeFilter = $_GET['type'] ?? null;
+    $validTypes = ['delay', 'warning', 'return', 'info', 'newbooks'];
+
     // Get notifications
     $notifications = $service->getAllNotifications($studentId);
+
+    // Filter by type if specified
+    if ($typeFilter && in_array($typeFilter, $validTypes)) {
+        $typeMap = [
+            'delay' => 'keterlambatan',
+            'warning' => 'peringatan',
+            'return' => 'pengembalian',
+            'info' => 'informasi',
+            'newbooks' => 'buku_baru'
+        ];
+        $filterType = $typeMap[$typeFilter];
+        $notifications = array_filter($notifications, fn($n) => $n['jenis_notifikasi'] === $filterType);
+        $notifications = array_values($notifications); // Re-index array
+    }
 
     // Sort
     if ($sort === 'oldest') {
@@ -127,49 +145,61 @@ function getLabel($type)
         <!-- Stats Grid -->
         <?php if (!empty($stats)): ?>
             <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-card-label">
-                        <iconify-icon icon="mdi:bell" width="16" height="16"></iconify-icon>
-                        Total Notifikasi
+                <div class="stat-card-link" onclick="showNotificationModal('Semua Notifikasi', 'all')">
+                    <div class="stat-card">
+                        <div class="stat-card-label">
+                            <iconify-icon icon="mdi:bell" width="16" height="16"></iconify-icon>
+                            Total Notifikasi
+                        </div>
+                        <div class="stat-card-value"><?php echo (int) ($stats['total'] ?? 0); ?></div>
                     </div>
-                    <div class="stat-card-value"><?php echo (int) ($stats['total'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card overdue">
-                    <div class="stat-card-label">
-                        <iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon>
-                        Keterlambatan
+                <div class="stat-card-link" onclick="showNotificationModal('Keterlambatan', 'keterlambatan')">
+                    <div class="stat-card overdue">
+                        <div class="stat-card-label">
+                            <iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon>
+                            Keterlambatan
+                        </div>
+                        <div class="stat-card-value"><?php echo (int) ($stats['overdue'] ?? 0); ?></div>
                     </div>
-                    <div class="stat-card-value"><?php echo (int) ($stats['overdue'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card warning">
-                    <div class="stat-card-label">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0;">
-                            <path d="M13 14h-2V9h2m0 9h-2v-2h2M1 21h22L12 2z" />
-                        </svg>
-                        Peringatan
+                <div class="stat-card-link" onclick="showNotificationModal('Peringatan', 'peringatan')">
+                    <div class="stat-card warning">
+                        <div class="stat-card-label">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink: 0;">
+                                <path d="M13 14h-2V9h2m0 9h-2v-2h2M1 21h22L12 2z" />
+                            </svg>
+                            Peringatan
+                        </div>
+                        <div class="stat-card-value"><?php echo (int) ($stats['warning'] ?? 0); ?></div>
                     </div>
-                    <div class="stat-card-value"><?php echo (int) ($stats['warning'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card return">
-                    <div class="stat-card-label">
-                        <iconify-icon icon="mdi:package-variant-closed" width="16" height="16"></iconify-icon>
-                        Pengembalian
+                <div class="stat-card-link" onclick="showNotificationModal('Pengembalian', 'borrow')">
+                    <div class="stat-card return">
+                        <div class="stat-card-label">
+                            <iconify-icon icon="mdi:package-variant-closed" width="16" height="16"></iconify-icon>
+                            Pengembalian
+                        </div>
+                        <div class="stat-card-value"><?php echo (int) ($stats['return'] ?? 0); ?></div>
                     </div>
-                    <div class="stat-card-value"><?php echo (int) ($stats['return'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card info">
-                    <div class="stat-card-label">
-                        <iconify-icon icon="mdi:information" width="16" height="16"></iconify-icon>
-                        Informasi
+                <div class="stat-card-link" onclick="showNotificationModal('Informasi', 'info')">
+                    <div class="stat-card info">
+                        <div class="stat-card-label">
+                            <iconify-icon icon="mdi:information" width="16" height="16"></iconify-icon>
+                            Informasi
+                        </div>
+                        <div class="stat-card-value"><?php echo (int) ($stats['info'] ?? 0); ?></div>
                     </div>
-                    <div class="stat-card-value"><?php echo (int) ($stats['info'] ?? 0); ?></div>
                 </div>
-                <div class="stat-card newbooks">
-                    <div class="stat-card-label">
-                        <iconify-icon icon="mdi:book-open-page-variant" width="16" height="16"></iconify-icon>
-                        Buku Baru
+                <div class="stat-card-link" onclick="showNotificationModal('Buku Baru', 'new_book')">
+                    <div class="stat-card newbooks">
+                        <div class="stat-card-label">
+                            <iconify-icon icon="mdi:book-open-page-variant" width="16" height="16"></iconify-icon>
+                            Buku Baru
+                        </div>
+                        <div class="stat-card-value"><?php echo (int) ($stats['newbooks'] ?? 0); ?></div>
                     </div>
-                    <div class="stat-card-value"><?php echo (int) ($stats['newbooks'] ?? 0); ?></div>
                 </div>
             </div>
         <?php endif; ?>
@@ -237,16 +267,144 @@ function getLabel($type)
     </div>
 
     <script>
-        // Direct handler untuk toggle sidebar
-        function toggleNavSidebar(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const sidebar = document.getElementById('navSidebar') || document.querySelector('.nav-sidebar');
-            if (sidebar) {
-                sidebar.classList.toggle('active');
-                console.log('Sidebar toggled - active:', sidebar.classList.contains('active'));
+        // Seed modal data with current PHP-provided notifications as fallback
+        let allNotificationsForModal = <?php echo json_encode($notifications); ?> || [];
+
+        // Try to load ALL notifications (unfiltered) from API to ensure modal can show every type
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const resp = await fetch('./api/notifications-all.php');
+                const json = await resp.json();
+                if (json && json.success && Array.isArray(json.data)) {
+                    allNotificationsForModal = json.data;
+                    console.log('✓ Loaded ' + allNotificationsForModal.length + ' notifications from API');
+                    const types = [...new Set(allNotificationsForModal.map(n => n.jenis_notifikasi))];
+                    console.log('Available types in database:', types);
+                    console.log('Full notification data:', allNotificationsForModal);
+                } else {
+                    console.warn('API response invalid:', json);
+                }
+            } catch (err) {
+                console.error('Failed to load full notifications via API:', err);
+            }
+        });
+
+        /**
+         * Show notifications modal with table view
+         */
+        function showNotificationModal(title, typeFilter) {
+            let data = allNotificationsForModal || [];
+
+            // Filter by type if specified (case-insensitive, trimmed)
+            if (typeFilter && typeFilter !== 'all') {
+                const f = typeFilter.toLowerCase().trim();
+                data = data.filter(n => (n.jenis_notifikasi || '').toLowerCase().trim() === f);
+            }
+
+            // Create modal overlay
+            const modal = document.createElement('div');
+            modal.className = 'notification-modal-overlay';
+            modal.onclick = (e) => {
+                if (e.target === modal) closeNotificationModal(modal);
+            };
+
+            // Modal content
+            const modalContent = document.createElement('div');
+            modalContent.className = 'notification-modal-content';
+            modalContent.innerHTML = `
+                <div class="notification-modal-header">
+                    <h2>${title}</h2>
+                    <button onclick="closeNotificationModal()" class="notification-modal-close">
+                        <iconify-icon icon="mdi:close" width="20" height="20"></iconify-icon>
+                    </button>
+                </div>
+                <div class="notification-modal-body">
+                    ${data && data.length > 0 ? renderNotificationTableHtml(data) : '<div class="empty-state" style="text-align: center; padding: 40px 20px;">\n<p>Data tidak ditemukan</p>\n</div>'}
+                </div>
+            `;
+
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Trigger animation
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+
+        /**
+         * Close notification modal
+         */
+        function closeNotificationModal(modalElement) {
+            const modal = modalElement || document.querySelector('.notification-modal-overlay.active');
+            if (modal) {
+                modal.classList.remove('active');
+                setTimeout(() => modal.remove(), 300);
             }
         }
+
+        /**
+         * Render notifications as HTML table
+         */
+        function renderNotificationTableHtml(data) {
+            if (!data || data.length === 0) {
+                return '<div class="empty-state"><p>Data tidak ditemukan</p></div>';
+            }
+
+            let html = '<table class="notification-modal-table"><thead><tr>';
+            html += '<th>Judul</th>';
+            html += '<th>Pesan</th>';
+            html += '<th>Tipe</th>';
+            html += '<th>Tanggal</th>';
+            html += '</tr></thead><tbody>';
+
+            data.forEach(item => {
+                let typeBadge = '';
+                const normalized = (item.jenis_notifikasi || '').toLowerCase().trim();
+                
+                switch(normalized) {
+                    case 'keterlambatan':
+                        typeBadge = '<span class="notification-badge badge-delay">Keterlambatan</span>';
+                        break;
+                    case 'peringatan':
+                        typeBadge = '<span class="notification-badge badge-warning">Peringatan</span>';
+                        break;
+                    case 'borrow':
+                        typeBadge = '<span class="notification-badge badge-return">Pengembalian</span>';
+                        break;
+                    case 'info':
+                        typeBadge = '<span class="notification-badge badge-info">Informasi</span>';
+                        break;
+                    case 'new_book':
+                        typeBadge = '<span class="notification-badge badge-newbooks">Buku Baru</span>';
+                        break;
+                    default:
+                        typeBadge = '<span class="notification-badge">' + (item.jenis_notifikasi || '-') + '</span>';
+                }
+
+                const tanggal = new Date(item.tanggal);
+                const formattedDate = tanggal.toLocaleDateString('id-ID', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit' 
+                });
+
+                html += `<tr>
+                    <td class="title-cell">${item.judul || '-'}</td>
+                    <td class="message-cell">${item.pesan || '-'}</td>
+                    <td>${typeBadge}</td>
+                    <td>${formattedDate}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeNotificationModal();
+            }
+        });
     </script>
     <script src="../assets/js/notifications.js"></script>
     <script src="../assets/js/sidebar.js"></script>

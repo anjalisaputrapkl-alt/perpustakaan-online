@@ -417,12 +417,6 @@ $pageTitle = 'Koleksi Favorit';
         }
 
         /* Favorites Grid */
-        .favorites-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 20px;
-        }
-
         .favorites-grid .book-card {
             background: var(--card);
             border-radius: 12px;
@@ -437,11 +431,31 @@ $pageTitle = 'Koleksi Favorit';
             border-left: none;
             margin-bottom: 0;
             gap: 0;
+            position: relative;
+        }
+
+        .favorites-grid .book-card::after {
+            content: '♡';
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 5;
+            pointer-events: none;
         }
 
         .favorites-grid .book-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(58, 127, 242, 0.15);
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 16px 32px rgba(58, 127, 242, 0.2);
             border-color: var(--primary);
         }
 
@@ -474,7 +488,7 @@ $pageTitle = 'Koleksi Favorit';
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
             font-size: 20px;
             padding: 0;
             z-index: 10;
@@ -483,12 +497,28 @@ $pageTitle = 'Koleksi Favorit';
 
         .favorites-grid .book-card-cover .btn-love:hover {
             background: white;
-            transform: scale(1.1);
+            transform: scale(1.15);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
 
         .favorites-grid .book-card-cover .btn-love.loved {
             color: var(--danger);
+            animation: heartBeat 0.3s ease;
+        }
+
+        @keyframes heartBeat {
+            0% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.3);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1.15);
+            }
         }
 
         .favorites-grid .book-card-cover .btn-love iconify-icon {
@@ -551,68 +581,59 @@ $pageTitle = 'Koleksi Favorit';
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
             background: transparent;
             padding: 0;
             border-radius: 0;
             margin-bottom: 8px;
         }
 
+        .favorites-grid .book-card-category::before {
+            content: '◆';
+            font-size: 8px;
+            display: inline-block;
+        }
+
         .favorites-grid .book-card-action {
             margin-top: auto;
-        }
-
-        .favorites-grid .btn-remove {
-            width: 100%;
-            padding: 10px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .favorites-grid .btn-remove:hover {
-            background: #dc2626;
         }
 
         .favorites-grid .book-card-actions {
             display: flex;
             gap: 8px;
             margin-top: auto;
+            justify-content: space-between;
         }
 
         .favorites-grid .btn-borrow,
         .favorites-grid .btn-detail {
             flex: 1;
-            padding: 10px;
+            padding: 10px 8px;
             border: none;
             border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
             cursor: pointer;
-            transition: 0.2s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 4px;
+            white-space: nowrap;
         }
 
         .favorites-grid .btn-borrow {
             background: var(--accent);
             color: white;
+            flex: 1.2;
         }
 
         .favorites-grid .btn-borrow:hover {
             background: #062d4a;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(58, 127, 242, 0.3);
         }
 
         .favorites-grid .btn-detail {
@@ -623,12 +644,232 @@ $pageTitle = 'Koleksi Favorit';
 
         .favorites-grid .btn-detail:hover {
             background: var(--accent-light);
+            transform: translateY(-2px);
         }
 
         .favorites-grid .btn-borrow iconify-icon,
         .favorites-grid .btn-detail iconify-icon {
             width: 14px;
             height: 14px;
+        }
+
+        /* Favorites Controls */
+        .favorites-controls {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 16px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            animation: slideDown 0.4s ease-out;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-group {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            color: var(--text-muted);
+            width: 18px;
+            height: 18px;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 12px 10px 40px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--text);
+            background: var(--muted);
+            transition: all 0.2s ease;
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(58, 127, 242, 0.1);
+        }
+
+        .btn-clear-search {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            z-index: 3;
+        }
+
+        .btn-clear-search:hover {
+            color: var(--text);
+            transform: scale(1.2);
+        }
+
+        .filter-sort-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select,
+        .sort-select {
+            padding: 10px 12px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--text);
+            background: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:hover,
+        .sort-select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(58, 127, 242, 0.15);
+            border-color: var(--primary-2);
+        }
+
+        .filter-select:focus,
+        .sort-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 0 0 3px rgba(58, 127, 242, 0.2);
+            font-weight: 500;
+        }
+
+        .btn-clear-filters {
+            padding: 10px 12px;
+            border: 1px solid var(--danger);
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-clear-filters:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .filter-stats {
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: var(--text-muted);
+            padding: 0 4px;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .filter-stats span {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        /* Empty state dengan filter aktif */
+        .empty-filtered-state {
+            text-align: center;
+            padding: 60px 24px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .empty-filtered-state-icon {
+            font-size: 48px;
+            color: var(--border);
+            margin-bottom: 12px;
+        }
+
+        .empty-filtered-state h3 {
+            font-size: 16px;
+            color: var(--text);
+            margin: 0 0 6px 0;
+        }
+
+        .empty-filtered-state p {
+            font-size: 13px;
+            margin: 0 0 16px 0;
+            color: var(--text-muted);
+        }
+
+        .empty-filtered-state .btn-reset {
+            padding: 8px 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .empty-filtered-state .btn-reset:hover {
+            background: #062d4a;
+            transform: translateY(-1px);
+        }
+
+        /* Grid responsive */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .book-card.hidden {
+            display: none;
+        }
+
+        .book-card.fade-in {
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         /* Modal */
@@ -875,6 +1116,27 @@ $pageTitle = 'Koleksi Favorit';
 
         /* Modal Responsive */
         @media (max-width: 768px) {
+            .favorites-controls {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .search-group {
+                width: 100%;
+                min-width: auto;
+            }
+
+            .filter-sort-group {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-select,
+            .sort-select {
+                flex: 1;
+                min-width: 0;
+            }
+
             .modal-body {
                 flex-direction: column;
             }
@@ -886,6 +1148,52 @@ $pageTitle = 'Koleksi Favorit';
             .modal-book-cover {
                 width: 100%;
                 aspect-ratio: 2 / 3;
+            }
+
+            .favorites-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                gap: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .favorites-controls {
+                padding: 12px;
+                gap: 8px;
+            }
+
+            .filter-sort-group {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .filter-select,
+            .sort-select,
+            .btn-clear-filters {
+                width: 100%;
+            }
+
+            .filter-stats {
+                font-size: 12px;
+            }
+
+            .favorites-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 12px;
+            }
+
+            .favorites-grid .book-card-body {
+                padding: 12px;
+            }
+
+            .favorites-grid .book-card-title {
+                font-size: 13px;
+            }
+
+            .favorites-grid .btn-borrow,
+            .favorites-grid .btn-detail {
+                font-size: 11px;
+                padding: 8px 6px;
             }
         }
 
@@ -1178,14 +1486,53 @@ $pageTitle = 'Koleksi Favorit';
 
         <!-- Favorites Grid Section -->
         <div>
+            <!-- Header dengan Stats -->
             <div style="margin-bottom: 24px;">
                 <h2
                     style="font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0 0 16px 0;">
                     <iconify-icon icon="mdi:heart" style="color: var(--success);"></iconify-icon>
                     Koleksi Favorit
-                    <span class="favorites-count"><?php echo count($favorites); ?> Buku</span>
+                    <span class="favorites-count" id="favoritesCountBadge"><?php echo count($favorites); ?> Buku</span>
                 </h2>
             </div>
+
+            <!-- Search, Filter, dan Sort Bar -->
+            <?php if (!empty($favorites)): ?>
+            <div class="favorites-controls">
+                <!-- Search Bar -->
+                <div class="control-group search-group">
+                    <iconify-icon icon="mdi:magnify" class="search-icon"></iconify-icon>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cari judul buku favorit...">
+                    <button class="btn-clear-search" id="clearSearchBtn" style="display: none;" onclick="clearSearch()">
+                        <iconify-icon icon="mdi:close" width="18" height="18"></iconify-icon>
+                    </button>
+                </div>
+
+                <!-- Filter dan Sort Controls -->
+                <div class="control-group filter-sort-group">
+                    <select id="categoryFilter" class="filter-select" onchange="applyFilters()">
+                        <option value="">Semua Kategori</option>
+                    </select>
+
+                    <select id="sortSelect" class="sort-select" onchange="applySorting()">
+                        <option value="original">Urutan Awal</option>
+                        <option value="a-z">A → Z</option>
+                        <option value="z-a">Z → A</option>
+                        <option value="newest">Terbaru</option>
+                    </select>
+
+                    <button class="btn-clear-filters" id="clearFiltersBtn" style="display: none;" onclick="clearAllFilters()">
+                        <iconify-icon icon="mdi:filter-off" width="18" height="18"></iconify-icon>
+                        Hapus Filter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Results -->
+            <div class="filter-stats">
+                <span id="resultsCount">Menampilkan <span id="activeCount"><?php echo count($favorites); ?></span> dari <span id="totalCount"><?php echo count($favorites); ?></span> buku</span>
+            </div>
+            <?php endif; ?>
 
             <?php if (empty($favorites)): ?>
                 <div class="empty-state"
@@ -1299,33 +1646,279 @@ $pageTitle = 'Koleksi Favorit';
     </div>
 
     <script>
-        // Handle remove favorite
-        function removeFavorite(favoriteId) {
-            if (!confirm('Yakin ingin menghapus buku ini dari favorit?')) {
-                return;
+        // ============================================
+        // DATA MANAGEMENT
+        // ============================================
+        
+        let allFavorites = <?php echo json_encode($favorites); ?>;
+        let filteredFavorites = [...allFavorites];
+        let currentFilters = {
+            search: '',
+            category: '',
+            sort: 'original'
+        };
+
+        // Extract unique categories
+        function getUniqueCategories() {
+            const categories = new Set();
+            allFavorites.forEach(fav => {
+                if (fav.buku_kategori) {
+                    categories.add(fav.buku_kategori);
+                }
+            });
+            return Array.from(categories).sort();
+        }
+
+        // Initialize category filter options
+        function initializeCategoryFilter() {
+            const select = document.getElementById('categoryFilter');
+            const categories = getUniqueCategories();
+            
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                select.appendChild(option);
+            });
+        }
+
+        // ============================================
+        // SEARCH FUNCTIONALITY
+        // ============================================
+
+        document.getElementById('searchInput')?.addEventListener('input', function(e) {
+            currentFilters.search = e.target.value.toLowerCase();
+            
+            // Show/hide clear button
+            const clearBtn = document.getElementById('clearSearchBtn');
+            if (clearBtn) {
+                clearBtn.style.display = currentFilters.search ? 'flex' : 'none';
+            }
+            
+            applyFilters();
+        });
+
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                currentFilters.search = '';
+                document.getElementById('clearSearchBtn').style.display = 'none';
+                applyFilters();
+            }
+        }
+
+        // ============================================
+        // FILTER FUNCTIONALITY
+        // ============================================
+
+        function applyFilters() {
+            // Start with all favorites
+            filteredFavorites = [...allFavorites];
+
+            // Apply search filter
+            if (currentFilters.search) {
+                filteredFavorites = filteredFavorites.filter(fav => {
+                    const title = (fav.judul || '').toLowerCase();
+                    const category = (fav.buku_kategori || '').toLowerCase();
+                    return title.includes(currentFilters.search) || 
+                           category.includes(currentFilters.search);
+                });
             }
 
-            const formData = new FormData();
-            formData.append('id_favorit', favoriteId);
+            // Apply category filter
+            if (currentFilters.category) {
+                filteredFavorites = filteredFavorites.filter(fav => 
+                    fav.buku_kategori === currentFilters.category
+                );
+            }
 
-            fetch('/perpustakaan-online/public/api/favorites.php?action=remove', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector(`[data-favorite-id="${favoriteId}"]`).remove();
-                        location.reload();
-                    } else {
-                        alert('Error: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Gagal menghapus dari favorit');
-                });
+            // Apply sorting
+            applySorting();
+
+            // Update UI
+            updateFavoritesDisplay();
+            updateFilterStats();
         }
+
+        // ============================================
+        // SORTING FUNCTIONALITY
+        // ============================================
+
+        document.getElementById('sortSelect')?.addEventListener('change', function(e) {
+            currentFilters.sort = e.target.value;
+            applySorting();
+            updateFavoritesDisplay();
+        });
+
+        function applySorting() {
+            const sortType = currentFilters.sort;
+            
+            if (sortType === 'a-z') {
+                filteredFavorites.sort((a, b) => 
+                    (a.judul || '').localeCompare(b.judul || '', 'id-ID')
+                );
+            } else if (sortType === 'z-a') {
+                filteredFavorites.sort((a, b) => 
+                    (b.judul || '').localeCompare(a.judul || '', 'id-ID')
+                );
+            } else if (sortType === 'newest') {
+                filteredFavorites.sort((a, b) => (b.id_buku || 0) - (a.id_buku || 0));
+            } else {
+                // 'original' - maintain original order
+                filteredFavorites = [...allFavorites];
+                
+                // Re-apply filters if needed
+                if (currentFilters.search || currentFilters.category) {
+                    filteredFavorites = filteredFavorites.filter(fav => {
+                        let match = true;
+                        
+                        if (currentFilters.search) {
+                            const title = (fav.judul || '').toLowerCase();
+                            const category = (fav.buku_kategori || '').toLowerCase();
+                            match = match && (title.includes(currentFilters.search) || 
+                                            category.includes(currentFilters.search));
+                        }
+                        
+                        if (currentFilters.category) {
+                            match = match && fav.buku_kategori === currentFilters.category;
+                        }
+                        
+                        return match;
+                    });
+                }
+            }
+        }
+
+        // ============================================
+        // CLEAR ALL FILTERS
+        // ============================================
+
+        function clearAllFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            document.getElementById('sortSelect').value = 'original';
+            document.getElementById('clearSearchBtn').style.display = 'none';
+            document.getElementById('clearFiltersBtn').style.display = 'none';
+            
+            currentFilters = {
+                search: '',
+                category: '',
+                sort: 'original'
+            };
+            
+            filteredFavorites = [...allFavorites];
+            updateFavoritesDisplay();
+            updateFilterStats();
+        }
+
+        // ============================================
+        // UI UPDATE
+        // ============================================
+
+        function updateFavoritesDisplay() {
+            const favoritesList = document.getElementById('favoritesList');
+            if (!favoritesList) return;
+
+            // Clear existing items
+            favoritesList.innerHTML = '';
+
+            if (filteredFavorites.length === 0) {
+                // Show empty state for filters
+                const emptyDiv = document.createElement('div');
+                emptyDiv.className = 'empty-filtered-state';
+                emptyDiv.innerHTML = `
+                    <div class="empty-filtered-state-icon">
+                        <iconify-icon icon="mdi:magnify-off"></iconify-icon>
+                    </div>
+                    <h3>Tidak ada hasil</h3>
+                    <p>Coba ubah filter atau pencarian Anda</p>
+                    <button class="btn-reset" onclick="clearAllFilters()">Reset Filter</button>
+                `;
+                favoritesList.appendChild(emptyDiv);
+                favoritesList.style.gridColumn = '1 / -1';
+            } else {
+                // Render books
+                filteredFavorites.forEach((fav, index) => {
+                    const card = createBookCard(fav);
+                    card.classList.add('fade-in');
+                    card.style.animationDelay = `${index * 50}ms`;
+                    favoritesList.appendChild(card);
+                });
+                favoritesList.style.gridColumn = 'auto';
+            }
+        }
+
+        function updateFilterStats() {
+            const activeCount = filteredFavorites.length;
+            const totalCount = allFavorites.length;
+
+            // Update counter badge
+            const countBadge = document.getElementById('favoritesCountBadge');
+            if (countBadge) {
+                countBadge.textContent = `${activeCount} Buku`;
+            }
+
+            // Update stats text
+            const activeCountSpan = document.getElementById('activeCount');
+            const totalCountSpan = document.getElementById('totalCount');
+            if (activeCountSpan) activeCountSpan.textContent = activeCount;
+            if (totalCountSpan) totalCountSpan.textContent = totalCount;
+
+            // Show/hide clear filters button
+            const hasActiveFilters = currentFilters.search || 
+                                    currentFilters.category || 
+                                    currentFilters.sort !== 'original';
+            const clearBtn = document.getElementById('clearFiltersBtn');
+            if (clearBtn) {
+                clearBtn.style.display = hasActiveFilters ? 'flex' : 'none';
+            }
+        }
+
+        // ============================================
+        // CREATE BOOK CARD ELEMENT
+        // ============================================
+
+        function createBookCard(fav) {
+            const card = document.createElement('div');
+            card.className = 'book-card';
+            card.setAttribute('data-favorite-id', fav.id_favorit);
+            card.setAttribute('data-book-id', fav.id_buku);
+
+            const coverImg = fav.cover ? 
+                `<img src="../img/covers/${fav.cover}" alt="${fav.judul}" style="width: 100%; height: 100%; object-fit: cover;">` :
+                `<div class="book-card-cover-placeholder"><iconify-icon icon="mdi:book-open-variant" width="48" height="48"></iconify-icon></div>`;
+
+            card.innerHTML = `
+                <div class="book-card-cover">
+                    <button class="btn-love loved" onclick="toggleFavorite(event, ${fav.id_buku}, '${fav.judul.replace(/'/g, "\\'")}')">
+                        <iconify-icon icon="mdi:heart"></iconify-icon>
+                    </button>
+                    ${coverImg}
+                </div>
+                <div class="book-card-body">
+                    <h3 class="book-card-title">${fav.judul}</h3>
+                    <p class="book-card-author">${fav.penulis || '-'}</p>
+                    <p class="book-card-category">${fav.buku_kategori || 'Umum'}</p>
+                    <div class="book-card-actions">
+                        <button class="btn-borrow" onclick="borrowBook(${fav.id_buku}, '${fav.judul.replace(/'/g, "\\'")}')">
+                            <iconify-icon icon="mdi:download-circle" width="14" height="14"></iconify-icon>
+                            Pinjam
+                        </button>
+                        <button class="btn-detail" onclick="viewDetail(${fav.id_buku})">
+                            <iconify-icon icon="mdi:information" width="14" height="14"></iconify-icon>
+                            Detail
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return card;
+        }
+
+        // ============================================
+        // EXISTING FUNCTIONS (PRESERVED)
+        // ============================================
 
         // Toggle favorite
         async function toggleFavorite(e, bookId, bookTitle) {
@@ -1352,6 +1945,15 @@ $pageTitle = 'Koleksi Favorit';
                     if (isLoved) {
                         btn.classList.remove('loved');
                         icon.setAttribute('icon', 'mdi:heart-outline');
+                        // Remove from list and update display
+                        const card = btn.closest('.book-card');
+                        if (card) {
+                            card.style.opacity = '0.5';
+                            setTimeout(() => {
+                                allFavorites = allFavorites.filter(f => f.id_buku !== bookId);
+                                applyFilters();
+                            }, 300);
+                        }
                     } else {
                         btn.classList.add('loved');
                         icon.setAttribute('icon', 'mdi:heart');
@@ -1440,7 +2042,7 @@ $pageTitle = 'Koleksi Favorit';
         }
 
         // Close modal when clicking outside
-        document.getElementById('bookModal').addEventListener('click', (e) => {
+        document.getElementById('bookModal')?.addEventListener('click', (e) => {
             if (e.target.id === 'bookModal') {
                 closeBookModal();
             }
@@ -1473,6 +2075,18 @@ $pageTitle = 'Koleksi Favorit';
                     alert('Terjadi kesalahan');
                 });
         }
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (allFavorites.length > 0) {
+                initializeCategoryFilter();
+                updateFavoritesDisplay();
+                updateFilterStats();
+            }
+        });
     </script>
     <script src="../assets/js/sidebar.js"></script>
 </body>
