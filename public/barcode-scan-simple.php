@@ -9,6 +9,11 @@ requireAuth();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pemindai Barcode</title>
+    <script>
+        if (window.innerWidth <= 768) {
+            window.location.href = 'scan-mobile.php';
+        }
+    </script>
     <style>
         * {
             margin: 0;
@@ -412,8 +417,8 @@ requireAuth();
         <div class="mode-indicator">
             <div class="mode-text">Mode Pemindaian</div>
             <div class="mode-buttons">
-                <button class="mode-btn active" id="btnModeMember">Scan Anggota</button>
-                <button class="mode-btn inactive" id="btnModeBook">Scan Buku</button>
+                <button class="mode-btn active" id="btnModeBook">Scan Buku</button>
+                <button class="mode-btn inactive" id="btnModeMember">Scan Anggota</button>
             </div>
         </div>
 
@@ -435,7 +440,8 @@ requireAuth();
             <table>
                 <thead>
                     <tr>
-                        <th>Buku</th>
+                        <th style="width: 60px;">Cover</th>
+                        <th>Judul Buku</th>
                         <th style="width: 50px;">Aksi</th>
                     </tr>
                 </thead>
@@ -447,17 +453,21 @@ requireAuth();
         <!-- Action Buttons -->
         <div class="btn-group" id="actionButtons" style="display: none;">
             <button class="btn-primary" id="btnSubmit" onclick="submitScannedBooks()">
-                Kirim Data
+                Pinjam
             </button>
             <button class="btn-secondary" id="btnClear" onclick="clearScannedBooks()">
                 Hapus Semua
             </button>
         </div>
 
+        <!-- Date Picker Removed -->
+
+
         <!-- Instruction -->
         <div class="instruction">
-            Silakan scan NISN Anda terlebih dahulu, kemudian scan barcode buku yang ingin dipinjam. Data akan
-            tampil di sistem admin secara realtime.
+            1. Scan Buku <br>
+            2. Scan Anggota <br>
+            3. Tekan Pinjam
         </div>
 
         <!-- Logout Button -->
@@ -484,7 +494,7 @@ requireAuth();
         // ============================================================================
 
         let scanner = null;
-        let scanMode = 'member';
+        let scanMode = 'book'; // Default mode Book
         let currentMember = null;
         let scannedBooks = []; // Array to store scanned books
         let lastScannedTime = 0;
@@ -501,7 +511,7 @@ requireAuth();
 
             scanner.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
+                { fps: 10, qrbox: { width: 300, height: 150 } },
                 onScanSuccess,
                 onScanError
             ).then(() => {
@@ -573,42 +583,62 @@ requireAuth();
 
                 // Handle member scan
                 if (scanMode === 'member') {
-                    if (data.data.type !== 'member') {
+                     if (data.data.type !== 'member') {
+                        // Intelligent auto-switch attempt
+                        if (data.data.type === 'book') {
+                            showStatus('Terdeteksi Buku. Beralih ke mode Buku...', 'info');
+                            switchMode('book');
+                            processBarcode(barcode); // Recursive call for book
+                            return;
+                        }
                         showStatus('Ini buku, bukan anggota!', 'error');
                         showLoading(false);
                         return;
                     }
                     currentMember = data.data;
                     displayMember();
-                    switchMode('book');
-                    scannedBooks = []; // Reset books list
-                    updateScannedList();
-                    showStatus('Anggota dipilih. Sekarang scan buku', 'success');
+                    
+                    // If we have books, show success
+                    if (scannedBooks.length > 0) {
+                        showStatus(`Anggota ${currentMember.name} OK. Siap meminjam.`, 'success');
+                    } else {
+                        showStatus(`Halo ${currentMember.name}. Silakan scan buku.`, 'success');
+                        switchMode('book');
+                    }
                 }
                 // Handle book scan
                 else if (scanMode === 'book') {
-                    if (!currentMember) {
-                        showStatus('Scan anggota dulu!', 'error');
-                        switchMode('member');
-                        showLoading(false);
-                        return;
-                    }
-                    if (data.data.type !== 'book') {
+                     if (data.data.type !== 'book') {
+                         // Intelligent auto-switch attempt
+                        if (data.data.type === 'member') {
+                            showStatus('Terdeteksi Anggota. Beralih ke mode Anggota...', 'info');
+                            switchMode('member');
+                            processBarcode(barcode); // Recursive call for member
+                            return;
+                        }
                         showStatus('Ini anggota, bukan buku!', 'error');
                         showLoading(false);
                         return;
                     }
 
                     // Add to local array
-                    scannedBooks.push({
-                        member_id: currentMember.id,
-                        member_name: currentMember.name,
-                        book_id: data.data.id,
-                        book_title: data.data.name
-                    });
+                    // Check duplicate
+                    if (scannedBooks.some(b => b.book_id === data.data.id)) {
+                        showStatus('Buku sudah ada di daftar!', 'info');
+                    } else {
+                        scannedBooks.push({
+                            book_id: data.data.id,
+                            book_title: data.data.name,
+                            cover_image: data.data.cover_image
+                        });
+                        updateScannedList();
+                        showStatus(data.data.name + ' ditambahkan', 'success');
 
-                    updateScannedList();
-                    showStatus(data.data.name + ' ditambahkan', 'success');
+                        // If member is not set, encourage setting member
+                        if (!currentMember) {
+                            showStatus(data.data.name + ' OK. Lanjut buku lain atau Scan Anggota.', 'success');
+                        }
+                    }
                 }
 
             } catch (error) {
@@ -640,8 +670,19 @@ requireAuth();
 
                 document.getElementById('bookCount').textContent = scannedBooks.length;
 
+                // Show/Hide Date Picker logic removed
+                if (scannedBooks.length > 0) {
+                     // logic for empty state if needed
+                }
+
                 tbody.innerHTML = scannedBooks.map((book, index) => `
                     <tr>
+                        <td style="width: 50px;">
+                            ${book.cover_image 
+                              ? `<img src="../img/covers/${escapeHtml(book.cover_image)}" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">`
+                              : `<div style="width: 40px; height: 60px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><small>No Img</small></div>`
+                            }
+                        </td>
                         <td>${escapeHtml(book.book_title)}</td>
                         <td>
                             <button class="btn-remove" onclick="removeBook(${index})">Hapus</button>
@@ -670,6 +711,24 @@ requireAuth();
                 return;
             }
 
+            if (!currentMember) {
+                showStatus('Harap scan KARTU ANGGOTA terlebih dahulu!', 'error');
+                switchMode('member');
+                // Pulse member button
+                const btn = document.getElementById('btnModeMember');
+                btn.style.borderColor = 'red';
+                setTimeout(() => btn.style.borderColor = '', 1000);
+                return;
+            }
+
+            /*
+            const dueDate = document.getElementById('dueDateInput').value;
+            if (!dueDate) {
+                showStatus('Silakan tentukan tanggal pengembalian', 'error');
+                return;
+            }
+            */
+
             const btnSubmit = document.getElementById('btnSubmit');
             const btnClear = document.getElementById('btnClear');
             btnSubmit.disabled = true;
@@ -684,9 +743,10 @@ requireAuth();
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         borrows: scannedBooks.map(book => ({
-                            member_id: book.member_id,
+                            member_id: currentMember.id,
                             book_id: book.book_id
                         }))
+                        // due_date removed, let API handle default
                     })
                 });
 
@@ -694,12 +754,14 @@ requireAuth();
                 console.log('[SUBMIT] Response:', data);
 
                 if (data.success) {
-                    showStatus(`${data.inserted} peminjaman berhasil disimpan! Tunggu konfirmasi admin.`, 'success');
+                    showStatus('Selesai! Buku berhasil dipinjam untuk ' + currentMember.name, 'success');
                     scannedBooks = [];
                     updateScannedList();
                     currentMember = null;
                     document.getElementById('memberDisplay').classList.remove('show');
-                    switchMode('member');
+                    // Reset
+                    // document.getElementById('datePickerSection').style.display = 'none';
+                    switchMode('book'); // Ready for next person
                 } else {
                     showStatus('Error: ' + (data.message || 'Gagal menyimpan'), 'error');
                     btnSubmit.disabled = false;

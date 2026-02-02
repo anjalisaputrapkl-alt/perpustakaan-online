@@ -116,6 +116,7 @@ $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-align: center;
             page-break-inside: avoid;
             break-inside: avoid;
+            min-width: 200px;
         }
 
         .barcode-card h3 {
@@ -126,15 +127,20 @@ $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .barcode-image {
-            width: 150px;
-            height: 150px;
+            width: 100%;
+            height: 90px;
             margin: 0 auto 10px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            background: #fff;
+            padding: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .barcode-image svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         .barcode-image img {
@@ -273,6 +279,9 @@ $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <!-- JsBarcode CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
     <script>
         const memberData = <?php echo json_encode($members); ?>;
         const container = document.getElementById('barcodeContainer');
@@ -296,9 +305,15 @@ $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="barcode-card">
                     <h3>${member.name}</h3>
                     <div class="barcode-image">
-                        <img src="api/generate-qrcode.php?type=member&value=${encodeURIComponent(member.nisn)}&size=150" 
-                             alt="QR Code ${member.nisn}" 
-                             loading="lazy">
+                         <svg class="barcode-render"
+                             jsbarcode-format="CODE128"
+                             jsbarcode-value="${member.nisn}"
+                             jsbarcode-displayValue="true"
+                             jsbarcode-fontSize="14"
+                             jsbarcode-width="2"
+                             jsbarcode-height="50"
+                             jsbarcode-margin="5">
+                        </svg>
                     </div>
                     <div class="barcode-info">
                         <strong>NISN</strong>
@@ -306,6 +321,13 @@ $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
             `).join('');
+            
+             // Initialize Barcodes
+            try {
+                JsBarcode(".barcode-render").init();
+            } catch (e) {
+                console.error("Barcode rendering failed", e);
+            }
         }
 
         function selectAll() {

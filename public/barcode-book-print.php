@@ -116,6 +116,7 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
             text-align: center;
             page-break-inside: avoid;
             break-inside: avoid;
+            min-width: 200px;
         }
 
         .barcode-card h3 {
@@ -127,15 +128,20 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
         .barcode-image {
-            width: 130px;
-            height: 130px;
+            width: 100%;
+            height: 90px;
             margin: 0 auto 8px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            background: #fff;
+            padding: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .barcode-image svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         .barcode-image img {
@@ -298,6 +304,9 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
         </div>
     </div>
 
+    <!-- JsBarcode CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
     <script>
         const bookData = <?php echo json_encode($books); ?>;
         const container = document.getElementById('barcodeContainer');
@@ -323,9 +332,15 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <div class="barcode-card">
                     <h3>${book.title}</h3>
                     <div class="barcode-image">
-                        <img src="api/generate-qrcode.php?type=book&value=${encodeURIComponent(book.isbn)}&size=130" 
-                             alt="QR Code ${book.isbn}" 
-                             loading="lazy">
+                        <svg class="barcode-render"
+                             jsbarcode-format="CODE128"
+                             jsbarcode-value="${book.isbn}"
+                             jsbarcode-displayValue="true"
+                             jsbarcode-fontSize="14"
+                             jsbarcode-width="2"
+                             jsbarcode-height="50"
+                             jsbarcode-margin="5">
+                        </svg>
                     </div>
                     <div class="barcode-info">
                         <strong>ISBN</strong>
@@ -334,6 +349,13 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
             `).join('');
+            
+            // Initialize Barcodes
+            try {
+                JsBarcode(".barcode-render").init();
+            } catch (e) {
+                console.error("Barcode rendering failed", e);
+            }
         }
 
         function filterBooks() {

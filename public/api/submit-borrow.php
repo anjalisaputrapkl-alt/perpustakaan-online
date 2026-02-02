@@ -42,8 +42,8 @@ try {
                 continue;
             }
 
-            // Calculate due date (7 days from now)
-            $dueDate = date('Y-m-d H:i:s', strtotime('+7 days'));
+            // Determine due date (use provided date or default +7 days)
+            $dueDate = $input['due_date'] ?? date('Y-m-d H:i:s', strtotime('+7 days'));
 
             // Insert into borrows table with pending_confirmation status
             $stmt = $pdo->prepare(
