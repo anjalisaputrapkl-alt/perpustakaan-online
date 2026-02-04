@@ -30,6 +30,16 @@ require_once __DIR__ . '/../src/maintenance/DamageController.php';
 $userId = (int) $_SESSION['user']['id'];
 $schoolId = (int) $_SESSION['user']['school_id'];
 
+// Get school info
+try {
+    $schoolStmt = $pdo->prepare('SELECT * FROM schools WHERE id = :sid');
+    $schoolStmt->execute(['sid' => $schoolId]);
+    $school = $schoolStmt->fetch();
+} catch (Exception $e) {
+    error_log("Error fetching school: " . $e->getMessage());
+    $school = null;
+}
+
 $success_message = '';
 $error_message = '';
 $isEditing = false;
@@ -263,6 +273,270 @@ $pageTitle = 'Profil Saya';
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/school-profile.css">
+    <!-- JsBarcode for client-side barcode generation -->
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        /* Library Card Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-card {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            transition: all 0.2s;
+        }
+
+        .modal-btn-close {
+            background: #3A7FF2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 12px;
+        }
+
+        /* Library Card Design (Exact Copy from student-barcodes.php) */
+        .library-card-wrapper {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            overflow-x: auto;
+            padding: 10px;
+        }
+
+        .id-card-mockup {
+            width: 500px;
+            min-width: 500px;
+            aspect-ratio: 1.586 / 1;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 20px 40px -10px rgba(30, 58, 138, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Decorative patterns */
+        .id-card-mockup::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .id-card-mockup::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .id-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .school-logo {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #1e3a8a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .school-logo img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+        
+        .school-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .id-card-body {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 10px 0;
+        }
+        
+        .id-card-photo {
+            width: 90px;
+            height: 110px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            backdrop-filter: blur(4px);
+            object-fit: cover;
+        }
+        
+        .id-card-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .id-card-details h3 {
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: -0.01em;
+        }
+        
+        .id-card-details p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            margin: 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .id-card-barcode-area {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        #card-barcode {
+            width: 100%;
+            height: 60px; /* Force match student-barcodes.php inline style */
+        }
+
+        /* Modal sizing fix override */
+        .modal-card {
+             width: auto !important;
+             max-width: 95vw !important;
+             min-width: 600px;
+        }
+
+        @media print {
+            .id-card-mockup {
+                width: 85.6mm !important;
+                height: 53.98mm !important;
+                min-width: 0 !important;
+                padding: 4mm !important;
+                box-shadow: none !important;
+                aspect-ratio: auto !important;
+            }
+            .id-card-header { padding-bottom: 2mm !important; gap: 3mm !important; }
+            .school-logo { width: 8mm !important; height: 8mm !important; border-radius: 2mm !important; } 
+            .school-name { font-size: 11pt !important; }
+            .id-card-body { padding: 2mm 0 !important; gap: 3mm !important; }
+            .id-card-photo { width: 18mm !important; height: 22mm !important; }
+            .id-card-details h3 { font-size: 14pt !important; margin-bottom: 1mm !important; }
+            .id-card-details p { font-size: 9pt !important; }
+            .id-card-barcode-area { padding: 2mm !important; }
+            #card-barcode { height: 10mm !important; }
+            
+            /* Hide everything else */
+            .nav-sidebar, .header, .container-main, #navToggle, .modal-overlay:not(#libraryCardModal) {
+                display: none !important;
+                visibility: hidden !important;
+            }
+            #libraryCardModal {
+                display: flex !important;
+                visibility: visible !important;
+                position: absolute !important;
+                left: 0 !important; top: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                background: white !important; padding: 0 !important; margin: 0 !important;
+                justify-content: center !important; align-items: center !important; z-index: 9999 !important;
+            }
+            #libraryCardModal * { visibility: visible !important; }
+            #libraryCardModal .modal-close-btn, #libraryCardModal .modal-footer, #libraryCardModal h3, .modal-close { display: none !important; }
+            .modal-card {
+                box-shadow: none !important; border: none !important; padding: 0 !important; margin: 0 !important;
+                width: auto !important; background: transparent !important; display: block !important;
+            }
+            .library-card-wrapper { margin: 0 !important; padding: 0 !important; display: block !important; }
+        }
     <style>
         :root {
             --primary: #3A7FF2;
@@ -708,6 +982,7 @@ $pageTitle = 'Profil Saya';
             text-decoration: none;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             transition: all 0.2s;
         }
@@ -1109,10 +1384,10 @@ $pageTitle = 'Profil Saya';
                     <p><?php echo htmlspecialchars($siswa['nisn'] ?? 'NISN: -'); ?> -
                         <?php echo htmlspecialchars($siswa['status'] ?? 'active'); ?>
                     </p>
-                    <a href="student-card.php" class="btn-view-card" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+                    <button type="button" onclick="showLibraryCard()" class="btn-view-card" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
                         <iconify-icon icon="mdi:card-account" width="16" height="16"></iconify-icon>
-                        Lihat Kartu Pelajar
-                    </a>
+                        Lihat Kartu Perpustakaan
+                    </button>
                 </div>
             </div>
 
@@ -1278,7 +1553,87 @@ $pageTitle = 'Profil Saya';
         </div>
     </div>
 
+    <!-- Library Card Modal -->
+    <div id="libraryCardModal" class="modal-overlay">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closeLibraryCardModal()">
+                <iconify-icon icon="mdi:close"></iconify-icon>
+            </button>
+            
+            <h3 style="margin-bottom: 20px; font-size: 18px;">Pratinjau Kartu Perpustakaan</h3>
+
+            <div class="library-card-wrapper">
+                <div class="id-card-mockup" id="printableCard">
+                     <div class="id-card-header">
+                        <div class="school-logo">
+                            <?php if (!empty($school['logo'])): ?>
+                                <img src="<?= htmlspecialchars($school['logo']) ?>" alt="Logo">
+                            <?php else: ?>
+                                <iconify-icon icon="mdi:school"></iconify-icon>
+                            <?php endif; ?>
+                        </div>
+                        <div class="school-name"><?= htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN DIGITAL') ?></div>
+                     </div>
+                     
+                     <div class="id-card-body">
+                         <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="id-card-photo" style="display:block;">
+                         
+                         <div class="id-card-details">
+                             <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Student Name</p>
+                             <h3 id="modal-name"><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></h3>
+                             <p id="modal-nisn">NISN: <?php echo htmlspecialchars($siswa['nisn']); ?></p>
+                         </div>
+                     </div>
+
+                     <div class="id-card-barcode-area">
+                         <svg id="card-barcode" style="width: 100%; height: 60px;"></svg>
+                     </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="display: flex; gap: 12px; margin-top: 24px;">
+                <button onclick="window.print()" class="btn primary" style="flex: 1;">
+                    <iconify-icon icon="mdi:printer" style="font-size: 18px;"></iconify-icon>
+                    Cetak Kartu
+                </button>
+                <button onclick="closeLibraryCardModal()" class="btn secondary" style="flex: 1;">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        function showLibraryCard() {
+            try {
+                // EXACT options from student-barcodes.php
+                JsBarcode("#card-barcode", "<?php echo $siswa['nisn']; ?>", {
+                    format: "CODE128",
+                    displayValue: true,
+                    fontSize: 14,
+                    width: 2.5,
+                    height: 50,
+                    margin: 5
+                });
+            } catch (e) {
+                console.error("Barcode error:", e);
+            }
+
+            document.getElementById('libraryCardModal').style.display = 'flex';
+        }
+
+        function closeLibraryCardModal() {
+            document.getElementById('libraryCardModal').style.display = 'none';
+        }
+
+        // Close on outside click
+        window.onclick = function(event) {
+            const modal = document.getElementById('libraryCardModal');
+            if (event.target == modal) {
+                closeLibraryCardModal();
+            }
+        }
+
         // File upload functionality
         const uploadSection = document.getElementById('uploadSection');
         const fotoInput = document.getElementById('fotoInput');

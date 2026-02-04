@@ -15,13 +15,13 @@ try {
             b.author,
             b.category,
             b.copies,
-            (SELECT COUNT(*) FROM borrows WHERE book_id = b.id AND returned_at IS NULL AND school_id = :sid) as borrowed_count
+            (SELECT COUNT(*) FROM borrows WHERE book_id = b.id AND returned_at IS NULL AND school_id = :sid1) as borrowed_count
         FROM books b
-        WHERE b.school_id = :sid
+        WHERE b.school_id = :sid2
         ORDER BY b.created_at DESC
     ");
     
-    $stmt->execute(['sid' => $school_id]);
+    $stmt->execute(['sid1' => $school_id, 'sid2' => $school_id]);
     $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $data = [];

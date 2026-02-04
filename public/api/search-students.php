@@ -30,8 +30,9 @@ try {
     }
     
     $query = $_GET['q'] ?? '';
+    $all = ($_GET['all'] ?? '0') === '1';
     
-    if (strlen($query) < 2) {
+    if (!$all && strlen($query) < 2) {
         echo json_encode([
             'success' => true,
             'students' => []
@@ -39,22 +40,35 @@ try {
         exit;
     }
     
-    // Search members by name or NISN
-    $searchTerm = '%' . $query . '%';
-    $stmt = $pdo->prepare(
-        'SELECT id, name, nisn, status 
-         FROM members 
-         WHERE school_id = :school_id 
-         AND (name LIKE :name_search OR nisn LIKE :nisn_search)
-         ORDER BY name ASC 
-         LIMIT 20'
-    );
-    
-    $stmt->execute([
-        'school_id' => $school_id,
-        'name_search' => $searchTerm,
-        'nisn_search' => $searchTerm
-    ]);
+    // Search members by name or NISN - UPDATED TO JOIN SISWA TABLE FOR PHOTO
+    if ($all) {
+        $stmt = $pdo->prepare(
+            'SELECT m.id, m.name, m.nisn, m.status, s.foto 
+             FROM members m
+             LEFT JOIN users u ON u.nisn = m.nisn AND u.school_id = m.school_id AND u.role = "student"
+             LEFT JOIN siswa s ON s.id_siswa = u.id
+             WHERE m.school_id = :school_id 
+             ORDER BY m.name ASC'
+        );
+        $stmt->execute(['school_id' => $school_id]);
+    } else {
+        $searchTerm = '%' . $query . '%';
+        $stmt = $pdo->prepare(
+            'SELECT m.id, m.name, m.nisn, m.status, s.foto 
+             FROM members m
+             LEFT JOIN users u ON u.nisn = m.nisn AND u.school_id = m.school_id AND u.role = "student"
+             LEFT JOIN siswa s ON s.id_siswa = u.id
+             WHERE m.school_id = :school_id 
+             AND (m.name LIKE :name_search OR m.nisn LIKE :nisn_search)
+             ORDER BY m.name ASC 
+             LIMIT 20'
+        );
+        $stmt->execute([
+            'school_id' => $school_id,
+            'name_search' => $searchTerm,
+            'nisn_search' => $searchTerm
+        ]);
+    }
     
     $students = $stmt->fetchAll(PDO::FETCH_ASSOC);
     

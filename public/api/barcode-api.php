@@ -31,6 +31,26 @@ try {
         exit;
     }
 
+    if ($action === 'get_all_ids') {
+        try {
+            $stmt = $pdo->prepare('SELECT id FROM books WHERE school_id = ?');
+            $stmt->execute([$school_id]);
+            $ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            ob_end_clean();
+            echo json_encode([
+                'success' => true,
+                'count' => count($ids),
+                'ids' => $ids
+            ]);
+        } catch (Exception $e) {
+            ob_end_clean();
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+
     if ($action === 'search') {
         $query = trim($_GET['q'] ?? '');
         
@@ -52,6 +72,54 @@ try {
             ]);
         } catch (Exception $e) {
             error_log("Barcode API Search Error: " . $e->getMessage());
+            ob_end_clean();
+            http_response_code(500);
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+        }
+        exit;
+    }
+    
+    if ($action === 'generate_bulk') {
+        $book_ids = $_POST['book_ids'] ?? [];
+        if (is_string($book_ids)) {
+            $book_ids = json_decode($book_ids, true) ?: explode(',', $book_ids);
+        }
+        
+        if (empty($book_ids)) {
+            ob_end_clean();
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => 'No book IDs provided']);
+            exit;
+        }
+        
+        try {
+            $barcodeModel = new BarcodeModel($pdo, $school_id);
+            $results = [];
+            
+            foreach ($book_ids as $id) {
+                $id = intval($id);
+                if ($id <= 0) continue;
+                
+                $book = $barcodeModel->getBookById($id);
+                if ($book) {
+                    $res = $barcodeModel->generateCombinedBarcode($book);
+                    if ($res['success']) {
+                        $results[] = $res;
+                        try {
+                            $barcodeModel->logBarcodeGeneration($id, $user_id);
+                        } catch (Exception $e) {}
+                    }
+                }
+            }
+            
+            ob_end_clean();
+            echo json_encode([
+                'success' => true,
+                'count' => count($results),
+                'results' => $results
+            ]);
+        } catch (Exception $e) {
+            error_log("Barcode API Bulk Error: " . $e->getMessage());
             ob_end_clean();
             http_response_code(500);
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);

@@ -78,38 +78,112 @@ if ($is_authenticated) {
             </div>
 
             <div class="content">
-
-                <div class="main">
+                <div class="dashboard-grid">
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <a href="borrows.php" class="q-action">
+                            <div class="q-icon" style="background: var(--accent-soft); color: var(--accent);">
+                                <iconify-icon icon="mdi:book-plus-outline"></iconify-icon>
+                            </div>
+                            <span>Pinjam Buku</span>
+                        </a>
+                        <a href="borrows.php" class="q-action">
+                            <div class="q-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                                <iconify-icon icon="mdi:book-check-outline"></iconify-icon>
+                            </div>
+                            <span>Pengembalian</span>
+                        </a>
+                        <a href="books.php" class="q-action">
+                            <div class="q-icon" style="background: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                                <iconify-icon icon="mdi:library-plus"></iconify-icon>
+                            </div>
+                            <span>Tambah Buku</span>
+                        </a>
+                        <a href="members.php" class="q-action">
+                            <div class="q-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">
+                                <iconify-icon icon="mdi:account-plus-outline"></iconify-icon>
+                            </div>
+                            <span>Tambah Anggota</span>
+                        </a>
+                    </div>
 
                     <div class="stats">
-                        <div class="stat" data-stat-type="books" data-tooltip="Total seluruh buku yang sudah terdaftar di perpustakaan">
-                            <small>Total Buku</small><strong class="stat-value" id="stat-books">-</strong>
+                        <div class="stat stat-books" data-stat-type="books" data-tooltip="Total seluruh buku yang sudah terdaftar di perpustakaan">
+                            <div class="stat-icon">
+                                <iconify-icon icon="mdi:library-books"></iconify-icon>
+                            </div>
+                            <div class="stat-info">
+                                <small>Total Buku</small>
+                                <strong class="stat-value" id="stat-books">-</strong>
+                            </div>
                         </div>
-                        <div class="stat" data-stat-type="members" data-tooltip="Total seluruh anggota perpustakaan yang terdaftar">
-                            <small>Total Anggota</small><strong class="stat-value" id="stat-members">-</strong>
+                        <div class="stat stat-members" data-stat-type="members" data-tooltip="Total seluruh anggota perpustakaan yang terdaftar">
+                            <div class="stat-icon">
+                                <iconify-icon icon="mdi:account-group"></iconify-icon>
+                            </div>
+                            <div class="stat-info">
+                                <small>Total Anggota</small>
+                                <strong class="stat-value" id="stat-members">-</strong>
+                            </div>
                         </div>
-                        <div class="stat" data-stat-type="borrowed" data-tooltip="Total buku yang sedang dipinjam oleh anggota">
-                            <small>Dipinjam</small><strong class="stat-value" id="stat-borrowed">-</strong>
+                        <div class="stat stat-borrowed" data-stat-type="borrowed" data-tooltip="Total buku yang sedang dipinjam oleh anggota">
+                            <div class="stat-icon">
+                                <iconify-icon icon="mdi:book-clock"></iconify-icon>
+                            </div>
+                            <div class="stat-info">
+                                <small>Dipinjam</small>
+                                <strong class="stat-value" id="stat-borrowed">-</strong>
+                            </div>
                         </div>
-                        <div class="stat alert" data-stat-type="overdue" data-tooltip="Total peminjaman yang sudah melewati batas waktu pengembalian">
-                            <small>Terlambat</small><strong class="stat-value" id="stat-overdue">-</strong>
+                        <div class="stat stat-overdue alert" data-stat-type="overdue" data-tooltip="Total peminjaman yang sudah melewati batas waktu pengembalian">
+                            <div class="stat-icon">
+                                <iconify-icon icon="mdi:alert-circle-outline"></iconify-icon>
+                            </div>
+                            <div class="stat-info">
+                                <small>Terlambat</small>
+                                <strong class="stat-value" id="stat-overdue">-</strong>
+                            </div>
                         </div>
                     </div>
 
                     <div class="charts">
                         <div class="chart-box">
                             <h2>Peminjaman per Bulan</h2>
-                            <canvas id="borrowChart" width="400" height="200"></canvas>
+                            <div class="chart-container">
+                                <canvas id="borrowChart"></canvas>
+                            </div>
                         </div>
                         <div class="chart-box">
                             <h2>Status Buku</h2>
-                            <canvas id="statusChart" width="400" height="300"></canvas>
+                            <div class="chart-container">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h2>Tren 7 Hari Terakhir</h2>
+                            <div class="chart-container">
+                                <canvas id="weeklyChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="insights-row">
+                        <div class="chart-box">
+                            <h2><iconify-icon icon="mdi:fire" class="section-header-icon" style="color: #f59e0b;"></iconify-icon>Buku Terpopuler</h2>
+                            <div class="chart-container">
+                                <canvas id="topBooksChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-box">
+                            <h2><iconify-icon icon="mdi:star" class="section-header-icon" style="color: #f59e0b;"></iconify-icon>Anggota Teraktif</h2>
+                            <div class="top-list" id="top-members-list">
+                                <div class="modal-loading">Memuat data...</div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="activity-section">
-                        <h2><iconify-icon icon="mdi:clipboard-list"
-                                style="vertical-align: middle; margin-right: 8px;"></iconify-icon>Aktivitas Terbaru</h2>
+                        <h2><iconify-icon icon="mdi:clipboard-list" class="section-header-icon"></iconify-icon>Aktivitas Terbaru</h2>
 
                         <div class="activity-tabs">
                             <button class="activity-tab active btn-sm" data-tab="all"><iconify-icon
@@ -132,22 +206,32 @@ if ($is_authenticated) {
                                     <?php if (!empty($all_activities)): ?>
                                         <?php foreach ($all_activities as $activity): ?>
                                             <div class="activity-item">
+                                                <div class="activity-marker">
+                                                    <?php
+                                                    switch ($activity['type']) {
+                                                        case 'borrow': echo '<iconify-icon icon="mdi:book-open-page-variant"></iconify-icon>'; break;
+                                                        case 'return': echo '<iconify-icon icon="mdi:keyboard-return"></iconify-icon>'; break;
+                                                        case 'member': echo '<iconify-icon icon="mdi:account-plus"></iconify-icon>'; break;
+                                                        case 'book': echo '<iconify-icon icon="mdi:plus-circle"></iconify-icon>'; break;
+                                                    }
+                                                    ?>
+                                                </div>
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
                                                     <div class="member-name">
                                                         <?php
                                                         switch ($activity['type']) {
                                                             case 'borrow':
-                                                                echo '<iconify-icon icon="mdi:book-open" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dipinjam oleh ' . htmlspecialchars($activity['name']);
+                                                                echo 'Dipinjam oleh ' . htmlspecialchars($activity['name']);
                                                                 break;
                                                             case 'return':
-                                                                echo '<iconify-icon icon="mdi:inbox" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dikembalikan oleh ' . htmlspecialchars($activity['name']);
+                                                                echo 'Dikembalikan oleh ' . htmlspecialchars($activity['name']);
                                                                 break;
                                                             case 'member':
-                                                                echo '<iconify-icon icon="mdi:account-multiple" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Anggota baru terdaftar';
+                                                                echo 'Anggota baru terdaftar';
                                                                 break;
                                                             case 'book':
-                                                                echo '<iconify-icon icon="mdi:library" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Buku baru ditambahkan';
+                                                                echo 'Buku baru ditambahkan';
                                                                 break;
                                                         }
                                                         ?>
@@ -170,13 +254,13 @@ if ($is_authenticated) {
                                     <?php if (!empty($recent_borrows)): ?>
                                         <?php foreach ($recent_borrows as $activity): ?>
                                             <div class="activity-item">
+                                                <div class="activity-marker" style="border-color: var(--accent); color: var(--accent);">
+                                                    <iconify-icon icon="mdi:book-open-page-variant"></iconify-icon>
+                                                </div>
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
                                                     <div class="member-name">
-                                                        <iconify-icon icon="mdi:book-open"
-                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dipinjam
-                                                        oleh
-                                                        <?= htmlspecialchars($activity['name']) ?>
+                                                        Dipinjam oleh <?= htmlspecialchars($activity['name']) ?>
                                                     </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>
@@ -196,13 +280,13 @@ if ($is_authenticated) {
                                     <?php if (!empty($recent_returns)): ?>
                                         <?php foreach ($recent_returns as $activity): ?>
                                             <div class="activity-item">
+                                                <div class="activity-marker" style="border-color: var(--success); color: var(--success);">
+                                                    <iconify-icon icon="mdi:keyboard-return"></iconify-icon>
+                                                </div>
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
                                                     <div class="member-name">
-                                                        <iconify-icon icon="mdi:inbox"
-                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Dikembalikan
-                                                        oleh
-                                                        <?= htmlspecialchars($activity['name']) ?>
+                                                        Dikembalikan oleh <?= htmlspecialchars($activity['name']) ?>
                                                     </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>
@@ -222,12 +306,13 @@ if ($is_authenticated) {
                                     <?php if (!empty($new_members)): ?>
                                         <?php foreach ($new_members as $activity): ?>
                                             <div class="activity-item">
+                                                <div class="activity-marker" style="border-color: var(--success); color: var(--success);">
+                                                    <iconify-icon icon="mdi:account-plus"></iconify-icon>
+                                                </div>
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
                                                     <div class="member-name">
-                                                        <iconify-icon icon="mdi:account-multiple"
-                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Anggota
-                                                        baru terdaftar
+                                                        Anggota baru terdaftar
                                                     </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>
@@ -247,12 +332,13 @@ if ($is_authenticated) {
                                     <?php if (!empty($new_books)): ?>
                                         <?php foreach ($new_books as $activity): ?>
                                             <div class="activity-item">
+                                                <div class="activity-marker" style="border-color: var(--accent); color: var(--accent);">
+                                                    <iconify-icon icon="mdi:plus-circle"></iconify-icon>
+                                                </div>
                                                 <div class="details">
                                                     <div class="book-title"><?= htmlspecialchars($activity['title']) ?></div>
                                                     <div class="member-name">
-                                                        <iconify-icon icon="mdi:library"
-                                                            style="vertical-align: middle; margin-right: 4px;"></iconify-icon>Buku
-                                                        baru ditambahkan
+                                                        Buku baru ditambahkan
                                                     </div>
                                                 </div>
                                                 <div class="time"><?= date('d M', strtotime($activity['timestamp'])) ?></div>

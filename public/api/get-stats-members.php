@@ -16,13 +16,13 @@ try {
             m.email,
             m.status,
             m.created_at,
-            (SELECT COUNT(*) FROM borrows WHERE member_id = m.id AND returned_at IS NULL AND school_id = :sid) as current_borrows
+            (SELECT COUNT(*) FROM borrows WHERE member_id = m.id AND returned_at IS NULL AND school_id = :sid1) as current_borrows
         FROM members m
-        WHERE m.school_id = :sid
+        WHERE m.school_id = :sid2
         ORDER BY m.created_at DESC
     ");
     
-    $stmt->execute(['sid' => $school_id]);
+    $stmt->execute(['sid1' => $school_id, 'sid2' => $school_id]);
     $members = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $data = [];

@@ -198,151 +198,428 @@ $members = $stmt->fetchAll();
       color: #0f172a;
     }
 
-    /* Library Card Design (Same as student-card.php) */
-    .library-card-wrapper {
-        margin: 20px 0;
-        display: flex;
-        justify-content: center;
-    }
+        /* Library Card Design */
+        .library-card-wrapper {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            width: 100%;
+            overflow-x: auto; /* Allow scroll on small screens */
+            padding: 10px;
+        }
 
-    .library-card {
-        width: 100%;
-        max-width: 400px;
-        background: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(58, 127, 242, 0.15);
-        overflow: hidden;
-        border: 1px solid rgba(226, 232, 240, 0.8);
-        position: relative;
-        text-align: left;
-    }
+        .library-card {
+            width: 550px; /* Fixed width to guarantee aspect ratio fits content */
+            min-width: 550px; /* Force minimum width */
+            aspect-ratio: 1.586 / 1;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 24px; /* Restored to 24px */
+            position: relative;
+            box-shadow: 0 20px 40px -10px rgba(30, 58, 138, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
 
-    .card-header-bg {
-        background: #3A7FF2;
-        color: white;
-        padding: 16px 20px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-    }
+        /* Decorative patterns */
+        .library-card::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
 
-    .school-logo-frame {
-        width: 40px;
-        height: 40px;
-        background: white;
-        border-radius: 10px;
-        padding: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
+        .library-card::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
 
-    .school-logo-frame img {
-        width: 100%;
-        height: 100%;
-        object-fit: contain;
-    }
+        .card-header-bg {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 16px; /* Restored to 16px */
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            position: relative;
+            z-index: 2;
+            background: transparent;
+        }
 
-    .school-info-text h2 {
-        font-size: 14px;
-        font-weight: 700;
-        margin: 0;
-        line-height: 1.2;
-        color: white;
-    }
+        .school-logo-frame {
+            width: 48px; /* Restored to 48px */
+            height: 48px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 0;
+        }
 
-    .school-info-text p {
-        font-size: 10px;
-        opacity: 0.9;
-        margin: 2px 0 0 0;
-        color: white;
-    }
+        .school-logo-frame img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+        
+        .school-logo-frame iconify-icon {
+            font-size: 24px !important;
+            color: #1e3a8a !important;
+        }
 
-    .card-body-content {
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-    }
+        .school-info-text h2 {
+            font-size: 16px; /* Restored to 16px */
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 0;
+        }
 
-    .student-profile-row {
-        display: flex;
-        gap: 16px;
-        align-items: center;
-    }
+        .school-info-text p {
+            display: none;
+        }
 
-    .student-avatar-img {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        object-fit: cover;
-        background: #eee;
-    }
+        .card-body-content {
+            display: flex;
+            gap: 20px; /* Restored to 20px */
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 10px 0; /* Restored to 10px 0 */
+        }
 
-    .student-data-text {
-        flex: 1;
-    }
+        .student-profile-row {
+            display: flex;
+            gap: 20px; /* Restored gap */
+            align-items: center;
+            width: 100%;
+        }
 
-    .st-name {
-        font-size: 16px;
-        font-weight: 700;
-        color: #0F172A;
-        margin-bottom: 2px;
-    }
+        .student-avatar-img {
+            width: 90px; /* Restored to 90px */
+            height: 110px; /* Restored to 110px */
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            backdrop-filter: blur(4px);
+        }
 
-    .st-id-label {
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: #64748b;
-        font-weight: 600;
-    }
+        .student-data-text {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    .st-id-value {
-        font-size: 12px;
-        font-weight: 600;
-        color: #3A7FF2;
-        font-family: monospace;
-        background: rgba(58, 127, 242, 0.1);
-        padding: 1px 6px;
-        border-radius: 4px;
-    }
+        .st-name {
+            font-size: 22px; /* Restored to 22px */
+            font-weight: 800;
+            color: white;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: -0.01em;
+            line-height: 1.2;
+        }
 
-    .barcode-container {
-        text-align: center;
-        background: white;
-        padding: 12px;
-        border-radius: 10px;
-        border: 1px solid #E6EEF8;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
+        .st-id-label {
+            font-size: 14px; /* Restored to 14px */
+            color: rgba(255,255,255,0.9);
+            margin: 0;
+            font-weight: 500;
+        }
 
-    #card-barcode {
-        max-width: 100%;
-        height: auto;
-    }
+        .st-id-value {
+            font-size: 14px; /* Restored to 14px */
+            color: rgba(255,255,255,0.9);
+            font-weight: 500;
+            font-family: inherit;
+            background: transparent;
+            padding: 0;
+        }
 
-    .card-footer-strip {
-        background: #f1f5f9;
-        padding: 8px;
-        text-align: center;
-        font-size: 9px;
-        color: #64748b;
-        border-top: 1px solid #E6EEF8;
-    }
+        .barcode-container {
+            background: white;
+            padding: 8px 20px; /* Slightly reduced top/bottom padding to ensure fit */
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-top: auto;
+            height: auto;
+            border: none;
+        }
 
-    @media print {
-        body * { visibility: hidden; }
-        #libraryCardModal, #libraryCardModal * { visibility: visible; }
-        #libraryCardModal { position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0; background: white; }
-        .modal-card { box-shadow: none; border: none; max-width: 100%; width: 100%; }
-        .modal-close-btn, .modal-footer { display: none !important; }
-        .library-card { box-shadow: none; border: 1px solid #ddd; }
-    }
+        #card-barcode {
+            width: 100%;
+            height: 45px; /* Restored to 45px */
+        }
+
+        .card-footer-strip {
+            display: none;
+        }
+        
+        /* Modal sizing fix */
+        .modal-card {
+             width: auto !important;
+             max-width: 95vw !important;
+             min-width: 600px; /* Ensure modal is wider than card */
+        }
+        
+        @media (max-width: 640px) {
+             .modal-card {
+                 min-width: 95% !important;
+             }
+             /* On very small screens, allow card to scale down if absolutely needed, but prefer scroll */
+        }
+
+
+        .btn-primary { 
+            background: #3A7FF2; 
+            color: white; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+    
+        .btn-secondary { 
+            background: #E6EEF8; 
+            color: #0F172A; 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+        
+        @media print {
+            @page { size: auto; margin: 0mm; }
+            body { background: white; -webkit-print-color-adjust: exact; }
+            
+            /* Ensure correct print sizing regardless of screen tweaks */
+            .library-card {
+                width: 85.6mm !important;
+                height: 53.98mm !important;
+                padding: 4mm !important;
+                aspect-ratio: auto !important;
+            }
+            .card-header-bg { padding-bottom: 2mm !important; }
+            .student-avatar-img { width: 18mm !important; height: 22mm !important; }
+            .barcode-container { padding: 2mm !important; }
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* EXACT COPY FROM STUDENT-BARCODES.PHP FOR 100% MATCH */
+        /* ------------------------------------------------------------------ */
+
+        .id-card-mockup {
+            width: 500px;
+            min-width: 500px;
+            aspect-ratio: 1.586 / 1;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            box-shadow: 0 20px 40px -10px rgba(30, 58, 138, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Decorative patterns */
+        .id-card-mockup::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 250px;
+            height: 250px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .id-card-mockup::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 180px;
+            height: 180px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        .id-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .school-logo {
+            width: 48px;
+            height: 48px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #1e3a8a;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .school-logo img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+        
+        .school-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .id-card-body {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 10px 0;
+        }
+        
+        .id-card-photo {
+            width: 90px;
+            height: 110px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            backdrop-filter: blur(4px);
+            object-fit: cover;
+        }
+        
+        .id-card-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .id-card-details h3 {
+            font-size: 22px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 6px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            letter-spacing: -0.01em;
+        }
+        
+        .id-card-details p {
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            margin: 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .id-card-barcode-area {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        #card-barcode {
+            width: 100%;
+            height: 60px; /* Force match student-barcodes.php inline style */
+        }
+
+        /* Modal sizing fix override */
+        .modal-card {
+             width: auto !important;
+             max-width: 95vw !important;
+             min-width: 600px;
+        }
+
+        @media print {
+            .id-card-mockup {
+                width: 85.6mm !important;
+                height: 53.98mm !important;
+                min-width: 0 !important;
+                padding: 4mm !important;
+                box-shadow: none !important;
+                aspect-ratio: auto !important;
+            }
+            .id-card-header { padding-bottom: 2mm !important; gap: 3mm !important; }
+            .school-logo { width: 8mm !important; height: 8mm !important; border-radius: 2mm !important; } 
+            .school-name { font-size: 11pt !important; }
+            .id-card-body { padding: 2mm 0 !important; gap: 3mm !important; }
+            .id-card-photo { width: 18mm !important; height: 22mm !important; }
+            .id-card-details h3 { font-size: 14pt !important; margin-bottom: 1mm !important; }
+            .id-card-details p { font-size: 9pt !important; }
+            .id-card-barcode-area { padding: 2mm !important; }
+            #card-barcode { height: 10mm !important; }
+        }
   </style>
 </head>
 
@@ -411,7 +688,13 @@ $members = $stmt->fetchAll();
         </div>
 
         <div class="card">
-          <h2>Daftar Murid (<?= count($members) ?>)</h2>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="margin: 0;">Daftar Murid (<?= count($members) ?>)</h2>
+            <button class="btn btn-sm btn-secondary" onclick="printAllCards()">
+              <iconify-icon icon="mdi:card-multiple-outline" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+              Cetak Semua Kartu
+            </button>
+          </div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -543,39 +826,31 @@ $members = $stmt->fetchAll();
       <h3 style="margin-bottom: 20px; font-size: 18px;">Pratinjau Kartu Perpustakaan</h3>
 
       <div class="library-card-wrapper">
-        <div class="library-card" id="printableCard">
-          <div class="card-header-bg">
-            <div class="school-logo-frame">
-              <?php if (!empty($school['logo'])): ?>
-                <img src="<?= htmlspecialchars($school['logo']) ?>" alt="Logo">
-              <?php else: ?>
-                <iconify-icon icon="mdi:school" style="color:#3A7FF2; font-size:20px;"></iconify-icon>
-              <?php endif; ?>
-            </div>
-            <div class="school-info-text">
-              <h2><?= htmlspecialchars($school['name'] ?? 'Perpustakaan Digital') ?></h2>
-              <p><?= htmlspecialchars($school['address'] ?? 'Kartu Anggota Resmi') ?></p>
-            </div>
-          </div>
+        <div class="id-card-mockup" id="printableCard">
+             <div class="id-card-header">
+                <div class="school-logo">
+                    <?php if (!empty($school['logo'])): ?>
+                        <img src="<?= htmlspecialchars($school['logo']) ?>" alt="Logo">
+                    <?php else: ?>
+                        <iconify-icon icon="mdi:school"></iconify-icon>
+                    <?php endif; ?>
+                </div>
+                <div class="school-name"><?= htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN DIGITAL') ?></div>
+             </div>
+             
+             <div class="id-card-body">
+                 <img id="modal-photo" src="../assets/images/default-avatar.svg" alt="Foto" class="id-card-photo" style="display:block;">
+                 
+                 <div class="id-card-details">
+                     <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Student Name</p>
+                     <h3 id="modal-name">-</h3>
+                     <p id="modal-nisn">NISN: -</p>
+                 </div>
+             </div>
 
-          <div class="card-body-content">
-            <div class="student-profile-row">
-              <img id="modal-photo" src="../assets/images/default-avatar.svg" alt="Foto" class="student-avatar-img">
-              <div class="student-data-text">
-                <div id="modal-name" class="st-name">-</div>
-                <div class="st-id-label">Nomor Anggota</div>
-                <div id="modal-nisn" class="st-id-value">-</div>
-              </div>
-            </div>
-
-            <div class="barcode-container">
-              <svg id="card-barcode"></svg>
-            </div>
-          </div>
-
-          <div class="card-footer-strip">
-            Berlaku selama menjadi siswa aktif di sekolah ini.
-          </div>
+             <div class="id-card-barcode-area">
+                 <svg id="card-barcode" style="width: 100%; height: 60px;"></svg>
+             </div>
         </div>
       </div>
 
@@ -593,9 +868,15 @@ $members = $stmt->fetchAll();
 
   <script src="../assets/js/members.js"></script>
   <script>
+    // Inject PHP members data to JS for bulk printing
+    const allMembersData = <?= json_encode($members) ?>;
+    const schoolData = <?= json_encode($school) ?>;
+    let currentMemberData = null;
+
     function showLibraryCard(data) {
+      currentMemberData = data;
       document.getElementById('modal-name').textContent = data.name;
-      document.getElementById('modal-nisn').textContent = data.nisn;
+      document.getElementById('modal-nisn').textContent = 'NISN: ' + data.nisn;
       
       const photoEl = document.getElementById('modal-photo');
       if (data.foto) {
@@ -603,28 +884,197 @@ $members = $stmt->fetchAll();
       } else {
         photoEl.src = '../assets/images/default-avatar.svg';
       }
-
+ 
       try {
+        // EXACT options from student-barcodes.php
         JsBarcode("#card-barcode", data.nisn, {
             format: "CODE128",
-            lineColor: "#000",
-            width: 2,
-            height: 40,
             displayValue: true,
-            font: "monospace",
-            fontSize: 12,
-            marginTop: 5,
-            marginBottom: 5
+            fontSize: 14,
+            width: 2.5,
+            height: 50,
+            margin: 5
         });
       } catch (e) {
         console.error("Barcode error:", e);
       }
-
+ 
       document.getElementById('libraryCardModal').style.display = 'flex';
     }
 
+    function printLibraryCard() {
+      if (!currentMemberData) return;
+      renderPrintWindow([currentMemberData]);
+    }
+
+    function printAllCards() {
+      if (confirm(`Cetak kartu untuk ${allMembersData.length} murid?`)) {
+        renderPrintWindow(allMembersData);
+      }
+    }
+
+    function renderPrintWindow(members) {
+        const printWindow = window.open('', '_blank', 'width=900,height=600');
+        const schoolName = schoolData.name || 'PERPUSTAKAAN DIGITAL';
+        const schoolLogo = schoolData.logo || '';
+        
+        // Build card HTML with new design
+        const cardsHtml = members.map(m => {
+            const photoSrc = m.foto ? m.foto : '../assets/images/default-avatar.svg';
+            const barcodeValue = m.nisn || m.id;
+            
+            // Generate barcode off-screen for each card
+            const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            try {
+                JsBarcode(tempSvg, barcodeValue, {
+                    format: "CODE128",
+                    displayValue: true,
+                    width: 2,
+                    height: 40,
+                    fontSize: 14,
+                    margin: 0
+                });
+            } catch(e) { console.error(e); }
+
+            return `
+                <div class="library-card">
+                    <!-- Decor -->
+                    <div class="decor-circle-1"></div>
+                    <div class="decor-circle-2"></div>
+
+                    <div class="card-header">
+                        <div class="school-logo">
+                            ${schoolLogo ? `<img src="${schoolLogo}">` : '<div style="font-size:20px; color:#1e3a8a;">🏫</div>'}
+                        </div>
+                        <div class="school-info">
+                            <h2>${schoolName.toUpperCase()}</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="profile-row">
+                            <img src="${photoSrc}" class="avatar">
+                            <div class="data">
+                                <div class="name">${m.name}</div>
+                                <div class="label">Nomor Anggota</div>
+                                <div class="value">NISN: ${barcodeValue}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="barcode-area">
+                        ${tempSvg.outerHTML}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        printWindow.document.write(`
+            <html>
+            <head>
+                <title>Cetak Kartu Perpustakaan</title>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+                <style>
+                    @page { margin: 10mm; size: A4; }
+                    body { font-family: 'Inter', sans-serif; background: #fff; margin: 0; padding: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                    .print-grid { 
+                        display: grid; 
+                        grid-template-columns: repeat(2, 1fr); 
+                        gap: 20px; 
+                        justify-content: center;
+                    }
+                    .library-card {
+                        width: 90mm;
+                        height: 57mm; /* Aspect ratio roughly 1.58 */
+                        border: 1px solid #ddd;
+                        border-radius: 8mm;
+                        overflow: hidden;
+                        display: flex;
+                        flex-direction: column;
+                        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%) !important;
+                        color: white !important;
+                        padding: 5mm;
+                        position: relative;
+                        box-shadow: none;
+                        page-break-inside: avoid;
+                    }
+                    
+                    /* Decor for print */
+                    .decor-circle-1 {
+                        position: absolute; top: -15mm; right: -15mm; width: 60mm; height: 60mm;
+                        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+                        border-radius: 50%; pointer-events: none;
+                    }
+                    .decor-circle-2 {
+                        position: absolute; bottom: -10mm; left: -10mm; width: 40mm; height: 40mm;
+                        background: rgba(255,255,255,0.05);
+                        border-radius: 50%; pointer-events: none;
+                    }
+
+                    .card-header {
+                        display: flex;
+                        align-items: center;
+                        gap: 4mm;
+                        padding-bottom: 3mm;
+                        border-bottom: 0.5px solid rgba(255,255,255,0.2);
+                        position: relative; z-index: 2;
+                        margin-bottom: 3mm;
+                    }
+                    .school-logo {
+                        width: 10mm; height: 10mm;
+                        background: white; border-radius: 3mm;
+                        display: flex; align-items: center; justify-content: center;
+                        padding: 1mm;
+                    }
+                    .school-logo img { width: 100%; height: 100%; object-fit: contain; }
+                    .school-info h2 { font-size: 10pt; margin: 0; font-weight: 800; text-transform: uppercase; color: white; }
+                    
+                    .card-body { flex: 1; display: flex; flex-direction: column; position: relative; z-index: 2; }
+                    .profile-row { display: flex; gap: 4mm; align-items: center; }
+                    .avatar { 
+                        width: 22mm; height: 26mm; 
+                        border-radius: 3mm; object-fit: cover; 
+                        border: 1mm solid rgba(255,255,255,0.3); 
+                        background: rgba(255,255,255,0.1);
+                    }
+                    .data { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+                    .name { font-size: 14pt; font-weight: 800; color: white; margin-bottom: 1mm; line-height: 1.1; }
+                    .label { font-size: 8pt; color: rgba(255,255,255,0.9); margin-bottom: 0; }
+                    .value { font-size: 9pt; font-weight: 500; color: rgba(255,255,255,0.9); }
+                    
+                    .barcode-area { 
+                        margin-top: auto; 
+                        background: white; 
+                        border-radius: 3mm; 
+                        padding: 2mm 4mm; 
+                        text-align: center; 
+                        position: relative; z-index: 2;
+                        display: flex; justify-content: center; align-items: center;
+                        height: 10mm;
+                    }
+                    .barcode-area svg { width: 100%; height: 100%; }
+                </style>
+            </head>
+            <body>
+                <div class="print-grid">
+                    ${cardsHtml}
+                </div>
+                <script>
+                    window.onload = function() {
+
+                        setTimeout(() => {
+                            window.print();
+                            window.close();
+                        }, 500);
+                    };
+                <\/script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+    }
+ 
     function closeLibraryCardModal() {
       document.getElementById('libraryCardModal').style.display = 'none';
+      currentMemberData = null;
     }
 
     // Close on outside click

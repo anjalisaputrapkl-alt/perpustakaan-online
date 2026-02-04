@@ -26,127 +26,189 @@ document.querySelectorAll('.faq-question').forEach(item => {
 // Chart instances (global for potential updates)
 let borrowChart = null;
 let statusChart = null;
+let weeklyChart = null;
+let topBooksChart = null;
 
 // Initialize charts with data
 function initializeCharts(monthlyBorrows) {
-  console.log('📊 initializeCharts() called with monthly data:', monthlyBorrows);
   const borrowChartEl = document.getElementById('borrowChart');
-  console.log('   borrowChart element found:', !!borrowChartEl, borrowChartEl);
-  
   if (borrowChartEl) {
     try {
-      // Destroy existing chart if any
-      if (borrowChart !== null) {
-        console.log('   Destroying previous borrowChart...');
-        borrowChart.destroy();
-      }
-      
+      if (borrowChart !== null) borrowChart.destroy();
+      const ctx = borrowChartEl.getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+      gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+
       borrowChart = new Chart(borrowChartEl, {
         type: 'line',
         data: {
           labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
           datasets: [{
+            label: 'Peminjaman',
             data: monthlyBorrows,
-            borderColor: '#2563eb',
-            tension: 0.3
+            borderColor: '#3b82f6',
+            backgroundColor: gradient,
+            fill: true,
+            borderWidth: 3,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#3b82f6',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            tension: 0.4
           }]
         },
-        options: { plugins: { legend: { display: false } } }
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false }, ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } } }, x: { grid: { display: false, drawBorder: false }, ticks: { color: '#64748b', font: { family: 'Inter', size: 11 } } } }
+        }
       });
-      console.log('   ✅ borrowChart initialized successfully');
-    } catch (error) {
-      console.error('   ❌ Error initializing borrowChart:', error);
-    }
-  } else {
-    console.warn('   ⚠️ borrowChart element NOT found in DOM');
+    } catch (error) { console.error('Error borrowChart:', error); }
   }
 }
 
 function initializeStatusChart(totalAvailable, totalBorrowed, totalOverdue) {
-  console.log('📊 initializeStatusChart() called with:', {totalAvailable, totalBorrowed, totalOverdue});
   const statusChartEl = document.getElementById('statusChart');
-  console.log('   statusChart element found:', !!statusChartEl, statusChartEl);
-  
   if (statusChartEl) {
     try {
-      // Destroy existing chart if any
-      if (statusChart !== null) {
-        console.log('   Destroying previous chart...');
-        statusChart.destroy();
-      }
-      
+      if (statusChart !== null) statusChart.destroy();
       statusChart = new Chart(statusChartEl, {
         type: 'doughnut',
         data: {
           labels: ['Tersedia', 'Dipinjam', 'Terlambat'],
           datasets: [{
-            data: [
-              totalAvailable,
-              totalBorrowed,
-              totalOverdue
-            ],
-            backgroundColor: ['#16a34a', '#2563eb', '#dc2626']
+            data: [totalAvailable, totalBorrowed, totalOverdue],
+            backgroundColor: ['#10b981', '#3b82f6', '#ef4444'],
+            borderWidth: 0,
+            hoverOffset: 15
           }]
         },
-        options: { 
-          plugins: { legend: { position: 'bottom' } } 
+        options: {
+          responsive: true, maintainAspectRatio: false, cutout: '75%',
+          plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20, font: { family: 'Inter', size: 12, weight: 500 }, color: '#64748b' } }, tooltip: { backgroundColor: '#0f172a', padding: 12, cornerRadius: 8 } }
         }
       });
-      console.log('   ✅ statusChart initialized successfully');
-    } catch (error) {
-      console.error('   ❌ Error initializing statusChart:', error);
-    }
-  } else {
-    console.warn('   ⚠️ statusChart element NOT found in DOM');
+    } catch (error) { console.error('Error statusChart:', error); }
   }
+}
+
+function initializeWeeklyTrendChart(weeklyTrend) {
+  const weeklyChartEl = document.getElementById('weeklyChart');
+  if (weeklyChartEl) {
+    try {
+      if (weeklyChart !== null) weeklyChart.destroy();
+      const labels = weeklyTrend.map(d => d.label);
+      const data = weeklyTrend.map(d => d.count);
+
+      weeklyChart = new Chart(weeklyChartEl, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Peminjaman',
+            data: data,
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            borderWidth: 3,
+            tension: 0.4,
+            pointBackgroundColor: '#10b981'
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+        }
+      });
+    } catch (e) { console.error(e); }
+  }
+}
+
+function initializeTopBooksChart(topBooks) {
+  const topBooksChartEl = document.getElementById('topBooksChart');
+  if (topBooksChartEl) {
+    try {
+      if (topBooksChart !== null) topBooksChart.destroy();
+      const labels = topBooks.map(b => b.title.length > 20 ? b.title.substring(0, 20) + '...' : b.title);
+      const data = topBooks.map(b => b.borrow_count);
+
+      topBooksChart = new Chart(topBooksChartEl, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Pinjam',
+            data: data,
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            borderRadius: 8,
+            hoverBackgroundColor: '#3b82f6'
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } }
+        }
+      });
+    } catch (e) { console.error(e); }
+  }
+}
+
+function renderTopMembers(topMembers) {
+  const container = document.getElementById('top-members-list');
+  if (!container) return;
+
+  if (topMembers.length === 0) {
+    container.innerHTML = '<div class="empty-activity">Belum ada data</div>';
+    return;
+  }
+
+  container.innerHTML = topMembers.map((m, index) => `
+        <div class="top-item">
+            <div class="top-rank">${index + 1}</div>
+            <div class="top-info">
+                <div class="top-name">${m.name}</div>
+                <div class="top-meta">Anggota Perpustakaan</div>
+            </div>
+            <div class="top-count">${m.borrow_count} <span>Buku</span></div>
+        </div>
+    `).join('');
 }
 
 // Auto-fetch dashboard statistics and initialize charts
 async function loadDashboardStats() {
   try {
-    console.log('🚀 loadDashboardStats() called!');
     const apiUrl = '/perpustakaan-online/public/api/dashboard-stats.php';
-    console.log('📡 Fetching from:', apiUrl);
-    const response = await fetch(apiUrl, {
-      credentials: 'include',
-      method: 'GET'
-    });
-
-    if (!response.ok) {
-      console.error('❌ HTTP Error:', response.status, response.statusText);
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
+    const response = await fetch(apiUrl, { credentials: 'include', method: 'GET' });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
-    console.log('✅ API Response received:', data);
-    
+
     if (data.success) {
-      console.log('📊 Dashboard stats loaded:', data.stats);
-      
       // Update stat card values
       document.getElementById('stat-books').textContent = data.stats.total_books;
       document.getElementById('stat-members').textContent = data.stats.total_members;
       document.getElementById('stat-borrowed').textContent = data.stats.total_borrowed;
       document.getElementById('stat-overdue').textContent = data.stats.total_overdue;
-      console.log('✅ Stat cards updated');
-      
-      // Initialize charts with fetched data
+
+      // Initialize all charts
       initializeCharts(data.chart_data.monthly_chart);
-      initializeStatusChart(
-        data.stats.total_available,
-        data.stats.total_borrowed,
-        data.stats.total_overdue
-      );
-      console.log('✅ Charts initialized with API data');
-    } else {
-      console.error('⚠️ API returned success=false:', data.message);
+      initializeStatusChart(data.stats.total_available, data.stats.total_borrowed, data.stats.total_overdue);
+      initializeWeeklyTrendChart(data.chart_data.weekly_trend);
+      initializeTopBooksChart(data.chart_data.top_books);
+      renderTopMembers(data.chart_data.top_members);
     }
   } catch (error) {
-    console.error('❌ Error loading dashboard stats:', error);
-    // Fallback: Initialize with default values if API fails
-    console.warn('⚠️ Initializing charts with default values');
-    initializeCharts([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    console.error('Error loading dashboard stats:', error);
+    // Silent fallbacks for empty charts
+    initializeCharts(Array(12).fill(0));
     initializeStatusChart(0, 0, 0);
+    initializeWeeklyTrendChart([]);
+    initializeTopBooksChart([]);
+    renderTopMembers([]);
   }
 }
 

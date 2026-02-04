@@ -590,11 +590,7 @@ $pageTitle = 'Koleksi Favorit';
             margin-bottom: 8px;
         }
 
-        .favorites-grid .book-card-category::before {
-            content: '◆';
-            font-size: 8px;
-            display: inline-block;
-        }
+
 
         .favorites-grid .book-card-action {
             margin-top: auto;
@@ -607,7 +603,6 @@ $pageTitle = 'Koleksi Favorit';
             justify-content: space-between;
         }
 
-        .favorites-grid .btn-borrow,
         .favorites-grid .btn-detail {
             flex: 1;
             padding: 10px 8px;
@@ -624,17 +619,6 @@ $pageTitle = 'Koleksi Favorit';
             white-space: nowrap;
         }
 
-        .favorites-grid .btn-borrow {
-            background: var(--accent);
-            color: white;
-            flex: 1.2;
-        }
-
-        .favorites-grid .btn-borrow:hover {
-            background: #062d4a;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(58, 127, 242, 0.3);
-        }
 
         .favorites-grid .btn-detail {
             background: var(--bg);
@@ -647,7 +631,6 @@ $pageTitle = 'Koleksi Favorit';
             transform: translateY(-2px);
         }
 
-        .favorites-grid .btn-borrow iconify-icon,
         .favorites-grid .btn-detail iconify-icon {
             width: 14px;
             height: 14px;
@@ -1087,22 +1070,7 @@ $pageTitle = 'Koleksi Favorit';
             gap: 6px;
         }
 
-        .modal-btn-borrow {
-            background: var(--accent);
-            color: white;
-        }
 
-        .modal-btn-borrow:hover:not(:disabled) {
-            background: #062d4a;
-            transform: translateY(-1px);
-        }
-
-        .modal-btn-borrow:disabled {
-            background: var(--border);
-            color: var(--text-muted);
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
 
         .modal-btn-close {
             background: var(--bg);
@@ -1190,7 +1158,6 @@ $pageTitle = 'Koleksi Favorit';
                 font-size: 13px;
             }
 
-            .favorites-grid .btn-borrow,
             .favorites-grid .btn-detail {
                 font-size: 11px;
                 padding: 8px 6px;
@@ -1487,14 +1454,7 @@ $pageTitle = 'Koleksi Favorit';
         <!-- Favorites Grid Section -->
         <div>
             <!-- Header dengan Stats -->
-            <div style="margin-bottom: 24px;">
-                <h2
-                    style="font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0 0 16px 0;">
-                    <iconify-icon icon="mdi:heart" style="color: var(--success);"></iconify-icon>
-                    Koleksi Favorit
-                    <span class="favorites-count" id="favoritesCountBadge"><?php echo count($favorites); ?> Buku</span>
-                </h2>
-            </div>
+
 
             <!-- Search, Filter, dan Sort Bar -->
             <?php if (!empty($favorites)): ?>
@@ -1569,10 +1529,6 @@ $pageTitle = 'Koleksi Favorit';
                                 <p class="book-card-category"><?php echo htmlspecialchars($fav['buku_kategori'] ?? 'Umum'); ?>
                                 </p>
                                 <div class="book-card-actions">
-                                    <button class="btn-borrow"
-                                        onclick="borrowBook(<?php echo $fav['id_buku']; ?>, '<?php echo htmlspecialchars(str_replace("'", "\\'", $fav['judul'])); ?>')">
-                                        Pinjam
-                                    </button>
                                     <button class="btn-detail" onclick="viewDetail(<?php echo $fav['id_buku']; ?>)">
                                         Detail
                                     </button>
@@ -1619,25 +1575,17 @@ $pageTitle = 'Koleksi Favorit';
                             <span class="modal-book-item-value" id="modalBookISBN">-</span>
                         </div>
 
-                        <div class="modal-book-item">
-                            <span class="modal-book-item-label">Jumlah Tersedia</span>
-                            <span class="modal-book-item-value" id="modalBookCopies">-</span>
-                        </div>
+
 
                         <div class="modal-book-item">
                             <span class="modal-book-item-label">Lokasi Rak</span>
                             <span class="modal-book-item-value" id="modalBookShelf">-</span>
                         </div>
 
-                        <div class="modal-book-item">
-                            <span class="modal-book-item-label">Status</span>
-                            <span class="modal-book-status" id="modalBookStatus">-</span>
-                        </div>
+
                     </div>
 
                     <div class="modal-actions">
-                        <button class="modal-btn modal-btn-borrow" id="modalBorrowBtn"
-                            onclick="borrowFromModal()">Pinjam</button>
                         <button class="modal-btn modal-btn-close" onclick="closeBookModal()">Tutup</button>
                     </div>
                 </div>
@@ -1901,12 +1849,7 @@ $pageTitle = 'Koleksi Favorit';
                     <p class="book-card-author">${fav.penulis || '-'}</p>
                     <p class="book-card-category">${fav.buku_kategori || 'Umum'}</p>
                     <div class="book-card-actions">
-                        <button class="btn-borrow" onclick="borrowBook(${fav.id_buku}, '${fav.judul.replace(/'/g, "\\'")}')">
-                            <iconify-icon icon="mdi:download-circle" width="14" height="14"></iconify-icon>
-                            Pinjam
-                        </button>
                         <button class="btn-detail" onclick="viewDetail(${fav.id_buku})">
-                            <iconify-icon icon="mdi:information" width="14" height="14"></iconify-icon>
                             Detail
                         </button>
                     </div>
@@ -2007,23 +1950,7 @@ $pageTitle = 'Koleksi Favorit';
             document.getElementById('modalBookAuthor').textContent = bookData.author || '-';
             document.getElementById('modalBookCategory').textContent = bookData.category || 'Umum';
             document.getElementById('modalBookISBN').textContent = bookData.isbn || '-';
-            document.getElementById('modalBookCopies').textContent = bookData.copies || '0';
             document.getElementById('modalBookShelf').textContent = (bookData.shelf || '-') + (bookData.row_number ? ' (Baris ' + bookData.row_number + ')' : '');
-
-            // Set status
-            const isAvailable = (bookData.copies || 1) > 0;
-            const statusEl = document.getElementById('modalBookStatus');
-            if (isAvailable) {
-                statusEl.textContent = 'Tersedia';
-                statusEl.className = 'modal-book-status available';
-            } else {
-                statusEl.textContent = 'Tidak Tersedia';
-                statusEl.className = 'modal-book-status unavailable';
-            }
-
-            // Enable/disable borrow button
-            const borrowBtn = document.getElementById('modalBorrowBtn');
-            borrowBtn.disabled = !isAvailable;
 
             // Show modal
             document.getElementById('bookModal').classList.add('active');
@@ -2034,12 +1961,6 @@ $pageTitle = 'Koleksi Favorit';
             currentBookData = null;
         }
 
-        function borrowFromModal() {
-            if (currentBookData) {
-                borrowBook(currentBookData.id, currentBookData.title);
-                closeBookModal();
-            }
-        }
 
         // Close modal when clicking outside
         document.getElementById('bookModal')?.addEventListener('click', (e) => {
@@ -2047,34 +1968,6 @@ $pageTitle = 'Koleksi Favorit';
                 closeBookModal();
             }
         });
-
-        // Borrow book
-        function borrowBook(bookId, bookTitle) {
-            if (!confirm('Apakah Anda ingin meminjam ' + bookTitle + '?')) {
-                return;
-            }
-
-            fetch('api/borrow-book.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: 'book_id=' + bookId
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert('Buku berhasil dipinjam! Silakan ambil di perpustakaan.');
-                        location.reload();
-                    } else {
-                        alert(data.message || 'Gagal meminjam buku');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan');
-                });
-        }
 
         // ============================================
         // INITIALIZATION
