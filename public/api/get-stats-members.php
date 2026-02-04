@@ -1,9 +1,14 @@
 <?php
 header('Content-Type: application/json');
-require __DIR__ . '/../../src/auth.php';
-requireAuth();
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
 
-$pdo = require __DIR__ . '/../../src/db.php';
+try {
+    require __DIR__ . '/../../src/auth.php';
+    requireAuth();
+    
+    $pdo = require __DIR__ . '/../../src/db.php';
 $user = $_SESSION['user'];
 $school_id = $user['school_id'];
 
@@ -44,10 +49,19 @@ try {
         'total' => count($data)
     ]);
 } catch (Exception $e) {
+    error_log('get-stats-members.php Error: ' . $e->getMessage());
     http_response_code(500);
     echo json_encode([
         'success' => false,
         'message' => 'Error: ' . $e->getMessage()
+    ]);
+}
+} catch (Exception $e) {
+    error_log('get-stats-members.php Fatal Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ':' . $e->getLine());
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Server error occurred'
     ]);
 }
 ?>
