@@ -20,11 +20,11 @@ requireAuth();
 
         body {
             font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #121212; /* Dark theme */
+            background: #121212;
             color: white;
             margin: 0;
             padding: 0;
-            height: 100vh;
+            height: 100dvh; /* Dynamic viewport height */
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -35,18 +35,18 @@ requireAuth();
             width: 100%;
             height: 100%;
             overflow: hidden;
+            background: #000;
+            flex: 1;
         }
 
         /* Fullscreen Reader */
         #reader {
             width: 100% !important;
             height: 100% !important;
-            object-fit: cover;
             position: absolute;
             top: 0;
             left: 0;
             z-index: 1;
-            background: black;
         }
         
         #reader video {
@@ -62,14 +62,18 @@ requireAuth();
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2;
+            z-index: 20;
             display: flex;
             flex-direction: column;
-            pointer-events: none; /* Let clicks pass through to potential controls */
+            pointer-events: none;
         }
 
         /* Top Bar */
         .top-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             padding: 20px;
             padding-top: max(20px, env(safe-area-inset-top));
             background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
@@ -77,6 +81,8 @@ requireAuth();
             justify-content: space-between;
             align-items: center;
             pointer-events: auto;
+            z-index: 30;
+            box-sizing: border-box;
         }
 
         .app-title {
@@ -92,28 +98,68 @@ requireAuth();
         /* Scanner Overlay & Laser */
         .scan-region {
             flex: 1;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
         }
 
+        /* Scan Target Box */
+        .scan-target {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            border-radius: 20px;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+            pointer-events: none;
+            z-index: 5;
+        }
 
+        .scan-target::after {
+            content: '';
+            position: absolute;
+            top: -2px; left: -2px; right: -2px; bottom: -2px;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            background: linear-gradient(to right, var(--primary), var(--primary)) top left / 30px 3px no-repeat,
+                        linear-gradient(to down, var(--primary), var(--primary)) top left / 3px 30px no-repeat,
+                        linear-gradient(to left, var(--primary), var(--primary)) top right / 30px 3px no-repeat,
+                        linear-gradient(to down, var(--primary), var(--primary)) top right / 3px 30px no-repeat,
+                        linear-gradient(to right, var(--primary), var(--primary)) bottom left / 30px 3px no-repeat,
+                        linear-gradient(to up, var(--primary), var(--primary)) bottom left / 3px 30px no-repeat,
+                        linear-gradient(to left, var(--primary), var(--primary)) bottom right / 30px 3px no-repeat,
+                        linear-gradient(to up, var(--primary), var(--primary)) bottom right / 3px 30px no-repeat;
+            opacity: 0.8;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
 
         /* Controls Area */
         .controls-area {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             background: #1e1e1e;
             padding: 24px;
             padding-bottom: max(24px, env(safe-area-inset-bottom));
             border-radius: 24px 24px 0 0;
             pointer-events: auto;
-            max-height: 45vh;
+            max-height: 50dvh; /* Limit height */
             display: flex;
             flex-direction: column;
             box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative; /* Ensure z-index works */
-            z-index: 50; /* Higher than scanner layers */
+            z-index: 1000;
+            box-sizing: border-box;
         }
 
         .mode-switch {
@@ -121,7 +167,8 @@ requireAuth();
             background: #333;
             border-radius: 100px;
             padding: 4px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
+            flex-shrink: 0;
         }
 
         .mode-btn {
@@ -147,13 +194,10 @@ requireAuth();
         .scanned-list {
             flex: 1;
             overflow-y: auto;
-            margin-bottom: 20px;
-            min-height: 0; /* Allow shrinking */
-            scrollbar-width: none; /* Firefox */
-        }
-        
-        .scanned-list::-webkit-scrollbar {
-            display: none;
+            margin-bottom: 16px;
+            min-height: 100px; /* Minimum height for list */
+            scrollbar-width: thin;
+            scrollbar-color: #444 transparent;
         }
         
         .empty-placeholder {
@@ -166,19 +210,19 @@ requireAuth();
         .scanned-item {
             display: flex;
             align-items: center;
-            padding: 12px;
+            padding: 10px;
             background: #2a2a2a;
             border-radius: 12px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             animation: slideUp 0.3s ease;
             border: 1px solid #333;
         }
 
         .item-cover {
-            width: 40px;
-            height: 56px;
+            width: 36px;
+            height: 52px;
             background: #444;
-            border-radius: 6px;
+            border-radius: 4px;
             object-fit: cover;
             margin-right: 12px;
         }
@@ -189,9 +233,9 @@ requireAuth();
         }
 
         .item-title {
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             color: white;
             white-space: nowrap;
             overflow: hidden;
@@ -207,8 +251,8 @@ requireAuth();
             background: rgba(255, 82, 82, 0.1);
             border: none;
             color: #FF5252;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -221,16 +265,17 @@ requireAuth();
             display: grid;
             grid-template-columns: 1fr auto;
             gap: 12px;
+            flex-shrink: 0; /* Prevent shrinking */
         }
 
         .btn-main {
             background: var(--success);
             color: white;
             border: none;
-            padding: 16px;
+            padding: 14px;
             border-radius: 14px;
             font-weight: 700;
-            font-size: 16px;
+            font-size: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -248,7 +293,7 @@ requireAuth();
             background: #333;
             color: white;
             border: none;
-            width: 52px;
+            width: 48px;
             border-radius: 14px;
             cursor: pointer;
             display: flex;
@@ -257,12 +302,7 @@ requireAuth();
             font-size: 20px;
         }
 
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Status Toast */
+        /* Status Toast - Matched to Return Page */
         .toast {
             position: absolute;
             top: 100px;
@@ -273,14 +313,9 @@ requireAuth();
             padding: 12px 24px;
             border-radius: 50px;
             font-size: 14px;
-            font-weight: 500;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             opacity: 0;
-            white-space: nowrap;
+            transition: all 0.3s;
             z-index: 10;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            backdrop-filter: blur(8px);
         }
         
         .toast.show {
@@ -288,60 +323,52 @@ requireAuth();
             transform: translateX(-50%) translateY(0);
         }
 
-        .toast.error { background: rgba(255, 61, 0, 0.9); }
-        .toast.success { background: rgba(0, 200, 83, 0.9); }
+        .toast.error { background: var(--danger); border: none; color: white; }
+        .toast.success { background: var(--success); border: none; color: white; }
 
-        @keyframes slideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        /* Member Badge */
-        .member-badge {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 50px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 13px;
-            font-weight: 600;
-            display: none;
-        }
-        
-        .member-badge.active {
-            display: flex;
-            background: rgba(0, 200, 83, 0.2);
-            border-color: rgba(0, 200, 83, 0.5);
-            color: #69f0ae;
-            animation: slideDown 0.3s;
-        }
-        
-        @keyframes slideDown {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .logout-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: none;
+        .btn-back {
+            background: #333;
             color: white;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(4px);
+            gap: 8px;
+            margin-top: 12px;
+            box-sizing: border-box;
+            font-size: 14px;
         }
 
-        /* Loading Overlay Adjusted */
+        /* Loading Overlay - Matched to Return Page */
         .loading-overlay {
-            background: rgba(0,0,0,0.85) !important;
-            backdrop-filter: blur(5px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .loading-overlay.show {
+            display: flex;
+        }
+    </style>
+    <style>
+        @keyframes spin { 
+            from { transform: rotate(0deg); } 
+            to { transform: rotate(360deg); } 
         }
     </style>
 </head>
@@ -350,30 +377,25 @@ requireAuth();
     <div class="scanner-container">
         <!-- QR Reader -->
         <div id="reader"></div>
+        <!-- Scan Target Box Removed to match Return Page -->
 
         <!-- UI Layer -->
         <div class="ui-layer">
             <!-- Top Bar -->
             <div class="top-bar">
                 <div class="app-title">
-                    <iconify-icon icon="mdi:barcode-scan"></iconify-icon>
-                    Scanner
+                    <iconify-icon icon="mdi:barcode-scan" style="color: var(--primary);"></iconify-icon>
+                    Scanner Peminjaman
                 </div>
                 <!-- Member Badge -->
                 <div class="member-badge" id="memberBadge">
                     <iconify-icon icon="mdi:account"></iconify-icon>
                     <span id="badgeName"></span>
                 </div>
-                
-                <button class="logout-btn" onclick="document.getElementById('logoutForm').submit()">
-                    <iconify-icon icon="mdi:logout"></iconify-icon>
-                </button>
             </div>
 
-            <!-- Scanning Region -->
-            <div class="scan-region">
-
-                <!-- Toast Message -->
+            <!-- Toast Message -->
+            <div style="flex: 1; display: flex; align-items: center; justify-content: center; position: relative; pointer-events: none;">
                 <div class="toast" id="toastMessage"></div>
             </div>
 
@@ -397,6 +419,11 @@ requireAuth();
                         <iconify-icon icon="mdi:delete-outline"></iconify-icon>
                     </button>
                 </div>
+
+                <a href="borrows.php" class="btn-back" id="backBtnContainer">
+                    <iconify-icon icon="mdi:arrow-left"></iconify-icon>
+                    Kembali ke Dashboard
+                </a>
             </div>
         </div>
     </div>
@@ -406,9 +433,13 @@ requireAuth();
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="spinner"></div>
-        <p>Memproses...</p>
+        <iconify-icon icon="mdi:loading" style="font-size: 40px; color: var(--primary); animation: spin 1s linear infinite;"></iconify-icon>
+        <p style="margin-top: 16px; font-weight: 600;">Memproses...</p>
     </div>
+
+    <!-- Audio Sounds -->
+    <audio id="soundSuccess" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+    <audio id="soundError" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
 
     <!-- Html5 QRCode Library -->
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -431,19 +462,27 @@ requireAuth();
         // ============================================================================
 
         function initScanner() {
-            console.log('[INIT] Starting scanner...');
+            // Calculate best aspect ratio for camera
+            const aspectRatio = window.innerWidth / window.innerHeight;
+            
             scanner = new Html5Qrcode("reader");
+            
+            const config = { 
+                fps: 10,
+                qrbox: { width: 280, height: 130 },
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            };
 
             scanner.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 280, height: 130 } }, // Rectangular box for barcodes
+                config, 
                 onScanSuccess,
                 onScanError
             ).then(() => {
-                console.log('[SCANNER] Started');
                 showToast('Siap memindai', 'info');
             }).catch(err => {
-                console.error('[SCANNER] Error:', err);
                 showToast('Gagal mengakses kamera', 'error');
             });
         }
@@ -452,9 +491,6 @@ requireAuth();
             const now = Date.now();
             if (now - lastScannedTime < SCAN_DELAY) return;
             lastScannedTime = now;
-
-            // Visual feedback
-
 
             processBarcode(text.trim());
         }
@@ -483,8 +519,7 @@ requireAuth();
 
         async function processBarcode(barcode) {
             const parsedBarcode = parseBarcode(barcode);
-            console.log('[PROCESS]', parsedBarcode, scanMode);
-
+            
             showLoading(true);
 
             try {
@@ -497,6 +532,7 @@ requireAuth();
                 const data = await response.json();
 
                 if (!data.success) {
+                    playSound('error');
                     showToast('Data tidak ditemukan', 'error');
                     showLoading(false);
                     return;
@@ -507,17 +543,26 @@ requireAuth();
                      if (data.data.type !== 'member') {
                         // Intelligent auto-switch
                         if (data.data.type === 'book') {
+                            playSound('success');
                             showToast('Buku terdeteksi. Mode: Buku', 'info');
                             switchMode('book');
-                            processBarcode(barcode);
+                            // Re-process as book immediately? Maybe risky for recursion/state. 
+                            // Better to just let user scan again or handle it. 
+                            // Let's call processBarcode recursively safely? 
+                            // No, let's just switch mode and ask to scan again to be safe and clear.
+                            // Actually, better UX: just handle it.
+                            scanMode = 'book'; // Force update local var
+                            processBarcode(barcode); // Retry with new mode
                             return;
                         }
+                        playSound('error');
                         showToast('Bukan kartu anggota!', 'error');
                         showLoading(false);
                         return;
                     }
                     currentMember = data.data;
                     updateMemberUI();
+                    playSound('success');
                     
                     if (scannedBooks.length > 0) {
                         showToast(`Anggota: ${currentMember.name}`, 'success');
@@ -531,17 +576,21 @@ requireAuth();
                      if (data.data.type !== 'book') {
                          // Intelligent auto-switch
                         if (data.data.type === 'member') {
+                            playSound('success');
                             showToast('Kartu anggota terdeteksi', 'info');
                             switchMode('member');
+                            scanMode = 'member';
                             processBarcode(barcode);
                             return;
                         }
+                        playSound('error');
                         showToast('Bukan kode buku!', 'error');
                         showLoading(false);
                         return;
                     }
 
                     if (scannedBooks.some(b => b.book_id === data.data.id)) {
+                        playSound('error');
                         showToast('Buku sudah ada', 'error');
                     } else {
                         scannedBooks.push({
@@ -550,16 +599,14 @@ requireAuth();
                             cover_image: data.data.cover_image
                         });
                         updateScannedList();
+                        playSound('success');
                         showToast('Buku ditambahkan', 'success');
-
-                        if (!currentMember) {
-                           // Stay in book mode 
-                        }
                     }
                 }
 
             } catch (error) {
                 console.error(error);
+                playSound('error');
                 showToast('Error koneksi', 'error');
             }
 
@@ -570,6 +617,7 @@ requireAuth();
             if (scannedBooks.length === 0) return;
 
             if (!currentMember) {
+                playSound('error');
                 showToast('Scan kartu anggota dulu!', 'error');
                 switchMode('member');
                 return;
@@ -592,20 +640,30 @@ requireAuth();
                 const data = await response.json();
 
                 if (data.success) {
+                    playSound('success');
                     showToast('Peminjaman Berhasil!', 'success');
-                    scannedBooks = [];
-                    updateScannedList();
-                    currentMember = null;
-                    updateMemberUI();
-                    switchMode('book');
+                    // Small delay to let user see toast
+                    setTimeout(() => {
+                        window.location.href = 'borrows.php';
+                    }, 1500);
                 } else {
+                    playSound('error');
                     showToast(data.message || 'Gagal', 'error');
                 }
             } catch (error) {
+                playSound('error');
                 showToast('Error koneksi', 'error');
             }
 
             showLoading(false);
+        }
+
+        function playSound(type) {
+            const audio = document.getElementById(type === 'success' ? 'soundSuccess' : 'soundError');
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(e => console.log('Audio play failed', e));
+            }
         }
 
         // ============================================================================
@@ -616,8 +674,6 @@ requireAuth();
             scanMode = mode;
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(mode === 'book' ? 'btnModeBook' : 'btnModeMember').classList.add('active');
-            
-            // Optional: Change laser color or UI hint?
         }
 
         function updateMemberUI() {
@@ -635,15 +691,28 @@ requireAuth();
         function updateScannedList() {
             const container = document.getElementById('scannedListMini');
             const actionBar = document.getElementById('actionBar');
+            const backBtn = document.getElementById('backBtnContainer');
             
             if (scannedBooks.length === 0) {
                 container.innerHTML = '<div class="empty-placeholder">Belum ada buku discan</div>';
                 actionBar.style.display = 'none';
+                backBtn.style.display = 'block'; // Show back button when empty
                 return;
             }
 
             actionBar.style.display = 'grid';
-            document.getElementById('btnCount').textContent = scannedBooks.length;
+            backBtn.style.display = 'none'; // Hide back button when active (or keep it? Return page always has it. Let's keep it but maybe below?)
+            // Actually return page hides back button when card is up? No, return page always shows back button.
+            // But here "Action Bar" replaces the space.
+            // Let's put Back button inside action bar or below it?
+            
+            // Re-evaluating: Scan Return has "Return Card" (content) THEN "Action Bar" (Back Button).
+            // Here we have "Scanned List" (content) THEN "Action Bar" (Submit/Clear).
+            // We should add a "Back" button to the Action Bar or separate row.
+            
+            // Let's modify the HTML structure in a separate call to handle layout better. 
+            // For now, let's just make sure list updates correctly.
+             document.getElementById('btnCount').textContent = scannedBooks.length;
 
             container.innerHTML = scannedBooks.map((book, index) => `
                 <div class="scanned-item">
@@ -661,7 +730,6 @@ requireAuth();
                 </div>
             `).join('');
             
-            // Scroll to bottom
             container.scrollTop = container.scrollHeight;
         }
 
@@ -690,8 +758,17 @@ requireAuth();
 
         function showLoading(show) {
             const el = document.getElementById('loadingOverlay');
-            if (show) el.classList.add('show');
-            else el.classList.remove('show');
+             if (show) {
+                el.style.display = 'flex';
+                // Trigger reflow
+                el.offsetHeight; 
+                el.style.opacity = '1';
+            } else {
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    if (el.style.opacity === '0') el.style.display = 'none';
+                }, 300);
+            }
         }
 
         function escapeHtml(text) {

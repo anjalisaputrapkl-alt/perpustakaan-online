@@ -8,14 +8,32 @@ $sid = $user['school_id'];
 
 // Handle return confirmation
 if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])) {
-  $stmt = $pdo->prepare(
-    'UPDATE borrows SET returned_at=NOW(), status="returned"
-     WHERE id=:id AND school_id=:sid'
-  );
-  $stmt->execute([
-    'id' => (int) $_GET['id'],
-    'sid' => $sid
-  ]);
+  $pdo->beginTransaction();
+  try {
+    // 1. Get book_id
+    $stmt = $pdo->prepare('SELECT book_id FROM borrows WHERE id=:id AND school_id=:sid');
+    $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
+    $borrowData = $stmt->fetch();
+    
+    if ($borrowData) {
+      // 2. Update borrows
+      $stmt = $pdo->prepare(
+        'UPDATE borrows SET returned_at=NOW(), status="returned"
+         WHERE id=:id AND school_id=:sid'
+      );
+      $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
+
+      // 3. Update stock
+      $stmt = $pdo->prepare('UPDATE books SET copies = copies + 1 WHERE id = :bid');
+      $stmt->execute(['bid' => $borrowData['book_id']]);
+      
+      $pdo->commit();
+    } else {
+      $pdo->rollBack();
+    }
+  } catch (Exception $e) {
+    if ($pdo->inTransaction()) $pdo->rollBack();
+  }
   header('Location: borrows.php');
   exit;
 }
@@ -176,8 +194,12 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
             const SCAN_COOLDOWN = 1500;
 
             function toggleScanner() {
+                // Robust mobile detection
+                const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(navigator.userAgent) || window.innerWidth <= 1024;
+
                 // If mobile, go to dedicated mobile scanner page
-                if (window.innerWidth <= 768) {
+                if (isMobile) {
+                    console.log('Detected mobile device, redirecting to scan-mobile.php');
                     window.location.href = 'scan-mobile.php';
                     return;
                 }
