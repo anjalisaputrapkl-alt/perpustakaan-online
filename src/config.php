@@ -5,5 +5,12 @@ return [
     'db_name' => 'perpustakaan_online',
     'db_user' => 'root',
     'db_pass' => '',
-    'base_url' => 'http://localhost/perpustakaan-online/public'
+    'base_url' => 'http://localhost/perpustakaan-online/public',
+    'smtp' => [
+        'host' => 'smtp.gmail.com',
+        'port' => 465, // SSL
+        'username' => 'anjalisaputrapkl@gmail.com', // Ganti dengan email Anda
+        'password' => 'gyvd sxxy swir wytx', // Ganti dengan App Password (bukan password login biasa)
+        'from_name' => 'Perpustakaan Online'
+    ]
 ];

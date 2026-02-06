@@ -798,19 +798,33 @@ $pageTitle = 'Dashboard Siswa';
         }
 
         // Toggle favorite
+        // Toggle favorite (Optimistic UI Update)
         async function toggleFavorite(e, bookId, bookTitle) {
             e.preventDefault();
             e.stopPropagation();
 
             const btn = e.currentTarget;
             const icon = btn.querySelector('iconify-icon');     
-            const isLoved = btn.classList.contains('loved');
+            const wasLoved = btn.classList.contains('loved');
+
+            // 1. Optimistic UI Update (Langsung update tampilan)
+            if (wasLoved) {
+                btn.classList.remove('loved');
+                icon.setAttribute('icon', 'mdi:heart-outline');
+                favorites.delete(bookId);
+            } else {
+                btn.classList.add('loved');
+                icon.setAttribute('icon', 'mdi:heart');
+                favorites.add(bookId);
+            }
 
             try {
                 const formData = new FormData();
                 formData.append('id_buku', bookId);
 
-                const action = isLoved ? 'remove' : 'add';
+                const action = wasLoved ? 'remove' : 'add';
+                
+                // 2. Kirim request di background
                 const response = await fetch(`/perpustakaan-online/public/api/favorites.php?action=${action}`, {
                     method: 'POST',
                     body: formData
@@ -818,22 +832,27 @@ $pageTitle = 'Dashboard Siswa';
 
                 const data = await response.json();
 
-                if (data.success) {
-                    if (isLoved) {
-                        btn.classList.remove('loved');
-                        icon.setAttribute('icon', 'mdi:heart-outline');
-                        favorites.delete(bookId);
-                    } else {
-                        btn.classList.add('loved');
-                        icon.setAttribute('icon', 'mdi:heart');
-                        favorites.add(bookId);
-                    }
-                } else {
-                    alert('Error: ' + data.message);
+                // 3. Revert jika gagal
+                if (!data.success) {
+                    throw new Error(data.message || 'Gagal mengubah status');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Gagal mengubah favorite');
+                
+                // Revert UI ke state awal
+                if (wasLoved) {
+                    btn.classList.add('loved');
+                    icon.setAttribute('icon', 'mdi:heart');
+                    favorites.add(bookId);
+                } else {
+                    btn.classList.remove('loved');
+                    icon.setAttribute('icon', 'mdi:heart-outline');
+                    favorites.delete(bookId);
+                }
+                
+                // Gunakan Toast atau alert kecil daripada alert() yang blocking
+                // Tapi untuk sekarang alert cukup sebagai fallback
+                // alert('Gagal: ' + error.message); 
             }
         }
 

@@ -57,6 +57,13 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($action === 'edit' && isset($_GET['id'])) {
   $id = (int) $_GET['id'];
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // 1. Ambil NISN lama sebelum update untuk acuan update ke tabel users
+    $oldMemberStmt = $pdo->prepare('SELECT nisn FROM members WHERE id=:id AND school_id=:sid');
+    $oldMemberStmt->execute(['id' => $id, 'sid' => $sid]);
+    $oldMember = $oldMemberStmt->fetch();
+    $oldNisn = $oldMember['nisn'] ?? $_POST['nisn'];
+
+    // 2. Update tabel members
     $stmt = $pdo->prepare(
       'UPDATE members SET name=:name,email=:email,nisn=:nisn,max_pinjam=:max_pinjam
        WHERE id=:id AND school_id=:sid'
@@ -70,17 +77,58 @@ if ($action === 'edit' && isset($_GET['id'])) {
       'sid' => $sid
     ]);
 
-    // Update password jika diisi
-    if (!empty($_POST['password'])) {
-      $hashed_password = password_hash($_POST['password'], PASSWORD_BCRYPT);
-      $updatePasswordStmt = $pdo->prepare(
-        'UPDATE users SET password=:password WHERE nisn=:nisn AND role=:role'
-      );
-      $updatePasswordStmt->execute([
-        'password' => $hashed_password,
-        'nisn' => $_POST['nisn'],
-        'role' => 'student'
-      ]);
+    // 3. Update tabel users & siswa (Sinkronisasi Data)
+    // Ambil user_id dulu berdasarkan NISN lama
+    $getUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND role = :role');
+    $getUserStmt->execute(['nisn' => $oldNisn, 'role' => 'student']);
+    $user = $getUserStmt->fetch();
+
+    if ($user) {
+        $userId = $user['id'];
+        
+        // A. Update Users
+        $updateUserSql = 'UPDATE users SET name=:name, email=:email, nisn=:new_nisn';
+        $updateUserParams = [
+            'name' => $_POST['name'],
+            'email' => $_POST['email'],
+            'new_nisn' => $_POST['nisn'],
+            'id' => $userId
+        ];
+
+        if (!empty($_POST['password'])) {
+            $hashed_password = password_hash($_POST['password'], PASSWORD_BCRYPT);
+            $updateUserSql .= ', password=:password';
+            $updateUserParams['password'] = $hashed_password;
+        }
+
+        $updateUserSql .= ' WHERE id=:id';
+        $updateUserStmt = $pdo->prepare($updateUserSql);
+        $updateUserStmt->execute($updateUserParams);
+
+        // B. Update Siswa (Profile Data)
+        // Periksa apakah record siswa ada
+        $checkSiswa = $pdo->prepare('SELECT id_siswa FROM siswa WHERE id_siswa = :id');
+        $checkSiswa->execute(['id' => $userId]);
+        
+        if ($checkSiswa->fetch()) {
+            // Update existing
+            $updateSiswaStmt = $pdo->prepare('UPDATE siswa SET nama_lengkap = :name, email = :email, nisn = :nisn WHERE id_siswa = :id');
+            $updateSiswaStmt->execute([
+                'name' => $_POST['name'],
+                'email' => $_POST['email'],
+                'nisn' => $_POST['nisn'],
+                'id' => $userId
+            ]);
+        } else {
+            // Create new if not exists (Lazy create)
+            $insertSiswa = $pdo->prepare('INSERT INTO siswa (id_siswa, nama_lengkap, email, nisn) VALUES (:id, :name, :email, :nisn)');
+            $insertSiswa->execute([
+                'id' => $userId,
+                'name' => $_POST['name'],
+                'email' => $_POST['email'],
+                'nisn' => $_POST['nisn']
+            ]);
+        }
     }
 
     header('Location: members.php');

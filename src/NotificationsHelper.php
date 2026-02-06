@@ -61,8 +61,8 @@ class NotificationsHelper {
      */
     private function sendEmailToStudent($studentId, $title, $message) {
         try {
-            // Ambil email siswa dari tabel members
-            $stmt = $this->pdo->prepare('SELECT email FROM members WHERE id = :id LIMIT 1');
+            // Ambil email siswa dari tabel users (karena studentId adalah user_id)
+            $stmt = $this->pdo->prepare('SELECT email FROM users WHERE id = :id LIMIT 1');
             $stmt->execute([':id' => $studentId]);
             $student = $stmt->fetch(PDO::FETCH_ASSOC);
 
