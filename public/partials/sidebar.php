@@ -383,6 +383,15 @@ function _is_active_sidebar($path, $current)
             </a>
         </li>
         <li>
+            <a href="<?php echo $base; ?>/returns.php"
+                class="nav-link<?php echo _is_active_sidebar($base . '/returns.php', $current); ?>">
+                <span class="nav-sidebar-menu-icon">
+                    <iconify-icon icon="mdi:keyboard-return"></iconify-icon>
+                </span>
+                <span>Pengembalian</span>
+            </a>
+        </li>
+        <li>
             <a href="<?php echo $base; ?>/reports.php"
                 class="nav-link<?php echo _is_active_sidebar($base . '/reports.php', $current); ?>">
                 <span class="nav-sidebar-menu-icon">
