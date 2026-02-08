@@ -24,7 +24,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
       $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
 
       // 3. Update stock
-      $stmt = $pdo->prepare('UPDATE books SET copies = copies + 1 WHERE id = :bid');
+      $stmt = $pdo->prepare('UPDATE books SET copies = 1 WHERE id = :bid');
       $stmt->execute(['bid' => $borrowData['book_id']]);
       
       $pdo->commit();

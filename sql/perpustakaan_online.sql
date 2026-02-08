@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 06, 2026 at 09:34 AM
--- Server version: 10.4.32-MariaDB
--- PHP Version: 8.2.12
+-- Waktu pembuatan: 08 Feb 2026 pada 15.18
+-- Versi server: 10.4.32-MariaDB
+-- Versi PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -24,7 +24,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `barcode_sessions`
+-- Struktur dari tabel `barcode_sessions`
 --
 
 CREATE TABLE `barcode_sessions` (
@@ -44,7 +44,7 @@ CREATE TABLE `barcode_sessions` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `books`
+-- Struktur dari tabel `books`
 --
 
 CREATE TABLE `books` (
@@ -62,23 +62,23 @@ CREATE TABLE `books` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `books`
+-- Dumping data untuk tabel `books`
 --
 
 INSERT INTO `books` (`id`, `school_id`, `title`, `author`, `isbn`, `category`, `copies`, `created_at`, `shelf`, `row_number`, `cover_image`) VALUES
 (1, 4, 'Mengunyah Rindu', 'Budi Maryono', '982384', 'Fiksi', 1, '2026-01-26 02:48:25', '1A', 1, 'book_1769399260_6976e3dc930ca.jpg'),
-(2, 4, 'Bu, aku ingin pelukmu', 'Reza Mustopa', '4522343', 'Fiksi', 5, '2026-01-26 02:49:48', '1A', 1, 'book_1769399253_6976e3d564a9a.png'),
-(3, 4, 'Madilog', 'Tan Malaka', '533454', 'Referensi', 3, '2026-01-26 02:52:47', '1B', 1, 'book_1769399247_6976e3cfbddeb.jpeg'),
-(4, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', '345645', 'Non-Fiksi', 5, '2026-01-26 02:55:04', '1B', 2, 'book_1769399240_6976e3c8d253c.png'),
-(5, 4, 'The Psychology of Money', 'Morgan Housel', '9786238371044', 'Lainnya', 15, '2026-01-26 04:02:19', '1B', 5, 'book_1769400139_6976e74ba9d73.jpg'),
-(6, 4, 'Sang Alkemis', 'Paulo Coelho', '9786020656069', 'Lainnya', 2, '2026-01-26 04:03:53', '1B', 4, 'book_1769400245_6976e7b53bd5e.jpg'),
+(2, 4, 'Bu, aku ingin pelukmu', 'Reza Mustopa', '4522343', 'Fiksi', 1, '2026-01-26 02:49:48', '1A', 1, 'book_1769399253_6976e3d564a9a.png'),
+(3, 4, 'Madilog', 'Tan Malaka', '533454', 'Referensi', 1, '2026-01-26 02:52:47', '1B', 1, 'book_1769399247_6976e3cfbddeb.jpeg'),
+(4, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', '345645', 'Non-Fiksi', 1, '2026-01-26 02:55:04', '1B', 2, 'book_1769399240_6976e3c8d253c.png'),
+(5, 4, 'The Psychology of Money', 'Morgan Housel', '9786238371044', 'Lainnya', 1, '2026-01-26 04:02:19', '1B', 5, 'book_1769400139_6976e74ba9d73.jpg'),
+(6, 4, 'Sang Alkemis', 'Paulo Coelho', '9786020656069', 'Lainnya', 1, '2026-01-26 04:03:53', '1B', 4, 'book_1769400245_6976e7b53bd5e.jpg'),
 (7, 4, 'B.J. Habibie : Sebuah Biografi', 'Fatimah Fayrus', '9786231643094', 'Biografi', 1, '2026-01-26 04:07:07', '1C', 2, 'book_1769400427_6976e86b698e3.jpg'),
-(8, 10, 'dfgdfg', 'dfgdfg', '232343', 'Referensi', 12, '2026-01-29 04:24:26', '1A', 3, 'book_1769660674_697ae1029671b.jpg');
+(8, 10, 'dfgdfg', 'dfgdfg', '232343', 'Referensi', 1, '2026-01-29 04:24:26', '1A', 3, 'book_1769660674_697ae1029671b.jpg');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `book_damage_fines`
+-- Struktur dari tabel `book_damage_fines`
 --
 
 CREATE TABLE `book_damage_fines` (
@@ -98,7 +98,7 @@ CREATE TABLE `book_damage_fines` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `book_maintenance`
+-- Struktur dari tabel `book_maintenance`
 --
 
 CREATE TABLE `book_maintenance` (
@@ -110,7 +110,7 @@ CREATE TABLE `book_maintenance` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `book_maintenance`
+-- Dumping data untuk tabel `book_maintenance`
 --
 
 INSERT INTO `book_maintenance` (`id`, `book_id`, `status`, `notes`, `updated_at`) VALUES
@@ -119,7 +119,7 @@ INSERT INTO `book_maintenance` (`id`, `book_id`, `status`, `notes`, `updated_at`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `borrows`
+-- Struktur dari tabel `borrows`
 --
 
 CREATE TABLE `borrows` (
@@ -134,7 +134,7 @@ CREATE TABLE `borrows` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `borrows`
+-- Dumping data untuk tabel `borrows`
 --
 
 INSERT INTO `borrows` (`id`, `school_id`, `book_id`, `member_id`, `borrowed_at`, `due_at`, `returned_at`, `status`) VALUES
@@ -153,7 +153,7 @@ INSERT INTO `borrows` (`id`, `school_id`, `book_id`, `member_id`, `borrowed_at`,
 -- --------------------------------------------------------
 
 --
--- Table structure for table `favorites`
+-- Struktur dari tabel `favorites`
 --
 
 CREATE TABLE `favorites` (
@@ -165,7 +165,7 @@ CREATE TABLE `favorites` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `favorites`
+-- Dumping data untuk tabel `favorites`
 --
 
 INSERT INTO `favorites` (`id`, `student_id`, `book_id`, `category`, `created_at`) VALUES
@@ -180,7 +180,7 @@ INSERT INTO `favorites` (`id`, `student_id`, `book_id`, `category`, `created_at`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `members`
+-- Struktur dari tabel `members`
 --
 
 CREATE TABLE `members` (
@@ -195,7 +195,7 @@ CREATE TABLE `members` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `members`
+-- Dumping data untuk tabel `members`
 --
 
 INSERT INTO `members` (`id`, `school_id`, `name`, `email`, `nisn`, `status`, `created_at`, `max_pinjam`) VALUES
@@ -206,7 +206,7 @@ INSERT INTO `members` (`id`, `school_id`, `name`, `email`, `nisn`, `status`, `cr
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifications`
+-- Struktur dari tabel `notifications`
 --
 
 CREATE TABLE `notifications` (
@@ -222,7 +222,7 @@ CREATE TABLE `notifications` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `notifications`
+-- Dumping data untuk tabel `notifications`
 --
 
 INSERT INTO `notifications` (`id`, `school_id`, `student_id`, `title`, `message`, `type`, `is_read`, `created_at`, `updated_at`) VALUES
@@ -270,7 +270,7 @@ INSERT INTO `notifications` (`id`, `school_id`, `student_id`, `title`, `message`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `notifikasi`
+-- Struktur dari tabel `notifikasi`
 --
 
 CREATE TABLE `notifikasi` (
@@ -288,7 +288,7 @@ CREATE TABLE `notifikasi` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `rating_buku`
+-- Struktur dari tabel `rating_buku`
 --
 
 CREATE TABLE `rating_buku` (
@@ -301,7 +301,7 @@ CREATE TABLE `rating_buku` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
--- Dumping data for table `rating_buku`
+-- Dumping data untuk tabel `rating_buku`
 --
 
 INSERT INTO `rating_buku` (`id_rating`, `id_user`, `id_buku`, `rating`, `komentar`, `created_at`) VALUES
@@ -310,7 +310,7 @@ INSERT INTO `rating_buku` (`id_rating`, `id_user`, `id_buku`, `rating`, `komenta
 -- --------------------------------------------------------
 
 --
--- Table structure for table `schools`
+-- Struktur dari tabel `schools`
 --
 
 CREATE TABLE `schools` (
@@ -333,7 +333,7 @@ CREATE TABLE `schools` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `schools`
+-- Dumping data untuk tabel `schools`
 --
 
 INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `created_at`, `email`, `phone`, `address`, `description`, `logo`, `profile_picture`, `npsn`, `website`, `photo_path`, `founded_year`) VALUES
@@ -349,7 +349,7 @@ INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `creat
 -- --------------------------------------------------------
 
 --
--- Table structure for table `school_themes`
+-- Struktur dari tabel `school_themes`
 --
 
 CREATE TABLE `school_themes` (
@@ -363,7 +363,7 @@ CREATE TABLE `school_themes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `school_themes`
+-- Dumping data untuk tabel `school_themes`
 --
 
 INSERT INTO `school_themes` (`id`, `school_id`, `theme_name`, `custom_colors`, `typography`, `created_at`, `updated_at`) VALUES
@@ -373,7 +373,7 @@ INSERT INTO `school_themes` (`id`, `school_id`, `theme_name`, `custom_colors`, `
 -- --------------------------------------------------------
 
 --
--- Table structure for table `siswa`
+-- Struktur dari tabel `siswa`
 --
 
 CREATE TABLE `siswa` (
@@ -393,7 +393,7 @@ CREATE TABLE `siswa` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `siswa`
+-- Dumping data untuk tabel `siswa`
 --
 
 INSERT INTO `siswa` (`id_siswa`, `nama_lengkap`, `nisn`, `kelas`, `jurusan`, `tanggal_lahir`, `jenis_kelamin`, `alamat`, `email`, `no_hp`, `foto`, `created_at`, `updated_at`) VALUES
@@ -405,7 +405,7 @@ INSERT INTO `siswa` (`id_siswa`, `nama_lengkap`, `nisn`, `kelas`, `jurusan`, `ta
 -- --------------------------------------------------------
 
 --
--- Table structure for table `users`
+-- Struktur dari tabel `users`
 --
 
 CREATE TABLE `users` (
@@ -424,7 +424,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `users`
+-- Dumping data untuk tabel `users`
 --
 
 INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `verification_code`, `code_expires_at`, `is_verified`, `verified_at`, `role`, `created_at`) VALUES
@@ -445,7 +445,7 @@ INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `ve
 --
 
 --
--- Indexes for table `barcode_sessions`
+-- Indeks untuk tabel `barcode_sessions`
 --
 ALTER TABLE `barcode_sessions`
   ADD PRIMARY KEY (`id`),
@@ -454,14 +454,14 @@ ALTER TABLE `barcode_sessions`
   ADD KEY `member_id` (`member_id`);
 
 --
--- Indexes for table `books`
+-- Indeks untuk tabel `books`
 --
 ALTER TABLE `books`
   ADD PRIMARY KEY (`id`),
   ADD KEY `school_id` (`school_id`);
 
 --
--- Indexes for table `book_damage_fines`
+-- Indeks untuk tabel `book_damage_fines`
 --
 ALTER TABLE `book_damage_fines`
   ADD PRIMARY KEY (`id`),
@@ -473,7 +473,7 @@ ALTER TABLE `book_damage_fines`
   ADD KEY `idx_created_at` (`created_at`);
 
 --
--- Indexes for table `book_maintenance`
+-- Indeks untuk tabel `book_maintenance`
 --
 ALTER TABLE `book_maintenance`
   ADD PRIMARY KEY (`id`),
@@ -482,7 +482,7 @@ ALTER TABLE `book_maintenance`
   ADD KEY `idx_updated_at` (`updated_at`);
 
 --
--- Indexes for table `borrows`
+-- Indeks untuk tabel `borrows`
 --
 ALTER TABLE `borrows`
   ADD PRIMARY KEY (`id`),
@@ -491,7 +491,7 @@ ALTER TABLE `borrows`
   ADD KEY `member_id` (`member_id`);
 
 --
--- Indexes for table `favorites`
+-- Indeks untuk tabel `favorites`
 --
 ALTER TABLE `favorites`
   ADD PRIMARY KEY (`id`),
@@ -501,7 +501,7 @@ ALTER TABLE `favorites`
   ADD KEY `idx_student_book` (`student_id`,`book_id`);
 
 --
--- Indexes for table `members`
+-- Indeks untuk tabel `members`
 --
 ALTER TABLE `members`
   ADD PRIMARY KEY (`id`),
@@ -509,7 +509,7 @@ ALTER TABLE `members`
   ADD KEY `idx_members_school_status` (`school_id`,`status`);
 
 --
--- Indexes for table `notifications`
+-- Indeks untuk tabel `notifications`
 --
 ALTER TABLE `notifications`
   ADD PRIMARY KEY (`id`),
@@ -522,7 +522,7 @@ ALTER TABLE `notifications`
   ADD KEY `idx_student_type` (`student_id`,`type`,`created_at`);
 
 --
--- Indexes for table `notifikasi`
+-- Indeks untuk tabel `notifikasi`
 --
 ALTER TABLE `notifikasi`
   ADD PRIMARY KEY (`id_notifikasi`),
@@ -533,13 +533,13 @@ ALTER TABLE `notifikasi`
 ALTER TABLE `notifikasi` ADD FULLTEXT KEY `ft_search` (`judul`,`pesan`);
 
 --
--- Indexes for table `rating_buku`
+-- Indeks untuk tabel `rating_buku`
 --
 ALTER TABLE `rating_buku`
   ADD PRIMARY KEY (`id_rating`);
 
 --
--- Indexes for table `schools`
+-- Indeks untuk tabel `schools`
 --
 ALTER TABLE `schools`
   ADD PRIMARY KEY (`id`),
@@ -549,7 +549,7 @@ ALTER TABLE `schools`
   ADD KEY `idx_status` (`status`);
 
 --
--- Indexes for table `school_themes`
+-- Indeks untuk tabel `school_themes`
 --
 ALTER TABLE `school_themes`
   ADD PRIMARY KEY (`id`),
@@ -557,7 +557,7 @@ ALTER TABLE `school_themes`
   ADD KEY `idx_school_id` (`school_id`);
 
 --
--- Indexes for table `siswa`
+-- Indeks untuk tabel `siswa`
 --
 ALTER TABLE `siswa`
   ADD PRIMARY KEY (`id_siswa`),
@@ -565,7 +565,7 @@ ALTER TABLE `siswa`
   ADD KEY `idx_email` (`email`);
 
 --
--- Indexes for table `users`
+-- Indeks untuk tabel `users`
 --
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
@@ -575,112 +575,112 @@ ALTER TABLE `users`
   ADD KEY `idx_is_verified` (`is_verified`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT untuk tabel yang dibuang
 --
 
 --
--- AUTO_INCREMENT for table `barcode_sessions`
+-- AUTO_INCREMENT untuk tabel `barcode_sessions`
 --
 ALTER TABLE `barcode_sessions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `books`
+-- AUTO_INCREMENT untuk tabel `books`
 --
 ALTER TABLE `books`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
--- AUTO_INCREMENT for table `book_damage_fines`
+-- AUTO_INCREMENT untuk tabel `book_damage_fines`
 --
 ALTER TABLE `book_damage_fines`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `book_maintenance`
+-- AUTO_INCREMENT untuk tabel `book_maintenance`
 --
 ALTER TABLE `book_maintenance`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `borrows`
+-- AUTO_INCREMENT untuk tabel `borrows`
 --
 ALTER TABLE `borrows`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
--- AUTO_INCREMENT for table `favorites`
+-- AUTO_INCREMENT untuk tabel `favorites`
 --
 ALTER TABLE `favorites`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- AUTO_INCREMENT for table `members`
+-- AUTO_INCREMENT untuk tabel `members`
 --
 ALTER TABLE `members`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
--- AUTO_INCREMENT for table `notifications`
+-- AUTO_INCREMENT untuk tabel `notifications`
 --
 ALTER TABLE `notifications`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=45;
 
 --
--- AUTO_INCREMENT for table `notifikasi`
+-- AUTO_INCREMENT untuk tabel `notifikasi`
 --
 ALTER TABLE `notifikasi`
   MODIFY `id_notifikasi` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `rating_buku`
+-- AUTO_INCREMENT untuk tabel `rating_buku`
 --
 ALTER TABLE `rating_buku`
   MODIFY `id_rating` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
--- AUTO_INCREMENT for table `schools`
+-- AUTO_INCREMENT untuk tabel `schools`
 --
 ALTER TABLE `schools`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT for table `school_themes`
+-- AUTO_INCREMENT untuk tabel `school_themes`
 --
 ALTER TABLE `school_themes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
--- AUTO_INCREMENT for table `siswa`
+-- AUTO_INCREMENT untuk tabel `siswa`
 --
 ALTER TABLE `siswa`
   MODIFY `id_siswa` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
--- AUTO_INCREMENT for table `users`
+-- AUTO_INCREMENT untuk tabel `users`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
--- Constraints for dumped tables
+-- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
 
 --
--- Constraints for table `barcode_sessions`
+-- Ketidakleluasaan untuk tabel `barcode_sessions`
 --
 ALTER TABLE `barcode_sessions`
   ADD CONSTRAINT `barcode_sessions_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `barcode_sessions_ibfk_2` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`) ON DELETE SET NULL;
 
 --
--- Constraints for table `books`
+-- Ketidakleluasaan untuk tabel `books`
 --
 ALTER TABLE `books`
   ADD CONSTRAINT `books_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `book_damage_fines`
+-- Ketidakleluasaan untuk tabel `book_damage_fines`
 --
 ALTER TABLE `book_damage_fines`
   ADD CONSTRAINT `fk_damage_book` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE,
@@ -689,13 +689,13 @@ ALTER TABLE `book_damage_fines`
   ADD CONSTRAINT `fk_damage_school` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `book_maintenance`
+-- Ketidakleluasaan untuk tabel `book_maintenance`
 --
 ALTER TABLE `book_maintenance`
   ADD CONSTRAINT `fk_maintenance_book` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `borrows`
+-- Ketidakleluasaan untuk tabel `borrows`
 --
 ALTER TABLE `borrows`
   ADD CONSTRAINT `borrows_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
@@ -703,33 +703,33 @@ ALTER TABLE `borrows`
   ADD CONSTRAINT `borrows_ibfk_3` FOREIGN KEY (`member_id`) REFERENCES `members` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `favorites`
+-- Ketidakleluasaan untuk tabel `favorites`
 --
 ALTER TABLE `favorites`
   ADD CONSTRAINT `favorites_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `favorites_ibfk_2` FOREIGN KEY (`book_id`) REFERENCES `books` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `members`
+-- Ketidakleluasaan untuk tabel `members`
 --
 ALTER TABLE `members`
   ADD CONSTRAINT `members_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `notifications`
+-- Ketidakleluasaan untuk tabel `notifications`
 --
 ALTER TABLE `notifications`
   ADD CONSTRAINT `notifications_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `notifications_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `school_themes`
+-- Ketidakleluasaan untuk tabel `school_themes`
 --
 ALTER TABLE `school_themes`
   ADD CONSTRAINT `school_themes_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;
 
 --
--- Constraints for table `users`
+-- Ketidakleluasaan untuk tabel `users`
 --
 ALTER TABLE `users`
   ADD CONSTRAINT `users_ibfk_1` FOREIGN KEY (`school_id`) REFERENCES `schools` (`id`) ON DELETE CASCADE;

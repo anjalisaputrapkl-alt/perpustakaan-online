@@ -29,20 +29,25 @@ try {
 
     error_log("[APPROVE-BORROW] borrow_id=$borrow_id, due_at=$due_at, school_id=$sid");
 
-    if ($due_at) {
-        // Validate due_at format
-        $testDate = strtotime($due_at);
-        if ($testDate === false) {
-            error_log("[APPROVE-BORROW] Invalid due_at format: $due_at");
-            http_response_code(400);
-            echo json_encode([
-                'success' => false,
-                'message' => 'Format tenggat tidak valid'
-            ]);
-            exit;
-        }
+    // 1. Check if book is still available
+    $checkStmt = $pdo->prepare(
+        'SELECT b.book_id, bk.copies FROM borrows b
+         JOIN books bk ON b.book_id = bk.id
+         WHERE b.id = :id AND b.school_id = :sid'
+    );
+    $checkStmt->execute(['id' => (int) $borrow_id, 'sid' => $sid]);
+    $bookData = $checkStmt->fetch();
 
-        // Update status to borrowed AND set custom due_at
+    if (!$bookData) {
+        throw new Exception('Data peminjaman tidak ditemukan');
+    }
+
+    if ($bookData['copies'] < 1) {
+        throw new Exception('Gagal: Buku sudah dipinjam oleh orang lain (Stok 0)');
+    }
+
+    if ($due_at) {
+        // Update status AND set custom due_at
         $stmt = $pdo->prepare(
             'UPDATE borrows SET status="borrowed", due_at=:due_at
              WHERE id=:id AND school_id=:sid AND status="pending_confirmation"'
@@ -52,9 +57,8 @@ try {
             'sid' => $sid,
             'due_at' => $due_at
         ]);
-        error_log("[APPROVE-BORROW] Update with due_at executed, rows affected: " . $stmt->rowCount());
     } else {
-        // Update status to borrowed (keep existing due_at)
+        // Update status
         $stmt = $pdo->prepare(
             'UPDATE borrows SET status="borrowed"
              WHERE id=:id AND school_id=:sid AND status="pending_confirmation"'
@@ -63,7 +67,14 @@ try {
             'id' => (int) $borrow_id,
             'sid' => $sid
         ]);
-        error_log("[APPROVE-BORROW] Update without due_at executed, rows affected: " . $stmt->rowCount());
+    }
+
+    if ($stmt->rowCount() > 0) {
+        // DECREMENT STOCK (Set to 0)
+        $updateStock = $pdo->prepare('UPDATE books SET copies = 0 WHERE id = :bid');
+        $updateStock->execute(['bid' => $bookData['book_id']]);
+        
+        error_log("[APPROVE-BORROW] Stock set to 0 for book_id=" . $bookData['book_id']);
     }
 
     if ($stmt->rowCount() === 0) {

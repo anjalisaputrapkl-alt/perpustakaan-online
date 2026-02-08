@@ -42,6 +42,16 @@ try {
                 continue;
             }
 
+            // Check if book is available
+            $checkStmt = $pdo->prepare('SELECT copies, title FROM books WHERE id = :bid');
+            $checkStmt->execute(['bid' => $borrow['book_id']]);
+            $bookInfo = $checkStmt->fetch();
+
+            if (!$bookInfo || $bookInfo['copies'] < 1) {
+                $errors[] = "Buku '" . ($bookInfo['title'] ?? 'Unknown') . "' sedang tidak tersedia (Stok 0)";
+                continue;
+            }
+
             // Determine due date (use provided date or default +7 days)
             $dueDate = $input['due_date'] ?? date('Y-m-d H:i:s', strtotime('+7 days'));
 

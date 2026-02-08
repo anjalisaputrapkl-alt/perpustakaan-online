@@ -45,7 +45,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'category' => $_POST['category'],
         'shelf' => $_POST['shelf'],
         'row' => $_POST['row_number'],
-        'copies' => (int) $_POST['copies'],
+        'copies' => 1,
         'cover_image' => $coverImage
       ]);
   
@@ -113,7 +113,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
           'category' => $_POST['category'],
           'shelf' => $_POST['shelf'],
           'row' => $_POST['row_number'],
-          'copies' => (int) $_POST['copies'],
+          'copies' => 1,
           'cover_image' => $coverImage,
           'id' => $id,
           'sid' => $sid
@@ -218,9 +218,8 @@ $categories = [
                     </div>
                 </div>
                 <div class="form-col">
-                     <div class="form-group"><label>Stok</label>
-                        <input type="number" min="1" name="copies" value="<?= $book['copies'] ?? 1 ?>">
-                    </div>
+                     <!-- Stock hidden, always 1 -->
+                     <input type="hidden" name="copies" value="1">
                 </div>
                  <div class="form-col">
                     <div class="form-group"><label>Lokasi (Rak / Baris)</label>
@@ -286,8 +285,8 @@ $categories = [
                     </div>
                   <?php endif; ?>
                   
-                  <div class="stock-badge-overlay">
-                      <?= $b['copies'] ?> Stok
+                  <div class="stock-badge-overlay" style="background: <?= $b['copies'] > 0 ? 'rgba(46, 204, 113, 0.9)' : 'rgba(231, 76, 60, 0.9)' ?>">
+                      <?= $b['copies'] > 0 ? 'Tersedia' : 'Dipinjam' ?>
                   </div>
                 </div>
                 

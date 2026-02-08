@@ -74,9 +74,9 @@ try {
     );
     $updateBorrowStmt->execute(['borrow_id' => $borrow_id]);
 
-    // Update book stock +1
+    // Update book stock (Reset to 1)
     $updateBookStmt = $pdo->prepare(
-        'UPDATE books SET copies = copies + 1 
+        'UPDATE books SET copies = 1 
          WHERE id = :book_id'
     );
     $updateBookStmt->execute(['book_id' => $borrow['book_id']]);
