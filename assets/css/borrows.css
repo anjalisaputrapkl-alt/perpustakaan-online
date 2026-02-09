@@ -389,13 +389,13 @@ body {
 }
 
 /* Explicit widths for predictability */
-.modal-table th:nth-child(3), 
+.modal-table th:nth-child(3),
 .modal-table td:nth-child(3) {
   width: 140px;
   white-space: nowrap;
 }
 
-.modal-table th:nth-child(4), 
+.modal-table th:nth-child(4),
 .modal-table td:nth-child(4) {
   width: 120px;
   text-align: center;
@@ -431,42 +431,50 @@ body {
 }
 
 .student-badge {
-    display: inline-block;
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 11px;
-    font-weight: 700;
-    white-space: nowrap;
-    text-align: center;
-    min-width: 80px;
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+  text-align: center;
+  min-width: 80px;
 }
 
 .badge-active {
-    background: var(--success-soft);
-    color: var(--success);
-    border: 1px solid color-mix(in srgb, var(--success), transparent 80%);
+  background: var(--success-soft);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success), transparent 80%);
 }
 
 .badge-inactive {
-    background: var(--danger-soft);
-    color: var(--danger);
-    border: 1px solid color-mix(in srgb, var(--danger), transparent 80%);
+  background: var(--danger-soft);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger), transparent 80%);
 }
 
 @media (max-width: 600px) {
-    .col-hide-mobile {
-        display: none;
-    }
+  .col-hide-mobile {
+    display: none;
+  }
 }
 
 .modal-container {
-    animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    max-width: 900px !important; /* Allow slightly wider modal */
+  animation: modalSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 900px !important;
+  /* Allow slightly wider modal */
 }
 
 @keyframes modalSlideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* --- Action Buttons --- */
