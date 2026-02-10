@@ -43,7 +43,7 @@ try {
             }
 
             // Check if book is available and get its custom borrow limit
-            $checkStmt = $pdo->prepare('SELECT copies, title, max_borrow_days FROM books WHERE id = :bid');
+            $checkStmt = $pdo->prepare('SELECT copies, title, max_borrow_days, access_level FROM books WHERE id = :bid');
             $checkStmt->execute(['bid' => $borrow['book_id']]);
             $bookInfo = $checkStmt->fetch();
             
@@ -60,6 +60,19 @@ try {
                 $dueDate = date('Y-m-d H:i:s', strtotime('+' . $bookInfo['max_borrow_days'] . ' days'));
             } else {
                 $dueDate = $input['due_date'] ?? date('Y-m-d H:i:s', strtotime('+7 days'));
+            }
+
+            // Enforce Access Level Restriction
+            if (isset($bookInfo['access_level']) && $bookInfo['access_level'] === 'teacher_only') {
+                // Get member role
+                $memStmt = $pdo->prepare('SELECT role FROM members WHERE id = :mid');
+                $memStmt->execute(['mid' => $borrow['member_id']]);
+                $memberRole = $memStmt->fetchColumn();
+
+                if ($memberRole === 'student') {
+                    $errors[] = "Buku '" . ($bookInfo['title'] ?? 'Unknown') . "' KHUSUS untuk Guru/Karyawan.";
+                    continue;
+                }
             }
 
             // Insert into borrows table with pending_confirmation status

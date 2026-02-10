@@ -35,14 +35,15 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   $pdo->prepare(
-    'INSERT INTO books (school_id,title,author,isbn,category,shelf,row_number,copies,max_borrow_days,cover_image)
-     VALUES (:sid,:title,:author,:isbn,:category,:shelf,:row,:copies,:max_borrow_days,:cover_image)'
+    'INSERT INTO books (school_id,title,author,isbn,category,access_level,shelf,row_number,copies,max_borrow_days,cover_image)
+     VALUES (:sid,:title,:author,:isbn,:category,:access_level,:shelf,:row,:copies,:max_borrow_days,:cover_image)'
   )->execute([
         'sid' => $sid,
         'title' => $_POST['title'],
         'author' => $_POST['author'],
         'isbn' => $_POST['isbn'],
         'category' => $_POST['category'],
+        'access_level' => $_POST['access_level'] ?? 'all',
         'shelf' => $_POST['shelf'],
         'row' => $_POST['row_number'],
         'copies' => 1,
@@ -105,13 +106,14 @@ if ($action === 'edit' && isset($_GET['id'])) {
     }
 
     $pdo->prepare(
-      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,shelf=:shelf,row_number=:row,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image
+      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,access_level=:access_level,shelf=:shelf,row_number=:row,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image
        WHERE id=:id AND school_id=:sid'
     )->execute([
           'title' => $_POST['title'],
           'author' => $_POST['author'],
           'isbn' => $_POST['isbn'],
           'category' => $_POST['category'],
+          'access_level' => $_POST['access_level'] ?? 'all',
           'shelf' => $_POST['shelf'],
           'row' => $_POST['row_number'],
           'copies' => 1,
@@ -217,6 +219,16 @@ $categories = [
                             </option>
                         <?php endforeach ?>
                         </select>
+                    </div>
+                </div>
+                <!-- Access Level Field -->
+                <div class="form-col">
+                    <div class="form-group"><label>Target Peminjam</label>
+                        <select name="access_level">
+                            <option value="all" <?= ($book['access_level'] ?? '') === 'all' ? 'selected' : '' ?>>Semua (Siswa & Guru)</option>
+                            <option value="teacher_only" <?= ($book['access_level'] ?? '') === 'teacher_only' ? 'selected' : '' ?>>Khusus Guru & Karyawan</option>
+                        </select>
+                        <small style="color:var(--muted); font-size:11px;">Membatasi hak peminjaman</small>
                     </div>
                 </div>
                 <div class="form-col">

@@ -50,7 +50,7 @@ try {
 
     // 1. Validate book exists and has stock
     $bookStmt = $pdo->prepare(
-        'SELECT id, title, copies FROM books WHERE id = :book_id AND school_id = :school_id'
+        'SELECT id, title, copies, access_level FROM books WHERE id = :book_id AND school_id = :school_id'
     );
     $bookStmt->execute([
         'book_id' => $book_id,
@@ -70,6 +70,17 @@ try {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Stok buku habis']);
         exit;
+    }
+
+    // 1.5 Check Access Level
+    if (isset($book['access_level']) && $book['access_level'] === 'teacher_only') {
+        $role = $student['role'] ?? 'student';
+        if ($role === 'student') {
+            $pdo->rollBack();
+            http_response_code(403);
+            echo json_encode(['success' => false, 'message' => 'Buku ini KHUSUS untuk Guru/Karyawan']);
+            exit;
+        }
     }
 
     // 2. Check if student already borrowed this book and hasn't returned it

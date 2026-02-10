@@ -1,0 +1,12 @@
+Array
+(
+    [title] => Sebuah Seni Untuk Bersikap Bodoamat
+    [author] => Mark Manson
+    [isbn] => 345645
+    [category] => Non-Fiksi
+    [access_level] => all
+    [copies] => 1
+    [shelf] => 1B
+    [row_number] => 2
+    [max_borrow_days] => 
+)

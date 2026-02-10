@@ -23,7 +23,7 @@ try {
 
     // Try to find as member (NISN)
     $stmt = $pdo->prepare(
-        'SELECT id, nisn as barcode, name, "member" as type FROM members 
+        'SELECT id, nisn as barcode, name, role, "member" as type FROM members 
          WHERE nisn = ? OR id = ?
          LIMIT 1'
     );
@@ -39,7 +39,7 @@ try {
     }
 
     $stmt = $pdo->prepare(
-        'SELECT id, isbn as barcode, title as name, cover_image, copies, max_borrow_days, "book" as type FROM books 
+        'SELECT id, isbn as barcode, title as name, cover_image, copies, max_borrow_days, access_level, "book" as type FROM books 
          WHERE isbn = ? OR id = ?
          LIMIT 1'
     );

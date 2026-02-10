@@ -316,6 +316,13 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                             setScanMode('book'); // Switch back to book to continue scanning books? Or maybe stay? Borrowing flow usually implies books first then member.
                             showScanStatus('Anggota terdeteksi: ' + item.name, 'success');
                         } else {
+                            // Validate against current member if exists
+                            if (currentMember && currentMember.role === 'student' && item.access_level === 'teacher_only') {
+                                showScanStatus('Buku KHUSUS GURU! Tidak bisa dipinjam siswa.', 'error');
+                                alert('PERINGATAN: Buku ini khusus untuk Guru & Karyawan!');
+                                return;
+                            }
+
                             addBookToCart(item);
                             showScanStatus('Buku ditambahkan: ' + item.name, 'success');
                         }
@@ -326,6 +333,25 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                             setScanMode('book');
                         } else {
                             currentMember = item;
+                            
+                            // VALIDATE EXISTING CART
+                            if (currentMember.role === 'student') {
+                                const validBooks = [];
+                                let removedCount = 0;
+                                scannedBooks.forEach(b => {
+                                    if (b.access_level === 'teacher_only') {
+                                        removedCount++;
+                                    } else {
+                                        validBooks.push(b);
+                                    }
+                                });
+                                
+                                if (removedCount > 0) {
+                                    scannedBooks = validBooks;
+                                    alert(`Peringatan: ${removedCount} buku dihapus dari keranjang karena khusus Guru/Karyawan.`);
+                                }
+                            }
+
                             updateMemberDisplay();
                             showScanStatus('Anggota di-set: ' + item.name, 'success');
                             setScanMode('book');
@@ -460,9 +486,17 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                     
                     const result = await res.json();
                     
-                    if (result.success) {
-                        alert('Peminjaman berhasil dicatat!');
+                    if (result.success && result.inserted > 0) {
+                        let msg = result.message;
+                        if (result.errors && result.errors.length > 0) {
+                            msg += '\n\nPeringatan beberapa item gagal:\n' + result.errors.join('\n');
+                        }
+                        alert(msg);
                         location.reload(); 
+                    } else if (result.success && result.inserted === 0) {
+                         // All failed
+                         const errorMsg = result.errors && result.errors.length > 0 ? result.errors.join('\n') : result.message;
+                         alert('Gagal meminjam:\n' + errorMsg);
                     } else {
                         alert('Gagal: ' + (result.message || 'Error saving'));
                     }
