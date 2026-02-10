@@ -69,10 +69,17 @@ try {
                 $memStmt->execute(['mid' => $borrow['member_id']]);
                 $memberRole = $memStmt->fetchColumn();
 
+                $logMsg = date('Y-m-d H:i:s') . " [BORROW CHECK] Book: '{$bookInfo['title']}' (ID: {$borrow['book_id']}) is teacher_only. Member (ID: {$borrow['member_id']}) Role: '$memberRole'\n";
+                file_put_contents(__DIR__ . '/../../debug_borrow.log', $logMsg, FILE_APPEND);
+
                 if ($memberRole === 'student') {
                     $errors[] = "Buku '" . ($bookInfo['title'] ?? 'Unknown') . "' KHUSUS untuk Guru/Karyawan.";
+                    file_put_contents(__DIR__ . '/../../debug_borrow.log', date('Y-m-d H:i:s') . " [BORROW BLOCKED] Blocked student.\n", FILE_APPEND);
                     continue;
                 }
+            } else {
+                 $logMsg = date('Y-m-d H:i:s') . " [BORROW CHECK] Book: '{$bookInfo['title']}' (ID: {$borrow['book_id']}) Access: " . ($bookInfo['access_level'] ?? 'null') . "\n";
+                 file_put_contents(__DIR__ . '/../../debug_borrow.log', $logMsg, FILE_APPEND);
             }
 
             // Insert into borrows table with pending_confirmation status

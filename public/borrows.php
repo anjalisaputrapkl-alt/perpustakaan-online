@@ -312,6 +312,25 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                         if (item.type === 'member') {
                             // Auto switch to member mode
                             currentMember = item;
+                            
+                             // VALIDATE EXISTING CART (Fix for Bug #816)
+                             if (currentMember.role === 'student') {
+                                const validBooks = [];
+                                let removedCount = 0;
+                                scannedBooks.forEach(b => {
+                                    if (b.access_level === 'teacher_only') {
+                                        removedCount++;
+                                    } else {
+                                        validBooks.push(b);
+                                    }
+                                });
+                                
+                                if (removedCount > 0) {
+                                    scannedBooks = validBooks;
+                                    alert(`Peringatan: ${removedCount} buku dihapus dari keranjang karena khusus Guru/Karyawan.`);
+                                }
+                            }
+
                             updateMemberDisplay();
                             setScanMode('book'); // Switch back to book to continue scanning books? Or maybe stay? Borrowing flow usually implies books first then member.
                             showScanStatus('Anggota terdeteksi: ' + item.name, 'success');

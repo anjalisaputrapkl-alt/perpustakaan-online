@@ -570,6 +570,34 @@ requireAuth();
                         showToast(`Hai ${currentMember.name.split(' ')[0]}. Scan buku sekarang.`, 'success');
                         switchMode('book');
                     }
+
+                     // VALIDATE EXISTING CART (Fix for Restricted Books)
+                     if (currentMember.role === 'student') {
+                        const validBooks = [];
+                        let removedCount = 0;
+                        // scannedBooks structure in mobile is object { book_id, book_title, cover_image, access_level?? }
+                        // Wait, data.data for book has access_level. We need to store it in scannedBooks first or check it?
+                        // scan-mobile.php stores: { book_id: data.data.id, book_title: data.data.name, cover_image: data.data.cover_image }
+                        // We need to add access_level to stored object to validate later.
+                        
+                        // REFACTOR: Check scannedBooks for access_level manually?
+                        // We need to ensure access_level is saved during book scan.
+                        const newScannedBooks = [];
+                        scannedBooks.forEach(b => {
+                            if (b.access_level === 'teacher_only') {
+                                removedCount++;
+                            } else {
+                                newScannedBooks.push(b);
+                            }
+                        });
+
+                        if (removedCount > 0) {
+                            scannedBooks = newScannedBooks;
+                            updateScannedList();
+                            showToast(`${removedCount} buku dihapus (Khusus Guru)`, 'error');
+                            playSound('error');
+                        }
+                    }
                 }
                 // Handle book scan
                 else if (scanMode === 'book') {
@@ -593,10 +621,19 @@ requireAuth();
                         playSound('error');
                         showToast('Buku sudah ada', 'error');
                     } else {
+                        // CHECK ACCESS LEVEL
+                        if (currentMember && currentMember.role === 'student' && data.data.access_level === 'teacher_only') {
+                            playSound('error');
+                            showToast('Buku Khusus GURU!', 'error');
+                            showLoading(false); // Fix infinite loading
+                            return;
+                        }
+
                         scannedBooks.push({
                             book_id: data.data.id,
                             book_title: data.data.name,
-                            cover_image: data.data.cover_image
+                            cover_image: data.data.cover_image,
+                            access_level: data.data.access_level // Store access_level
                         });
                         updateScannedList();
                         playSound('success');
