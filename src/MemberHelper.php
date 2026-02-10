@@ -32,6 +32,7 @@ class MemberHelper
         $user_id = $userSession['id'] ?? null;
         $school_id = $userSession['school_id'] ?? null;
         $nisn = $userSession['nisn'] ?? null;
+        $role = $userSession['role'] ?? 'student';
         $name = $userSession['name'] ?? 'Unknown';
         $email = $userSession['email'] ?? null;
 
@@ -39,7 +40,7 @@ class MemberHelper
             throw new Exception('Invalid user session data');
         }
 
-        // Jika tidak ada NISN, gunakan user_id sebagai member_id
+        // Jika tidak ada NISN/Identifier, gunakan user_id sebagai member_id (fallback)
         if (!$nisn) {
             return $user_id;
         }
@@ -61,14 +62,15 @@ class MemberHelper
 
             // Jika belum ada, buat member baru
             $insertStmt = $this->pdo->prepare(
-                'INSERT INTO members (school_id, name, email, nisn, status, created_at)
-                 VALUES (:school_id, :name, :email, :nisn, "active", NOW())'
+                'INSERT INTO members (school_id, name, email, nisn, role, status, created_at)
+                 VALUES (:school_id, :name, :email, :nisn, :role, "active", NOW())'
             );
             $insertStmt->execute([
                 'school_id' => $school_id,
                 'name' => $name,
                 'email' => $email,
-                'nisn' => $nisn
+                'nisn' => $nisn,
+                'role' => $role
             ]);
 
             return $this->pdo->lastInsertId();

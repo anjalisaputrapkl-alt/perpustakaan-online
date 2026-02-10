@@ -24,7 +24,7 @@ $stmt->execute([$siswaId]);
 $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if (!$siswa) {
-    die("Profil siswa tidak ditemukan.");
+    die("Profil tidak ditemukan.");
 }
 
 $message = '';

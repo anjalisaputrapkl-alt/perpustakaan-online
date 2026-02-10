@@ -12,14 +12,15 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   try {
     // Insert into members table
     $stmt = $pdo->prepare(
-      'INSERT INTO members (school_id,name,email,nisn,max_pinjam)
-       VALUES (:sid,:name,:email,:nisn,:max_pinjam)'
+      'INSERT INTO members (school_id,name,email,nisn,role,max_pinjam)
+       VALUES (:sid,:name,:email,:nisn,:role,:max_pinjam)'
     );
     $stmt->execute([
       'sid' => $sid,
       'name' => $_POST['name'],
       'email' => $_POST['email'],
       'nisn' => $_POST['nisn'],
+      'role' => $_POST['role'] ?? 'student',
       'max_pinjam' => (int) ($_POST['max_pinjam'] ?? 2)
     ]);
 
@@ -29,7 +30,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Hash the password
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-    // Create student account in users table
+    // Create account in users table
     $userStmt = $pdo->prepare(
       'INSERT INTO users (school_id, name, email, password, role, nisn)
        VALUES (:sid, :name, :email, :password, :role, :nisn)'
@@ -39,12 +40,12 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
       'name' => $_POST['name'],
       'email' => $_POST['email'],
       'password' => $hashed_password,
-      'role' => 'student',
+      'role' => $_POST['role'] ?? 'student',
       'nisn' => $nisn
     ]);
 
     // Success message
-    $_SESSION['success'] = 'Murid berhasil ditambahkan. Akun siswa otomatis terbuat dengan NISN: ' . $nisn;
+    $_SESSION['success'] = 'Anggota berhasil ditambahkan. Akun otomatis terbuat dengan ' . ($_POST['role'] === 'student' ? 'NISN' : 'ID') . ': ' . $nisn;
     header('Location: members.php');
     exit;
   } catch (Exception $e) {
@@ -65,13 +66,14 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
     // 2. Update tabel members
     $stmt = $pdo->prepare(
-      'UPDATE members SET name=:name,email=:email,nisn=:nisn,max_pinjam=:max_pinjam
+      'UPDATE members SET name=:name,email=:email,nisn=:nisn,role=:role,max_pinjam=:max_pinjam
        WHERE id=:id AND school_id=:sid'
     );
     $stmt->execute([
       'name' => $_POST['name'],
       'email' => $_POST['email'],
       'nisn' => $_POST['nisn'],
+      'role' => $_POST['role'] ?? 'student',
       'max_pinjam' => (int) ($_POST['max_pinjam'] ?? 2),
       'id' => $id,
       'sid' => $sid
@@ -79,8 +81,8 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
     // 3. Update tabel users & siswa (Sinkronisasi Data)
     // Ambil user_id dulu berdasarkan NISN lama
-    $getUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND role = :role');
-    $getUserStmt->execute(['nisn' => $oldNisn, 'role' => 'student']);
+    $getUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND (role = "student" OR role = "teacher" OR role = "employee")');
+    $getUserStmt->execute(['nisn' => $oldNisn]);
     $user = $getUserStmt->fetch();
 
     if ($user) {
@@ -175,7 +177,7 @@ $school = $schoolStmt->fetch();
 $stmt = $pdo->prepare('
     SELECT m.*, s.foto 
     FROM members m
-    LEFT JOIN users u ON u.nisn = m.nisn AND u.school_id = m.school_id AND u.role = "student"
+    LEFT JOIN users u ON u.nisn = m.nisn AND u.school_id = m.school_id AND (u.role = "student" OR u.role = "teacher" OR u.role = "employee")
     LEFT JOIN siswa s ON s.id_siswa = u.id
     WHERE m.school_id = :sid 
     ORDER BY m.id DESC
@@ -189,7 +191,7 @@ $members = $stmt->fetchAll();
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Kelola Murid</title>
+  <title>Kelola Anggota</title>
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -679,7 +681,7 @@ $members = $stmt->fetchAll();
   <div class="app">
 
     <div class="topbar">
-      <strong>Kelola Murid</strong>
+      <strong>Kelola Anggota</strong>
     </div>
 
     <div class="content">
@@ -700,16 +702,24 @@ $members = $stmt->fetchAll();
         <?php endif; ?>
 
         <div class="card">
-          <h2><?= $action === 'edit' ? 'Edit Murid' : 'Tambah Murid' ?></h2>
+          <h2><?= $action === 'edit' ? 'Edit Anggota' : 'Tambah Anggota' ?></h2>
           <?php if ($action === 'add'): ?>
             <div
               style="background: #e0f2fe; border-left: 4px solid #0284c7; padding: 12px; border-radius: 6px; margin-bottom: 16px; font-size: 12px; color: #0c4a6e;">
-              <strong>ℹ️ Info:</strong> Ketika murid ditambahkan, akun siswa akan otomatis terbuat. <strong>Siswa login
-                dengan NISN sebagai username dan password yang Anda buat</strong>.
+              <strong>ℹ️ Info:</strong> Ketika anggota ditambahkan, akun akan otomatis terbuat. <strong>Anggota login
+                dengan NISN/ID sebagai username and password yang Anda buat</strong>.
             </div>
           <?php endif; ?>
           <form method="post" action="<?= $action === 'edit' ? '' : 'members.php?action=add' ?>" autocomplete="off"
             id="member-form">
+            <div class="form-group">
+              <label>Role Anggota</label>
+              <select name="role" id="role-select" required onchange="updateMemberLabels()">
+                <option value="student" <?= ($action === 'edit' && isset($member['role']) && $member['role'] === 'student') ? 'selected' : '' ?>>Siswa</option>
+                <option value="teacher" <?= ($action === 'edit' && isset($member['role']) && $member['role'] === 'teacher') ? 'selected' : '' ?>>Guru</option>
+                <option value="employee" <?= ($action === 'edit' && isset($member['role']) && $member['role'] === 'employee') ? 'selected' : '' ?>>Karyawan</option>
+              </select>
+            </div>
             <div class="form-group">
               <label>Nama Lengkap</label>
               <input type="text" name="name" required autocomplete="off"
@@ -721,8 +731,8 @@ $members = $stmt->fetchAll();
                 value="<?= $action === 'edit' && isset($member['email']) ? htmlspecialchars($member['email']) : '' ?>">
             </div>
             <div class="form-group">
-              <label>NISN Siswa</label>
-              <input type="text" name="nisn" required placeholder="Nomor Induk Siswa Nasional" autocomplete="off"
+              <label id="id-label">NISN Siswa</label>
+              <input type="text" name="nisn" id="id-input" required placeholder="Nomor Induk Siswa Nasional" autocomplete="off"
                 value="<?= $action === 'edit' && isset($member['nisn']) ? htmlspecialchars($member['nisn']) : '' ?>">
             </div>
             <div class="form-group">
@@ -737,14 +747,14 @@ $members = $stmt->fetchAll();
                 value="">
             </div>
             <button class="btn" type="submit">
-              <?= $action === 'edit' ? 'Simpan Perubahan' : 'Tambah Murid' ?>
+              <?= $action === 'edit' ? 'Simpan Perubahan' : 'Tambah Anggota' ?>
             </button>
           </form>
         </div>
 
         <div class="card">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0;">Daftar Murid (<?= count($members) ?>)</h2>
+            <h2 style="margin: 0;">Daftar Anggota (<?= count($members) ?>)</h2>
             <button class="btn btn-sm btn-secondary" onclick="printAllCards()">
               <iconify-icon icon="mdi:card-multiple-outline" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
               Cetak Semua Kartu
@@ -756,22 +766,28 @@ $members = $stmt->fetchAll();
                 <tr>
                   <th>Nama</th>
                   <th>Email</th>
-                  <th>NISN</th>
+                  <th>ID / NISN</th>
+                  <th>Role</th>
                   <th>Status Akun</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody>
                 <?php foreach ($members as $m):
-                  // Check if student account exists
-                  $checkUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND role = :role');
-                  $checkUserStmt->execute(['nisn' => $m['nisn'], 'role' => 'student']);
+                  // Check if account exists
+                  $checkUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND (role = "student" OR role = "teacher" OR role = "employee")');
+                  $checkUserStmt->execute(['nisn' => $m['nisn']]);
                   $userExists = $checkUserStmt->fetch() ? true : false;
                   ?>
                   <tr>
                     <td><strong><?= htmlspecialchars($m['name']) ?></strong></td>
                     <td><?= htmlspecialchars($m['email']) ?></td>
                     <td><strong><?= htmlspecialchars($m['nisn']) ?></strong></td>
+                    <td>
+                      <span style="display: inline-block; background: rgba(59, 130, 246, 0.1); color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; text-transform: capitalize;">
+                        <?= htmlspecialchars($m['role'] ?? 'student') ?>
+                      </span>
+                    </td>
                     <td>
                       <?php if ($userExists): ?>
                         <span
@@ -798,7 +814,7 @@ $members = $stmt->fetchAll();
                           href="members.php?action=edit&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:pencil"
                             style="vertical-align: middle;"></iconify-icon> Edit</a>
                         <a class="btn btn-sm btn-danger"
-                          onclick="return confirm('Hapus murid ini? Akun siswa juga akan dihapus.')"
+                          onclick="return confirm('Hapus anggota ini? Akun juga akan dihapus.')"
                           href="members.php?action=delete&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:trash-can"
                             style="vertical-align: middle;"></iconify-icon> Hapus</a>
                       </div>
@@ -811,10 +827,10 @@ $members = $stmt->fetchAll();
         </div>
 
         <div class="card" style="grid-column: 1/-1">
-          <h2>Statistik Murid</h2>
+          <h2>Statistik Anggota</h2>
           <div class="stats-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
             <div class="stat-card">
-              <div class="stat-label">Total Murid</div>
+              <div class="stat-label">Total Anggota</div>
               <div class="stat-value"><?= count($members) ?></div>
             </div>
             <div class="stat-card">
@@ -827,27 +843,21 @@ $members = $stmt->fetchAll();
         <div class="card" style="grid-column: 1/-1">
           <h2>Pertanyaan Umum</h2>
           <div class="faq-item">
-            <div class="faq-question">Bagaimana cara menambah murid baru? <span>+</span></div>
-            <div class="faq-answer">Isi form dengan nama lengkap, email, no murid, dan NISN siswa, lalu klik "Tambah
-              Murid". Akun siswa akan otomatis terbuat dengan NISN sebagai username dan password.</div>
+            <div class="faq-question">Bagaimana cara menambah anggota baru? <span>+</span></div>
+            <div class="faq-answer">Pilih Role (Siswa/Guru/Karyawan), isi nama lengkap, email, dan ID (NISN/NIP/NUPTK), lalu klik "Tambah Anggota". Akun akan otomatis terbuat dengan ID tersebut sebagai username.</div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Apa perbedaan No Murid dan NISN? <span>+</span></div>
-            <div class="faq-answer"><strong>No Murid</strong> adalah nomor internal sekolah (ex: 001, 002).
-              <strong>NISN</strong> adalah Nomor Induk Siswa Nasional yang unik dan digunakan untuk login. Siswa login
-              menggunakan NISN sebagai username.
-            </div>
+            <div class="faq-question">Apa yang dimaksud dengan ID Anggota? <span>+</span></div>
+            <div class="faq-answer"><strong>ID Anggota</strong> bisa berupa NISN untuk Siswa, NUPTK untuk Guru, atau NIP untuk Karyawan. ID ini digunakan sebagai username login.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa itu "Status Akun"? <span>+</span></div>
-            <div class="faq-answer">Status Akun menunjukkan apakah akun siswa sudah terbuat di sistem. Ketika Anda
-              menambah murid, akun siswa otomatis terbuat dengan NISN dan Password = NISN.</div>
+            <div class="faq-answer">Status Akun menunjukkan apakah kredensial login sudah aktif. Secara default, password awal sama dengan ID Anggota.</div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Bagaimana siswa login ke dashboard? <span>+</span></div>
-            <div class="faq-answer">Siswa login di halaman siswa menggunakan <strong>NISN sebagai username</strong> dan
-              <strong>Password = NISN</strong> (sama dengan username). Siswa sangat disarankan untuk mengubah password
-              setelah login pertama kali.
+            <div class="faq-question">Bagaimana anggota login? <span>+</span></div>
+            <div class="faq-answer">Anggota login menggunakan <strong>ID (NISN/NIP/NUPTK) sebagai username</strong> and 
+              <strong>Password = ID</strong>. Kami sarankan untuk segera mengubah password setelah login pertama kali.
             </div>
           </div>
           <div class="faq-item">
@@ -931,7 +941,7 @@ $members = $stmt->fetchAll();
     function showLibraryCard(data) {
       currentMemberData = data;
       document.getElementById('modal-name').textContent = data.name;
-      document.getElementById('modal-nisn').textContent = 'NISN: ' + data.nisn;
+      document.getElementById('modal-nisn').textContent = 'ID: ' + data.nisn;
       
       const photoEl = document.getElementById('modal-photo');
       if (data.foto) {
@@ -963,7 +973,7 @@ $members = $stmt->fetchAll();
     }
 
     function printAllCards() {
-      if (confirm(`Cetak kartu untuk ${allMembersData.length} murid?`)) {
+      if (confirm(`Cetak kartu untuk ${allMembersData.length} anggota?`)) {
         renderPrintWindow(allMembersData);
       }
     }
@@ -1011,7 +1021,7 @@ $members = $stmt->fetchAll();
                             <div class="data">
                                 <div class="name">${m.name}</div>
                                 <div class="label">Nomor Anggota</div>
-                                <div class="value">NISN: ${barcodeValue}</div>
+                                <div class="value">ID: ${barcodeValue}</div>
                             </div>
                         </div>
                     </div>
@@ -1139,6 +1149,34 @@ $members = $stmt->fetchAll();
         closeLibraryCardModal();
       }
     }
+
+    function updateMemberLabels() {
+      const roleSelect = document.getElementById('role-select');
+      const idLabel = document.getElementById('id-label');
+      const idInput = document.getElementById('id-input');
+      const maxPinjamInput = document.querySelector('input[name="max_pinjam"]');
+      
+      if (roleSelect.value === 'teacher') {
+        idLabel.textContent = 'NUPTK / ID Guru';
+        idInput.placeholder = 'Nomor Unik Pendidik dan Tenaga Kependidikan';
+        if (!maxPinjamInput.value || maxPinjamInput.value == '2') maxPinjamInput.value = '5';
+      } else if (roleSelect.value === 'employee') {
+        idLabel.textContent = 'NIP / ID Karyawan';
+        idInput.placeholder = 'Nomor Induk Pegawai';
+        if (!maxPinjamInput.value || maxPinjamInput.value == '2') maxPinjamInput.value = '3';
+      } else {
+        idLabel.textContent = 'NISN Siswa';
+        idInput.placeholder = 'Nomor Induk Siswa Nasional';
+        if (!maxPinjamInput.value || maxPinjamInput.value == '5' || maxPinjamInput.value == '3') maxPinjamInput.value = '2';
+      }
+    }
+
+    // Call on load
+    document.addEventListener('DOMContentLoaded', function() {
+      if (document.getElementById('role-select')) {
+        updateMemberLabels();
+      }
+    });
 
     // Only reset form fields when in ADD mode, not EDIT mode
     document.addEventListener('DOMContentLoaded', function () {
