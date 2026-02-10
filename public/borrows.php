@@ -46,7 +46,7 @@ $pdo->prepare(
 
 // Get all borrowing data
 $stmt = $pdo->prepare(
-  'SELECT b.*, bk.title, bk.cover_image, bk.isbn, m.name AS member_name, m.nisn
+  'SELECT b.*, bk.title, bk.cover_image, bk.isbn, bk.max_borrow_days, m.name AS member_name, m.nisn
    FROM borrows b
    JOIN books bk ON b.book_id = bk.id
    JOIN members m ON b.member_id = m.id
@@ -619,7 +619,14 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                     'books' => []
                   ];
                 }
-                $groupedByMember[$b['member_id']]['books'][] = $b;
+                $groupedByMember[$b['member_id']]['books'][] = [
+                    'id' => $b['id'],
+                    'title' => $b['title'],
+                    'isbn' => $b['isbn'],
+                    'cover_image' => $b['cover_image'],
+                    'max_borrow_days' => $b['max_borrow_days'],
+                    'borrowed_at' => $b['borrowed_at']
+                ];
               }
               ?>
 
@@ -674,6 +681,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                             <th style="width: 40px;"></th>
                             <th>Info Buku</th>
                             <th>ISBN</th>
+                            <th style="width: 100px;">Batas</th>
                             <th style="width: 120px;">Status</th>
                           </tr>
                         </thead>
@@ -697,6 +705,15 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                                 </div>
                               </td>
                               <td style="font-weight: 600; color: var(--text);"><?= htmlspecialchars($book['isbn']) ?></td>
+                              <td>
+                                <?php if (!empty($book['max_borrow_days'])): ?>
+                                    <span style="color: var(--danger); font-weight: 700; font-size: 11px;">
+                                        <iconify-icon icon="mdi:alert-decagram"></iconify-icon> <?= $book['max_borrow_days'] ?> Hari
+                                    </span>
+                                <?php else: ?>
+                                    <span style="color: var(--text-muted); font-size: 11px;">Default</span>
+                                <?php endif; ?>
+                              </td>
                               <td>
                                 <span class="status-badge pending">Menunggu</span>
                               </td>
@@ -729,7 +746,8 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                       <button type="button" onclick="rejectAllBorrow('<?= $bookIdsHtml ?>')" class="btn-premium reject">
                         <iconify-icon icon="mdi:close-circle-outline"></iconify-icon> Tolak
                       </button>
-                      <button type="button" onclick="approveSelectedBorrows('<?= $studentId ?>')" class="btn-premium approve">
+                      <?php $booksDataJson = htmlspecialchars(json_encode($studentData['books'])); ?>
+                      <button type="button" onclick="approveSelectedBorrowsAdvanced('<?= $studentId ?>', '<?= $booksDataJson ?>')" class="btn-premium approve">
                         <iconify-icon icon="mdi:check-circle-outline"></iconify-icon> Terima
                       </button>
                     </div>
@@ -1255,6 +1273,71 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
           alert('Terjadi kesalahan');
         });
     }
+    function approveSelectedBorrowsAdvanced(studentId, booksDataJson) {
+        const checkboxes = document.querySelectorAll('.book-checkbox-' + studentId + ':checked');
+        if (checkboxes.length === 0) {
+            alert('Pilih setidaknya satu buku untuk disetujui.');
+            return;
+        }
+
+        const allBooksData = JSON.parse(booksDataJson);
+        const selectedIds = [];
+        checkboxes.forEach((cb) => {
+            selectedIds.push(parseInt(cb.value));
+        });
+
+        const inputElement = document.getElementById('dueDays_' + studentId);
+        const globalDueDays = parseInt(inputElement.value, 10) || 7;
+
+        if (!confirm(`Terima ${selectedIds.length} peminjaman terpilih?`)) {
+            return;
+        }
+
+        let approved = 0;
+        let failed = 0;
+        const errors = [];
+
+        // Map book limits for the selected IDs
+        Promise.all(selectedIds.map(borrowId => {
+            const bookInfo = allBooksData.find(b => b.id === borrowId);
+            
+            // Calculate due date: 
+            // Priority 1: Book Limit
+            // Priority 2: Admin Input
+            const effectiveDays = (bookInfo && bookInfo.max_borrow_days) ? Math.min(bookInfo.max_borrow_days, globalDueDays) : globalDueDays;
+            
+            const dueDate = new Date();
+            dueDate.setDate(dueDate.getDate() + effectiveDays);
+            const dueString = dueDate.toISOString().slice(0, 10) + ' ' + dueDate.toTimeString().slice(0, 8);
+
+            return fetch('api/approve-borrow.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'borrow_id=' + borrowId + '&due_at=' + encodeURIComponent(dueString)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) approved++;
+                else {
+                    failed++;
+                    errors.push(data.message);
+                }
+            })
+            .catch(err => {
+                failed++;
+                errors.push(err.message);
+            });
+        })).then(() => {
+            if (failed === 0) {
+                alert(`✓ ${approved} peminjaman telah diterima!`);
+                location.reload();
+            } else {
+                alert(`${approved} diterima, ${failed} gagal.\n\nContoh error: ${errors[0]}`);
+                location.reload();
+            }
+        });
+    }
+
     function toggleSelectAll(studentId, source) {
         const checkboxes = document.querySelectorAll('.book-checkbox-' + studentId);
         for(let i=0; i<checkboxes.length; i++) {

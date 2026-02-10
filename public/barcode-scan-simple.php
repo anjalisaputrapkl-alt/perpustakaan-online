@@ -629,7 +629,8 @@ requireAuth();
                         scannedBooks.push({
                             book_id: data.data.id,
                             book_title: data.data.name,
-                            cover_image: data.data.cover_image
+                            cover_image: data.data.cover_image,
+                            max_borrow_days: data.data.max_borrow_days
                         });
                         updateScannedList();
                         showStatus(data.data.name + ' ditambahkan', 'success');
@@ -683,7 +684,13 @@ requireAuth();
                               : `<div style="width: 40px; height: 60px; background: #eee; display: flex; align-items: center; justify-content: center; border-radius: 4px;"><small>No Img</small></div>`
                             }
                         </td>
-                        <td>${escapeHtml(book.book_title)}</td>
+                        <td>
+                            ${escapeHtml(book.book_title)}
+                            ${book.max_borrow_days 
+                                ? `<br><span style="color: #e74c3c; font-size: 10px; font-weight: 700;">Batas: ${book.max_borrow_days} Hari</span>` 
+                                : ''
+                            }
+                        </td>
                         <td>
                             <button class="btn-remove" onclick="removeBook(${index})">Hapus</button>
                         </td>

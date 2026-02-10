@@ -55,6 +55,7 @@ CREATE TABLE `books` (
   `isbn` varchar(100) DEFAULT NULL,
   `category` varchar(100) NOT NULL,
   `copies` int(11) DEFAULT 1,
+  `max_borrow_days` int(11) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `shelf` varchar(50) DEFAULT NULL,
   `row_number` int(11) DEFAULT NULL,
@@ -131,7 +132,8 @@ CREATE TABLE `borrows` (
   `due_at` datetime DEFAULT NULL,
   `returned_at` datetime DEFAULT NULL,
   `status` enum('borrowed','returned','overdue','pending_return','pending_confirmation') DEFAULT 'borrowed',
-  `fine_amount` decimal(10,2) DEFAULT 0.00
+  `fine_amount` decimal(10,2) DEFAULT 0.00,
+  `fine_status` enum('unpaid','paid') DEFAULT 'unpaid'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --

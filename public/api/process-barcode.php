@@ -39,7 +39,7 @@ try {
     }
 
     $stmt = $pdo->prepare(
-        'SELECT id, isbn as barcode, title as name, cover_image, copies, "book" as type FROM books 
+        'SELECT id, isbn as barcode, title as name, cover_image, copies, max_borrow_days, "book" as type FROM books 
          WHERE isbn = ? OR id = ?
          LIMIT 1'
     );

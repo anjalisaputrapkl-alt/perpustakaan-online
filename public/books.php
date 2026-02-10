@@ -35,8 +35,8 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   $pdo->prepare(
-    'INSERT INTO books (school_id,title,author,isbn,category,shelf,row_number,copies,cover_image)
-     VALUES (:sid,:title,:author,:isbn,:category,:shelf,:row,:copies,:cover_image)'
+    'INSERT INTO books (school_id,title,author,isbn,category,shelf,row_number,copies,max_borrow_days,cover_image)
+     VALUES (:sid,:title,:author,:isbn,:category,:shelf,:row,:copies,:max_borrow_days,:cover_image)'
   )->execute([
         'sid' => $sid,
         'title' => $_POST['title'],
@@ -46,6 +46,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'shelf' => $_POST['shelf'],
         'row' => $_POST['row_number'],
         'copies' => 1,
+        'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
         'cover_image' => $coverImage
       ]);
   
@@ -104,7 +105,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
     }
 
     $pdo->prepare(
-      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,shelf=:shelf,row_number=:row,copies=:copies,cover_image=:cover_image
+      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,shelf=:shelf,row_number=:row,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image
        WHERE id=:id AND school_id=:sid'
     )->execute([
           'title' => $_POST['title'],
@@ -114,6 +115,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
           'shelf' => $_POST['shelf'],
           'row' => $_POST['row_number'],
           'copies' => 1,
+          'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
           'cover_image' => $coverImage,
           'id' => $id,
           'sid' => $sid
@@ -221,12 +223,18 @@ $categories = [
                      <!-- Stock hidden, always 1 -->
                      <input type="hidden" name="copies" value="1">
                 </div>
-                 <div class="form-col">
+                <div class="form-col">
                     <div class="form-group"><label>Lokasi (Rak / Baris)</label>
                         <div class="book-location-input">
                             <input name="shelf" value="<?= $book['shelf'] ?? '' ?>" placeholder="Rak A1">
                             <input type="number" min="1" name="row_number" value="<?= $book['row_number'] ?? '' ?>" placeholder="Baris 1">
                         </div>
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group"><label>Batas Pinjam Khusus (Hari)</label>
+                        <input type="number" min="1" name="max_borrow_days" value="<?= $book['max_borrow_days'] ?? '' ?>" placeholder="Default Sekolah">
+                        <small style="color: var(--text-muted); font-size: 10px;">Kosongkan untuk menggunakan aturan sekolah</small>
                     </div>
                 </div>
             </div>
@@ -443,8 +451,8 @@ $categories = [
               <div id="detailLocation"></div>
             </div>
             <div class="detail-field">
-              <label>Jumlah Salinan</label>
-              <div id="detailCopies"></div>
+              <label>Batas Pinjam</label>
+              <div id="detailMaxBorrow"></div>
             </div>
           </div>
         </div>
@@ -522,6 +530,7 @@ $categories = [
         set('detailCategory', book.category);
         set('detailLocation', `Rak ${book.shelf || '?'} / Baris ${book.row_number || '?'}`);
         set('detailCopies', `${book.copies} Salinan`);
+        set('detailMaxBorrow', book.max_borrow_days ? `${book.max_borrow_days} Hari` : 'Default Sekolah');
         
         // Image Handling
         const imgContainer = document.getElementById('detailCover');

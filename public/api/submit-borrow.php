@@ -42,18 +42,25 @@ try {
                 continue;
             }
 
-            // Check if book is available
-            $checkStmt = $pdo->prepare('SELECT copies, title FROM books WHERE id = :bid');
+            // Check if book is available and get its custom borrow limit
+            $checkStmt = $pdo->prepare('SELECT copies, title, max_borrow_days FROM books WHERE id = :bid');
             $checkStmt->execute(['bid' => $borrow['book_id']]);
             $bookInfo = $checkStmt->fetch();
-
+            
             if (!$bookInfo || $bookInfo['copies'] < 1) {
                 $errors[] = "Buku '" . ($bookInfo['title'] ?? 'Unknown') . "' sedang tidak tersedia (Stok 0)";
                 continue;
             }
 
-            // Determine due date (use provided date or default +7 days)
-            $dueDate = $input['due_date'] ?? date('Y-m-d H:i:s', strtotime('+7 days'));
+            // Determine due date
+            // 1. Priority: Book-specific limit
+            // 2. Fallback: Provided date in request
+            // 3. Last Fallback: Default +7 days
+            if (!empty($bookInfo['max_borrow_days'])) {
+                $dueDate = date('Y-m-d H:i:s', strtotime('+' . $bookInfo['max_borrow_days'] . ' days'));
+            } else {
+                $dueDate = $input['due_date'] ?? date('Y-m-d H:i:s', strtotime('+7 days'));
+            }
 
             // Insert into borrows table with pending_confirmation status
             $stmt = $pdo->prepare(
