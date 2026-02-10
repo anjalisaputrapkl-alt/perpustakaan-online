@@ -35,8 +35,8 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   $pdo->prepare(
-    'INSERT INTO books (school_id,title,author,isbn,category,shelf,row_number,copies,max_borrow_days,cover_image)
-     VALUES (:sid,:title,:author,:isbn,:category,:shelf,:row,:copies,:max_borrow_days,:cover_image)'
+    'INSERT INTO books (school_id,title,author,isbn,category,shelf,row_number,copies,max_borrow_days,cover_image,boleh_dipinjam)
+     VALUES (:sid,:title,:author,:isbn,:category,:shelf,:row,:copies,:max_borrow_days,:cover_image,:boleh_dipinjam)'
   )->execute([
         'sid' => $sid,
         'title' => $_POST['title'],
@@ -47,7 +47,8 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'row' => $_POST['row_number'],
         'copies' => 1,
         'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
-        'cover_image' => $coverImage
+        'cover_image' => $coverImage,
+        'boleh_dipinjam' => $_POST['boleh_dipinjam'] ?? 'YES'
       ]);
   
   // Get all students in this school to notify them about new book
@@ -105,7 +106,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
     }
 
     $pdo->prepare(
-      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,shelf=:shelf,row_number=:row,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image
+      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,shelf=:shelf,row_number=:row,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image,boleh_dipinjam=:boleh_dipinjam
        WHERE id=:id AND school_id=:sid'
     )->execute([
           'title' => $_POST['title'],
@@ -117,6 +118,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
           'copies' => 1,
           'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
           'cover_image' => $coverImage,
+          'boleh_dipinjam' => $_POST['boleh_dipinjam'] ?? 'YES',
           'id' => $id,
           'sid' => $sid
         ]);
@@ -220,8 +222,12 @@ $categories = [
                     </div>
                 </div>
                 <div class="form-col">
-                     <!-- Stock hidden, always 1 -->
-                     <input type="hidden" name="copies" value="1">
+                    <div class="form-group"><label>Status Peminjaman</label>
+                        <select name="boleh_dipinjam">
+                            <option value="YES" <?= ($book['boleh_dipinjam'] ?? 'YES') === 'YES' ? 'selected' : '' ?>>Boleh Dipinjam</option>
+                            <option value="NO" <?= ($book['boleh_dipinjam'] ?? '') === 'NO' ? 'selected' : '' ?>>Tidak Bisa Dipinjam</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-col">
                     <div class="form-group"><label>Lokasi (Rak / Baris)</label>

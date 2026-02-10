@@ -50,7 +50,7 @@ try {
 
     // 1. Validate book exists and has stock
     $bookStmt = $pdo->prepare(
-        'SELECT id, title, copies FROM books WHERE id = :book_id AND school_id = :school_id'
+        'SELECT id, title, copies, boleh_dipinjam FROM books WHERE id = :book_id AND school_id = :school_id'
     );
     $bookStmt->execute([
         'book_id' => $book_id,
@@ -62,6 +62,13 @@ try {
         $pdo->rollBack();
         http_response_code(404);
         echo json_encode(['success' => false, 'message' => 'Buku tidak ditemukan']);
+        exit;
+    }
+
+    if (($book['boleh_dipinjam'] ?? 'YES') === 'NO') {
+        $pdo->rollBack();
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'Buku ini tidak diizinkan untuk dipinjam']);
         exit;
     }
 
@@ -93,12 +100,12 @@ try {
         exit;
     }
 
-    // 2.5 Check total active loans (Dynamic Limit from DB)
-    // Fetch max_pinjam from members first
-    $memberMetaStmt = $pdo->prepare('SELECT max_pinjam FROM members WHERE id = :member_id');
-    $memberMetaStmt->execute(['member_id' => $member_id]);
-    $memberMeta = $memberMetaStmt->fetch();
-    $max_pinjam = (int) ($memberMeta['max_pinjam'] ?? 2);
+    // 2.5 Check total active loans (Dynamic Limit from School Settings)
+    $schoolSettingsStmt = $pdo->prepare('SELECT max_buku, durasi_peminjaman FROM schools WHERE id = :school_id');
+    $schoolSettingsStmt->execute(['school_id' => $school_id]);
+    $schoolSettings = $schoolSettingsStmt->fetch();
+    $max_pinjam_school = (int) ($schoolSettings['max_buku'] ?? 3);
+    $durasi_pinjam = (int) ($schoolSettings['durasi_peminjaman'] ?? 7);
 
     $countStmt = $pdo->prepare(
         'SELECT COUNT(*) as total FROM borrows 
@@ -112,26 +119,27 @@ try {
     ]);
     $loanCount = (int) ($countStmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0);
 
-    if ($loanCount >= $max_pinjam) {
+    if ($loanCount >= $max_pinjam_school) {
         $pdo->rollBack();
         http_response_code(400);
         echo json_encode([
             'success' => false, 
-            'message' => "Anda telah mencapai batas maksimal peminjaman ($max_pinjam buku)."
+            'message' => "Anda telah mencapai batas maksimal peminjaman ($max_pinjam_school buku)."
         ]);
         exit;
     }
 
     // 3. Insert into borrows table
-    // due_at = NOW() + 7 DAYS
+    // due_at = NOW() + {durasi_pinjam} DAYS
     $insertStmt = $pdo->prepare(
         'INSERT INTO borrows (school_id, book_id, member_id, borrowed_at, due_at, status)
-         VALUES (:school_id, :book_id, :member_id, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY), "borrowed")'
+         VALUES (:school_id, :book_id, :member_id, NOW(), DATE_ADD(NOW(), INTERVAL :durasi DAY), "borrowed")'
     );
     $insertStmt->execute([
         'school_id' => $school_id,
         'book_id' => $book_id,
-        'member_id' => $member_id
+        'member_id' => $member_id,
+        'durasi' => $durasi_pinjam
     ]);
 
     $borrow_id = $pdo->lastInsertId();

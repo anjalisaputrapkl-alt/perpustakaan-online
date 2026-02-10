@@ -61,16 +61,22 @@ class MemberHelper
             }
 
             // Jika belum ada, buat member baru
+            // Get default max_buku from school settings
+            $schoolStmt = $this->pdo->prepare('SELECT max_buku FROM schools WHERE id = :sid');
+            $schoolStmt->execute(['sid' => $school_id]);
+            $maxBuku = $schoolStmt->fetchColumn() ?: 3;
+
             $insertStmt = $this->pdo->prepare(
-                'INSERT INTO members (school_id, name, email, nisn, role, status, created_at)
-                 VALUES (:school_id, :name, :email, :nisn, :role, "active", NOW())'
+                'INSERT INTO members (school_id, name, email, nisn, role, status, max_pinjam, created_at)
+                 VALUES (:school_id, :name, :email, :nisn, :role, "active", :max_pinjam, NOW())'
             );
             $insertStmt->execute([
                 'school_id' => $school_id,
                 'name' => $name,
                 'email' => $email,
                 'nisn' => $nisn,
-                'role' => $role
+                'role' => $role,
+                'max_pinjam' => $maxBuku
             ]);
 
             return $this->pdo->lastInsertId();
