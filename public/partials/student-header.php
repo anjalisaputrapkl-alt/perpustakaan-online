@@ -75,8 +75,15 @@ try {
 
         <div class="header-user">
             <div class="header-user-info">
-                <p class="name"><?php echo htmlspecialchars($user['name'] ?? 'Siswa'); ?></p>
-                <p class="role">Siswa</p>
+                <p class="name"><?php echo htmlspecialchars($user['name'] ?? 'User'); ?></p>
+                <p class="role">
+                    <?php
+                    $role = $user['role'] ?? 'student';
+                    if ($role === 'teacher') echo 'Guru';
+                    elseif ($role === 'employee') echo 'Karyawan';
+                    else echo 'Siswa';
+                    ?>
+                </p>
             </div>
             <div class="header-user-avatar">
                 <?php if ($studentPhoto && file_exists(__DIR__ . '/../' . $studentPhoto)): ?>

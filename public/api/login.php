@@ -37,14 +37,14 @@ if ($user_type === 'student') {
     error_log("Checking NISN: $nisn");
 
     try {
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE nisn = :nisn AND role = :role LIMIT 1');
-        $stmt->execute(['nisn' => $nisn, 'role' => 'student']);
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE nisn = :nisn AND role IN ('student', 'teacher', 'employee') LIMIT 1");
+        $stmt->execute(['nisn' => $nisn]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         error_log("Query result: " . ($user ? "User found (ID: " . $user['id'] . ")" : "User NOT found"));
 
         if (!$user) {
-            error_log("LOGIN FAILED: NISN '$nisn' tidak ditemukan atau role bukan student");
+            error_log("LOGIN FAILED: NISN '$nisn' tidak ditemukan atau role bukan student/teacher/employee");
             http_response_code(401);
             echo json_encode(['success' => false, 'message' => 'NISN atau password salah']);
             exit;

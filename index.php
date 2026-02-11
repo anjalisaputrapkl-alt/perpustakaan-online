@@ -515,8 +515,8 @@
         <div class="user-type-options">
           <button type="button" class="user-type-option" onclick="selectUserType('student')">
             <div class="user-type-icon"></div>
-            <div class="user-type-title">Siswa / Mahasiswa</div>
-            <div class="user-type-desc">Akses sebagai pengguna pelajar</div>
+            <div class="user-type-title">Siswa / Guru / Karyawan</div>
+            <div class="user-type-desc">Akses untuk warga sekolah</div>
           </button>
 
           <button type="button" class="user-type-option" onclick="selectUserType('school')">
@@ -537,14 +537,14 @@
         <div id="studentLoginForm" class="login-form-container" style="display: none;">
           <div class="login-modal-header">
             <div class="login-icon"></div>
-            <h2>Login Siswa</h2>
-            <p>Akses akun siswa Anda dengan NISN</p>
+            <h2>Login Anggota</h2>
+            <p>Masuk dengan NISN / NIP / ID Anda</p>
           </div>
 
           <form method="post" action="public/api/login.php" class="login-modal-form">
             <input type="hidden" name="user_type" value="student">
             <div class="form-group">
-              <label>NISN (Nomor Induk Siswa Nasional)</label>
+              <label>NISN / NIP / ID</label>
               <input type="text" name="nisn" required placeholder="Contoh: 1234567890">
             </div>
 

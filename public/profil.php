@@ -1479,9 +1479,9 @@ $pageTitle = 'Profil Saya';
                          <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="id-card-photo" style="display:block;">
                          
                          <div class="id-card-details">
-                             <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Student Name</p>
+                             <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Nama Anggota</p>
                              <h3 id="modal-name"><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></h3>
-                             <p id="modal-nisn">NISN: <?php echo htmlspecialchars($siswa['nisn']); ?></p>
+                             <p id="modal-nisn">ID/NISN: <?php echo htmlspecialchars($siswa['nisn']); ?></p>
                          </div>
                      </div>
 

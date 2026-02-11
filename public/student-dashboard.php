@@ -202,7 +202,13 @@ try {
     $top_viewed_books = [];
 }
 
-$pageTitle = 'Dashboard Siswa';
+// Set dynamic page title
+$userRole = $_SESSION['user']['role'] ?? 'student';
+$roleLabel = 'Siswa';
+if ($userRole === 'teacher') $roleLabel = 'Guru';
+elseif ($userRole === 'employee') $roleLabel = 'Karyawan';
+
+$pageTitle = 'Dashboard ' . $roleLabel;
 ?>
 <!doctype html>
 <html lang="id">
@@ -210,7 +216,7 @@ $pageTitle = 'Dashboard Siswa';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Perpustakaan Siswa - Dashboard</title>
+    <title>Perpustakaan - <?php echo $pageTitle; ?></title>
     <script src="../assets/js/db-theme-loader.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
