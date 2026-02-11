@@ -5,1339 +5,833 @@
   <meta charset="utf-8" />
   <meta name="viewport"
     content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5, user-scalable=yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <title>Perpustakaan Digital — Akses Pengetahuan Modern</title>
+  <meta name="description" content="Sistem Informasi Perpustakaan Digital Sekolah Modern.">
+  <title>Perpustakaan Digital — Platform Sekolah Modern</title>
   <link rel="stylesheet" href="assets/css/landing.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@700;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+  <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
 </head>
 
 <body>
 
+  <!-- GLASS HEADER -->
   <header class="site-header">
-    <div class="container">
+    <div class="container header-inner">
       <a href="index.php" class="brand">
-        <img src="img/logo.png" alt="Logo Perpustakaan Digital" class="logo-img"
-          style="width: 45px; height: 45px; object-fit: contain;">
+        <div class="logo-icon">
+          <img src="img/logo.png" alt="Logo">
+        </div>
         <div class="brand-text">
-          <div class="site-title">AS Library</div>
-          <div class="site-sub">Sistem Manajemen Perpustakaan Sekolah</div>
+          <div class="site-title">Perpustakaan<span style="color:var(--accent);">Digital</span></div>
         </div>
       </a>
 
       <nav class="main-nav">
-        <a href="#solution">Solusi</a>
         <a href="#features">Fitur</a>
-        <a href="#audience">Pengguna</a>
-        <a href="#contact">Kontak</a>
-        <div class="nav-mobile-cta">
-          <a href="#" onclick="openLoginModal(event)" class="nav-btn login">Login</a>
-          <a href="#" onclick="openRegisterModal(event)" class="nav-btn register">Daftar</a>
-        </div>
+        <a href="#audience">Solusi</a>
+        <a href="#stats">Statistik</a>
+        <a href="#testimonials">Testimoni</a>
       </nav>
 
       <div class="nav-right">
-        <a href="#" onclick="openLoginModal(event)" class="nav-btn login">Login</a>
-        <a href="#" onclick="openRegisterModal(event)" class="nav-btn register">Daftar</a>
+        <a href="#" onclick="openLoginModal(event)" class="nav-btn login">Masuk</a>
+        <a href="#" onclick="openRegisterModal(event)" class="nav-btn register">Daftar Sekolah</a>
       </div>
 
-      <button class="nav-toggle" id="hamburger-btn" aria-label="Toggle menu">☰</button>
+      <button class="nav-toggle" aria-label="Toggle menu">
+        <iconify-icon icon="solar:hamburger-menu-linear"></iconify-icon>
+      </button>
     </div>
   </header>
 
-  <main id="main">
-
-    <!-- HERO -->
+  <main>
+    <!-- MODERN HERO -->
     <section class="hero">
+      <div class="hero-bg-glow"></div>
       <div class="container hero-inner">
-        <div class="hero-copy">
-          <h1>Sistem Perpustakaan Digital untuk Semua Sekolah</h1>
-          <p class="lede">
-            Platform manajemen perpustakaan terintegrasi yang memudahkan sekolah Anda mengelola koleksi buku, anggota,
-            dan peminjaman dalam satu sistem yang mudah digunakan.
-          </p>
-          <p class="hero-cta">
-            <a href="#" onclick="openRegisterModal(event)" class="btn primary">Daftarkan Sekolah Anda</a>
-            <a href="#" onclick="openLoginModal(event)" class="btn ghost">Masuk Sekarang</a>
-          </p>
-        </div>
-        <div class="hero-visual">
-          <img src="img/g1.jpg" alt="Dashboard sistem perpustakaan sekolah" />
-        </div>
-      </div>
-    </section>
-
-    <!-- PROBLEM -->
-    <section class="section problem">
-      <div class="container" data-aos="zoom-in">
-        <h2>Tantangan Manajemen Perpustakaan Sekolah</h2>
-        <p class="microcopy">Banyak sekolah masih menghadapi kesulitan dalam mengelola perpustakaan secara efisien dan
-          modern.</p>
-
-        <div class="values-grid">
-          <article class="value">
-            <h3>Pencatatan Manual</h3>
-            <p>Tanpa sistem otomatis yang handal, proses pencatatan buku dan peminjaman masih dilakukan secara manual
-              dan sangat rentan terhadap kesalahan data.</p>
-          </article>
-          <article class="value">
-            <h3>Waktu Hilang</h3>
-            <p>Proses pencarian buku dan data anggota memakan waktu yang sangat lama ketika tidak didukung oleh sistem
-              digital yang tepat dan terintegrasi.</p>
-          </article>
-          <article class="value">
-            <h3>Laporan Sulit</h3>
-            <p>Tanpa sistem analitik yang memadai, sekolah kesulitan membuat laporan komprehensif dan melakukan evaluasi
-              penggunaan perpustakaan.</p>
-          </article>
-          <article class="value">
-            <h3>Data Tidak Aman</h3>
-            <p>Tanpa sistem digital yang terorganisir, data perpustakaan berisiko hilang atau tidak terstruktur dengan
-              rapih dan dengan baik
-              baik.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- SOLUTION -->
-    <section id="solution" class="section solution">
-      <div class="container split" data-aos="zoom-in">
-        <div class="col">
-          <h2>Solusi Perpustakaan Digital Terintegrasi</h2>
-          <p>
-            Kami menyediakan sistem manajemen perpustakaan yang dirancang khusus untuk kebutuhan sekolah. Platform kami
-            mengintegrasikan semua aspek operasional perpustakaan dalam satu dashboard yang intuitif dan mudah
-            digunakan.
-          </p>
-
-          <ul class="story">
-            <li> Kelola koleksi buku dengan mudah dan terstruktur</li>
-            <li> Catat anggota perpustakaan secara digital</li>
-            <li> Proses peminjaman dan pengembalian otomatis</li>
-            <li> Laporan statistik dan analisis penggunaan real-time</li>
-          </ul>
-        </div>
-        <div class="col">
-          <img src="img/g2.jpg" class="section-img" alt="Dashboard sistem perpustakaan terintegrasi" />
-        </div>
-      </div>
-    </section>
-
-    <!-- STATS -->
-    <section class="section stats"
-      style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); padding: 80px 0; position: relative; overflow: hidden;">
-      <div
-        style="position: absolute; top: -40px; right: -40px; width: 300px; height: 300px; background: rgba(255,255,255,0.05); border-radius: 50%; z-index: 0;">
-      </div>
-      <div
-        style="position: absolute; bottom: -60px; left: -60px; width: 250px; height: 250px; background: rgba(255,255,255,0.05); border-radius: 50%; z-index: 0;">
-      </div>
-
-      <div class="container" style="position: relative; z-index: 1;">
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px;">
-          <div style="text-align: center;">
-            <div style="font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 8px;" class="stat-number"
-              data-target="50">0</div>
-            <div style="font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; letter-spacing: 0.5px;">SEKOLAH
-              TERDAFTAR</div>
-            <div style="width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 12px auto 0;"></div>
+        <div class="hero-content">
+          <div class="badge-pill">
+            <span class="badge-dot"></span>Telah Hadir
           </div>
-
-          <div style="text-align: center;">
-            <div style="font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 8px;" class="stat-number"
-              data-target="25000">0</div>
-            <div style="font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; letter-spacing: 0.5px;">KOLEKSI
-              BUKU</div>
-            <div style="width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 12px auto 0;"></div>
+          <h1>Transformasi Digital Perpustakaan Sekolah Anda</h1>
+          <p class="lede">Platform manajemen perpustakaan modern yang terintegrasi, efisien, dan menyenangkan. Kelola buku, anggota, dan peminjaman dalam satu dashboard pintar.</p>
+          <div class="hero-actions">
+            <a href="#" onclick="openRegisterModal(event)" class="btn btn-primary btn-lg">
+              Mulai Sekarang <iconify-icon icon="solar:arrow-right-linear"></iconify-icon>
+            </a>
+            <a href="#features" class="btn btn-outline btn-lg">Pelajari Fitur</a>
           </div>
-
-          <div style="text-align: center;">
-            <div style="font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 8px;" class="stat-number"
-              data-target="15000">0</div>
-            <div style="font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; letter-spacing: 0.5px;">
-              PENGGUNA AKTIF</div>
-            <div style="width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 12px auto 0;"></div>
+          <div class="hero-trust">
+            <p>Dipercaya oleh 50+ Sekolah di Indonesia</p>
+            <div class="trust-icons">
+               <!-- Placeholder for logos if needed -->
+            </div>
           </div>
-
-          <div style="text-align: center;">
-            <div style="font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 8px;" class="stat-number-percent"
-              data-target="99">0</div>
-            <div style="font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 500; letter-spacing: 0.5px;">UPTIME
-              SISTEM</div>
-            <div style="width: 40px; height: 2px; background: rgba(255,255,255,0.3); margin: 12px auto 0;"></div>
+        </div>
+        <div class="hero-image">
+          <div class="hero-card glass-card">
+            <div class="card-header">
+              <div class="dot red"></div>
+              <div class="dot yellow"></div>
+              <div class="dot green"></div>
+            </div>
+            <img src="img/g1.jpg" alt="Dashboard Preview" class="dashboard-img">
+            
+            <!-- Floating Elements -->
+            <div class="float-stat glass-card">
+              <div class="stat-icon"><iconify-icon icon="solar:book-bookmark-bold"></iconify-icon></div>
+              <div>
+                <span class="stat-val">25rb+</span>
+                <span class="stat-label">Koleksi Buku</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- COLLECTIONS -->
-    <section id="features" class="section preview">
-      <div class="container" data-aos="zoom-in">
-        <h2>Fitur-Fitur Utama Sistem</h2>
-
-        <div
-          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-top: 48px;">
-          <div
-            style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(37, 99, 235, 0) 100%); border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; border-left: 4px solid #2563eb; transition: all 0.3s ease; cursor: pointer; position: relative;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.15)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <div
-              style="display: inline-block; width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-              01</div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0 0 12px 0;">Manajemen Buku</h3>
-            <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0;">Kelola koleksi buku dengan
-              pencarian mudah, kategori, dan informasi lengkap setiap judul.</p>
-          </div>
-
-          <div
-            style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(37, 99, 235, 0) 100%); border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; border-left: 4px solid #2563eb; transition: all 0.3s ease; cursor: pointer; position: relative;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.15)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <div
-              style="display: inline-block; width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-              02</div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0 0 12px 0;">Manajemen Anggota</h3>
-            <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0;">Pendaftaran anggota digital,
-              tracking aktivitas, dan identitas terverifikasi dengan aman.</p>
-          </div>
-
-          <div
-            style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(37, 99, 235, 0) 100%); border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; border-left: 4px solid #2563eb; transition: all 0.3s ease; cursor: pointer; position: relative;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.15)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <div
-              style="display: inline-block; width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-              03</div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0 0 12px 0;">Peminjaman & Pengembalian
-            </h3>
-            <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0;">Proses peminjaman cepat dengan
-              notifikasi otomatis dan manajemen tenggat waktu.</p>
-          </div>
-
-          <div
-            style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.03) 0%, rgba(37, 99, 235, 0) 100%); border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; border-left: 4px solid #2563eb; transition: all 0.3s ease; cursor: pointer; position: relative;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.15)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <div
-              style="display: inline-block; width: 40px; height: 40px; background: #2563eb; color: white; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 16px;">
-              04</div>
-            <h3 style="font-size: 18px; font-weight: 600; color: #2563eb; margin: 0 0 12px 0;">Laporan & Analitik</h3>
-            <p style="font-size: 14px; color: #6b7280; line-height: 1.6; margin: 0;">Dashboard interaktif dengan laporan
-              statistik penggunaan perpustakaan real-time.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- AUDIENCE -->
-    <section id="audience" class="section audience" style="background: #f9fafb; padding: 80px 0;">
+    <!-- BENTO GRID FEATURES -->
+    <section id="features" class="section">
       <div class="container">
-        <h2>Untuk Siapa Sistem Ini?</h2>
-        <p class="microcopy" style="text-align: center; max-width: 600px; margin: 0 auto 48px;">Dirancang untuk memenuhi
-          kebutuhan semua pihak yang terlibat dalam ekosistem perpustakaan
-          sekolah.</p>
+        <div class="section-header text-center animate-on-scroll">
+          <h2 class="section-title">Fitur Lengkap & Canggih</h2>
+          <p class="section-subtitle">Semua yang Anda butuhkan untuk mengelola perpustakaan modern</p>
+        </div>
 
-        <div
-          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; margin-top: 48px;">
-          <div
-            style="background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.12)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <img src="img/admin-sekolah.jpg" alt="Admin Sekolah"
-              style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; margin: 0 auto 16px; display: block;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0;">Admin Sekolah</h3>
-            <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0;">Kelola seluruh sistem, user, dan
-              laporan operasional perpustakaan dengan mudah.</p>
+        <div class="bento-grid">
+          <!-- Large Feature -->
+          <div class="bento-item large bento-1 animate-on-scroll delay-100">
+            <div class="bento-content">
+              <h3>Manajemen Sirkulasi Otomatis</h3>
+              <p>Peminjaman dan pengembalian buku tercatat otomatis. Notifikasi denda dan keterlambatan terkirim via sistem.</p>
+            </div>
+            <div class="bento-visual">
+              <iconify-icon icon="solar:round-transfer-horizontal-bold-duotone" class="big-icon"></iconify-icon>
+            </div>
           </div>
 
-          <div
-            style="background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.12)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <img src="img/pustakawan.jpg" alt="Pustakawan"
-              style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; margin: 0 auto 16px; display: block;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0;">Pustakawan</h3>
-            <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0;">Kelola inventaris buku, proses
-              peminjaman, dan pengembalian dalam satu dashboard.</p>
+          <!-- Medium Features -->
+          <div class="bento-item medium bento-2 animate-on-scroll delay-200">
+            <div class="icon-box"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
+            <h3>Manajemen Anggota</h3>
+            <p>Database siswa, guru, dan karyawan terpusat dengan kartu anggota digital.</p>
           </div>
 
-          <div
-            style="background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.12)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <img src="img/guru.jpg" alt="Guru & Dosen"
-              style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; margin: 0 auto 16px; display: block;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0;">Guru & Dosen</h3>
-            <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0;">Akses mudah ke koleksi buku dan
-              rekomendasi sumber pembelajaran untuk kelas.</p>
+          <div class="bento-item medium bento-3 animate-on-scroll delay-300">
+             <div class="icon-box"><iconify-icon icon="solar:chart-2-bold-duotone"></iconify-icon></div>
+            <h3>Laporan Analitik</h3>
+            <p>Visualisasi data peminjaman real-time untuk keputusan yang lebih baik.</p>
           </div>
 
-          <div
-            style="background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.12)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <img src="img/murid.jpg" alt="Siswa & Mahasiswa"
-              style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; margin: 0 auto 16px; display: block;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0;">Siswa & Mahasiswa</h3>
-            <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0;">Cari dan pinjam buku online,
-              tracking status peminjaman, dan perpanjangan otomatis.</p>
-          </div>
-
-          <div
-            style="background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e5e7eb; text-align: center; transition: all 0.3s ease; cursor: pointer;"
-            onmouseover="this.style.boxShadow='0 10px 30px rgba(37, 99, 235, 0.12)'; this.style.transform='translateY(-4px)'"
-            onmouseout="this.style.boxShadow='none'; this.style.transform='translateY(0)'">
-            <img src="img/institusi.jpg" alt="Institusi Pendidikan"
-              style="width: 80px; height: 80px; border-radius: 12px; object-fit: cover; margin: 0 auto 16px; display: block;">
-            <h3 style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 8px 0;">Institusi Pendidikan</h3>
-            <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin: 0;">Solusi enterprise dengan analitik
-              mendalam dan integrasi sistem sekolah yang komprehensif.</p>
+          <!-- Wide Feature -->
+          <!-- Wide Feature -->
+          <div class="bento-item wide bento-4 animate-on-scroll delay-100">
+            <div class="bento-flex">
+              <div class="bento-text">
+                <h3>Katalog OPAC Modern</h3>
+                <p>Pencarian buku cepat & akurat. Filter kategori, penulis, dan ketersediaan real-time.</p>
+              </div>
+              <div class="bento-visual-opac">
+                <div class="mock-search-bar">
+                   <iconify-icon icon="solar:magnifer-linear"></iconify-icon>
+                   <span>Cari buku sejarah...</span>
+                   <div class="search-btn">Cari</div>
+                </div>
+                <div class="mock-tags">
+                   <span>#Sejarah</span>
+                   <span>#Sains</span>
+                   <span>#Novel</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- CLOSING CTA -->
-    <section class="section closing">
+    <!-- STATS COUNTER -->
+    <section id="stats" class="section stats-section animate-on-scroll">
       <div class="container">
-        <h2>Transformasikan Perpustakaan Sekolah Anda</h2>
-        <p>Bergabunglah dengan 50+ sekolah yang telah mempercayai sistem kami untuk mengelola perpustakaan secara
-          modern, efisien, dan terintegrasi.</p>
-        <div style="margin:32px 0;">
-          <a href="#" onclick="openRegisterModal(event)" class="btn primary">Daftarkan Sekarang</a>
-          <a href="#contact" class="btn ghost">Hubungi Kami</a>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <h3 class="counter" data-target="50">0</h3>
+            <p>Sekolah Mitra</p>
+          </div>
+          <div class="stat-item">
+            <h3 class="counter" data-target="25000">0</h3>
+            <p>Buku Digital</p>
+          </div>
+          <div class="stat-item">
+            <h3 class="counter" data-target="15000">0</h3>
+            <p>Pengguna Aktif</p>
+          </div>
+          <div class="stat-item">
+            <h3 class="counter-percent" data-target="99">0</h3>
+            <p>Kepuasan User</p>
+          </div>
         </div>
-        <p class="closing-meta">Gratis • Setup Otomatis • Support 24/7</p>
       </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer id="contact" class="site-footer" style="padding:0 !important;">
-      <div style="padding:60px 40px;background:#0F1724;width:100%;">
-        <div style="max-width:1400px;margin:0 auto;">
-          <!-- Newsletter Section -->
-          <div
-            style="background:rgba(255,255,255,.05);border-radius:12px;padding:32px 40px;margin-bottom:60px;border:1px solid rgba(255,255,255,.1);">
-            <div style="display:flex;justify-content:space-between;align-items:center;gap:40px;">
-              <div style="flex:1;">
-                <h3 style="color:#fff;margin:0 0 8px 0;font-size:16px;font-weight:700;">Dapatkan Update Terbaru</h3>
-                <p style="color:rgba(255,255,255,.6);margin:0;font-size:13px;">Berlangganan untuk tips manajemen
-                  perpustakaan dan update fitur terbaru.</p>
+    <!-- TESTIMONIALS & FAQ SPLIT -->
+    <section id="testimonials" class="section bg-soft">
+      <div class="container split-layout">
+        <div class="testimonials-col animate-on-scroll">
+          <h2 class="section-title">Kata Mereka</h2>
+          <div class="testimonial-slider">
+            <div class="testimonial-single glass-card">
+              <div class="quote-icon"><iconify-icon icon="solar:quote-up-bold"></iconify-icon></div>
+              <p class="quote-text">"Sistem ini mengubah cara perpustakaan kami bekerja. Dari manual ke digital dalam hitungan hari. Sangat membantu!"</p>
+              <div class="user-profile">
+                <div class="avatar">BS</div>
+                <div>
+                  <h4>Budi Santoso</h4>
+                  <p>Kepala Perpus SMAN 1</p>
+                </div>
               </div>
-              <div style="display:flex;gap:8px;white-space:nowrap;">
-                <input type="email" placeholder="Email Anda"
-                  style="padding:10px 14px;border:1px solid rgba(255,255,255,.2);border-radius:6px;background:rgba(255,255,255,.05);color:#fff;font-size:13px;min-width:220px;" />
-                <button
-                  style="padding:10px 24px;background:#fff;color:var(--accent);border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:13px;transition:.2s ease;"
-                  onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Subscribe</button>
+            </div>
+             <div class="testimonial-single glass-card mt-4">
+              <div class="quote-icon"><iconify-icon icon="solar:quote-up-bold"></iconify-icon></div>
+              <p class="quote-text">"Fitur booking bukunya keren banget. Gak perlu rebutan lagi kalau ada buku baru."</p>
+              <div class="user-profile">
+                <div class="avatar">AD</div>
+                <div>
+                  <h4>Ani Dewantara</h4>
+                  <p>Siswi Kelas XII</p>
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Main Footer Grid -->
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1.2fr;gap:50px;margin-bottom:60px;">
-            <!-- Brand Column -->
-            <div>
-              <h4 style="color:#fff;margin:0 0 12px 0;font-size:15px;font-weight:800;">Perpustakaan Digital</h4>
-              <p style="color:rgba(255,255,255,.6);margin:0;font-size:13px;line-height:1.6;">Solusi manajemen
-                perpustakaan modern untuk institusi pendidikan Indonesia.</p>
-            </div>
-
-            <!-- Produk Column -->
-            <div>
-              <h4
-                style="color:#fff;margin:0 0 16px 0;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">
-                Produk</h4>
-              <ul style="list-style:none;margin:0;padding:0;">
-                <li style="margin-bottom:10px;"><a href="#features"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Fitur
-                    Utama</a></li>
-                <li style="margin-bottom:10px;"><a href="#solution"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Solusi</a>
-                </li>
-                <li style="margin-bottom:10px;"><a href="#audience"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Pengguna</a>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Perusahaan Column -->
-            <div>
-              <h4
-                style="color:#fff;margin:0 0 16px 0;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">
-                Perusahaan</h4>
-              <ul style="list-style:none;margin:0;padding:0;">
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Tentang</a>
-                </li>
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Blog</a>
-                </li>
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Karir</a>
-                </li>
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Partner</a>
-                </li>
-                <li><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Testimonial</a>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Dukungan Column -->
-            <div>
-              <h4
-                style="color:#fff;margin:0 0 16px 0;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">
-                Dukungan</h4>
-              <ul style="list-style:none;margin:0;padding:0;">
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Bantuan</a>
-                </li>
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Dokumentasi</a>
-                </li>
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Status</a>
-                </li>
-                <li style="margin-bottom:10px;"><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">FAQ</a>
-                </li>
-                <li><a href="#"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">Support</a>
-                </li>
-              </ul>
-            </div>
-
-            <!-- Kontak Column -->
-            <div>
-              <h4
-                style="color:#fff;margin:0 0 16px 0;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">
-                Kontak</h4>
-              <ul style="list-style:none;margin:0;padding:0;">
-                <li style="margin-bottom:10px;"><a href="mailto:support@perpustakaan.edu"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">
-                    anjalisaputrapkl@gmail.com</a></li>
-                <li style="margin-bottom:10px;"><a href="tel:+622745551234"
-                    style="color:rgba(255,255,255,.7);text-decoration:none;font-size:13px;transition:.2s ease;">
-                    +62 851-8737-8063</a></li>
-                <li style="color:rgba(255,255,255,.7);font-size:13px;">Senin–Jumat 09:00–17:00</li>
-              </ul>
-            </div>
-          </div>
-
-          <!-- Social & Compliance -->
-          <div
-            style="padding:50px 0;border-top:1px solid rgba(255,255,255,.1);border-bottom:1px solid rgba(255,255,255,.1);display:grid;grid-template-columns:1fr 1fr 1fr;gap:50px;">
-            <!-- Social Media -->
-            <div>
-              <h5
-                style="font-weight:700;color:#fff;margin:0 0 16px 0;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">
-                Ikuti Kami</h5>
-              <div style="display:flex;gap:12px;align-items:center;justify-content:center;">
-                <a href="#"
-                  style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:8px;color:#fff;text-decoration:none;font-size:18px;transition:.2s ease;font-weight:600;"
-                  title="Facebook" onmouseover="this.style.background='rgba(255,255,255,.15)'"
-                  onmouseout="this.style.background='rgba(255,255,255,.1)'">f</a>
-                <a href="#"
-                  style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:8px;color:#fff;text-decoration:none;font-size:18px;transition:.2s ease;font-weight:600;"
-                  title="Twitter" onmouseover="this.style.background='rgba(255,255,255,.15)'"
-                  onmouseout="this.style.background='rgba(255,255,255,.1)'">𝕏</a>
-                <a href="#"
-                  style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:8px;color:#fff;text-decoration:none;font-size:18px;transition:.2s ease;font-weight:600;"
-                  title="LinkedIn" onmouseover="this.style.background='rgba(255,255,255,.15)'"
-                  onmouseout="this.style.background='rgba(255,255,255,.1)'">in</a>
-                <a href="#"
-                  style="display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;background:rgba(255,255,255,.1);border-radius:8px;color:#fff;text-decoration:none;font-size:18px;transition:.2s ease;font-weight:600;"
-                  title="Instagram" onmouseover="this.style.background='rgba(255,255,255,.15)'"
-                  onmouseout="this.style.background='rgba(255,255,255,.1)'">📷</a>
+        <div class="faq-col animate-on-scroll delay-200">
+          <h2 class="section-title">FAQ</h2>
+          <div class="accordion">
+            <div class="accordion-item">
+              <button class="accordion-header" onclick="toggleAccordion(this)">
+                Apakah sistem ini berbayar?
+                <iconify-icon icon="solar:alt-arrow-down-linear" class="arrow"></iconify-icon>
+              </button>
+              <div class="accordion-body">
+                <p>Kami menyediakan semua fitur gratis tanpa di pungut biaya apapun.</p>
               </div>
             </div>
-
-            <!-- Security -->
-            <div>
-              <h5
-                style="font-weight:700;color:#fff;margin:0 0 16px 0;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">
-                Keamanan</h5>
-              <ul style="list-style:none;margin:0;padding:0;">
-                <li style="margin-bottom:8px;color:rgba(255,255,255,.6);font-size:12px;">✓ GDPR Compliant</li>
-                <li style="margin-bottom:8px;color:rgba(255,255,255,.6);font-size:12px;">✓ ISO 27001 Certified</li>
-                <li style="color:rgba(255,255,255,.6);font-size:12px;">✓ Data Backup Daily</li>
-              </ul>
+            <div class="accordion-item">
+               <button class="accordion-header" onclick="toggleAccordion(this)">
+                Bagaimana cara daftar?
+                <iconify-icon icon="solar:alt-arrow-down-linear" class="arrow"></iconify-icon>
+              </button>
+              <div class="accordion-body">
+                <p>Klik tombol "Daftar Sekolah" di pojok kanan atas, isi data sekolah, dan verifikasi email Anda.</p>
+              </div>
             </div>
-
-            <!-- Legal -->
-            <div>
-              <h5
-                style="font-weight:700;color:#fff;margin:0 0 16px 0;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">
-                Legal</h5>
-              <ul style="list-style:none;margin:0;padding:0;">
-                <li style="margin-bottom:8px;"><a href="#"
-                    style="color:rgba(255,255,255,.6);text-decoration:none;font-size:12px;transition:.2s ease;">Privasi</a>
-                </li>
-                <li style="margin-bottom:8px;"><a href="#"
-                    style="color:rgba(255,255,255,.6);text-decoration:none;font-size:12px;transition:.2s ease;">Terms</a>
-                </li>
-                <li><a href="#"
-                    style="color:rgba(255,255,255,.6);text-decoration:none;font-size:12px;transition:.2s ease;">Sertifikasi</a>
-                </li>
-              </ul>
+            <div class="accordion-item">
+               <button class="accordion-header" onclick="toggleAccordion(this)">
+                Apakah data aman?
+                <iconify-icon icon="solar:alt-arrow-down-linear" class="arrow"></iconify-icon>
+              </button>
+              <div class="accordion-body">
+                <p>Ya, kami menggunakan enkripsi standar industri dan backup data harian untuk menjamin keamanan data sekolah Anda.</p>
+              </div>
             </div>
-          </div>
-
-          <!-- Bottom -->
-          <div style="padding-top:30px;text-align:center;">
-            <p style="color:rgba(255,255,255,.4);font-size:12px;margin:0;">© 2026 Perpustakaan Digital Indonesia. Hak
-              cipta dilindungi undang-undang.</p>
-            <p style="color:rgba(255,255,255,.3);font-size:11px;margin:6px 0 0 0;">Made with ❤️ for Indonesian Education
-              | v1.0.0</p>
           </div>
         </div>
       </div>
-    </footer>
+    </section>
 
-    <!-- USER TYPE SELECTION MODAL -->
-    <div id="userTypeModal" class="modal" onclick="closeUserTypeModal(event)">
-      <div class="modal-content user-type-modal" onclick="event.stopPropagation()">
-        <button class="modal-close" onclick="closeUserTypeModal()">&times;</button>
-
-        <div class="user-type-header">
-          <h2>Masuk ke Akun Anda</h2>
-          <p>Pilih jenis akun untuk melanjutkan</p>
+    <!-- CTA -->
+    <section class="section cta-section animate-on-scroll">
+      <div class="container text-center">
+        <div class="cta-box glass-card glow">
+          <h2>Siap Modernisasi Perpustakaan Anda?</h2>
+          <p>Bergabunglah sekarang dan rasakan kemudahannya.</p>
+          <div class="cta-buttons">
+            <a href="#" onclick="openRegisterModal(event)" class="btn btn-light btn-lg">Daftar Gratis</a>
+          </div>
         </div>
+      </div>
+    </section>
+  </main>
 
-        <div class="user-type-options">
-          <button type="button" class="user-type-option" onclick="selectUserType('student')">
-            <div class="user-type-icon"></div>
-            <div class="user-type-title">Siswa / Guru / Karyawan</div>
-            <div class="user-type-desc">Akses untuk warga sekolah</div>
-          </button>
-
-          <button type="button" class="user-type-option" onclick="selectUserType('school')">
-            <div class="user-type-icon"></div>
-            <div class="user-type-title">Admin / Pustakawan</div>
-            <div class="user-type-desc">Akses sebagai admin/pustakawan</div>
-          </button>
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <div class="logo-text">Perpustakaan<span style="color:var(--accent-light);">Digital</span></div>
+          <p>© 2026. Made for Education.</p>
+        </div>
+        <div class="footer-links">
+          <h4>Produk</h4>
+          <a href="#">Fitur</a>
+          <a href="#">Harga</a>
+          <a href="#">Panduan</a>
+        </div>
+        <div class="footer-links">
+          <h4>Legal</h4>
+          <a href="#">Privasi</a>
+          <a href="#">Syarat</a>
+        </div>
+        <div class="footer-social">
+           <a href="#"><iconify-icon icon="mdi:instagram"></iconify-icon></a>
+           <a href="#"><iconify-icon icon="mdi:twitter"></iconify-icon></a>
+           <a href="#"><iconify-icon icon="mdi:linkedin"></iconify-icon></a>
         </div>
       </div>
     </div>
+  </footer>
 
-    <!-- LOGIN MODAL -->
-    <div id="loginModal" class="modal" onclick="closeLoginModal(event)">
-      <div class="modal-content" onclick="event.stopPropagation()">
+  <!-- MODALS (Login/Register/UserType) - Reused Logic -->
+  <!-- User Type Modal -->
+  <div id="userTypeModal" class="modal" onclick="closeUserTypeModal(event)">
+    <div class="modal-content glass-modal">
+       <button class="modal-close" onclick="closeUserTypeModal()">&times;</button>
+       <h2>Siapa Anda?</h2>
+       <div class="role-grid">
+         <button onclick="selectUserType('student')" class="role-card">
+           <iconify-icon icon="solar:user-bold-duotone"></iconify-icon>
+           <span>Siswa / Guru / Karyawan</span>
+         </button>
+         <button onclick="selectUserType('school')" class="role-card">
+           <iconify-icon icon="solar:shield-user-bold-duotone"></iconify-icon>
+           <span>Admin / Pustakawan</span>
+         </button>
+       </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+   <div id="loginModal" class="modal" onclick="closeLoginModal(event)">
+      <div class="modal-content glass-modal" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeLoginModal()">&times;</button>
-
-        <!-- STUDENT LOGIN FORM -->
-        <div id="studentLoginForm" class="login-form-container" style="display: none;">
-          <div class="login-modal-header">
-            <div class="login-icon"></div>
-            <h2>Login Anggota</h2>
-            <p>Masuk dengan NISN / NIP / ID Anda</p>
-          </div>
-
-          <form method="post" action="public/api/login.php" class="login-modal-form">
+        
+        <!-- Student Form -->
+        <div id="studentLoginForm" style="display:none;">
+          <h2 class="modal-title">Login Anggota</h2>
+          <p class="modal-subtitle">Masuk dengan ID/NISN Anda</p>
+          <div id="studentLoginError" class="login-error-msg"></div>
+          <form onsubmit="handleLogin(event, 'student')" class="modern-form">
             <input type="hidden" name="user_type" value="student">
-            <div class="form-group">
-              <label>NISN / NIP / ID</label>
-              <input type="text" name="nisn" required placeholder="Contoh: 1234567890">
+            <div class="input-group">
+               <iconify-icon icon="solar:user-id-bold"></iconify-icon>
+               <input type="text" name="nisn" required placeholder="NISN / NIP / ID">
             </div>
-
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" name="password" required placeholder="••••••••">
+            <div class="input-group">
+               <iconify-icon icon="solar:lock-password-bold"></iconify-icon>
+               <input type="password" name="password" required placeholder="Password">
             </div>
-
-            <button type="submit" class="btn-modal-submit">Login</button>
+            <button type="submit" class="btn btn-primary full-width">Masuk</button>
           </form>
-
-          <div class="login-modal-divider"></div>
         </div>
 
-        <!-- SCHOOL ADMIN LOGIN FORM -->
-        <div id="schoolLoginForm" class="login-form-container" style="display: none;">
-          <div class="login-modal-header">
-            <div class="login-icon"></div>
-            <h2>Login Admin Sekolah</h2>
-            <p>Kelola perpustakaan sekolah Anda</p>
-          </div>
-
-          <form method="post" action="public/api/login.php" class="login-modal-form">
+        <!-- School Form -->
+        <div id="schoolLoginForm" style="display:none;">
+          <h2 class="modal-title">Login Admin</h2>
+          <p class="modal-subtitle">Masuk akun sekolah</p>
+          <div id="schoolLoginError" class="login-error-msg"></div>
+          <form onsubmit="handleLogin(event, 'school')" class="modern-form">
             <input type="hidden" name="user_type" value="school">
-            <div class="form-group">
-              <label>Email Sekolah</label>
-              <input type="email" name="email" required placeholder="admin@sekolah.com">
+             <div class="input-group">
+               <iconify-icon icon="solar:letter-bold"></iconify-icon>
+               <input type="email" name="email" required placeholder="Email Sekolah">
             </div>
-
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" name="password" required placeholder="••••••••">
+             <div class="input-group">
+               <iconify-icon icon="solar:lock-password-bold"></iconify-icon>
+               <input type="password" name="password" required placeholder="Password">
             </div>
-
-            <button type="submit" class="btn-modal-submit">Login</button>
+            <button type="submit" class="btn btn-primary full-width">Masuk Admin</button>
           </form>
-
-          <div class="login-modal-divider"></div>
-
-          <p class="login-modal-footer">Belum punya akun?</p>
-          <a href="#" onclick="closeLoginModal(); openRegisterModal(event);" class="btn-modal-register">Daftar
-            Sekolah Baru</a>
-
+          <div class="modal-footer">
+            Belum punya akun? <a href="#" onclick="switchModal('register')">Daftar Sekolah</a>
+          </div>
         </div>
       </div>
-    </div>
+   </div>
 
-    <!-- REGISTER MODAL -->
-    <div id="registerModal" class="modal" onclick="closeRegisterModal(event)">
-      <div class="modal-content" onclick="event.stopPropagation()">
+   <!-- Register Modal -->
+   <div id="registerModal" class="modal" onclick="closeRegisterModal(event)">
+      <div class="modal-content glass-modal" onclick="event.stopPropagation()">
         <button class="modal-close" onclick="closeRegisterModal()">&times;</button>
-
-        <div class="login-modal-header">
-          <div class="login-icon"></div>
-          <h2>Daftar Sekolah Baru</h2>
-          <p>Kelola perpustakaan sekolah dengan sistem yang modern</p>
-        </div>
-
-        <form method="post" action="public/api/register.php" id="registerForm" class="login-modal-form">
-          <div class="form-group">
-            <label>Nama Sekolah</label>
-            <input type="text" name="school_name" required placeholder="SMA Maju Jaya">
-          </div>
-
-          <div class="form-group">
-            <label>Nama Admin</label>
-            <input type="text" name="admin_name" required placeholder="Budi Santoso">
-          </div>
-
-          <div class="form-group">
-            <label>Email Sekolah</label>
-            <input type="email" name="admin_email" required placeholder="admin@sch.id" pattern=".*@sch\.id$"
-              title="Email harus menggunakan domain @sch.id">
-            <small style="color: #6b7280; display: block; margin-top: 6px; font-size: 11px;">ⓘ Email harus menggunakan
-              domain @sch.id</small>
-          </div>
-
-          <div class="form-group">
-            <label>Password Admin</label>
-            <input type="password" name="admin_password" required placeholder="••••••••">
-          </div>
-
-          <button type="submit" class="btn-modal-submit">✓ Daftarkan Sekolah</button>
-        </form>
-
-        <div class="login-modal-divider"></div>
-
-        <p class="login-modal-footer">Sudah punya akun?</p>
-        <a href="#" onclick="closeRegisterModal(); openLoginModal(event);" class="btn-modal-register">Login di
-          sini</a>
-      </div>
-    </div>
-
-    <!-- EMAIL VERIFICATION MODAL -->
-    <div id="verificationModal" class="modal" onclick="closeVerificationModal(event)">
-      <div class="modal-content" onclick="event.stopPropagation()">
-        <button class="modal-close" id="verificationCloseBtn" onclick="closeVerificationModal()"
-          style="display: none;">&times;</button>
-
-        <div class="login-modal-header">
-          <div class="login-icon"></div>
-          <h2>Verifikasi Email</h2>
-          <p>Masukkan kode verifikasi yang telah dikirim ke email Anda</p>
-        </div>
-
-        <div
-          style="background: #f0f9ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 12px; margin-bottom: 20px; text-align: center;">
-          <p style="font-size: 13px; color: #1e40af; margin: 0; font-weight: 600;">Email: <span id="verificationEmail"
-              style="color: #2563eb;"></span></p>
-        </div>
-
-        <div class="verification-error" id="verificationError"
-          style="display: none; background: #fee2e2; border: 1px solid #fecaca; border-radius: 8px; padding: 12px; margin-bottom: 16px; color: #dc2626; font-size: 13px; text-align: center;">
-        </div>
-
-        <div class="verification-success" id="verificationSuccess"
-          style="display: none; background: #dcfce7; border: 1px solid #86efac; border-radius: 8px; padding: 12px; margin-bottom: 16px; color: #16a34a; font-size: 13px; text-align: center; font-weight: 600;">
-          Verifikasi berhasil! Mengalihkan...</div>
-
-        <form id="verificationForm" class="login-modal-form">
-          <input type="hidden" id="verificationUserId" name="user_id">
-
-          <div class="form-group">
-            <label>Kode Verifikasi (6 digit)</label>
-            <div class="code-input-group" style="display: flex; gap: 8px; justify-content: center; margin-top: 12px;">
-              <input type="text" class="code-input" id="code1" maxlength="1" inputmode="numeric" required
-                style="width: 44px; height: 44px; font-size: 20px; font-weight: bold; text-align: center; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; transition: all 0.2s ease;">
-              <input type="text" class="code-input" id="code2" maxlength="1" inputmode="numeric" required
-                style="width: 44px; height: 44px; font-size: 20px; font-weight: bold; text-align: center; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; transition: all 0.2s ease;">
-              <input type="text" class="code-input" id="code3" maxlength="1" inputmode="numeric" required
-                style="width: 44px; height: 44px; font-size: 20px; font-weight: bold; text-align: center; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; transition: all 0.2s ease;">
-              <input type="text" class="code-input" id="code4" maxlength="1" inputmode="numeric" required
-                style="width: 44px; height: 44px; font-size: 20px; font-weight: bold; text-align: center; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; transition: all 0.2s ease;">
-              <input type="text" class="code-input" id="code5" maxlength="1" inputmode="numeric" required
-                style="width: 44px; height: 44px; font-size: 20px; font-weight: bold; text-align: center; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; transition: all 0.2s ease;">
-              <input type="text" class="code-input" id="code6" maxlength="1" inputmode="numeric" required
-                style="width: 44px; height: 44px; font-size: 20px; font-weight: bold; text-align: center; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; transition: all 0.2s ease;">
+        <h2 class="modal-title">Daftar Sekolah</h2>
+        <div id="registerError" class="login-error-msg"></div>
+        <form onsubmit="handleRegister(event)" class="modern-form">
+             <div class="input-group">
+               <iconify-icon icon="solar:buildings-bold"></iconify-icon>
+               <input type="text" name="school_name" required placeholder="Nama Sekolah">
             </div>
-          </div>
-
-          <div
-            style="background: #fffbeb; border: 1px solid #fed7aa; border-radius: 8px; padding: 12px; margin-bottom: 20px; font-size: 12px; color: #92400e;">
-            <strong style="display: block; margin-bottom: 6px;">Tip Penting:</strong>
-            <ul style="margin: 0; padding-left: 20px;">
-              <li>Kode verifikasi terdiri dari 6 digit angka</li>
-              <li>Kode berlaku selama 15 menit</li>
-              <li>Cek folder spam jika tidak menerima email</li>
-            </ul>
-          </div>
-
-          <button type="submit" class="btn-modal-submit">Verifikasi Email</button>
+             <div class="input-group">
+               <iconify-icon icon="solar:user-circle-bold"></iconify-icon>
+               <input type="text" name="admin_name" required placeholder="Nama Admin">
+            </div>
+             <div class="input-group">
+               <iconify-icon icon="solar:letter-bold"></iconify-icon>
+               <input type="email" name="admin_email" required placeholder="Email (@sch.id)" pattern=".*@sch\.id$">
+            </div>
+             <div class="input-group">
+               <iconify-icon icon="solar:lock-password-bold"></iconify-icon>
+               <input type="password" name="admin_password" required placeholder="Password">
+            </div>
+            <button type="submit" class="btn btn-primary full-width">Daftar Sekarang</button>
         </form>
-
-        <div style="text-align: center; margin-top: 16px; padding-top: 16px; border-top: 1px solid #e5e7eb;">
-          <p style="font-size: 12px; color: #6b7280; margin: 0 0 8px 0;">
-            Kode kadaluarsa dalam <strong><span id="timerMinutes">15</span>:<span id="timerSeconds">00</span></strong>
-          </p>
-          <div style="display: flex; gap: 8px; justify-content: center;">
-            <button type="button" class="btn-modal-register" id="resendBtn" disabled
-              style="font-size: 13px; cursor: not-allowed; opacity: 0.5; flex: 1;">Kirim Ulang Kode</button>
-            <button type="button" class="btn-modal-register" id="cancelRegistrationBtn"
-              style="font-size: 13px; background: #ef4444; flex: 1;">Daftar Ulang</button>
+         <div class="modal-footer">
+            Sudah punya akun? <a href="#" onclick="switchModal('login')">Masuk</a>
           </div>
+      </div>
+
+   <!-- OTP Verification Modal - REBUILT FROM SCRATCH -->
+   <div id="otpModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 99999; justify-content: center; align-items: center;">
+      <div style="background: white; border-radius: 20px; padding: 40px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative;">
+        <button onclick="closeOTPModalNew()" style="position: absolute; top: 20px; right: 20px; background: none; border: none; font-size: 28px; cursor: pointer; color: #666;">&times;</button>
+        
+        <h2 style="margin: 0 0 10px 0; font-size: 24px; color: #0B3D61;">Verifikasi Email</h2>
+        <p style="margin: 0 0 20px 0; color: #64748B; font-size: 14px;">Kode OTP telah dikirim ke email Anda</p>
+        
+        <!-- OTP Code Display for Demo -->
+        <div id="otpCodeDisplayNew" style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); border: 2px solid #3b82f6; border-radius: 12px; padding: 20px; margin-bottom: 20px; text-align: center; display: none;">
+          <p style="margin: 0 0 10px 0; font-size: 13px; color: #1e40af; font-weight: 700;">🔑 Kode OTP Anda (Demo):</p>
+          <div id="otpCodeValueNew" style="font-size: 36px; font-weight: 900; color: #1e40af; letter-spacing: 10px; font-family: 'Courier New', monospace; margin: 10px 0;"></div>
+          <button type="button" onclick="copyOTPNew()" style="margin-top: 10px; padding: 8px 20px; background: #3b82f6; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; font-weight: 600;">📋 Copy Kode</button>
+        </div>
+        
+        <div id="otpErrorNew" style="display: none; background: #fee; border: 1px solid #fcc; color: #c33; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 14px;"></div>
+        
+        <form onsubmit="handleOTPVerificationNew(event)" style="margin: 0;">
+          <input type="hidden" id="otpEmailNew" name="email">
+          
+          <div style="position: relative; margin-bottom: 20px;">
+            <input type="text" id="otpCodeNew" name="code" required placeholder="Masukkan 6 digit kode OTP" maxlength="6" pattern="[0-9]{6}" style="width: 100%; padding: 14px 16px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; box-sizing: border-box; font-family: monospace; letter-spacing: 4px; text-align: center; font-weight: bold;">
+          </div>
+          
+          <button type="submit" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #0B3D61, #072a44); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;">Verifikasi Sekarang</button>
+        </form>
+        
+        <div style="margin-top: 20px; text-align: center; font-size: 14px; color: #64748B;">
+          Tidak menerima kode? <a href="#" onclick="resendOTPNew(event)" style="color: #0B3D61; font-weight: 600; text-decoration: none;">Kirim Ulang</a>
         </div>
       </div>
-    </div>
+   </div>
+   </div>
 
-    <script>
-      // Check pending verification on page load
-      window.addEventListener('load', async () => {
-        // Check localStorage for pending verification
-        const pendingVerification = localStorage.getItem('pending_verification');
+   <!-- JS Logic -->
+   <script>
+    // --- Modal Logic ---
+    function openLoginModal(e) {
+      if(e) e.preventDefault();
+      document.getElementById('userTypeModal').classList.add('active');
+    }
+    function closeUserTypeModal() {
+      document.getElementById('userTypeModal').classList.remove('active');
+    }
+    function selectUserType(type) {
+      closeUserTypeModal();
+      
+      // Clear forms before opening
+      document.querySelectorAll('#loginModal form').forEach(form => form.reset());
+      document.querySelectorAll('.login-error-msg').forEach(msg => {
+        msg.style.display = 'none';
+        msg.innerText = '';
+      });
+      
+      document.getElementById('loginModal').classList.add('active');
+      document.getElementById('studentLoginForm').style.display = 'none';
+      document.getElementById('schoolLoginForm').style.display = 'none';
+      
+      if(type === 'student') document.getElementById('studentLoginForm').style.display = 'block';
+      else document.getElementById('schoolLoginForm').style.display = 'block';
+    }
+    function closeLoginModal(event) {
+       // Stop if clicked inside modal content
+       if(event && event.target !== event.currentTarget) return;
+       
+       document.getElementById('loginModal').classList.remove('active');
+       
+       // Clear all forms and error messages
+       document.querySelectorAll('#loginModal form').forEach(form => form.reset());
+       document.querySelectorAll('.login-error-msg').forEach(msg => {
+         msg.style.display = 'none';
+         msg.innerText = '';
+       });
+    }
+    function openRegisterModal(e) {
+      if(e) e.preventDefault();
+      closeLoginModal();
+      
+      // Clear form before opening
+      const form = document.querySelector('#registerModal form');
+      if(form) form.reset();
+      
+      document.getElementById('registerModal').classList.add('active');
+    }
+    function closeRegisterModal(event) {
+      // Stop if clicked inside modal content
+      if(event && event.target !== event.currentTarget) return;
+      
+      // ONLY close register modal - DO NOT close OTP modal!
+      document.getElementById('registerModal').classList.remove('active');
+      
+      // Only clear register form
+      const form = document.querySelector('#registerModal form');
+      if(form) form.reset();
+      
+      console.log('🔴 Register modal closed - OTP modal should remain untouched');
+    }
+    function closeOTPModal(event) {
+      if(event && event.target !== event.currentTarget) return;
+      document.getElementById('otpModal').classList.remove('active');
+      // Clear OTP form
+      document.getElementById('otpCode').value = '';
+      document.getElementById('otpCodeDisplay').style.display = 'none';
+      document.getElementById('otpError').style.display = 'none';
+    }
+    function switchModal(target) {
+       if(target === 'register') openRegisterModal();
+       else {
+         closeRegisterModal();
+         openLoginModal();
+       }
+    }
 
-        if (pendingVerification) {
-          try {
-            const data = JSON.parse(pendingVerification);
-            const response = await fetch('public/api/check-pending-verification.php', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-              body: 'user_id=' + data.user_id
-            });
+    // --- Accordion Logic ---
+    function toggleAccordion(btn) {
+      const item = btn.parentElement;
+      item.classList.toggle('active');
+    }
 
-            const result = await response.json();
-
-            if (result.success && result.has_pending) {
-              // Auto-open verification modal
-              openVerificationModal(result.user_id, result.email, result.verification_code);
-            } else {
-              // No longer pending, clear localStorage
-              localStorage.removeItem('pending_verification');
-            }
-          } catch (error) {
-            console.error('Error checking pending verification:', error);
-          }
-        }
-
-        // Check if login is required
-        if (new URLSearchParams(window.location.search).get('login_required') === '1') {
-          openLoginModal();
+    // --- Stats Animation ---
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+           const counters = entry.target.querySelectorAll('.counter, .counter-percent');
+           counters.forEach(counter => {
+             const target = +counter.getAttribute('data-target');
+             const duration = 2000;
+             const step = target / (duration / 16);
+             let current = 0;
+             const update = () => {
+               current += step;
+               if(current < target) {
+                 counter.innerText = Math.ceil(current) + (counter.classList.contains('counter-percent') ? '%' : '');
+                 requestAnimationFrame(update);
+               } else {
+                 counter.innerText = target + (counter.classList.contains('counter-percent') ? '%' : '');
+               }
+             };
+             update();
+           });
+           observer.unobserve(entry.target);
         }
       });
+    });
+    document.querySelector('.stats-section') && observer.observe(document.querySelector('.stats-section'));
 
-      function openLoginModal(e) {
-        if (e) e.preventDefault();
-        document.body.style.overflow = 'hidden';
+    // --- Navbar Sticky ---
+    window.addEventListener('scroll', () => {
+      const header = document.querySelector('.site-header');
+      if(window.scrollY > 50) header.classList.add('scrolled');
+      else header.classList.remove('scrolled');
+    });
 
-        // Check screen size: if mobile/tablet (<=768px), go directly to student form
-        if (window.innerWidth <= 768) {
-          document.getElementById('loginModal').style.display = 'flex';
-          showLoginForm('student');
+    // --- Scroll Fade In Animation ---
+    const scrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.animate-on-scroll').forEach(el => scrollObserver.observe(el));
+
+    // --- AJAX Login Logic ---
+    async function handleLogin(e, type) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const errorMsg = document.getElementById(type + 'LoginError');
+      const originalText = btn.innerText;
+
+      // Reset state
+      errorMsg.style.display = 'none';
+      errorMsg.innerText = '';
+      btn.disabled = true;
+      btn.innerText = 'Memproses...';
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('public/api/login.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          btn.innerText = 'Berhasil!';
+          form.reset(); // Clear form fields
+          window.location.href = result.redirect_url;
         } else {
-          // Desktop: show user type selection first
-          document.getElementById('userTypeModal').style.display = 'flex';
+          throw new Error(result.message || 'Login gagal.');
         }
+      } catch (err) {
+        errorMsg.style.display = 'block';
+        // Handle JSON parse error or network error
+        errorMsg.innerText = err.message || 'Terjadi kesalahan koneksi.';
+        btn.disabled = false;
+        btn.innerText = originalText;
       }
+    }
 
-      function closeUserTypeModal(e) {
-        if (e && e.target.id !== 'userTypeModal') return;
-        clearLoginForms();
-        document.getElementById('userTypeModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }
+    // --- AJAX Register Logic - REBUILT ---
+    async function handleRegister(e) {
+      e.preventDefault();
+      console.log('🔵 Register form submitted');
+      
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const errorMsg = document.getElementById('registerError');
+      const originalText = btn.innerText;
 
-      function selectUserType(type) {
-        closeUserTypeModal();
-        document.getElementById('loginModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-        showLoginForm(type);
-      }
+      errorMsg.style.display = 'none';
+      errorMsg.innerText = '';
+      btn.disabled = true;
+      btn.innerText = 'Memproses...';
 
-      function showLoginForm(type) {
-        // Hide all forms
-        document.getElementById('studentLoginForm').style.display = 'none';
-        document.getElementById('schoolLoginForm').style.display = 'none';
+      const formData = new FormData(form);
 
-        // Show selected form
-        if (type === 'student') {
-          document.getElementById('studentLoginForm').style.display = 'block';
-        } else if (type === 'school') {
-          document.getElementById('schoolLoginForm').style.display = 'block';
-        }
-
-        // Store current type
-        window.currentLoginType = type;
-      }
-
-      function switchLoginType(newType) {
-        event.preventDefault();
-        showLoginForm(newType);
-      }
-
-      // Clear all login forms
-      function clearLoginForms() {
-        // Clear student login form
-        const studentForm = document.getElementById('studentLoginForm');
-        if (studentForm) {
-          studentForm.querySelectorAll('input[type="text"], input[type="password"]').forEach(input => {
-            input.value = '';
-          });
-        }
-
-        // Clear school login form
-        const schoolForm = document.getElementById('schoolLoginForm');
-        if (schoolForm) {
-          schoolForm.querySelectorAll('input[type="email"], input[type="password"]').forEach(input => {
-            input.value = '';
-          });
-        }
-      }
-
-      function closeLoginModal(e) {
-        if (e && e.target.id !== 'loginModal') return;
-        clearLoginForms();
-        document.getElementById('loginModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }
-
-      // Close modal on Escape key
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeUserTypeModal();
-          closeLoginModal();
-          closeRegisterModal();
-        }
-      });
-
-      // Handle login form submission (works for both student and school forms)
-      document.addEventListener('submit', async (e) => {
-        if (e.target.classList.contains('login-modal-form') && e.target.id !== 'registerForm') {
-          e.preventDefault();
-          const formData = new FormData(e.target);
-
-          try {
-            const response = await fetch('public/api/login.php', {
-              method: 'POST',
-              body: formData
-            });
-
-            const data = await response.json();
-            if (data.success) {
-              // Clear form inputs
-              clearLoginForms();
-              // Redirect to appropriate dashboard based on user type
-              const redirectUrl = data.redirect_url
-                ? 'public/' + data.redirect_url
-                : 'public/index.php';
-              window.location.href = redirectUrl;
-            } else {
-              // Show detailed error message without alert dialog
-              console.error('Login Error:', data);
-              const errorMsg = data.message || 'Login gagal. Silakan coba lagi.';
-              // Show error in a more subtle way instead of alert
-              if (e.target.id !== 'verificationForm') {
-                alert(errorMsg);
-              }
-            }
-          } catch (error) {
-            console.error('Login Request Error:', error);
-            alert('Terjadi kesalahan: ' + error.message);
-          }
-        }
-      });
-
-      // Register Modal Functions
-      function openRegisterModal(e) {
-        if (e) e.preventDefault();
-        // Clear form inputs sebelum membuka modal
-        clearRegisterForm();
-        document.getElementById('registerModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-      }
-
-      function closeRegisterModal(e) {
-        if (e && e.target.id !== 'registerModal') return;
-        // Clear form inputs sebelum menutup modal
-        clearRegisterForm();
-        document.getElementById('registerModal').style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }
-
-      function clearRegisterForm() {
-        // Clear all input fields di register form
-        const registerForm = document.getElementById('registerForm');
-        if (registerForm) {
-          registerForm.reset();
-          // Explicitly clear all inputs
-          const inputs = registerForm.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]');
-          inputs.forEach(input => {
-            input.value = '';
-            input.style.borderColor = '#e5e7eb';
-            input.style.background = '#f9fafb';
-          });
-        }
-      }
-
-      // Handle register form submission
-      document.getElementById('registerForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const emailInput = document.querySelector('#registerForm input[name="admin_email"]');
-        const email = emailInput.value.trim();
-
-        // Validasi email harus @sch.id
-        if (!email.endsWith('@sch.id')) {
-          emailInput.setCustomValidity('Email harus menggunakan domain @sch.id');
-          emailInput.reportValidity();
-          return;
-        }
-
-        const formData = new FormData(e.target);
-
-        // Debug: log semua form data
-        console.log('Form Data:');
-        for (let [key, value] of formData.entries()) {
-          console.log(`${key}: ${value}`);
-        }
-
-        try {
-          console.log('Submitting registration form...');
-          const response = await fetch('public/api/register.php', {
-            method: 'POST',
-            body: formData
-          });
-
-          console.log('Response status:', response.status);
-          console.log('Response headers:', response.headers);
-
-          const text = await response.text();
-          console.log('Raw response:', text);
-
-          try {
-            const data = JSON.parse(text);
-            if (data.success) {
-              // Simpan pending verification ke localStorage untuk auto-restore jika tab ditutup
-              localStorage.setItem('pending_verification', JSON.stringify({
-                user_id: data.user_id,
-                email: data.email,
-                timestamp: new Date().getTime()
-              }));
-
-              // Tutup register modal dan buka verification modal
-              closeRegisterModal();
-
-              // Log code untuk development
-              console.log('✅ Registrasi berhasil!');
-              console.log('User ID:', data.user_id);
-              console.log('Email:', data.email);
-              console.log('📧 VERIFICATION CODE:', data.verification_code);
-              console.log('⚠️ Copy kode di atas dan masukkan ke form verifikasi');
-
-              openVerificationModal(data.user_id, data.email, data.verification_code);
-            } else {
-              alert(data.message || 'Pendaftaran gagal');
-            }
-          } catch (parseError) {
-            console.error('JSON Parse Error:', parseError);
-            console.error('Response was:', text);
-            alert('Kesalahan respons dari server: ' + text.substring(0, 200));
-          }
-        } catch (error) {
-          console.error('Fetch Error:', error);
-          alert('Terjadi kesalahan: ' + error.message);
-        }
-      });
-
-      // ====== EMAIL VERIFICATION FUNCTIONS ======
-      let verificationTimer = null;
-      let remainingTime = 15 * 60; // 15 minutes in seconds
-
-      function openVerificationModal(userId, email, verificationCode) {
-        document.getElementById('verificationUserId').value = userId;
-        document.getElementById('verificationEmail').textContent = email;
-        document.getElementById('verificationModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-
-        // Show verification code in modal for development
-        if (verificationCode) {
-          // Cek apakah sudah ada code display sebelumnya
-          let existingDisplay = document.querySelector('.code-display-dev');
-          if (existingDisplay) {
-            existingDisplay.remove();
-          }
-
-          const codeDisplay = document.createElement('div');
-          codeDisplay.className = 'code-display-dev';
-          codeDisplay.style.cssText = 'background: #fef3c7; border: 2px solid #fbbf24; border-radius: 8px; padding: 15px; margin-bottom: 16px; text-align: center;';
-          codeDisplay.innerHTML = `
-            <p style="color: #92400e; margin: 0 0 8px 0; font-size: 12px; font-weight: 600;">KODE VERIFIKASI (untuk development):</p>
-            <div style="font-size: 32px; font-weight: bold; color: #f59e0b; letter-spacing: 4px; font-family: 'Courier New', monospace; margin: 0;">${verificationCode}</div>
-          `;
-          const form = document.getElementById('verificationForm');
-          form.parentNode.insertBefore(codeDisplay, form);
-        }
-
-        // Reset form
-        document.querySelectorAll('.code-input').forEach(input => {
-          input.value = '';
-          input.style.borderColor = '#e5e7eb';
-          input.style.background = '#f9fafb';
+      try {
+        console.log('🟡 Sending registration request...');
+        const response = await fetch('public/api/register.php', {
+          method: 'POST',
+          body: formData
         });
 
-        const errorDiv = document.getElementById('verificationError');
-        errorDiv.style.display = 'none';
-        errorDiv.textContent = '';
+        const result = await response.json();
+        console.log('🟢 Registration response:', result);
 
-        document.getElementById('verificationSuccess').style.display = 'none';
-
-        // Start countdown timer
-        startVerificationTimer();
-      }
-
-      function closeVerificationModal(e) {
-        if (e && e.target.id !== 'verificationModal') return;
-        // Jangan biarkan user menutup modal verifikasi
-        // Modal hanya bisa ditutup setelah verifikasi berhasil atau kode expired
-        return false;
-      }
-
-      function startVerificationTimer() {
-        remainingTime = 15 * 60;
-        if (verificationTimer) clearInterval(verificationTimer);
-
-        verificationTimer = setInterval(() => {
-          remainingTime--;
-          const minutes = Math.floor(remainingTime / 60);
-          const seconds = remainingTime % 60;
-
-          document.getElementById('timerMinutes').textContent = String(minutes).padStart(2, '0');
-          document.getElementById('timerSeconds').textContent = String(seconds).padStart(2, '0');
-
-          // Enable resend button at 1 minute mark
-          if (remainingTime <= 60 && remainingTime > 0) {
-            const resendBtn = document.getElementById('resendBtn');
-            resendBtn.disabled = false;
-            resendBtn.style.opacity = '1';
-            resendBtn.style.cursor = 'pointer';
+        if (result.success) {
+          console.log('✅ Registration successful!');
+          
+          // Reset form and button
+          form.reset();
+          btn.disabled = false;
+          btn.innerText = originalText;
+          
+          // RADICAL APPROACH: DON'T close register modal AT ALL!
+          // Just show OTP modal on top with higher z-index (already 9999)
+          console.log('🟣 Opening OTP modal WITHOUT closing register...');
+          
+          const otpModal = document.getElementById('otpModal');
+          otpModal.style.display = 'flex';
+          otpModal.style.zIndex = '99999'; // Even higher than before
+          console.log('✅ OTP modal opened on top of register modal');
+          
+          // Set email
+          document.getElementById('otpEmailNew').value = result.email;
+          
+          // Display OTP code for demo
+          if (result.verification_code) {
+            console.log('🔑 OTP Code:', result.verification_code);
+            document.getElementById('otpCodeDisplayNew').style.display = 'block';
+            document.getElementById('otpCodeValueNew').innerText = result.verification_code;
+            document.getElementById('otpCodeNew').value = result.verification_code;
           }
-
-          // Time expired
-          if (remainingTime <= 0) {
-            clearInterval(verificationTimer);
-            const errorDiv = document.getElementById('verificationError');
-            errorDiv.style.display = 'block';
-            errorDiv.textContent = 'Kode verifikasi telah kadaluarsa. Silakan daftar ulang.';
-
-            document.querySelectorAll('.code-input').forEach(input => {
-              input.disabled = true;
-              input.style.opacity = '0.5';
-            });
-            document.querySelector('.btn-modal-submit').disabled = true;
-          }
-        }, 1000);
-      }
-
-      // Handle code input auto-focus
-      document.querySelectorAll('.code-input').forEach((input, index) => {
-        input.addEventListener('input', (e) => {
-          // Clear error on input
-          const errorDiv = document.getElementById('verificationError');
-          errorDiv.style.display = 'none';
-          errorDiv.textContent = '';
-
-          e.target.style.borderColor = '#e5e7eb';
-          e.target.style.background = '#f9fafb';
-
-          // Only allow numbers
-          e.target.value = e.target.value.replace(/[^0-9]/g, '');
-
-          // Auto focus to next input
-          if (e.target.value && index < 5) {
-            document.getElementById('code' + (index + 2)).focus();
-          }
-        });
-
-        input.addEventListener('keydown', (e) => {
-          // Handle backspace
-          if (e.key === 'Backspace' && !input.value && index > 0) {
-            document.getElementById('code' + index).focus();
-          }
-        });
-
-        input.addEventListener('focus', (e) => {
-          e.target.style.borderColor = '#2563eb';
-          e.target.style.background = '#fff';
-        });
-
-        input.addEventListener('blur', (e) => {
-          if (!e.target.value) {
-            e.target.style.borderColor = '#e5e7eb';
-            e.target.style.background = '#f9fafb';
-          }
-        });
-      });
-
-      // Handle verification form submission
-      document.getElementById('verificationForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        // Get verification code from inputs
-        const codeInputs = document.querySelectorAll('.code-input');
-        const verificationCode = Array.from(codeInputs).map(input => input.value).join('');
-
-        // Validate
-        if (verificationCode.length !== 6) {
-          const errorDiv = document.getElementById('verificationError');
-          errorDiv.style.display = 'block';
-          errorDiv.textContent = 'Silakan masukkan 6 digit kode verifikasi';
-          codeInputs.forEach(input => {
-            input.style.borderColor = '#ef4444';
-            input.style.background = '#fee2e2';
-          });
-          return;
+          
+          console.log('✅ Done - both modals open, OTP on top');
+          
+        } else {
+          throw new Error(result.message || 'Pendaftaran gagal.');
         }
-
-        const userId = document.getElementById('verificationUserId').value;
-        const submitBtn = document.querySelector('.btn-modal-submit');
-
-        // Show loading state
-        submitBtn.disabled = true;
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Sedang Memverifikasi...';
-
-        try {
-          const formData = new FormData();
-          formData.append('user_id', userId);
-          formData.append('verification_code', verificationCode);
-
-          const response = await fetch('public/api/verify-and-login.php', {
-            method: 'POST',
-            body: formData
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            clearInterval(verificationTimer);
-            codeInputs.forEach(input => {
-              input.disabled = true;
-              input.style.borderColor = '#10b981';
-              input.style.background = '#f0fdf4';
-            });
-            submitBtn.disabled = true;
-            document.getElementById('resendBtn').style.display = 'none';
-            document.getElementById('cancelRegistrationBtn').style.display = 'none';
-
-            // Clear pending verification from localStorage
-            localStorage.removeItem('pending_verification');
-
-            // Redirect after 2 seconds
-            setTimeout(() => {
-              document.getElementById('verificationModal').style.display = 'none';
-              document.body.style.overflow = 'auto';
-              // Redirect ke public folder dengan route yang sesuai
-              const redirectUrl = data.redirect_url || 'index.php';
-              window.location.href = 'public/' + redirectUrl;
-            }, 2000);
-          } else {
-            // Show error tanpa alert dialog
-            const errorDiv = document.getElementById('verificationError');
-            errorDiv.style.display = 'block';
-            errorDiv.textContent = data.message || 'Verifikasi gagal. Silakan coba lagi.';
-
-            // Add error state to inputs
-            codeInputs.forEach(input => {
-              input.style.borderColor = '#ef4444';
-              input.style.background = '#fee2e2';
-            });
-
-            // Reset button
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-          }
-        } catch (error) {
-          const errorDiv = document.getElementById('verificationError');
-          errorDiv.style.display = 'block';
-          errorDiv.textContent = 'Terjadi kesalahan: ' + error.message;
-          submitBtn.disabled = false;
-          submitBtn.textContent = originalText;
-        }
-      });
-
-      // Resend verification code button (implementation for future enhancement)
-      document.getElementById('resendBtn').addEventListener('click', async (e) => {
-        e.preventDefault();
-
-        const resendBtn = document.getElementById('resendBtn');
-        const originalText = resendBtn.textContent;
-        resendBtn.disabled = true;
-        resendBtn.textContent = 'Mengirim...';
-
-        try {
-          const userId = document.getElementById('verificationUserId').value;
-          const formData = new FormData();
-          formData.append('user_id', userId);
-          formData.append('action', 'resend_code');
-
-          const response = await fetch('public/api/verify-email.php', {
-            method: 'POST',
-            body: formData
-          });
-
-          const data = await response.json();
-
-          if (data.success) {
-            // Clear previous code display
-            let existingDisplay = document.querySelector('.code-display-dev');
-            if (existingDisplay) {
-              existingDisplay.remove();
-            }
-
-            // Show new verification code
-            if (data.verification_code) {
-              const codeDisplay = document.createElement('div');
-              codeDisplay.className = 'code-display-dev';
-              codeDisplay.style.cssText = 'background: #fef3c7; border: 2px solid #fbbf24; border-radius: 8px; padding: 15px; margin-bottom: 16px; text-align: center;';
-              codeDisplay.innerHTML = `
-                <p style="color: #92400e; margin: 0 0 8px 0; font-size: 12px; font-weight: 600;">KODE VERIFIKASI BARU (untuk development):</p>
-                <div style="font-size: 32px; font-weight: bold; color: #f59e0b; letter-spacing: 4px; font-family: 'Courier New', monospace; margin: 0;">${data.verification_code}</div>
-              `;
-              const form = document.getElementById('verificationForm');
-              form.parentNode.insertBefore(codeDisplay, form);
-            }
-
-            // Clear code inputs
-            document.querySelectorAll('.code-input').forEach(input => {
-              input.value = '';
-              input.style.borderColor = '#e5e7eb';
-              input.style.background = '#f9fafb';
-            });
-
-            // Reset timer
-            startVerificationTimer();
-
-            // Reset button
-            resendBtn.disabled = true;
-            resendBtn.textContent = originalText;
-
-            alert('Kode verifikasi baru telah dikirim ke email Anda');
-          } else {
-            const errorDiv = document.getElementById('verificationError');
-            errorDiv.style.display = 'block';
-            errorDiv.textContent = data.message || 'Gagal mengirim ulang kode verifikasi';
-            resendBtn.disabled = true;
-            resendBtn.textContent = originalText;
-          }
-        } catch (error) {
-          const errorDiv = document.getElementById('verificationError');
-          errorDiv.style.display = 'block';
-          errorDiv.textContent = 'Terjadi kesalahan: ' + error.message;
-          resendBtn.disabled = true;
-          resendBtn.textContent = originalText;
-        }
-      });
-
-      // Cancel registration button
-      document.getElementById('cancelRegistrationBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-
-        if (confirm('Apakah Anda yakin ingin membatalkan dan mendaftar ulang dengan email berbeda?')) {
-          // Clear verification modal
-          if (verificationTimer) clearInterval(verificationTimer);
-          document.getElementById('verificationModal').style.display = 'none';
-
-          // Clear pending verification from localStorage
-          localStorage.removeItem('pending_verification');
-
-          // Clear all forms
-          clearLoginForms();
-          clearRegisterForm();
-
-          // Open register modal
-          document.getElementById('registerModal').style.display = 'flex';
-          document.body.style.overflow = 'hidden';
-        }
-      });
-
-      // Stat Counter Animation
-      function animateCounter(element, target, duration = 2000) {
-        let current = 0;
-        const increment = target / (duration / 16);
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            current = target;
-            clearInterval(timer);
-          }
-          element.textContent = Math.floor(current).toLocaleString('id-ID');
-        }, 16);
+      } catch (err) {
+        console.error('❌ Registration error:', err);
+        errorMsg.style.display = 'block';
+        errorMsg.innerText = err.message || 'Terjadi kesalahan.';
+        btn.disabled = false;
+        btn.innerText = originalText;
       }
+      
+      return false;
+    }
 
-      function animateCounterPercent(element, target, duration = 2000) {
-        let current = 0;
-        const increment = target / (duration / 16);
-        const timer = setInterval(() => {
-          current += increment;
-          if (current >= target) {
-            current = target;
-            clearInterval(timer);
-          }
-          element.textContent = Math.floor(current) + '%';
-        }, 16);
-      }
+    // --- NEW OTP Functions ---
+    function closeOTPModalNew() {
+      document.getElementById('otpModal').style.display = 'none';
+      document.getElementById('otpCodeNew').value = '';
+      document.getElementById('otpCodeDisplayNew').style.display = 'none';
+      document.getElementById('otpErrorNew').style.display = 'none';
+    }
 
-      // Intersection Observer for triggering animation when section is visible
-      const observerOptions = {
-        threshold: 0.5
-      };
+    function copyOTPNew() {
+      const code = document.getElementById('otpCodeValueNew').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Kode OTP berhasil disalin!');
+      });
+    }
 
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !entry.target.dataset.animated) {
-            entry.target.dataset.animated = 'true';
-            document.querySelectorAll('.stat-number').forEach(el => {
-              const target = parseInt(el.dataset.target);
-              animateCounter(el, target);
-            });
-            document.querySelectorAll('.stat-number-percent').forEach(el => {
-              const target = parseInt(el.dataset.target);
-              animateCounterPercent(el, target);
-            });
-          }
+    async function handleOTPVerificationNew(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const errorMsg = document.getElementById('otpErrorNew');
+      const originalText = btn.innerText;
+
+      errorMsg.style.display = 'none';
+      errorMsg.innerText = '';
+      btn.disabled = true;
+      btn.innerText = 'Memverifikasi...';
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('public/api/verify-and-login.php', {
+          method: 'POST',
+          body: formData
         });
-      }, observerOptions);
 
-      const statsSection = document.querySelector('.stats');
-      if (statsSection) {
-        observer.observe(statsSection);
+        const result = await response.json();
+
+        if (result.success) {
+          alert('✅ Email berhasil diverifikasi! Silakan login.');
+          closeOTPModalNew();
+          openLoginModal();
+        } else {
+          throw new Error(result.message || 'Kode OTP salah.');
+        }
+      } catch (err) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerText = err.message || 'Verifikasi gagal.';
+        btn.disabled = false;
+        btn.innerText = originalText;
       }
-    </script>
-    <script src="assets/js/landing.js"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-      AOS.init();
-    </script>
+    }
+
+    async function resendOTPNew(e) {
+      e.preventDefault();
+      const email = document.getElementById('otpEmailNew').value;
+      
+      try {
+        const response = await fetch('public/api/resend-otp.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('📧 Kode OTP baru telah dikirim ke email Anda.');
+          if (result.verification_code) {
+            document.getElementById('otpCodeValueNew').innerText = result.verification_code;
+            document.getElementById('otpCodeNew').value = result.verification_code;
+          }
+        } else {
+          alert(result.message || 'Gagal mengirim ulang OTP.');
+        }
+      } catch (err) {
+        alert('Terjadi kesalahan saat mengirim ulang OTP.');
+      }
+    }
+
+    // Copy OTP to clipboard
+    function copyOTP() {
+      const code = document.getElementById('otpCodeValue').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        alert('Kode OTP berhasil disalin!');
+      });
+    }
+
+    // --- OTP Verification Logic ---
+    async function handleOTPVerification(e) {
+      e.preventDefault();
+      const form = e.target;
+      const btn = form.querySelector('button[type="submit"]');
+      const errorMsg = document.getElementById('otpError');
+      const originalText = btn.innerText;
+
+      errorMsg.style.display = 'none';
+      errorMsg.innerText = '';
+      btn.disabled = true;
+      btn.innerText = 'Memverifikasi...';
+
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch('public/api/verify-email.php', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert('Email berhasil diverifikasi! Silakan login.');
+          document.getElementById('otpModal').classList.remove('active');
+          form.reset();
+          openLoginModal();
+        } else {
+          throw new Error(result.message || 'Kode OTP salah.');
+        }
+      } catch (err) {
+        errorMsg.style.display = 'block';
+        errorMsg.innerText = err.message || 'Verifikasi gagal.';
+        btn.disabled = false;
+        btn.innerText = originalText;
+      }
+    }
+
+    // --- Resend OTP ---
+    async function resendOTP(e) {
+      e.preventDefault();
+      const email = document.getElementById('otpEmail').value;
+      
+      try {
+        const response = await fetch('public/api/resend-otp.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          alert('Kode OTP baru telah dikirim ke email Anda.');
+        } else {
+          alert(result.message || 'Gagal mengirim ulang OTP.');
+        }
+      } catch (err) {
+        alert('Terjadi kesalahan saat mengirim ulang OTP.');
+      }
+    }
+
+    // DEBUG: Test function to open OTP modal directly
+    function testOpenOTP() {
+      console.log('🧪 TEST: Opening OTP modal...');
+      const otpModal = document.getElementById('otpModal');
+      console.log('🧪 Modal element:', otpModal);
+      console.log('🧪 Before - Display:', otpModal.style.display);
+      
+      otpModal.style.display = 'flex';
+      
+      console.log('🧪 After - Display:', otpModal.style.display);
+      console.log('🧪 Computed style:', window.getComputedStyle(otpModal).display);
+      
+      // Set demo OTP
+      document.getElementById('otpCodeDisplayNew').style.display = 'block';
+      document.getElementById('otpCodeValueNew').innerText = '123456';
+      document.getElementById('otpCodeNew').value = '123456';
+      
+      console.log('✅ TEST: Modal should be visible now!');
+      
+      // Check after 1 second if it's still visible
+      setTimeout(() => {
+        console.log('🔍 Check after 1s - Display:', otpModal.style.display);
+        console.log('🔍 Check after 1s - Computed:', window.getComputedStyle(otpModal).display);
+      }, 1000);
+    }
+   </script>
 </body>
-
 </html>

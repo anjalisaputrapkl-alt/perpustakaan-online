@@ -76,7 +76,7 @@ if ($user_type === 'student') {
         echo json_encode([
             'success' => true,
             'message' => 'Login berhasil',
-            'redirect_url' => 'student-dashboard.php'
+            'redirect_url' => 'public/student-dashboard.php'
         ]);
         exit;
     } catch (Exception $e) {
@@ -140,7 +140,7 @@ if ($user_type === 'student') {
         error_log("LOGIN SUCCESS: Email '$email' logged in successfully");
 
         // Determine redirect URL based on role
-        $redirect_url = 'index.php';
+        $redirect_url = 'public/index.php';
 
         echo json_encode([
             'success' => true,
