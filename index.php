@@ -155,6 +155,56 @@
       </div>
     </section>
 
+    <!-- AUDIENCE SOLUTIONS -->
+    <section id="audience" class="section bg-white animate-on-scroll">
+      <div class="container">
+        <div class="section-header text-center">
+          <h2 class="section-title">Solusi Untuk Semua</h2>
+          <p class="section-subtitle">Didesain khusus untuk memenuhi kebutuhan ekosistem sekolah</p>
+        </div>
+        <div class="audience-grid">
+          <!-- Students -->
+          <div class="audience-card glass-card animate-on-scroll delay-100">
+            <div class="audience-icon-wrap">
+              <img src="img/murid.jpg" alt="Siswa sedang belajar digital" loading="lazy">
+            </div>
+            <h3>Untuk Siswa</h3>
+            <ul class="audience-list">
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Akses ribuan buku digital kapan saja</li>
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Pinjam & baca dari smartphone</li>
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Rekomendasi buku berbasis minat</li>
+            </ul>
+          </div>
+
+          <!-- Teachers -->
+          <div class="audience-card glass-card animate-on-scroll delay-200">
+            <div class="audience-icon-wrap accent">
+              <img src="img/guru.jpg" alt="Guru mengajar menggunakan materi digital" loading="lazy">
+            </div>
+            <h3>Untuk Guru</h3>
+            <ul class="audience-list">
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Referensi bahan ajar lengkap</li>
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Pantau minat baca siswa</li>
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Koleksi khusus buku paket digital</li>
+            </ul>
+          </div>
+
+          <!-- Librarians -->
+          <div class="audience-card glass-card animate-on-scroll delay-300">
+            <div class="audience-icon-wrap dark">
+              <img src="img/pustakawan.jpg" alt="Pustakawan mengelola sistem administrasi" loading="lazy">
+            </div>
+            <h3>Untuk Pustakawan</h3>
+            <ul class="audience-list">
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Automasi sirkulasi & denda</li>
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Laporan instan & akurat</li>
+              <li><iconify-icon icon="solar:check-circle-bold"></iconify-icon> Manajemen stok buku efisien</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- STATS COUNTER -->
     <section id="stats" class="section stats-section animate-on-scroll">
       <div class="container">
@@ -269,9 +319,10 @@
         </div>
         <div class="footer-links">
           <h4>Produk</h4>
-          <a href="#">Fitur</a>
-          <a href="#">Harga</a>
-          <a href="#">Panduan</a>
+          <a href="#features">Fitur</a>
+        <a href="#audience">Solusi</a>
+        <a href="#stats">Statistik</a>
+        <a href="#testimonials">Testimoni</a>
         </div>
         <div class="footer-links">
           <h4>Legal</h4>

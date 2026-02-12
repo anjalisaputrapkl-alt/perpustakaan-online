@@ -461,6 +461,11 @@ button {
 .hero-card {
   padding: 16px;
   position: relative;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hero-card:hover {
+  transform: translateY(-20px) scale(1.02);
 }
 
 .card-header {
@@ -501,6 +506,13 @@ button {
   align-items: center;
   gap: 16px;
   animation: float 4s ease-in-out infinite;
+  transition: all 0.4s ease;
+}
+
+.float-stat:hover {
+  transform: translateY(-5px) scale(1.1);
+  box-shadow: 0 20px 40px rgba(11, 61, 97, 0.15);
+  border-color: var(--accent);
 }
 
 .stat-icon {
@@ -616,8 +628,9 @@ button {
 }
 
 .bento-item:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgba(11, 61, 97, 0.1);
+  border-color: var(--accent-light);
 }
 
 /* Grid spanning - Adjusted for 4 columns */
@@ -801,7 +814,112 @@ button {
 }
 
 /* ========================
-   7. STATS
+   7. AUDIENCE (SOLUTIONS)
+   ======================== */
+.bg-white {
+  background: #FFFFFF;
+}
+
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.audience-card {
+  padding: 40px 32px;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.audience-card:hover {
+  transform: translateY(-15px);
+  border-color: var(--accent);
+  box-shadow: 0 35px 70px rgba(11, 61, 97, 0.12);
+}
+
+.audience-icon-wrap {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  transition: .3s;
+  overflow: hidden;
+  border: 4px solid var(--accent-soft);
+  background: white;
+}
+
+.audience-icon-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.audience-icon-wrap.accent {
+  border-color: #fdf2f8;
+}
+
+.audience-icon-wrap.dark {
+  border-color: #f0fdf4;
+}
+
+.audience-card:hover .audience-icon-wrap {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.audience-card h3 {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+
+.audience-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+  width: 100%;
+}
+
+.audience-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.audience-list li iconify-icon {
+  color: #16a34a;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+@media (max-width: 992px) {
+  .audience-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .audience-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+
+/* ========================
+   8. STATS
    ======================== */
 .stats-section {
   background: var(--bg-card);
@@ -820,6 +938,11 @@ button {
 
 .stat-item {
   position: relative;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.stat-item:hover {
+  transform: scale(1.15);
 }
 
 .stat-item h3 {
@@ -876,7 +999,7 @@ button {
 }
 
 /* ========================
-   8. TESTIMONIALS & FAQ
+   9. TESTIMONIALS & FAQ
    ======================== */
 .bg-soft {
   background: #F8FAFC;
@@ -897,6 +1020,14 @@ button {
   flex-direction: column;
   justify-content: center;
   position: relative;
+  transition: all 0.4s ease;
+}
+
+.testimonial-single:hover {
+  transform: translateX(10px) translateY(-5px);
+  border-left-width: 8px;
+  background: white;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
 }
 
 .quote-icon {
@@ -960,6 +1091,13 @@ button {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.accordion-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+  border-color: var(--accent-light);
 }
 
 .accordion-header {
@@ -1004,10 +1142,7 @@ button {
 }
 
 /* ========================
-   9. CTA & FOOTER
-   ======================== */
-/* ========================
-   9. CTA & FOOTER
+   10. CTA & FOOTER
    ======================== */
 .cta-section {
   padding: 60px 0 100px;
@@ -1022,6 +1157,12 @@ button {
   overflow: hidden;
   box-shadow: 0 20px 50px rgba(11, 61, 97, 0.3);
   text-align: center;
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cta-box:hover {
+  transform: scale(1.03);
+  box-shadow: 0 30px 70px rgba(11, 61, 97, 0.4);
 }
 
 /* Glow effect for CTA */
@@ -1139,7 +1280,7 @@ button {
 }
 
 /* ========================
-   10. MODALS
+   11. MODALS
    ======================== */
 .modal {
   position: fixed;
