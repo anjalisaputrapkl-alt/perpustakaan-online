@@ -28,12 +28,14 @@ try {
 
     $themeModel = new ThemeModel($pdo);
     $theme = $themeModel->getThemeData($school_id);
+    $specialTheme = $themeModel->checkSpecialTheme($school_id);
 
     echo json_encode([
         'success' => true,
         'theme_name' => $theme['theme_name'],
         'custom_colors' => $theme['custom_colors'],
-        'typography' => $theme['typography']
+        'typography' => $theme['typography'],
+        'special_theme' => $specialTheme
     ]);
 } catch (Exception $e) {
     http_response_code(500);

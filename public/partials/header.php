@@ -4,6 +4,15 @@ if (session_status() !== PHP_SESSION_ACTIVE)
 $user = $_SESSION['user'] ?? null;
 $current = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $base = '/perpustakaan-online/public';
+
+// Special Theme Check
+$specialTheme = null;
+if ($user && isset($user['school_id'])) {
+    require_once __DIR__ . '/../../src/ThemeModel.php';
+    $themeModel = new ThemeModel($pdo ?? (require __DIR__ . '/../../src/db.php'));
+    $specialTheme = $themeModel->checkSpecialTheme($user['school_id']);
+}
+
 function _is_active($path, $current)
 {
   $current = rtrim(str_replace('/perpustakaan-online/public', '', $current), '/') ?: '/';
@@ -19,6 +28,10 @@ function _is_active($path, $current)
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+  <?php if ($specialTheme): ?>
+    <script>window.isSpecialThemeActive = true;</script>
+    <link rel="stylesheet" id="special-theme-css" href="<?php echo $base; ?>/themes/special/<?php echo htmlspecialchars($specialTheme); ?>.css">
+  <?php endif; ?>
 </head>
 
 <body></body>

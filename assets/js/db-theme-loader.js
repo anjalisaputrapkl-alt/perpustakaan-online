@@ -4,7 +4,7 @@
  * Jalankan PALING PERTAMA di halaman
  */
 
-(function() {
+(function () {
     'use strict';
 
     // Tema color definitions (sama seperti theme.js)
@@ -177,6 +177,10 @@
      * Terapkan tema ke CSS variables
      */
     function applyTheme(themeName) {
+        if (window.isSpecialThemeActive) {
+            console.log('ℹ️ Special theme active, skipping default variable application');
+            return;
+        }
         if (!themeName || !themes[themeName]) {
             themeName = 'light';
         }
@@ -206,7 +210,7 @@
 
             // Fetch tema terbaru dari API
             const response = await fetch('./api/student-theme.php');
-            
+
             if (!response.ok) {
                 console.warn('⚠️ Failed to fetch school theme from API');
                 return;
@@ -217,10 +221,18 @@
             if (data.success && data.theme_name) {
                 // Simpan tema baru
                 localStorage.setItem('theme', data.theme_name);
-                
+
+                // Load Base CSS if not present
+                loadBaseThemeCSS(data.theme_name);
+
                 // Terapkan ke halaman
                 applyTheme(data.theme_name);
-                
+
+                // Special theme loading
+                if (data.special_theme) {
+                    loadSpecialThemeCSS(data.special_theme);
+                }
+
                 console.log('✓ School theme loaded & applied:', data.theme_name);
             }
         } catch (error) {
@@ -229,13 +241,49 @@
         }
     }
 
+    /**
+     * Load base theme CSS file
+     */
+    function loadBaseThemeCSS(themeName) {
+        const id = 'base-theme-css';
+        let link = document.getElementById(id);
+
+        if (!link) {
+            link = document.createElement('link');
+            link.id = id;
+            link.rel = 'stylesheet';
+            document.head.appendChild(link);
+        }
+
+        const newHref = `/perpustakaan-online/public/themes/base/${themeName}.css`;
+        if (link.href !== newHref) {
+            link.href = newHref;
+            console.log('✓ Base theme CSS updated:', themeName);
+        }
+    }
+
+    /**
+     * Load special theme CSS file
+     */
+    function loadSpecialThemeCSS(themeKey) {
+        const id = 'special-theme-css';
+        if (document.getElementById(id)) return;
+
+        const link = document.createElement('link');
+        link.id = id;
+        link.rel = 'stylesheet';
+        link.href = `/perpustakaan-online/public/themes/special/${themeKey}.css`;
+        document.head.appendChild(link);
+        console.log('✓ Special theme CSS injected:', themeKey);
+    }
+
     // Load tema SEGERA, jangan tunggu DOMContentLoaded
     // agar tema sudah teraupdate sebelum halaman render
     loadSchoolTheme();
 
     // Juga load ulang saat DOM ready (backup)
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             setTimeout(loadSchoolTheme, 100);
         });
     }

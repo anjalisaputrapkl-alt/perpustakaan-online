@@ -1,0 +1,61 @@
+/* Tema Tahun Baru - Dark Festive */
+:root {
+    --primary: #fbbf24;
+    /* Gold */
+    --primary-2: #f59e0b;
+    --primary-dark: #b45309;
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --text: #f8fafc;
+    --border: #334155;
+}
+
+body {
+    background-color: #0f172a !important;
+    background-image: radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 40px),
+        radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 30px),
+        radial-gradient(white, rgba(255, 255, 255, .1) 2px, transparent 40px) !important;
+    background-size: 550px 550px, 350px 350px, 250px 250px !important;
+    background-position: 0 0, 40px 60px, 130px 270px !important;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    top: 40px;
+    right: 40px;
+    width: 60px;
+    height: 60px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%23fbbf24" d="M12 2.5a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0V3a.5.5 0 0 1 .5-.5zm5.303 2.197a.5.5 0 0 1 0 .707l-3.535 3.535a.5.5 0 1 1-.708-.707l3.535-3.535a.5.5 0 0 1 .708 0zm-10.606 0a.5.5 0 0 1 .707 0l3.535 3.535a.5.5 0 1 1-.707.707L6.697 5.404a.5.5 0 0 1 0-.707z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.nav-sidebar {
+    background: #0f172a !important;
+    border-right: 1px solid #fbbf24 !important;
+}
+
+.card,
+.stat,
+.chart-box {
+    background: #1e293b !important;
+    color: white !important;
+    border-color: #334155 !important;
+}
+
+.stat strong,
+.stat small,
+.card h3 {
+    color: white !important;
+}
+
+.header,
+.topbar {
+    background: rgba(30, 41, 59, 0.8) !important;
+    color: white !important;
+    border-bottom: 1px solid #fbbf24 !important;
+}

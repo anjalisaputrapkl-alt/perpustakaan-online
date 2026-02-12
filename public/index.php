@@ -46,6 +46,11 @@ if ($is_authenticated) {
     usort($all_activities, function ($a, $b) {
         return strtotime($b['timestamp']) - strtotime($a['timestamp']);
     });
+    
+    // Special Theme Check
+    require_once __DIR__ . '/../src/ThemeModel.php';
+    $themeModel = new ThemeModel($pdo);
+    $specialTheme = $themeModel->checkSpecialTheme($school_id);
 }
 ?>
 <!doctype html>
@@ -62,6 +67,10 @@ if ($is_authenticated) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <?php if (isset($specialTheme) && $specialTheme): ?>
+        <script>window.isSpecialThemeActive = true;</script>
+        <link rel="stylesheet" id="special-theme-css" href="themes/special/<?php echo htmlspecialchars($specialTheme); ?>.css">
+    <?php endif; ?>
     <link rel="stylesheet" href="../assets/css/animations.css">
     <link rel="stylesheet" href="../assets/css/index.css">
 </head>

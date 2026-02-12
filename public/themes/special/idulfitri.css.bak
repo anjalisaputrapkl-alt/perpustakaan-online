@@ -1,0 +1,90 @@
+/* Tema Idul Fitri */
+:root {
+    --primary: #2d6a4f;
+    --primary-2: #52b788;
+    --primary-dark: #1b4332;
+    --bg: #f0f7f4;
+    --surface: #ffffff;
+    --text: #081c15;
+    --accent: #ffb703;
+    --border: #d8e3de;
+    --success: #2d6a4f;
+    --danger: #bc4749;
+}
+
+body {
+    background-color: var(--bg) !important;
+    background-image:
+        linear-gradient(rgba(240, 247, 244, 0.95), rgba(240, 247, 244, 0.95)),
+        url('https://www.transparenttextures.com/patterns/diagonal-striped-brick.png') !important;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Lantern Ornament */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    right: 30px;
+    width: 180px;
+    height: 180px;
+    background-image: url('https://cdn-icons-png.flaticon.com/512/2965/2965155.png');
+    /* Ketupat icon */
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 10001;
+    pointer-events: none;
+    opacity: 0.9;
+}
+
+/* Islamic Pattern Accent */
+body::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('https://www.transparenttextures.com/patterns/pentagon.png');
+    opacity: 0.05;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.app,
+.content,
+.container,
+.main-content {
+    background-color: transparent !important;
+}
+
+.nav-sidebar {
+    background: linear-gradient(180deg, #2d6a4f 0%, #1b4332 100%) !important;
+    box-shadow: 4px 0 15px rgba(45, 106, 79, 0.2) !important;
+}
+
+.header,
+.topbar {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 3px solid #ffb703 !important;
+}
+
+.card,
+.stat,
+.chart-box,
+.panel {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border-color: #d8e3de !important;
+}
+
+.stat-icon {
+    background: rgba(45, 106, 79, 0.1) !important;
+    color: #2d6a4f !important;
+}
+
+.sidebar-section h3 {
+    background: rgba(45, 106, 79, 0.1) !important;
+    color: #1b4332 !important;
+}

@@ -2,7 +2,7 @@
 // This script runs BEFORE CSS loads to apply theme immediately
 // Prevents white flash or default color flicker
 
-(function() {
+(function () {
     const themes = {
         light: {
             '--bg': '#f1f4f8',
@@ -151,11 +151,11 @@
         // Try to get theme from sessionStorage first (faster)
         const cachedTheme = sessionStorage.getItem('theme_cache');
         const cachedCustom = sessionStorage.getItem('custom_colors_cache');
-        
+
         if (cachedTheme) {
             const theme = themes[cachedTheme] || themes.light;
             applyThemeColors(theme);
-            
+
             if (cachedCustom) {
                 try {
                     const customColors = JSON.parse(cachedCustom);
@@ -175,6 +175,10 @@
     }
 
     function applyThemeColors(theme) {
+        if (window.isSpecialThemeActive) {
+            console.log('ℹ️ Special theme active, skipping default variable application');
+            return;
+        }
         Object.entries(theme).forEach(([key, value]) => {
             document.documentElement.style.setProperty(key, value);
         });

@@ -22,6 +22,14 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 $pageTitle = $pageTitle ?? 'Dashboard Siswa';
 
+// Special Theme Check
+$specialTheme = null;
+if (isset($user['school_id'])) {
+    require_once __DIR__ . '/../../src/ThemeModel.php';
+    $themeModel = new ThemeModel($pdo ?? (require __DIR__ . '/../../src/db.php'));
+    $specialTheme = $themeModel->checkSpecialTheme($user['school_id']);
+}
+
 // Get school profile data
 $school = null;
 $school_photo = null;
@@ -53,6 +61,10 @@ try {
 }
 ?>
 <!-- Header -->
+<?php if ($specialTheme): ?>
+    <script>window.isSpecialThemeActive = true;</script>
+    <link rel="stylesheet" id="special-theme-css" href="/perpustakaan-online/public/themes/special/<?php echo htmlspecialchars($specialTheme); ?>.css">
+<?php endif; ?>
 <header class="header">
     <div class="header-container">
         <a href="student-dashboard.php" class="header-brand">

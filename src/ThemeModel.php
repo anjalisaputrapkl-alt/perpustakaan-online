@@ -107,5 +107,73 @@ class ThemeModel
             ]);
         }
     }
+    /**
+     * Cek apakah ada tema khusus yang aktif untuk hari ini
+     * @param int $school_id
+     * @return string|null theme_key atau null
+     */
+    public function checkSpecialTheme($school_id)
+    {
+        $stmt = $this->pdo->prepare('
+            SELECT theme_key 
+            FROM special_themes 
+            WHERE school_id = :school_id 
+            AND is_active = 1 
+            AND date = CURRENT_DATE()
+            LIMIT 1
+        ');
+        $stmt->execute(['school_id' => $school_id]);
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Ambil semua daftar hari penting untuk sekolah tertentu
+     * @param int $school_id
+     * @return array
+     */
+    public function getSpecialThemes($school_id)
+    {
+        $stmt = $this->pdo->prepare('
+            SELECT * FROM special_themes 
+            WHERE school_id = :school_id 
+            ORDER BY date ASC
+        ');
+        $stmt->execute(['school_id' => $school_id]);
+        return $stmt->fetchAll();
+    }
+
+    /**
+     * Tambah hari penting baru
+     */
+    public function addSpecialTheme($data)
+    {
+        $stmt = $this->pdo->prepare('
+            INSERT INTO special_themes (school_id, name, date, theme_key, description, is_active)
+            VALUES (:school_id, :name, :date, :theme_key, :description, :is_active)
+        ');
+        return $stmt->execute($data);
+    }
+
+    /**
+     * Hapus hari penting
+     */
+    public function deleteSpecialTheme($id, $school_id)
+    {
+        $stmt = $this->pdo->prepare('DELETE FROM special_themes WHERE id = :id AND school_id = :school_id');
+        return $stmt->execute(['id' => $id, 'school_id' => $school_id]);
+    }
+
+    /**
+     * Toggle status aktif hari penting
+     */
+    public function toggleSpecialTheme($id, $school_id, $status)
+    {
+        $stmt = $this->pdo->prepare('
+            UPDATE special_themes 
+            SET is_active = :status 
+            WHERE id = :id AND school_id = :school_id
+        ');
+        return $stmt->execute(['status' => $status, 'id' => $id, 'school_id' => $school_id]);
+    }
 }
 ?>

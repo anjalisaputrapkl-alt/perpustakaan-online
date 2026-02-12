@@ -1,6 +1,8 @@
 <?php
 require __DIR__ . '/../src/auth.php';
 requireAuth();
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 $pdo = require __DIR__ . '/../src/db.php';
 require __DIR__ . '/../src/SchoolProfileModel.php';
 require __DIR__ . '/../src/ThemeModel.php';
@@ -172,6 +174,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             $profile_error = 'Gagal menghapus foto: ' . $e->getMessage();
         }
+    } elseif ($action === 'add_special_theme') {
+        try {
+            $themeModel->addSpecialTheme([
+                'school_id' => $sid,
+                'name' => $_POST['theme_name_label'] ?? '',
+                'date' => $_POST['theme_date'] ?? '',
+                'theme_key' => $_POST['theme_key'] ?? '',
+                'description' => $_POST['theme_description'] ?? '',
+                'is_active' => 1
+            ]);
+            $theme_success = 'Tema hari penting berhasil ditambahkan.';
+        } catch (Exception $e) {
+            $theme_error = 'Gagal menambah tema: ' . $e->getMessage();
+        }
+    } elseif ($action === 'toggle_special_theme') {
+        try {
+            $id = (int)$_POST['theme_id'];
+            $status = (int)$_POST['status'];
+            $themeModel->toggleSpecialTheme($id, $sid, $status);
+            $theme_success = 'Status tema berhasil diubah.';
+        } catch (Exception $e) {
+            $theme_error = 'Gagal mengubah status: ' . $e->getMessage();
+        }
+    } elseif ($action === 'delete_special_theme') {
+        try {
+            $id = (int)$_POST['theme_id'];
+            $themeModel->deleteSpecialTheme($id, $sid);
+            $theme_success = 'Tema hari penting berhasil dihapus.';
+        } catch (Exception $e) {
+            $theme_error = 'Gagal menghapus tema: ' . $e->getMessage();
+        }
     }
 }
 
@@ -182,6 +215,8 @@ $school = $stmt->fetch();
 
 // Get current theme
 $currentTheme = $themeModel->getSchoolTheme($sid);
+$specialThemes = $themeModel->getSpecialThemes($sid);
+$activeSpecialTheme = $themeModel->checkSpecialTheme($sid);
 
 // Debug: Display what we got from database
 // var_dump($school); // Uncomment for debugging
@@ -206,6 +241,10 @@ if (!$school) {
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <link rel="stylesheet" href="../assets/css/animations.css">
     <link rel="stylesheet" href="../assets/css/settings.css">
+    <?php if ($activeSpecialTheme): ?>
+        <script>window.isSpecialThemeActive = true;</script>
+        <link rel="stylesheet" id="special-theme-css" href="themes/special/<?php echo htmlspecialchars($activeSpecialTheme); ?>.css">
+    <?php endif; ?>
 </head>
 
 <body>
@@ -586,6 +625,112 @@ if (!$school) {
                         </div>
                     </div>
                 </div>
+
+                <!-- Section Tema Hari Penting -->
+                <div class="card" style="margin-top: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div>
+                            <h2 class="card-title">
+                                <iconify-icon icon="mdi:calendar-star-outline"></iconify-icon> Tema Hari Penting (Otomatis)
+                            </h2>
+                            <p class="card-subtitle">Tema akan berganti otomatis pada tanggal yang ditentukan.</p>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="openAddSpecialThemeModal()">
+                            <iconify-icon icon="mdi:plus"></iconify-icon> Tambah
+                        </button>
+                    </div>
+
+                    <?php if (!empty($theme_error)): ?>
+                        <div class="alert alert-danger" style="margin-bottom: 20px;">
+                            <iconify-icon icon="mdi:alert-circle"></iconify-icon>
+                            <div><?php echo htmlspecialchars($theme_error); ?></div>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="special-themes-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                        <?php if (empty($specialThemes)): ?>
+                            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); background: var(--bg); border: 1px dashed var(--border); border-radius: 12px;">
+                                <iconify-icon icon="mdi:calendar-blank" style="font-size: 48px; margin-bottom: 10px;"></iconify-icon>
+                                <p>Belum ada tema hari penting yang dikonfigurasi.</p>
+                            </div>
+                        <?php endif; ?>
+                        
+                        <?php foreach ($specialThemes as $st): ?>
+                        <div class="card" style="padding: 15px; border: 1px solid var(--border); box-shadow: none;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                <div>
+                                    <h3 style="font-size: 15px; margin-bottom: 10px; font-weight: 600;"><?php echo htmlspecialchars($st['name']); ?></h3>
+                                    <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                                        <iconify-icon icon="mdi:calendar-outline" style="font-size: 16px; color: var(--primary);"></iconify-icon> 
+                                        <?php echo date('d F Y', strtotime($st['date'])); ?>
+                                    </div>
+                                    <div style="display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary);">
+                                        CSS: <?php echo htmlspecialchars($st['theme_key']); ?>.css
+                                    </div>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+                                    <form method="post">
+                                        <input type="hidden" name="action" value="toggle_special_theme">
+                                        <input type="hidden" name="theme_id" value="<?php echo $st['id']; ?>">
+                                        <input type="hidden" name="status" value="<?php echo $st['is_active'] ? 0 : 1; ?>">
+                                        <button type="submit" class="btn" style="padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: none; background: <?php echo $st['is_active'] ? 'var(--success)' : 'var(--muted)'; ?>; color: white;">
+                                            <?php echo $st['is_active'] ? 'AKTIF' : 'NONAKTIF'; ?>
+                                        </button>
+                                    </form>
+                                    <form method="post" onsubmit="return confirm('Hapus tema ini?')">
+                                        <input type="hidden" name="action" value="delete_special_theme">
+                                        <input type="hidden" name="theme_id" value="<?php echo $st['id']; ?>">
+                                        <button type="submit" class="btn-text" style="font-size: 11px; color: var(--danger); background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                                            <iconify-icon icon="mdi:trash-can-outline"></iconify-icon> Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
+                <!-- Modal Tambah Tema Khusus -->
+                <div id="addSpecialThemeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+                    <div class="card" style="width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                        <h2 class="card-title" style="margin-bottom: 25px;">
+                            <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon> Tambah Hari Penting
+                        </h2>
+                        <form method="post">
+                            <input type="hidden" name="action" value="add_special_theme">
+                            <div class="form-group" style="margin-bottom: 18px;">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Nama Hari / Acara</label>
+                                <input type="text" name="theme_name_label" placeholder="Contoh: HUT RI 81" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+                            </div>
+                            <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 18px;">
+                                <div class="form-group">
+                                    <label style="font-weight: 600; margin-bottom: 8px; display: block;">Tanggal</label>
+                                    <input type="date" name="theme_date" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+                                </div>
+                                <div class="form-group">
+                                    <label style="font-weight: 600; margin-bottom: 8px; display: block;">File Tema (.css)</label>
+                                    <select name="theme_key" required style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: white;">
+                                        <option value="kemerdekaan">kemerdekaan.css (Merah Putih)</option>
+                                        <option value="idulfitri">idulfitri.css (Lebaran)</option>
+                                        <option value="tahunbaru">tahunbaru.css (Festive)</option>
+                                        <option value="hariguru">hariguru.css (Education)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 25px;">
+                                <label style="font-weight: 600; margin-bottom: 8px; display: block;">Deskripsi Singkat</label>
+                                <textarea name="theme_description" rows="2" placeholder="Catatan tambahan..." style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid var(--border);"></textarea>
+                            </div>
+                            <div style="display: flex; gap: 12px;">
+                                <button type="submit" class="btn btn-primary" style="flex: 2; padding: 12px;">
+                                    <iconify-icon icon="mdi:content-save"></iconify-icon> Simpan Tema
+                                </button>
+                                <button type="button" class="btn" style="flex: 1; padding: 12px; background: var(--muted); border: none;" onclick="closeAddSpecialThemeModal()">Batal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
 
             <!-- Tab: FAQ -->
@@ -703,6 +848,14 @@ if (!$school) {
                     reader.readAsDataURL(file);
                 }
             });
+        }
+
+        function openAddSpecialThemeModal() {
+            document.getElementById('addSpecialThemeModal').style.display = 'flex';
+        }
+
+        function closeAddSpecialThemeModal() {
+            document.getElementById('addSpecialThemeModal').style.display = 'none';
         }
     </script>
 </body>
