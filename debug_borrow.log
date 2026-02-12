@@ -1,5 +1,0 @@
-2026-02-10 07:38:18 [BORROW CHECK] Book: 'Madilog' (ID: 3) is teacher_only. Member (ID: 4) Role: 'student'
-2026-02-10 07:38:18 [BORROW BLOCKED] Blocked student.
-2026-02-10 07:45:40 [BORROW CHECK] Book: 'Madilog' (ID: 3) is teacher_only. Member (ID: 4) Role: 'student'
-2026-02-10 07:45:40 [BORROW BLOCKED] Blocked student.
-2026-02-10 07:53:30 [BORROW CHECK] Book: 'Madilog' (ID: 3) is teacher_only. Member (ID: 6) Role: 'teacher'

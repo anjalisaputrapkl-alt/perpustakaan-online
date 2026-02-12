@@ -205,6 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $theme_success = 'Tema hari penting berhasil dihapus.';
         } catch (Exception $e) {
             $theme_error = 'Gagal menghapus tema: ' . $e->getMessage();
+        }
 
     } elseif ($action === 'reset_scan_key') {
         try {
@@ -220,7 +221,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $profile_success = 'Pengaturan scanner berhasil diperbarui.';
         } catch (Exception $e) {
             $profile_error = 'Gagal memperbarui pengaturan: ' . $e->getMessage();
->>>>>>> Stashed changes
         }
     }
 }
@@ -992,6 +992,7 @@ if (!$school) {
 
         function closeAddSpecialThemeModal() {
             document.getElementById('addSpecialThemeModal').style.display = 'none';
+        }
 
         // Copy to clipboard helper
         function copyToClipboard(text) {
@@ -1006,8 +1007,7 @@ if (!$school) {
                 document.body.removeChild(temp);
                 alert('Link berhasil disalin ke clipboard!');
             });
-
-        };
+        }
     </script>
 </body>
 

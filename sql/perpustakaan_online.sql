@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 12, 2026 at 04:27 AM
+-- Generation Time: Feb 12, 2026 at 04:49 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -78,7 +78,7 @@ INSERT INTO `books` (`id`, `school_id`, `title`, `author`, `isbn`, `category`, `
 (8, 10, 'dfgdfg', 'dfgdfg', '232343', 'Referensi', 'all', 1, NULL, '2026-01-29 04:24:26', '1A', 3, 'book_1769660674_697ae1029671b.jpg'),
 (14, 4, 'stoicsm', 'andora', '34567890', 'Non-Fiksi', 'teacher_only', 1, NULL, '2026-02-10 07:15:57', '1', 2, 'book_1770707752_698adb282818f.jpg'),
 (15, 4, 'coding', 'someone', '9860997', 'Referensi', 'teacher_only', 1, NULL, '2026-02-11 01:55:28', '1', 2, 'book_1770774928_698be1905b664.jpg'),
-(16, 4, 'program', 'someone', '9875654', 'Teknologi', 'teacher_only', 1, NULL, '2026-02-11 02:16:19', '1', 2, 'book_1770776179_698be673f3ad1.jpg'),
+(16, 4, 'program', 'someone', '9875654', 'Teknologi', 'teacher_only', 0, NULL, '2026-02-11 02:16:19', '1', 2, 'book_1770776179_698be673f3ad1.jpg'),
 (17, 4, 'jh', 'kj', '55', 'Non-Fiksi', 'teacher_only', 1, NULL, '2026-02-11 02:21:13', '5', 7, 'book_1770776473_698be79997086.jpg');
 
 -- --------------------------------------------------------
@@ -146,7 +146,9 @@ CREATE TABLE `borrows` (
 --
 
 INSERT INTO `borrows` (`id`, `school_id`, `book_id`, `member_id`, `borrowed_at`, `due_at`, `returned_at`, `status`, `fine_amount`, `fine_status`) VALUES
-(31, 10, 8, 3, '2026-01-30 08:32:40', '2026-02-06 02:32:40', NULL, 'pending_confirmation', 0.00, 'unpaid');
+(31, 10, 8, 3, '2026-01-30 08:32:40', '2026-02-06 02:32:40', NULL, 'pending_confirmation', 0.00, 'unpaid'),
+(35, 4, 4, 4, '2026-02-12 10:45:20', '2026-02-19 10:47:25', '2026-02-12 10:48:57', 'returned', 0.00, 'unpaid'),
+(36, 4, 16, 7, '2026-02-12 10:47:02', '2026-02-19 10:47:21', NULL, 'borrowed', 0.00, 'unpaid');
 
 -- --------------------------------------------------------
 
@@ -187,7 +189,8 @@ CREATE TABLE `members` (
 INSERT INTO `members` (`id`, `school_id`, `name`, `email`, `nisn`, `role`, `status`, `created_at`, `max_pinjam`) VALUES
 (3, 10, 'fafas', 'asdas@gmail.com', '1211211', 'student', 'active', '2026-01-29 04:25:45', 2),
 (4, 4, 'Anjali Saputra', 'anjalisaputra@gmail.com', '0094234', 'student', 'active', '2026-02-10 01:14:22', 2),
-(6, 4, 'surya', 'uya4767@gmail.com', '2346558', 'student', 'active', '2026-02-10 06:53:08', 2);
+(6, 4, 'surya', 'uya4767@gmail.com', '2346558', 'student', 'active', '2026-02-10 06:53:08', 2),
+(7, 4, 'Sonia Sugiana', 'sonia@gmail.com', '2345345', 'teacher', 'active', '2026-02-12 03:46:23', 5);
 
 -- --------------------------------------------------------
 
@@ -294,22 +297,24 @@ CREATE TABLE `schools` (
   `max_books` int(11) DEFAULT 3,
   `max_books_student` int(11) DEFAULT 3,
   `max_books_teacher` int(11) DEFAULT 10,
-  `max_books_employee` int(11) DEFAULT 5
+  `max_books_employee` int(11) DEFAULT 5,
+  `scan_access_key` varchar(64) DEFAULT NULL,
+  `custom_base_url` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `schools`
 --
 
-INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `created_at`, `email`, `phone`, `address`, `description`, `logo`, `profile_picture`, `npsn`, `website`, `photo_path`, `founded_year`, `borrow_duration`, `late_fine`, `max_books`, `max_books_student`, `max_books_teacher`, `max_books_employee`) VALUES
-(3, 'SMK BINA MANDIRI MULTIMEDIA', 'smk-bina-mandiri-multimedia', 'pending', NULL, '2026-01-26 02:40:51', NULL, '082-9999999', 'Jl. Updated No. 999', NULL, NULL, NULL, '12345', 'https://updated.com', NULL, 2020, 4, 500.00, 3, 3, 10, 5),
-(4, 'AUSTRALIA INDEPENDENTS SCHOOL', '', 'pending', NULL, '2026-01-26 02:42:13', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'public/uploads/school-photos/school_1769399275_6976e3ebe6757.jpg', 0, 7, 600.00, 4, 5, 5, 5),
-(5, 'sdfsdf', 'sdfsdf', 'pending', NULL, '2026-01-26 04:37:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5),
-(7, 'sdfsdfasdasd', 'sdfsdfasdasd', 'pending', NULL, '2026-01-26 04:39:59', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5),
-(8, 'sdfbhsd', 'sdfbhsd', 'pending', NULL, '2026-01-26 04:42:48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5),
-(9, 'hdgdfg', 'hdgdfg', 'pending', NULL, '2026-01-26 04:44:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5),
-(10, 'smamaju', 'smamaju', 'pending', NULL, '2026-01-29 02:37:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5),
-(11, 'smk bm3', 'smk-bm3', 'pending', NULL, '2026-02-02 02:46:29', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5);
+INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `created_at`, `email`, `phone`, `address`, `description`, `logo`, `profile_picture`, `npsn`, `website`, `photo_path`, `founded_year`, `borrow_duration`, `late_fine`, `max_books`, `max_books_student`, `max_books_teacher`, `max_books_employee`, `scan_access_key`, `custom_base_url`) VALUES
+(3, 'SMK BINA MANDIRI MULTIMEDIA', 'smk-bina-mandiri-multimedia', 'pending', NULL, '2026-01-26 02:40:51', NULL, '082-9999999', 'Jl. Updated No. 999', NULL, NULL, NULL, '12345', 'https://updated.com', NULL, 2020, 4, 500.00, 3, 3, 10, 5, NULL, NULL),
+(4, 'AUSTRALIA INDEPENDENTS SCHOOL', '', 'pending', NULL, '2026-01-26 02:42:13', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'public/uploads/school-photos/school_1769399275_6976e3ebe6757.jpg', 0, 7, 600.00, 4, 5, 5, 5, 'ca70af996b1992e41a4b80731ec5dd4b', 'https://ungaudy-bitless-jeffrey.ngrok-free.dev'),
+(5, 'sdfsdf', 'sdfsdf', 'pending', NULL, '2026-01-26 04:37:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
+(7, 'sdfsdfasdasd', 'sdfsdfasdasd', 'pending', NULL, '2026-01-26 04:39:59', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
+(8, 'sdfbhsd', 'sdfbhsd', 'pending', NULL, '2026-01-26 04:42:48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
+(9, 'hdgdfg', 'hdgdfg', 'pending', NULL, '2026-01-26 04:44:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
+(10, 'smamaju', 'smamaju', 'pending', NULL, '2026-01-29 02:37:45', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
+(11, 'smk bm3', 'smk-bm3', 'pending', NULL, '2026-02-02 02:46:29', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -429,7 +434,8 @@ INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `ve
 (11, 10, 'fafas', 'asdas@gmail.com', '1211211', '$2y$10$kxRqC.NMu.l1Gt/nT6ITQ.8gRFdrhBww3Bc1AeUxU5qCQq5kbzJey', NULL, NULL, 0, NULL, 'student', '2026-01-29 04:25:45'),
 (12, 11, 'someone', 'ada@sch.id', NULL, '$2y$10$hK3aWhbPDT0JIxa.hKx1UOnsgOz554F0tAsK3j.KM4CVW5briRGXO', '548097', '2026-02-01 21:01:29', 0, NULL, 'admin', '2026-02-02 02:46:30'),
 (13, 4, 'Anjali Saputra', 'anjalisaputra@gmail.com', '0094234', '$2y$10$KCo55BDxMYIXkX0V7nutBuBW89.oi9f/WZ6NKQFegU7VbfDcHgMNq', NULL, NULL, 0, NULL, 'student', '2026-02-10 01:14:22'),
-(14, 4, 'surya', 'uya4767@gmail.com', '2346558', '$2y$10$WyqJq5kEZzBf6HJpYcq8COPZEBf3IcIlUGzEsPPEPYFWxE2PZspQ.', NULL, NULL, 0, NULL, 'student', '2026-02-10 06:53:08');
+(14, 4, 'surya', 'uya4767@gmail.com', '2346558', '$2y$10$WyqJq5kEZzBf6HJpYcq8COPZEBf3IcIlUGzEsPPEPYFWxE2PZspQ.', NULL, NULL, 0, NULL, 'student', '2026-02-10 06:53:08'),
+(15, 4, 'Sonia Sugiana', 'sonia@gmail.com', '2345345', '$2y$10$lF7iBPw94PG6G9cVOGY1iuvQJ0Nph4O.be/LomLYe8qfViqyjzlvm', NULL, NULL, 0, NULL, 'teacher', '2026-02-12 03:46:23');
 
 --
 -- Indexes for dumped tables
@@ -605,7 +611,7 @@ ALTER TABLE `book_maintenance`
 -- AUTO_INCREMENT for table `borrows`
 --
 ALTER TABLE `borrows`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 
 --
 -- AUTO_INCREMENT for table `favorites`
@@ -617,7 +623,7 @@ ALTER TABLE `favorites`
 -- AUTO_INCREMENT for table `members`
 --
 ALTER TABLE `members`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `notifications`
@@ -659,13 +665,13 @@ ALTER TABLE `siswa`
 -- AUTO_INCREMENT for table `special_themes`
 --
 ALTER TABLE `special_themes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- Constraints for dumped tables
