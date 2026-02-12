@@ -174,6 +174,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             $profile_error = 'Gagal menghapus foto: ' . $e->getMessage();
         }
+
     } elseif ($action === 'add_special_theme') {
         try {
             $themeModel->addSpecialTheme([
@@ -204,6 +205,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $theme_success = 'Tema hari penting berhasil dihapus.';
         } catch (Exception $e) {
             $theme_error = 'Gagal menghapus tema: ' . $e->getMessage();
+
+    } elseif ($action === 'reset_scan_key') {
+        try {
+            $schoolProfileModel->resetScanAccessKey($sid);
+            $profile_success = 'Scan Access Key berhasil direset. Silakan bagikan link baru ke staff.';
+        } catch (Exception $e) {
+            $profile_error = 'Gagal mereset key: ' . $e->getMessage();
+        }
+    } elseif ($action === 'update_scanner_settings') {
+        try {
+            $custom_url = trim($_POST['custom_base_url'] ?? '');
+            $schoolProfileModel->updateSchoolProfile($sid, ['custom_base_url' => $custom_url ?: null]);
+            $profile_success = 'Pengaturan scanner berhasil diperbarui.';
+        } catch (Exception $e) {
+            $profile_error = 'Gagal memperbarui pengaturan: ' . $e->getMessage();
+>>>>>>> Stashed changes
         }
     }
 }
@@ -269,6 +286,9 @@ if (!$school) {
                 </div>
                 <div class="tab-link" data-tab="themes">
                     <iconify-icon icon="mdi:palette-outline"></iconify-icon> Tema
+                </div>
+                <div class="tab-link" data-tab="scanner">
+                    <iconify-icon icon="mdi:barcode-scan"></iconify-icon> Scanner Mobile
                 </div>
                 <div class="tab-link" data-tab="faq">
                     <iconify-icon icon="mdi:help-circle-outline"></iconify-icon> Bantuan
@@ -733,6 +753,121 @@ if (!$school) {
                 </div>
             </div>
 
+            <!-- Tab: Scanner Mobile -->
+            <div class="tab-content" id="scanner">
+                <div class="settings-grid">
+                    <div class="card">
+                        <h2 class="card-title">
+                            <iconify-icon icon="mdi:cellphone-wireless"></iconify-icon> Scanner Tanpa Login
+                        </h2>
+                        <p class="card-subtitle">Gunakan fitur ini untuk memberikan akses scan buku ke staff lewat handphone tanpa harus memberitahukan password admin.</p>
+
+                        <?php 
+                        $scanKey = $school['scan_access_key']; 
+                        
+                        // Robust Base URL detection
+                        $protocol = 'http';
+                        if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
+                            $protocol = $_SERVER['HTTP_X_FORWARDED_PROTO'];
+                        } elseif (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+                            $protocol = 'https';
+                        }
+                        
+                        $host = $_SERVER['HTTP_HOST'];
+                        $currentDir = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+                        
+                        // Use custom base URL if provided
+                        $detectedBaseUrl = $protocol . "://" . $host . $currentDir;
+                        
+                        // Intelligent Custom URL processing:
+                        $displayBaseUrl = $detectedBaseUrl;
+                        if (!empty($school['custom_base_url'])) {
+                            $custom = rtrim($school['custom_base_url'], '/');
+                            $parsed = parse_url($custom);
+                            
+                            // If user only provided domain (e.g. https://xyz.ngrok-free.app) 
+                            // and no path, append the current project directory.
+                            if (empty($parsed['path']) || $parsed['path'] === '/') {
+                                $displayBaseUrl = $custom . $currentDir;
+                            } else {
+                                $displayBaseUrl = $custom;
+                            }
+                        }
+                        
+                        $scanUrl = $displayBaseUrl . "/scan-mobile.php" . ($scanKey ? "?key=$scanKey" : "");
+                        $returnUrl = $displayBaseUrl . "/scan-return-mobile.php" . ($scanKey ? "?key=$scanKey" : "");
+                        ?>
+
+                        <div class="card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); margin: 16px 0;">
+                            <h3 class="card-title" style="font-size: 14px;">Domain / Base URL</h3>
+                            <p style="font-size: 12px; color: var(--muted); margin-bottom: 12px;">Jika Anda menggunakan <strong>ngrok</strong> atau akses IP Lokal, masukkan URL dasarnya di sini agar link yang dihasilkan benar.</p>
+                            <form method="post" style="display: flex; gap: 8px;">
+                                <input type="hidden" name="action" value="update_scanner_settings">
+                                <input type="text" name="custom_base_url" placeholder="Contoh: https://abcd-123.ngrok-free.app" 
+                                       value="<?= htmlspecialchars($school['custom_base_url'] ?? '') ?>" style="flex: 1;">
+                                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Simpan</button>
+                            </form>
+                            <?php if (!empty($school['custom_base_url'])): ?>
+                                <small style="color: var(--success); margin-top: 4px; display: block;">
+                                    <iconify-icon icon="mdi:check-circle"></iconify-icon> URL Custom Aktif
+                                </small>
+                            <?php endif; ?>
+                        </div>
+
+                        <?php if (!$scanKey): ?>
+                            <div class="alert alert-warning">
+                                <iconify-icon icon="mdi:alert-circle-outline"></iconify-icon>
+                                <div>Akses Scan Mobile belum diaktifkan. Klik tombol di bawah untuk membuat kunci akses pertama kali.</div>
+                            </div>
+                        <?php else: ?>
+                            <div class="info-block" style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; margin-bottom: 24px;">
+                                <div style="margin-bottom: 16px;">
+                                    <label style="font-weight: 700; display: block; margin-bottom: 8px;">1. Link Scanner Peminjaman</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" readonly value="<?= $scanUrl ?>" style="flex: 1; font-family: monospace; font-size: 11px;">
+                                        <button class="btn" onclick="copyToClipboard('<?= $scanUrl ?>')">Salin</button>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 16px;">
+                                    <label style="font-weight: 700; display: block; margin-bottom: 8px;">2. Link Scanner Pengembalian</label>
+                                    <div style="display: flex; gap: 8px;">
+                                        <input type="text" readonly value="<?= $returnUrl ?>" style="flex: 1; font-family: monospace; font-size: 11px;">
+                                        <button class="btn" onclick="copyToClipboard('<?= $returnUrl ?>')">Salin</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <form method="post">
+                            <input type="hidden" name="action" value="reset_scan_key">
+                            <button type="submit" class="btn btn-primary">
+                                <iconify-icon icon="mdi:key-refresh"></iconify-icon>
+                                <?= $scanKey ? 'Reset & Generate Kunci Baru' : 'Aktifkan Akses Scanner' ?>
+                            </button>
+                        </form>
+                        
+                        <?php if ($scanKey): ?>
+                            <p class="text-muted" style="margin-top: 16px; font-size: 12px; color: var(--danger);">
+                                <iconify-icon icon="mdi:alert-outline"></iconify-icon> 
+                                <strong>Peringatan:</strong> Jika Anda mereset kunci, link yang lama tidak akan bisa digunakan lagi.
+                            </p>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="sidebar-widgets">
+                        <div class="card">
+                            <h3 class="card-title" style="font-size: 14px;">Cara Penggunaan</h3>
+                            <ul style="font-size: 13px; color: var(--muted); padding-left: 20px; line-height: 1.6;">
+                                <li>Klik aktifkan untuk mendapatkan kunci unik.</li>
+                                <li>Salin link scanner (Peminjaman atau Pengembalian).</li>
+                                <li>Kirim link tersebut ke WhatsApp atau buka di Browser handphone staff.</li>
+                                <li>Staff bisa langsung scan barcode buku/anggota tanpa perlu login.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tab: FAQ -->
             <div class="tab-content" id="faq">
                 <div class="settings-grid">
@@ -850,13 +985,29 @@ if (!$school) {
             });
         }
 
+
         function openAddSpecialThemeModal() {
             document.getElementById('addSpecialThemeModal').style.display = 'flex';
         }
 
         function closeAddSpecialThemeModal() {
             document.getElementById('addSpecialThemeModal').style.display = 'none';
-        }
+
+        // Copy to clipboard helper
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Link berhasil disalin ke clipboard!');
+            }).catch(err => {
+                const temp = document.createElement('input');
+                document.body.appendChild(temp);
+                temp.value = text;
+                temp.select();
+                document.execCommand('copy');
+                document.body.removeChild(temp);
+                alert('Link berhasil disalin ke clipboard!');
+            });
+
+        };
     </script>
 </body>
 

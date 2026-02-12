@@ -22,12 +22,34 @@ class SchoolProfileModel
             SELECT id, name, slug, email, phone, address, 
                    npsn, website, founded_year, photo_path, status,
                    borrow_duration, late_fine, max_books,
-                   max_books_student, max_books_teacher, max_books_employee
+                   max_books_student, max_books_teacher, max_books_employee,
+                   scan_access_key, custom_base_url
             FROM schools 
             WHERE id = :id
         ');
         $stmt->execute(['id' => $school_id]);
         return $stmt->fetch();
+    }
+
+    /**
+     * Get scan access key
+     */
+    public function getScanAccessKey($school_id)
+    {
+        $stmt = $this->pdo->prepare('SELECT scan_access_key FROM schools WHERE id = :id');
+        $stmt->execute(['id' => $school_id]);
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Generate or Reset scan access key
+     */
+    public function resetScanAccessKey($school_id)
+    {
+        $new_key = bin2hex(random_bytes(16)); // 32 chars
+        $stmt = $this->pdo->prepare('UPDATE schools SET scan_access_key = :key WHERE id = :id');
+        $stmt->execute(['key' => $new_key, 'id' => $school_id]);
+        return $new_key;
     }
 
     /**
@@ -39,7 +61,8 @@ class SchoolProfileModel
         $allowed = [
             'name', 'email', 'phone', 'address', 'npsn', 'website', 'founded_year',
             'borrow_duration', 'late_fine', 'max_books',
-            'max_books_student', 'max_books_teacher', 'max_books_employee'
+            'max_books_student', 'max_books_teacher', 'max_books_employee',
+            'custom_base_url'
         ];
         $updates = [];
         $params = ['id' => $school_id];

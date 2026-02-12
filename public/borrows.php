@@ -1448,6 +1448,36 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
     }
   </script>
 
+  <!-- Live Scan Sync Script -->
+  <audio id="scanNotificationSound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
+  <script>
+    let initialPendingCount = <?= $pendingConfirmation ?>;
+    const CHECK_INTERVAL = 5000; // Check every 5 seconds
+
+    function checkPendingScans() {
+      fetch('api/check-pending-scans.php')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.count > initialPendingCount) {
+            // New scans detected!
+            const sound = document.getElementById('scanNotificationSound');
+            if (sound) sound.play().catch(e => console.log('Sound play blocked'));
+
+            // Reload page to show new scans
+            setTimeout(() => {
+              location.reload();
+            }, 800);
+          } else if (data.success) {
+            // Update count for next check
+            initialPendingCount = data.count;
+          }
+        })
+        .catch(err => console.log('Sync error'));
+    }
+
+    // Start polling
+    setInterval(checkPendingScans, CHECK_INTERVAL);
+  </script>
 </body>
 
 </html>

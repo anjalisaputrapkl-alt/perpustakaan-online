@@ -1,5 +1,15 @@
 <?php
 require __DIR__ . '/../src/auth.php';
+
+// Handle Token-based access for scanners
+if (isset($_GET['key']) && !empty($_GET['key'])) {
+    if (loginByScanKey($_GET['key'])) {
+        // Redirect to same page without key in URL for clean UI (optional)
+        // header('Location: scan-mobile.php');
+        // exit;
+    }
+}
+
 requireAuth();
 ?>
 <!DOCTYPE html>
