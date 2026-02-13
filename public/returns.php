@@ -42,91 +42,9 @@ $recentReturns = $stmt->fetchAll();
   <link rel="stylesheet" href="../assets/css/borrows.css">
   <?php require_once __DIR__ . '/../theme-loader.php'; ?>
   <style>
-    .return-scanner-section {
-      background: var(--primary-soft);
-      border: 2px solid var(--primary);
-      border-radius: 16px;
-      padding: 32px;
-      text-align: center;
-    }
-    
-    .manual-input-wrap {
-      max-width: 500px;
-      margin: 0 auto 24px;
-      position: relative;
-    }
-    
-    .manual-input-wrap input {
-      width: 100%;
-      padding: 16px 20px 16px 50px;
-      font-size: 18px;
-      font-weight: 700;
-      border: 2px solid var(--border);
-      border-radius: 12px;
-      background: var(--surface);
-      color: var(--text);
-      transition: all 0.3s;
-    }
-    
-    .manual-input-wrap input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 4px var(--primary-soft);
-      outline: none;
-    }
-    
-    .manual-input-wrap iconify-icon {
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 24px;
-      color: var(--primary);
-    }
-    
-    .last-return-card {
-      display: none;
-      animation: slideUp 0.4s ease-out;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      margin-top: 24px;
-      text-align: left;
-      box-shadow: var(--card-shadow);
-    }
-    
-    .success-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      background: var(--success-soft);
-      color: var(--success);
-      border-radius: 50px;
-      font-size: 12px;
-      font-weight: 700;
-      margin-bottom: 16px;
-    }
-    
-    .fine-alert {
-      background: var(--danger-soft);
-      color: var(--danger);
-      padding: 12px 16px;
-      border-radius: 8px;
-      margin-top: 12px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    #reader {
-        width: 100%;
-        max-width: 400px;
-        margin: 0 auto 20px;
-        border-radius: 12px;
-        overflow: hidden;
-        border: 4px solid var(--surface);
+    /* Specific overrides for returns if needed */
+    .scanner-mode-btn {
+        flex: 1;
     }
   </style>
 </head>
@@ -145,6 +63,88 @@ $recentReturns = $stmt->fetchAll();
     <div class="content">
       <div class="main">
         
+        <!-- Scanner Wrapper (Fixes button width issue) -->
+        <div>
+            <!-- Toggle Button -->
+            <div class="scanner-toggle-wrap">
+                <button onclick="toggleScanner()" class="btn-barcode-start">
+                  <iconify-icon icon="mdi:barcode-scan"></iconify-icon>
+                  <span id="scannerToggleText">Mulai Pengembalian</span>
+                </button>
+            </div>
+
+            <!-- Scanner Section (Hidden by default) -->
+            <div id="scannerSection" class="card scanner-section">
+                <div class="scanner-grid">
+                    <!-- Left: Scanner Controls -->
+                    <div>
+                       <div id="reader"></div>
+                       <div id="scanStatus" style="display:none; margin-bottom: 10px; padding: 10px; border-radius: 8px;"></div>
+                       
+                       <div class="scanner-controls">
+                           <input type="text" id="barcodeInput" placeholder="Ketik/Scan ISBN atau ID..." 
+                                  style="flex: 2; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-weight: 600;">
+                           <button class="scanner-mode-btn active" onclick="processManualInput()" style="flex: 1; text-align: center;">
+                               <iconify-icon icon="mdi:keyboard-return" style="vertical-align: -2px; margin-right: 4px;"></iconify-icon> Proses
+                           </button>
+                       </div>
+                       <div style="font-size: 12px; color: var(--muted); margin-top: 8px;">
+                           * Pastikan kursor aktif di kotak input jika menggunakan scanner gun.
+                       </div>
+                    </div>
+
+                    <!-- Right: Result Display -->
+                    <div>
+                        <h2 class="flex-center gap-2">
+                            <iconify-icon icon="mdi:history" style="font-size: 20px;"></iconify-icon>
+                            Riwayat Sesi Ini
+                        </h2>
+
+                        <!-- Session Info / Stats (Custom to Returns but styled consistently) -->
+                        <div id="lastReturnCard" style="display: none; margin-bottom: 20px;">
+                            <div class="scanned-info-card" style="display: block;">
+                                 <div class="scanned-info-label" style="display: flex; justify-content: space-between;">
+                                    <span>Buku Berhasil Dikembalikan</span>
+                                    <span id="resTime" style="font-weight: 400; opacity: 0.8;">-</span>
+                                 </div>
+                                 
+                                 <div class="scanned-info-value" id="resBookTitle" style="margin-top: 8px;">-</div>
+                                 <div class="scanned-info-meta" id="resMemberName">-</div>
+                                 
+                                 <div id="fineDisplay" style="margin-top: 12px;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Intro/Empty State -->
+                        <div id="scanEmptyState" class="scanner-empty-state">
+                            <iconify-icon icon="mdi:barcode-scan"></iconify-icon>
+                            <p>Scan buku untuk memulai sesi pengembalian</p>
+                        </div>
+
+                        <!-- Session History Table -->
+                        <div id="sessionHistory" style="display: none;">
+                             <div class="borrows-table-wrap mb-4">
+                                <table class="borrows-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Buku</th>
+                                            <th>Peminjam</th>
+                                            <th style="text-align: right;">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sessionReturnsList"></tbody>
+                                </table>
+                            </div>
+                            
+                            <div style="text-align: right; font-size: 13px; color: var(--muted); font-weight: 600;">
+                                Total Sesi Ini: <span id="sessionCountBadge" style="color: var(--primary); font-weight: 800;">0</span> Buku
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="stats-grid">
           <div class="stat-card">
             <div class="stat-icon blue">
@@ -162,48 +162,6 @@ $recentReturns = $stmt->fetchAll();
             <div class="stat-content">
               <div class="stat-label">Sesi Ini</div>
               <div class="stat-value" id="sessionCount">0</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="return-scanner-section">
-          <h2>Scan Barcode Buku</h2>
-          <p style="color: var(--muted); margin-bottom: 24px;">Gunakan scanner barcode atau arahkan kamera ke barcode buku</p>
-          
-          <div id="reader" style="display: none;"></div>
-
-          <div class="manual-input-wrap">
-            <iconify-icon icon="mdi:barcode"></iconify-icon>
-            <input type="text" id="barcodeInput" placeholder="Scan atau ketik ISBN/ID Buku..." autofocus autocomplete="off">
-          </div>
-
-          <div class="action-grid" style="justify-content: center;">
-            <button class="btn-barcode-start" id="btnToggleCamera" onclick="toggleCamera()">
-              <iconify-icon icon="mdi:camera"></iconify-icon>
-              Gunakan Kamera
-            </button>
-            <button class="btn-sm btn-sm-info" onclick="document.getElementById('barcodeInput').focus()">
-              <iconify-icon icon="mdi:keyboard-outline"></iconify-icon>
-              Fokus Input
-            </button>
-          </div>
-
-          <div id="lastReturnCard" class="last-return-card">
-            <div class="success-badge">
-              <iconify-icon icon="mdi:check-circle"></iconify-icon>
-              BERHASIL DIKEMBALIKAN
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr auto; gap: 20px;">
-              <div>
-                <div style="font-size: 20px; font-weight: 800; color: var(--text);" id="resBookTitle">-</div>
-                <div style="font-size: 14px; color: var(--muted); margin-top: 4px;">
-                  Peminjam: <span style="font-weight: 700; color: var(--primary);" id="resMemberName">-</span>
-                </div>
-                </div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 12px; color: var(--muted);" id="resTime">-</div>
-              </div>
             </div>
           </div>
         </div>
@@ -250,33 +208,87 @@ $recentReturns = $stmt->fetchAll();
 
   <script src="https://unpkg.com/html5-qrcode"></script>
   <script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script>
     const barcodeInput = document.getElementById('barcodeInput');
-    const lastReturnCard = document.getElementById('lastReturnCard');
+    const sessionHistory = document.getElementById('sessionHistory');
+    const sessionList = document.getElementById('sessionReturnsList');
+    const emptyState = document.getElementById('scanEmptyState');
     const sessionCountEl = document.getElementById('sessionCount');
+    const sessionCountBadge = document.getElementById('sessionCountBadge');
+    
     let sessionCount = 0;
-    let cameraActive = false;
     let html5QrcodeScanner = null;
+
+    function toggleScanner() {
+        const section = document.getElementById('scannerSection');
+        const btnText = document.getElementById('scannerToggleText');
+        const btn = document.querySelector('.scanner-toggle-wrap button');
+        
+        if (section.style.display === 'none' || section.style.display === '') {
+            section.style.display = 'block';
+            btnText.textContent = 'Tutup Pengembalian';
+            btn.innerHTML = '<iconify-icon icon="mdi:close"></iconify-icon> <span id="scannerToggleText">Tutup Pengembalian</span>';
+            btn.classList.add('btn-danger'); // Optional styling for active state if needed
+            startCamera();
+        } else {
+            section.style.display = 'none';
+            btnText.textContent = 'Mulai Pengembalian';
+            btn.innerHTML = '<iconify-icon icon="mdi:barcode-scan"></iconify-icon> <span id="scannerToggleText">Mulai Pengembalian</span>';
+            btn.classList.remove('btn-danger');
+            stopCamera();
+        }
+    }
+
+    function startCamera() {
+        if (html5QrcodeScanner) return;
+
+        html5QrcodeScanner = new Html5Qrcode("reader");
+        html5QrcodeScanner.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 150 } },
+            (decodedText) => {
+                const now = Date.now();
+                // Simple Debounce
+                if(window.lastScan && now - window.lastScan < 2000) return;
+                window.lastScan = now;
+                
+                processReturn(decodedText);
+            },
+            (error) => {}
+        ).catch(err => console.error("Error starting scanner", err));
+        
+        // Focus input
+        setTimeout(() => barcodeInput.focus(), 500);
+    }
+
+    function stopCamera() {
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.stop().then(() => {
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }).catch(err => console.error(err));
+        }
+    }
+
+    function processManualInput() {
+        const val = barcodeInput.value.trim();
+        if (val) {
+            processReturn(val);
+            barcodeInput.value = '';
+        }
+    }
 
     // Auto-focus input
     document.addEventListener('keydown', (e) => {
-      // Don't focus if we are already in an input
-      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'SELECT' || document.activeElement.tagName === 'TEXTAREA') {
-        return;
-      }
-      barcodeInput.focus();
-    });
-
-    barcodeInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        const val = barcodeInput.value.trim();
-        if (val) {
-          processReturn(val);
-          barcodeInput.value = '';
-        }
+      if (e.key === 'Enter' && document.activeElement === barcodeInput) {
+          processManualInput();
       }
     });
 
     async function processReturn(barcode) {
+      showStatus('Memproses...', 'info');
+
       try {
         const res = await fetch('api/process-return.php', {
           method: 'POST',
@@ -288,90 +300,103 @@ $recentReturns = $stmt->fetchAll();
         
         if (result.success) {
           handleSuccess(result.data);
+          showStatus('Berhasil: ' + result.data.book_title, 'success');
         } else {
           handleError(result.message);
+          showStatus('Gagal: ' + result.message, 'error');
         }
       } catch (e) {
         handleError('Koneksi terputus atau server error');
+        showStatus('Error: Koneksi terputus', 'error');
       }
+    }
+
+    function showStatus(msg, type) {
+        const el = document.getElementById('scanStatus');
+        if(el) {
+            el.textContent = msg;
+            el.style.display = 'block';
+            el.style.background = type === 'error' ? 'var(--danger-soft)' : (type === 'success' ? 'var(--success-soft)' : 'var(--info-soft)');
+            el.style.color = type === 'error' ? 'var(--danger)' : (type === 'success' ? 'var(--success)' : 'var(--info)');
+            
+            if(type === 'success') {
+                setTimeout(() => { el.style.display = 'none'; }, 3000);
+            }
+        }
     }
 
     function handleSuccess(data) {
-      document.getElementById('soundSuccess').play();
+      if(document.getElementById('soundSuccess')) document.getElementById('soundSuccess').play();
       
       sessionCount++;
       sessionCountEl.textContent = sessionCount;
+      if(sessionCountBadge) sessionCountBadge.textContent = sessionCount;
       
-      lastReturnCard.style.display = 'block';
-      document.getElementById('resBookTitle').textContent = data.book_title;
-      document.getElementById('resMemberName').textContent = data.member_name;
-      document.getElementById('resTime').textContent = new Date().toLocaleTimeString('id-ID');
+      // Update Right Column visibility
+      if (sessionCount === 1) {
+          emptyState.style.display = 'none';
+          sessionHistory.style.display = 'block';
+      }
       
-      const fineEl = document.getElementById('fineDisplay');
+      // Create Table Row
+      const row = document.createElement('tr');
+      row.className = 'fade-in-row'; // Access animations
+      row.style.animation = 'slideInRight 0.3s ease-out';
+      
+      // Fine badge logic
+      let statusHtml = '';
       if (data.fine_amount > 0) {
-        document.getElementById('soundWarning').play();
-        fineEl.innerHTML = `
-          <div class="fine-alert">
-            <iconify-icon icon="mdi:alert-circle"></iconify-icon>
-            TERLAMBAT ${data.late_days} HARI | DENDA: Rp ${data.fine_amount.toLocaleString('id-ID')}
-          </div>
-        `;
+          if(document.getElementById('soundWarning')) document.getElementById('soundWarning').play();
+          statusHtml = `
+            <div style="text-align: right;">
+                <div class="text-danger" style="font-weight: 800; font-size: 13px;">Rp ${data.fine_amount.toLocaleString('id-ID')}</div>
+                <div style="font-size: 10px; color: var(--danger); opacity: 0.8;">Terlambat ${data.late_days} Hari</div>
+            </div>
+          `;
       } else {
-        fineEl.innerHTML = '';
+          statusHtml = `
+            <div style="text-align: right;">
+                <div class="text-success" style="font-weight: 700; font-size: 12px;">
+                    <iconify-icon icon="mdi:check-circle"></iconify-icon> Tepat Waktu
+                </div>
+            </div>
+          `;
       }
 
-      // Add to list
-      const list = document.getElementById('recentReturnsList');
-      const row = document.createElement('tr');
-      row.style.animation = 'fadeIn 0.5s ease';
       row.innerHTML = `
-        <td style="font-weight: 700;">${data.book_title}</td>
-        <td>${data.member_name}</td>
-        <td>${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}</td>
-        <td>${data.fine_amount > 0 ? `<span style="color: var(--danger); font-weight: 700;">Rp ${data.fine_amount.toLocaleString('id-ID')}</span>` : `<span style="color: var(--success);">Nihil</span>`}</td>
+        <td>
+           <div style="font-weight: 700; color: var(--text); line-height: 1.3;">${data.book_title}</div>
+           <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">${new Date().toLocaleTimeString('id-ID')}</div>
+        </td>
+        <td>
+           <div style="font-size: 13px;">${data.member_name}</div>
+        </td>
+        <td>${statusHtml}</td>
       `;
-      list.insertBefore(row, list.firstChild);
+      
+      // Prepend to top
+      sessionList.insertBefore(row, sessionList.firstChild);
+
+      // Also add to the "Global" Recent History Table at the bottom
+      const globalList = document.getElementById('recentReturnsList');
+      if (globalList) {
+          const globalRow = document.createElement('tr');
+          globalRow.style.animation = 'fadeIn 0.5s ease';
+          globalRow.innerHTML = `
+            <td style="font-weight: 700;">${data.book_title}</td>
+            <td>${data.member_name}</td>
+            <td>${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}</td>
+            <td>${data.fine_amount > 0 ? `<span style="color: var(--danger); font-weight: 700;">Rp ${data.fine_amount.toLocaleString('id-ID')}</span>` : `<span style="color: var(--success);">Nihil</span>`}</td>
+          `;
+          globalList.insertBefore(globalRow, globalList.firstChild);
+          if(globalList.children.length > 10) globalList.removeChild(globalList.lastChild);
+      }
     }
 
     function handleError(msg) {
-      document.getElementById('soundError').play();
-      alert(msg);
-    }
-
-    function toggleCamera() {
-        // If mobile, redirect to specialized mobile return page
-        if (window.innerWidth <= 768) {
-            window.location.href = 'scan-return-mobile.php';
-            return;
-        }
-
-        const reader = document.getElementById('reader');
-        const btn = document.getElementById('btnToggleCamera');
-
-        if (!cameraActive) {
-            reader.style.display = 'block';
-            cameraActive = true;
-            btn.innerHTML = '<iconify-icon icon="mdi:camera-off"></iconify-icon> Matikan Kamera';
-            
-            html5QrcodeScanner = new Html5Qrcode("reader");
-            html5QrcodeScanner.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 150 } },
-                (decodedText) => {
-                    processReturn(decodedText);
-                    // Add cool-down
-                    html5QrcodeScanner.pause();
-                    setTimeout(() => html5QrcodeScanner.resume(), 2000);
-                },
-                (error) => {}
-            );
-        } else {
-            html5QrcodeScanner.stop().then(() => {
-                reader.style.display = 'none';
-                cameraActive = false;
-                btn.innerHTML = '<iconify-icon icon="mdi:camera"></iconify-icon> Gunakan Kamera';
-            });
-        }
+        if(document.getElementById('soundError')) document.getElementById('soundError').play();
+        // Option: could show a toast or alert
+        console.error(msg);
     }
   </script>
 </body>

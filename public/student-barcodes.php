@@ -494,7 +494,9 @@ $school = $stmt->fetch();
             z-index: 2;
         }
         
-        .school-logo {
+
+        
+        .id-card-school-logo {
             width: 48px;
             height: 48px;
             background: white;
@@ -507,7 +509,7 @@ $school = $stmt->fetch();
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .school-name {
+        .id-card-school-name {
             font-size: 16px;
             font-weight: 700;
             color: white;
@@ -610,10 +612,7 @@ $school = $stmt->fetch();
     <div class="app">
         <div class="topbar">
             <strong>Barcode Siswa</strong>
-            <a href="index.php" style="font-size: 13px; color: var(--accent); font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                <iconify-icon icon="mdi:arrow-left"></iconify-icon>
-                Kembali ke Dashboard
-            </a>
+
         </div>
 
         <div class="content">
@@ -695,10 +694,10 @@ $school = $stmt->fetch();
                     <!-- Student ID Mockup -->
                     <div class="id-card-mockup">
                         <div class="id-card-header">
-                            <div class="school-logo">
+                            <div class="id-card-school-logo">
                                 <iconify-icon icon="mdi:school"></iconify-icon>
                             </div>
-                            <div class="school-name"><?php echo htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN ONLINE'); ?></div>
+                            <div class="id-card-school-name"><?php echo htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN ONLINE'); ?></div>
                         </div>
                         
                         <div class="id-card-body">

@@ -61,6 +61,17 @@ try {
 }
 ?>
 <!-- Header -->
+<style>
+    /* Hide scrollbar for Chrome, Safari and Opera */
+    body::-webkit-scrollbar, html::-webkit-scrollbar {
+        display: none;
+    }
+    /* Hide scrollbar for IE, Edge and Firefox */
+    body, html {
+        -ms-overflow-style: none;  /* IE and Edge */
+        scrollbar-width: none;  /* Firefox */
+    }
+</style>
 <?php if ($specialTheme): ?>
     <script>window.isSpecialThemeActive = true;</script>
     <link rel="stylesheet" id="special-theme-css" href="/perpustakaan-online/public/themes/special/<?php echo htmlspecialchars($specialTheme); ?>.css">

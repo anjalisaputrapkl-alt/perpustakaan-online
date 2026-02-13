@@ -177,7 +177,8 @@ if ($action === 'delete' && isset($_GET['id'])) {
 
 // Update query to join with users and siswa to get photo
 $stmt = $pdo->prepare('
-    SELECT m.*, s.foto 
+    SELECT m.*, s.foto,
+    (SELECT COUNT(*) FROM borrows WHERE member_id = m.id AND returned_at IS NULL) as active_borrows
     FROM members m
     LEFT JOIN users u ON u.nisn = m.nisn AND u.school_id = m.school_id AND (u.role = "student" OR u.role = "teacher" OR u.role = "employee")
     LEFT JOIN siswa s ON s.id_siswa = u.id
@@ -551,7 +552,7 @@ $members = $stmt->fetchAll();
             z-index: 2;
         }
         
-        .school-logo {
+        .id-card-school-logo {
             width: 48px;
             height: 48px;
             background: white;
@@ -564,13 +565,13 @@ $members = $stmt->fetchAll();
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .school-logo img {
+        .id-card-school-logo img {
             width: 32px;
             height: 32px;
             object-fit: contain;
         }
         
-        .school-name {
+        .id-card-school-name {
             font-size: 16px;
             font-weight: 700;
             color: white;
@@ -759,70 +760,130 @@ $members = $stmt->fetchAll();
         </div>
 
         <div class="card">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
             <h2 style="margin: 0;">Daftar Anggota (<?= count($members) ?>)</h2>
-            <button class="btn btn-sm btn-secondary" onclick="printAllCards()">
-              <iconify-icon icon="mdi:card-multiple-outline" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
-              Cetak Semua Kartu
-            </button>
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <div class="search-box" style="position: relative;">
+                <iconify-icon icon="mdi:magnify" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b;"></iconify-icon>
+                <input type="text" id="memberSearch" placeholder="Cari nama, NISN..." style="padding: 10px 12px 10px 40px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 250px;">
+              </div>
+              <button class="btn btn-sm btn-secondary" onclick="printAllCards()">
+                <iconify-icon icon="mdi:card-multiple-outline" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                Cetak Semua Kartu
+              </button>
+            </div>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nama</th>
-                  <th>Email</th>
-                  <th>ID / NISN</th>
-                  <th>Role</th>
-                  <th>Status Akun</th>
-                  <th>Aksi</th>
+          
+          <div class="table-wrap" style="max-height: 600px; overflow-y: auto; overflow-x: auto; position: relative; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 800px;">
+              <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 10;">
+                <tr style="text-align: left;">
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600; font-size: 13px; width: 300px; min-width: 250px;">Anggota</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600; font-size: 13px; width: 120px; white-space: nowrap;">Role</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600; font-size: 13px; width: 120px; white-space: nowrap;">Pinjaman</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600; font-size: 13px; width: 150px; white-space: nowrap;">Status Akun</th>
+                  <th style="padding: 12px 16px; border-bottom: 2px solid #e2e8f0; color: #475569; font-weight: 600; font-size: 13px; text-align: right; width: 140px; white-space: nowrap;">Aksi</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="membersTableBody">
                 <?php foreach ($members as $m):
                   // Check if account exists
                   $checkUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND (role = "student" OR role = "teacher" OR role = "employee")');
                   $checkUserStmt->execute(['nisn' => $m['nisn']]);
                   $userExists = $checkUserStmt->fetch() ? true : false;
+                  
+                  // Photo
+                  $photoSrc = !empty($m['foto']) ? htmlspecialchars($m['foto']) : null;
+                  if ($photoSrc && strpos($photoSrc, 'http') !== 0) {
+                      // Fix relative paths
+                      $photoSrc = str_replace(['./', '../'], '', $photoSrc);
+                      if (file_exists(__DIR__ . '/' . $photoSrc)) {
+                          $photoSrc = $photoSrc; 
+                      } else {
+                          // Try uploads
+                           if (file_exists(__DIR__ . '/uploads/siswa/' . basename($photoSrc))) {
+                               $photoSrc = 'uploads/siswa/' . basename($photoSrc);
+                           } else {
+                               $photoSrc = null;
+                           }
+                      }
+                  }
+                  $initial = strtoupper(substr($m['name'], 0, 1));
+                  // Random-ish color based on name length
+                  $colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#f43f5e'];
+                  $bg = $colors[strlen($m['name']) % count($colors)];
+                  // Create data for modal with fixed photo path
+                  $modalData = $m;
+                  $modalData['foto'] = $photoSrc;
                   ?>
-                  <tr>
-                    <td><strong><?= htmlspecialchars($m['name']) ?></strong></td>
-                    <td><?= htmlspecialchars($m['email']) ?></td>
-                    <td><strong><?= htmlspecialchars($m['nisn']) ?></strong></td>
-                    <td>
-                      <span style="display: inline-block; background: rgba(59, 130, 246, 0.1); color: #1e40af; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500; text-transform: capitalize;">
+                  <tr class="member-row" style="transition: background 0.2s; border-bottom: 1px solid #f1f5f9;">
+                    <td style="padding: 16px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: <?= $bg ?>; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 16px;">
+                                <?php if($photoSrc): ?>
+                                    <img src="<?= $photoSrc ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                                <?php else: ?>
+                                    <?= $initial ?>
+                                <?php endif; ?>
+                            </div>
+                            <div style="overflow: hidden;">
+                                <div style="font-weight: 600; color: #0f172a; font-size: 14px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;" class="member-name" title="<?= htmlspecialchars($m['name']) ?>"><?= htmlspecialchars($m['name']) ?></div>
+                                <div style="font-size: 12px; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px;">
+                                    <span style="font-family: monospace; background: #f1f5f9; padding: 2px 4px; border-radius: 4px; color: #475569;"><?= htmlspecialchars($m['nisn']) ?></span>
+                                    • <span class="member-email" title="<?= htmlspecialchars($m['email']) ?>"><?= htmlspecialchars($m['email']) ?></span>
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                    <td style="padding: 16px; border-bottom: 1px solid #f1f5f9;">
+                      <span style="display: inline-block; background: rgba(59, 130, 246, 0.1); color: #1e40af; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; text-transform: capitalize;">
                         <?= htmlspecialchars($m['role'] ?? 'student') ?>
                       </span>
                     </td>
-                    <td>
+                    <td style="padding: 16px; border-bottom: 1px solid #f1f5f9;">
+                        <?php 
+                            $active = $m['active_borrows'] ?? 0;
+                            $max = $m['max_pinjam'] ?? 3;
+                            $ratio = $active / $max;
+                            $color = $ratio >= 1 ? '#ef4444' : ($ratio > 0.6 ? '#f59e0b' : '#10b981');
+                        ?>
+                        <div style="font-size: 13px; font-weight: 600; color: #334155; display: flex; align-items: center; gap: 6px;">
+                            <span style="color: <?= $color ?>"><?= $active ?></span> / <?= $max ?>
+                            <?php if($active > 0): ?>
+                                <span style="font-size: 10px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #64748b;">Aktif</span>
+                            <?php endif; ?>
+                        </div>
+                        <div style="width: 60px; height: 4px; background: #e2e8f0; border-radius: 2px; margin-top: 4px; overflow: hidden;">
+                            <div style="width: <?= min(100, ($active/$max)*100) ?>%; height: 100%; background: <?= $color ?>;"></div>
+                        </div>
+                    </td>
+                    <td style="padding: 16px; border-bottom: 1px solid #f1f5f9;">
                       <?php if ($userExists): ?>
-                        <span
-                          style="display: inline-block; background: rgba(16, 185, 129, 0.1); color: #065f46; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;"><iconify-icon
-                            icon="mdi:check-circle" style="vertical-align: middle; margin-right: 4px;"></iconify-icon> Akun
-                          Terbuat</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; color: #059669; font-size: 13px; font-weight: 500;">
+                            <iconify-icon icon="mdi:check-circle" style="color: #10b981;"></iconify-icon> Terdaftar
+                        </span>
                       <?php else: ?>
-                        <span
-                          style="display: inline-block; background: rgba(107, 114, 128, 0.1); color: #374151; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 500;"><iconify-icon
-                            icon="mdi:minus-circle" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
-                          Belum</span>
+                        <span style="display: inline-flex; align-items: center; gap: 4px; color: #94a3b8; font-size: 13px;">
+                            <iconify-icon icon="mdi:account-alert-outline"></iconify-icon> Belum Ada Akun
+                        </span>
                       <?php endif; ?>
                     </td>
-                    <td>
-                      <div class="actions">
-                        <button class="btn btn-sm btn-primary" onclick="showLibraryCard({
-                          name: '<?= addslashes($m['name']) ?>',
-                          nisn: '<?= addslashes($m['nisn']) ?>',
-                          foto: '<?= !empty($m['foto']) ? $m['foto'] : '' ?>'
-                        })">
-                          <iconify-icon icon="mdi:card-account-details-outline" style="vertical-align: middle;"></iconify-icon> Kartu Perpus
-                        </button>
-                        <a class="btn btn-sm btn-secondary"
-                          href="members.php?action=edit&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:pencil"
-                            style="vertical-align: middle;"></iconify-icon> Edit</a>
-                        <a class="btn btn-sm btn-danger"
+                    <td style="padding: 16px; border-bottom: 1px solid #f1f5f9; text-align: right;">
+                      <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                          <button onclick="showLibraryCard(<?= htmlspecialchars(json_encode($modalData)) ?>)" 
+                                  title="Lihat Kartu"
+                                  style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #3b82f6; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                            <iconify-icon icon="mdi:card-account-details-outline" style="font-size: 18px;"></iconify-icon>
+                          </button>
+                        <a href="members.php?action=edit&id=<?= $m['id'] ?>" title="Edit Anggota"
+                          style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #e2e8f0; background: white; color: #f97316; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+                          <iconify-icon icon="mdi:pencil" style="font-size: 18px;"></iconify-icon>
+                        </a>
+                        <a href="members.php?action=delete&id=<?= $m['id'] ?>" title="Hapus Anggota"
                           onclick="return confirm('Hapus anggota ini? Akun juga akan dihapus.')"
-                          href="members.php?action=delete&id=<?= $m['id'] ?>"><iconify-icon icon="mdi:trash-can"
-                            style="vertical-align: middle;"></iconify-icon> Hapus</a>
+                          style="width: 32px; height: 32px; border-radius: 8px; border: 1px solid #fee2e2; background: #fff1f2; color: #ef4444; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; text-decoration: none;">
+                          <iconify-icon icon="mdi:trash-can" style="font-size: 18px;"></iconify-icon>
+                        </a>
                       </div>
                     </td>
                   </tr>
@@ -899,14 +960,14 @@ $members = $stmt->fetchAll();
       <div class="library-card-wrapper">
         <div class="id-card-mockup" id="printableCard">
              <div class="id-card-header">
-                <div class="school-logo">
+                <div class="id-card-school-logo">
                     <?php if (!empty($school['logo'])): ?>
                         <img src="<?= htmlspecialchars($school['logo']) ?>" alt="Logo">
                     <?php else: ?>
                         <iconify-icon icon="mdi:school"></iconify-icon>
                     <?php endif; ?>
                 </div>
-                <div class="school-name"><?= htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN DIGITAL') ?></div>
+                <div class="id-card-school-name"><?= htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN DIGITAL') ?></div>
              </div>
              
              <div class="id-card-body">

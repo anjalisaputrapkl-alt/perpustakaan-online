@@ -494,10 +494,7 @@ if (!$school_id) {
     <div class="app">
         <div class="topbar">
             <strong>Barcode Buku</strong>
-            <a href="index.php" style="font-size: 13px; color: var(--accent); font-weight: 600; display: flex; align-items: center; gap: 4px;">
-                <iconify-icon icon="mdi:arrow-left"></iconify-icon>
-                Kembali ke Dashboard
-            </a>
+
         </div>
 
         <div class="content">

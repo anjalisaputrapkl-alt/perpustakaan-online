@@ -218,6 +218,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
               <p>Memproses...</p>
           </div>
 
+          <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
           <script>
             let html5QrcodeScanner = null;
             let currentScanMode = 'book';

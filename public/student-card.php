@@ -462,6 +462,17 @@ $barcodeValue = trim($member['nisn'] ?? $member['student_uuid'] ?? $member['id']
             }
         }
     </style>
+    <style>
+        /* Hide scrollbar for Chrome, Safari and Opera */
+        body::-webkit-scrollbar, html::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge and Firefox */
+        body, html {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
 </head>
 
 <body>
