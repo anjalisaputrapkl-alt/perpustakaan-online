@@ -20,7 +20,7 @@ if (!isset($_SESSION['user'])) {
 }
 
 $user = $_SESSION['user'];
-$pageTitle = $pageTitle ?? 'Dashboard Siswa';
+$pageTitle = $pageTitle ?? 'Dashboard Anggota';
 
 // Special Theme Check
 $specialTheme = null;
@@ -104,7 +104,7 @@ try {
                     $role = $user['role'] ?? 'student';
                     if ($role === 'teacher') echo 'Guru';
                     elseif ($role === 'employee') echo 'Karyawan';
-                    else echo 'Siswa';
+                    else echo 'Anggota';
                     ?>
                 </p>
             </div>

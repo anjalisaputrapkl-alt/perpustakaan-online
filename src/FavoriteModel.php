@@ -1,7 +1,7 @@
 <?php
 /**
  * Favorite Model
- * Menangani operasi buku favorit siswa
+ * Menangani operasi buku favorit anggota
  */
 
 class FavoriteModel
@@ -84,9 +84,9 @@ class FavoriteModel
     }
 
     /**
-     * Cek apakah buku sudah ada di favorit siswa
+     * Cek apakah buku sudah ada di favorit anggota
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @param int $bookId - ID buku
      * @return bool - true jika sudah favorit
      */
@@ -110,9 +110,9 @@ class FavoriteModel
     }
 
     /**
-     * Tambah buku ke favorit siswa
+     * Tambah buku ke favorit anggota
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @param int $bookId - ID buku
      * @param string $category - Kategori buku (optional)
      * @return bool - Berhasil atau tidak
@@ -152,9 +152,9 @@ class FavoriteModel
     }
 
     /**
-     * Ambil daftar buku favorit siswa
+     * Ambil daftar buku favorit anggota
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @param string $category - Filter kategori (optional)
      * @return array - Daftar favorit
      */
@@ -208,9 +208,9 @@ class FavoriteModel
     }
 
     /**
-     * Hapus buku dari favorit siswa
+     * Hapus buku dari favorit anggota
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @param int $favoriteId - ID favorit
      * @return bool - Berhasil atau tidak
      */
@@ -234,9 +234,9 @@ class FavoriteModel
     }
 
     /**
-     * Hitung total favorit siswa
+     * Hitung total favorit anggota
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @return int - Total favorit
      */
     public function countFavorites($studentId)

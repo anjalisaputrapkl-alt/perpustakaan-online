@@ -86,13 +86,18 @@ if ($activeKey) {
                 }
 
                 /* V6 Vibrant Sidebar (Dark/Primary color) */
-                html body .nav-sidebar, 
                 html body .sidebar,
-                html body #navSidebar {
+                html body #navSidebar:not(.nav-sidebar) {
                     background-color: var(--sidebar-bg) !important;
                     background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), var(--theme-pattern) !important;
                     background-blend-mode: overlay;
                     box-shadow: 4px 0 15px rgba(0,0,0,0.1) !important;
+                }
+
+                /* Ensure Admin Sidebar stays fixed even when a special theme is active */
+                html body .nav-sidebar {
+                    background: linear-gradient(135deg, #0b3d61 0%, #062d4a 100%) !important;
+                    background-image: linear-gradient(135deg, #0b3d61 0%, #062d4a 100%) !important;
                 }
 
                 /* V6 Vibrant Header/Topbar */

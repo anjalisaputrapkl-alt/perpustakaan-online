@@ -54,7 +54,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: members.php');
     exit;
   } catch (Exception $e) {
-    $_SESSION['error'] = 'Gagal menambahkan murid: ' . $e->getMessage();
+    $_SESSION['error'] = 'Gagal menambahkan anggota: ' . $e->getMessage();
     header('Location: members.php');
     exit;
   }
@@ -163,11 +163,11 @@ if ($action === 'delete' && isset($_GET['id'])) {
       $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
     }
 
-    $_SESSION['success'] = 'Murid dan akun siswa berhasil dihapus';
+    $_SESSION['success'] = 'Anggota dan akun berhasil dihapus';
     header('Location: members.php');
     exit;
   } catch (Exception $e) {
-    $_SESSION['error'] = 'Gagal menghapus murid: ' . $e->getMessage();
+    $_SESSION['error'] = 'Gagal menghapus anggota: ' . $e->getMessage();
     header('Location: members.php');
     exit;
   }
@@ -719,7 +719,7 @@ $members = $stmt->fetchAll();
             <div class="form-group">
               <label>Role Anggota</label>
               <select name="role" id="role-select" required onchange="updateMemberLabels()">
-                <option value="student" <?= ($action === 'edit' && isset($member['role']) && $member['role'] === 'student') ? 'selected' : '' ?>>Siswa</option>
+                <option value="student" <?= ($action === 'edit' && isset($member['role']) && $member['role'] === 'student') ? 'selected' : '' ?>>Anggota</option>
                 <option value="teacher" <?= ($action === 'edit' && isset($member['role']) && $member['role'] === 'teacher') ? 'selected' : '' ?>>Guru</option>
                 <option value="employee" <?= ($action === 'edit' && isset($member['role']) && $member['role'] === 'employee') ? 'selected' : '' ?>>Karyawan</option>
               </select>
@@ -735,7 +735,7 @@ $members = $stmt->fetchAll();
                 value="<?= $action === 'edit' && isset($member['email']) ? htmlspecialchars($member['email']) : '' ?>">
             </div>
             <div class="form-group">
-              <label id="id-label">NISN Siswa</label>
+              <label id="id-label">NISN Anggota</label>
               <input type="text" name="nisn" id="id-input" required placeholder="Nomor Induk Siswa Nasional" autocomplete="off"
                 value="<?= $action === 'edit' && isset($member['nisn']) ? htmlspecialchars($member['nisn']) : '' ?>">
             </div>
@@ -750,7 +750,7 @@ $members = $stmt->fetchAll();
             <div class="form-group">
               <label>Password</label>
               <input type="password" name="password" autocomplete="new-password" <?= $action === 'edit' ? '' : 'required' ?>
-                placeholder="<?= $action === 'edit' ? 'Kosongkan jika tidak ingin mengubah password' : 'Buat password untuk siswa' ?>"
+                placeholder="<?= $action === 'edit' ? 'Kosongkan jika tidak ingin mengubah password' : 'Buat password untuk anggota' ?>"
                 value="">
             </div>
             <button class="btn" type="submit">
@@ -911,11 +911,11 @@ $members = $stmt->fetchAll();
           <h2>Pertanyaan Umum</h2>
           <div class="faq-item">
             <div class="faq-question">Bagaimana cara menambah anggota baru? <span>+</span></div>
-            <div class="faq-answer">Pilih Role (Siswa/Guru/Karyawan), isi nama lengkap, email, dan ID (NISN/NIP/NUPTK), lalu klik "Tambah Anggota". Akun akan otomatis terbuat dengan ID tersebut sebagai username.</div>
+            <div class="faq-answer">Pilih Role (Anggota/Guru/Karyawan), isi nama lengkap, email, dan ID (NISN/NIP/NUPTK), lalu klik "Tambah Anggota". Akun akan otomatis terbuat dengan ID tersebut sebagai username.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa yang dimaksud dengan ID Anggota? <span>+</span></div>
-            <div class="faq-answer"><strong>ID Anggota</strong> bisa berupa NISN untuk Siswa, NUPTK untuk Guru, atau NIP untuk Karyawan. ID ini digunakan sebagai username login.</div>
+            <div class="faq-answer"><strong>ID Anggota</strong> bisa berupa NISN untuk Anggota, NUPTK untuk Guru, atau NIP untuk Karyawan. ID ini digunakan sebagai username login.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apa itu "Status Akun"? <span>+</span></div>
@@ -928,19 +928,19 @@ $members = $stmt->fetchAll();
             </div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Bisakah saya mengedit data murid? <span>+</span></div>
-            <div class="faq-answer">Ya, klik "Edit" pada baris murid yang ingin diubah. Anda bisa mengubah nama, email,
-              no murid, dan NISN. Perubahan NISN juga akan mengubah kredensial login siswa.</div>
+            <div class="faq-question">Bisakah saya mengedit data anggota? <span>+</span></div>
+            <div class="faq-answer">Ya, klik "Edit" pada baris anggota yang ingin diubah. Anda bisa mengubah nama, email,
+              no anggota, dan NISN. Perubahan NISN juga akan mengubah kredensial login anggota.</div>
           </div>
           <div class="faq-item">
-            <div class="faq-question">Apa yang terjadi jika saya menghapus murid? <span>+</span></div>
-            <div class="faq-answer">Murid dan akun siswa akan dihapus dari sistem. Siswa tidak bisa login lagi. Pastikan
-              murid tidak memiliki peminjaman aktif sebelum menghapus.</div>
+            <div class="faq-question">Apa yang terjadi jika saya menghapus anggota? <span>+</span></div>
+            <div class="faq-answer">Anggota dan akun akan dihapus dari sistem. Anggota tidak bisa login lagi. Pastikan
+              anggota tidak memiliki peminjaman aktif sebelum menghapus.</div>
           </div>
           <div class="faq-item">
             <div class="faq-question">Apakah NISN harus unik? <span>+</span></div>
-            <div class="faq-answer">Ya, NISN harus unik karena digunakan sebagai identitas login siswa. Setiap siswa
-              hanya memiliki satu NISN yang valid secara nasional.</div>
+            <div class="faq-answer">Ya, NISN harus unik karena digunakan sebagai identitas login anggota. Setiap anggota
+              hanya memiliki satu NISN yang valid.</div>
           </div>
         </div>
 
@@ -974,7 +974,7 @@ $members = $stmt->fetchAll();
                  <img id="modal-photo" src="../assets/images/default-avatar.svg" alt="Foto" class="id-card-photo" style="display:block;">
                  
                  <div class="id-card-details">
-                     <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Student Name</p>
+                     <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Nama Anggota</p>
                      <h3 id="modal-name">-</h3>
                      <p id="modal-nisn">NISN: -</p>
                  </div>
@@ -1237,8 +1237,8 @@ $members = $stmt->fetchAll();
         idInput.placeholder = 'Nomor Induk Pegawai';
         defaultLimit = schoolData.max_books_employee || 5;
       } else {
-        idLabel.textContent = 'NISN Siswa';
-        idInput.placeholder = 'Nomor Induk Siswa Nasional';
+        idLabel.textContent = 'NISN Anggota';
+        idInput.placeholder = 'Nomor Induk Anggota';
         defaultLimit = schoolData.max_books_student || 3;
       }
 

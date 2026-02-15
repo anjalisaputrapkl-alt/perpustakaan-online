@@ -1,7 +1,7 @@
 <?php
 /**
  * Student Dashboard Sidebar
- * File terpisah untuk navigasi sidebar siswa
+ * File terpisah untuk navigasi sidebar anggota
  * Include: <?php include 'partials/student-sidebar.php'; ?>
  */
 

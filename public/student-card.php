@@ -38,8 +38,8 @@ if ($user && !empty($user['id'])) {
             if ($dbData) {
                 $member = $dbData;
             } else {
-                // Database returned no rows - use session as fallback (user exists but no siswa record yet)
-                error_log("No siswa record found for user ID: " . $user['id']);
+                // Database returned no rows - use session as fallback (user exists but no anggota record yet)
+                error_log("No anggota record found for user ID: " . $user['id']);
                 $member = $user;
             }
         } catch (Exception $e) {
@@ -70,7 +70,7 @@ if (!$member && $isPreviewMode && isset($pdo)) {
             $member = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($member) {
                 // Ensure session user has minimal fields
-                $_SESSION['user'] = ['id' => $member['id'], 'school_id' => $member['school_id'] ?? null, 'name' => $member['name'], 'nisn' => $member['nisn'] ?? null];
+                $_SESSION['user'] = ['id' => $member['id'], 'school_id' => $member['school_id'] ?? null, 'name' => $member['name'], 'nisn' => $member['nisn'] ?? null]; // ID Anggota
             }
         }
     } catch (Exception $e) {
@@ -522,7 +522,7 @@ $barcodeValue = trim($member['nisn'] ?? $member['student_uuid'] ?? $member['id']
             </div>
 
             <div class="card-footer-strip">
-                Berlaku selama menjadi siswa aktif di sekolah ini.
+                Berlaku selama menjadi anggota aktif di sekolah ini.
             </div>
         </div>
 

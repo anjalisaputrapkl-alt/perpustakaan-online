@@ -104,8 +104,7 @@ function _is_active_sidebar($path, $current)
             top: 0;
             height: 100vh;
             width: 240px;
-            background: var(--accent); /* Fallback to theme primary */
-            background-color: var(--bg); /* Use system bg variable */
+            background: linear-gradient(135deg, #0b3d61 0%, #062d4a 100%) !important; /* Fixed Admin Background */
             color: white;
             padding: 24px 0;
             z-index: 1002;
@@ -362,7 +361,7 @@ function _is_active_sidebar($path, $current)
                 <span class="nav-sidebar-menu-icon">
                     <iconify-icon icon="mdi:qrcode"></iconify-icon>
                 </span>
-                <span>Barcode Siswa</span>
+                <span>Barcode Anggota</span>
             </a>
         </li>
         <li>

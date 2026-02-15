@@ -17,7 +17,7 @@ $school = $stmt->fetch();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Barcode Siswa - Perpustakaan Online</title>
+    <title>Barcode Anggota - Perpustakaan Online</title>
     <script src="../assets/js/theme-loader.js"></script>
     <script src="../assets/js/theme.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -611,7 +611,7 @@ $school = $stmt->fetch();
 
     <div class="app">
         <div class="topbar">
-            <strong>Barcode Siswa</strong>
+            <strong>Barcode Anggota</strong>
 
         </div>
 
@@ -619,7 +619,7 @@ $school = $stmt->fetch();
             <div class="section-card">
                 <div class="search-title">
                     <iconify-icon icon="mdi:qrcode-plus" style="color: var(--accent); font-size: 24px;"></iconify-icon>
-                    Pusat Barcode Siswa
+                    Pusat Barcode Anggota
                 </div>
                 <p class="search-description">
                     Kelola barcode akses untuk para anggota. Siap membantu mencetak label barcode.<!-- updated --><br>
@@ -631,7 +631,7 @@ $school = $stmt->fetch();
                         type="text" 
                         id="searchInput" 
                         class="search-input"
-                        placeholder="Ketik nama atau NISN untuk mencari siswa..."
+                        placeholder="Ketik nama atau NISN untuk mencari anggota..."
                         autocomplete="off"
                     >
                 </div>
@@ -671,7 +671,7 @@ $school = $stmt->fetch();
 
             <!-- Bulk Action Bar -->
             <div id="bulkActionBar" class="bulk-action-bar">
-                <span class="bulk-info-text"><span id="selectedCount">0</span> siswa dipilih</span>
+                <span class="bulk-info-text"><span id="selectedCount">0</span> anggota dipilih</span>
                 <button class="btn-bulk-generate" onclick="generateBulk()">
                     <iconify-icon icon="mdi:qrcode-plus"></iconify-icon>
                     Generate Barcode (<span id="btnSelectedCount">0</span>)
@@ -703,7 +703,7 @@ $school = $stmt->fetch();
                         <div class="id-card-body">
                             <img id="modalPhoto" src="../assets/images/default-avatar.svg" alt="Foto" class="id-card-photo" style="display:block; object-fit: cover;">
                             <div class="id-card-details">
-                                <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Student Name</p>
+                                <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Nama Anggota</p>
                                 <h3 id="modalName">-</h3>
                                 <p id="modalNISN">NISN: -</p>
                             </div>
@@ -836,11 +836,11 @@ $school = $stmt->fetch();
                 if (!json.success) throw new Error(json.message || 'Failed to fetch students');
                 
                 if (json.count === 0) {
-                    alert('Tidak ada siswa untuk di-generate.');
+                    alert('Tidak ada anggota untuk di-generate.');
                     return;
                 }
                 
-                if (confirm(`Generate barcode untuk ${json.count} siswa? Halaman mungkin akan sedikit lambat.`)) {
+                if (confirm(`Generate barcode untuk ${json.count} anggota? Halaman mungkin akan sedikit lambat.`)) {
                     btn.innerHTML = '<iconify-icon icon="mdi:loading" style="animation: spin 1s linear infinite;"></iconify-icon> Rendering...';
                     
                     // Display directly since student generation is client-side
@@ -881,7 +881,7 @@ $school = $stmt->fetch();
             
             // Handle bulk results
             if (Array.isArray(data)) {
-                modalTitle.textContent = `Preview Barcode (${data.length} Siswa)`;
+                modalTitle.textContent = `Preview Barcode (${data.length} Anggota)`;
                 modalBody.style.display = 'none';
                 bulkBody.style.display = 'grid';
                 
@@ -1054,7 +1054,7 @@ $school = $stmt->fetch();
             printWindow.document.write(`
                 <html>
                 <head>
-                    <title>Cetak Barcode Siswa</title>
+                    <title>Cetak Barcode Anggota</title>
                     <style>
                         body { margin: 20px; font-family: sans-serif; }
                         .barcode-item { 

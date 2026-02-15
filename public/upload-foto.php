@@ -7,11 +7,11 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
 }
 
 $pdo = require __DIR__ . '/../src/db.php';
-$siswaId = (int) $_SESSION['user']['id'];  // Use user ID, not school_id
+$anggotaId = (int) $_SESSION['user']['id'];  // ID Anggota
 
 // Get current photo
 $stmt = $pdo->prepare("SELECT foto FROM siswa WHERE id_siswa = ?");
-$stmt->execute([$siswaId]);
+$stmt->execute([$anggotaId]);
 $result = $stmt->fetch(PDO::FETCH_ASSOC);
 $currentFoto = $result['foto'] ?? '';
 
@@ -19,7 +19,7 @@ $message = '';
 $errorMessage = '';
 
 // Create upload directory if not exists
-$uploadDir = __DIR__ . '/uploads/siswa';
+$uploadDir = __DIR__ . '/uploads/anggota';
 if (!is_dir($uploadDir)) {
     @mkdir($uploadDir, 0755, true);
 }
@@ -43,13 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
     } else {
         // Generate filename
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $newFilename = 'siswa_' . $siswaId . '_' . time() . '.' . $ext;
+        $newFilename = 'anggota_' . $anggotaId . '_' . time() . '.' . $ext;
         $uploadPath = $uploadDir . '/' . $newFilename;
 
         // Upload file
         if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
             // Construct public URL (Relative path)
-            $photoUrl = 'uploads/siswa/' . $newFilename;
+            $photoUrl = 'uploads/anggota/' . $newFilename;
 
             // Delete old photo if exists
             if (!empty($currentFoto)) {
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
             // Update database
             try {
                 $updateStmt = $pdo->prepare("UPDATE siswa SET foto=?, updated_at=NOW() WHERE id_siswa=?");
-                $updateStmt->execute([$photoUrl, $siswaId]);
+                $updateStmt->execute([$photoUrl, $anggotaId]);
                 $message = "Foto berhasil diperbarui!";
                 
                 // Update session to keep it in sync with database
@@ -71,7 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 }
 
                 // Refresh current foto
-                $stmt->execute([$siswaId]);
+                $stmt->execute([$anggotaId]);
                 $result = $stmt->fetch(PDO::FETCH_ASSOC);
                 $currentFoto = $result['foto'] ?? '';
             } catch (Exception $e) {

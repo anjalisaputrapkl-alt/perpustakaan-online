@@ -1,7 +1,7 @@
 <?php
 /**
  * Notifications Model
- * Menangani semua operasi notifikasi siswa
+ * Menangani semua operasi notifikasi anggota
  */
 
 class NotificationsModel {
@@ -12,9 +12,9 @@ class NotificationsModel {
     }
 
     /**
-     * Ambil semua notifikasi siswa
+     * Ambil semua notifikasi anggota
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @param string $sort - Opsi sorting (latest, oldest, unread)
      * @return array - Daftar notifikasi
      */
@@ -63,7 +63,7 @@ class NotificationsModel {
      * Ambil notifikasi detail berdasarkan ID
      * 
      * @param int $notificationId - ID notifikasi
-     * @param int $studentId - ID siswa (untuk verifikasi kepemilikan)
+     * @param int $studentId - ID anggota (untuk verifikasi kepemilikan)
      * @return array - Detail notifikasi
      */
     public function getNotificationDetail($notificationId, $studentId) {
@@ -102,7 +102,7 @@ class NotificationsModel {
      * Update status baca notifikasi
      * 
      * @param int $notificationId - ID notifikasi
-     * @param int $studentId - ID siswa (untuk verifikasi)
+     * @param int $studentId - ID anggota (untuk verifikasi)
      * @param int $status - Status baca (0 atau 1)
      * @return bool - Berhasil atau tidak
      */
@@ -128,7 +128,7 @@ class NotificationsModel {
     /**
      * Tandai semua notifikasi sebagai dibaca
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @return bool - Berhasil atau tidak
      */
     public function markAllAsRead($studentId) {
@@ -153,7 +153,7 @@ class NotificationsModel {
     /**
      * Hitung notifikasi belum dibaca
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @return int - Jumlah notifikasi belum dibaca
      */
     public function countUnread($studentId) {
@@ -179,7 +179,7 @@ class NotificationsModel {
     /**
      * Hitung statistik notifikasi
      * 
-     * @param int $studentId - ID siswa
+     * @param int $studentId - ID anggota
      * @return array - Statistik notifikasi
      */
     public function getStatistics($studentId) {
@@ -217,7 +217,7 @@ class NotificationsModel {
      * Hapus notifikasi berdasarkan ID
      * 
      * @param int $notificationId - ID notifikasi
-     * @param int $studentId - ID siswa (untuk verifikasi)
+     * @param int $studentId - ID anggota (untuk verifikasi)
      * @return bool - Berhasil atau tidak
      */
     public function deleteNotification($notificationId, $studentId) {

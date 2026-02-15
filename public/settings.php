@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $theme_name = 'light';
             }
             $themeModel->saveSchoolTheme($sid, $theme_name);
-            $theme_success = 'Tema sekolah berhasil disimpan. Semua siswa akan menggunakan tema ini.';
+            $theme_success = 'Tema sekolah berhasil disimpan. Semua anggota akan menggunakan tema ini.';
         } catch (Exception $e) {
             $theme_error = 'Gagal menyimpan tema: ' . $e->getMessage();
         }
@@ -529,7 +529,7 @@ if (!$school) {
                                 <label>Maksimum Buku Disimpan (Berdasarkan Role)</label>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 5px;">
                                     <div>
-                                        <label style="font-size: 11px; color: var(--muted);">Siswa</label>
+                                        <label style="font-size: 11px; color: var(--muted);">Anggota</label>
                                         <div style="display: flex; align-items: center; gap: 5px;">
                                             <input type="number" name="max_books_student" class="form-control" value="<?= htmlspecialchars($school['max_books_student'] ?? 3) ?>" min="1" max="50">
                                             <span style="font-size: 12px;">Buku</span>
@@ -591,7 +591,7 @@ if (!$school) {
                         <h2 class="card-title">
                             <iconify-icon icon="mdi:palette-swatch-outline"></iconify-icon> Kustomisasi Tema
                         </h2>
-                        <p class="card-subtitle">Pilih tema global yang akan diterapkan ke seluruh siswa di sekolah ini.</p>
+                        <p class="card-subtitle">Pilih tema global yang akan diterapkan ke seluruh anggota di sekolah ini.</p>
 
                         <?php if (!empty($theme_success)): ?>
                             <div class="alert alert-success">

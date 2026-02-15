@@ -4,7 +4,7 @@
  * TrialLimitsManager.php
  * 
  * Enforcement dari hard limits untuk trial schools.
- * Prevent sekolah trial exceed kuota buku, siswa, transaksi.
+ * Prevent sekolah trial exceed kuota buku, anggota, transaksi.
  */
 
 class TrialLimitsManager
@@ -14,7 +14,7 @@ class TrialLimitsManager
 
     // Hard limits untuk trial
     const TRIAL_MAX_BOOKS = 50;
-    const TRIAL_MAX_STUDENTS = 100;
+    const TRIAL_MAX_STUDENTS = 100; // Kuota Anggota
     const TRIAL_MAX_BORROWS_MONTHLY = 200;
 
     public function __construct($pdo, $multiTenantManager)
@@ -45,7 +45,7 @@ class TrialLimitsManager
     }
 
     /**
-     * Check sebelum menambah siswa
+     * Check sebelum menambah anggota
      */
     public function checkBeforeAddStudent($school_id)
     {
@@ -56,8 +56,8 @@ class TrialLimitsManager
         $count = $this->getStudentCount($school_id);
         if ($count >= self::TRIAL_MAX_STUDENTS) {
             throw new TrialLimitException(
-                "Sekolah trial terbatas maksimal " . self::TRIAL_MAX_STUDENTS . " siswa. "
-                . "Sudah ada " . $count . " siswa."
+                "Sekolah trial terbatas maksimal " . self::TRIAL_MAX_STUDENTS . " anggota. "
+                . "Sudah ada " . $count . " anggota."
             );
         }
 
@@ -130,7 +130,7 @@ class TrialLimitsManager
     }
 
     /**
-     * Get current student count
+     * Get current anggota count
      */
     public function getStudentCount($school_id)
     {
@@ -143,7 +143,7 @@ class TrialLimitsManager
     }
 
     /**
-     * Get student count with capacity info
+     * Get anggota count with capacity info
      */
     public function getStudentCountWithCapacity($school_id)
     {
@@ -230,7 +230,7 @@ class TrialLimitsManager
         if ($students['is_trial'] && $students['percentage'] > 80) {
             $warnings[] = [
                 'type' => 'students',
-                'message' => "Kapasitas siswa " . $students['percentage'] . "% ({$students['current']}/{$students['max']})",
+                'message' => "Kapasitas anggota " . $students['percentage'] . "% ({$students['current']}/{$students['max']})",
                 'severity' => 'warning'
             ];
         }

@@ -39,7 +39,7 @@ try {
     $totalBooks = 0;
 }
 
-// 2. Jumlah buku yang sedang dipinjam siswa ini
+// 2. Jumlah buku yang sedang dipinjam anggota ini
 try {
     $borrowCountStmt = $pdo->prepare(
         'SELECT COUNT(*) as total FROM borrows 
@@ -79,7 +79,7 @@ try {
 }
 // ===================== END STATISTIK DASHBOARD =====================
 
-// ===================== QUERY PEMINJAMAN SISWA =====================
+// ===================== QUERY PEMINJAMAN ANGGOTA =====================
 // Update overdue status
 $pdo->prepare(
     'UPDATE borrows SET status = "overdue"
@@ -89,7 +89,7 @@ $pdo->prepare(
      AND due_at < NOW()'
 )->execute(['school_id' => $school_id, 'member_id' => $member_id]);
 
-// Get all borrowing records untuk siswa ini
+// Get all borrowing records untuk anggota ini
 $borrowStmt = $pdo->prepare(
     'SELECT b.id, b.borrowed_at, b.due_at, b.returned_at, b.status, 
             bk.id as book_id, bk.title, bk.author
@@ -106,7 +106,7 @@ $my_borrows = $borrowStmt->fetchAll();
 $active_borrows = count(array_filter($my_borrows, fn($b) => $b['status'] !== 'returned'));
 $overdue_count = count(array_filter($my_borrows, fn($b) => $b['status'] === 'overdue'));
 $returned_count = count(array_filter($my_borrows, fn($b) => $b['status'] === 'returned'));
-// ===================== END QUERY PEMINJAMAN SISWA =====================
+// ===================== END QUERY PEMINJAMAN ANGGOTA =====================
 
 // Get filter parameters
 $search = $_GET['search'] ?? '';
@@ -175,7 +175,7 @@ sort($categories);
 
 
 
-// Daftar semua buku sekolah (untuk ditampilkan ketika siswa klik 'Total Buku')
+// Daftar semua buku sekolah (untuk ditampilkan ketika anggota klik 'Total Buku')
 try {
     $booksAvailStmt = $pdo->prepare('SELECT bk.*, 
                                             curr_b.id as current_borrow_id, curr_b.due_at as borrower_due_at,
@@ -204,7 +204,7 @@ try {
 
 // Set dynamic page title
 $userRole = $_SESSION['user']['role'] ?? 'student';
-$roleLabel = 'Siswa';
+$roleLabel = 'Anggota';
 if ($userRole === 'teacher') $roleLabel = 'Guru';
 elseif ($userRole === 'employee') $roleLabel = 'Karyawan';
 
@@ -365,7 +365,7 @@ $pageTitle = 'Dashboard ' . $roleLabel;
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Global Student Header -->
+    <!-- Global Anggota Header -->
     <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->

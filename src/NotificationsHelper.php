@@ -22,7 +22,7 @@ class NotificationsHelper {
      * Buat notifikasi tunggal
      * 
      * @param int $schoolId ID sekolah
-     * @param int $studentId ID siswa
+     * @param int $studentId ID anggota
      * @param string $type Tipe notifikasi (borrow, return_request, return_confirm, late_warning, info, new_book)
      * @param string $title Judul notifikasi
      * @param string $message Isi pesan notifikasi
@@ -57,11 +57,11 @@ class NotificationsHelper {
     }
 
     /**
-     * Helper internal untuk kirim email ke siswa berdasarkan member_id
+     * Helper internal untuk kirim email ke anggota berdasarkan member_id
      */
     private function sendEmailToStudent($studentId, $title, $message) {
         try {
-            // Ambil email siswa dari tabel users (karena studentId adalah user_id)
+            // Ambil email anggota dari tabel users (karena studentId adalah user_id)
             $stmt = $this->pdo->prepare('SELECT email FROM users WHERE id = :id LIMIT 1');
             $stmt->execute([':id' => $studentId]);
             $student = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -78,10 +78,10 @@ class NotificationsHelper {
     }
 
     /**
-     * Broadcast notifikasi ke multiple siswa
+     * Broadcast notifikasi ke multiple anggota
      * 
      * @param int $schoolId ID sekolah
-     * @param array $studentIds Array ID siswa
+     * @param array $studentIds Array ID anggota
      * @param string $type Tipe notifikasi
      * @param string $title Judul notifikasi
      * @param string $message Isi pesan notifikasi
@@ -112,7 +112,7 @@ class NotificationsHelper {
      * Get notifikasi berdasarkan berbagai filter
      * 
      * @param int $schoolId ID sekolah
-     * @param int $studentId ID siswa
+     * @param int $studentId ID anggota
      * @param string $type Optional: filter by type
      * @param int $limit Default 10
      * @param int $offset Default 0
@@ -154,7 +154,7 @@ class NotificationsHelper {
      * Get statistik notifikasi
      * 
      * @param int $schoolId ID sekolah
-     * @param int $studentId ID siswa
+     * @param int $studentId ID anggota
      * @return array Array dengan key: total, unread, borrow, return_request, return_confirm, late_warning, info, new_book
      */
     public function getStatistics($schoolId, $studentId) {
@@ -207,7 +207,7 @@ class NotificationsHelper {
      * 
      * @param int $schoolId ID sekolah
      * @param int $notificationId ID notifikasi
-     * @param int $studentId ID siswa (untuk security check)
+     * @param int $studentId ID anggota (untuk security check)
      * @return bool Success status
      */
     public function markAsRead($schoolId, $notificationId, $studentId) {
@@ -233,7 +233,7 @@ class NotificationsHelper {
      * Mark semua notifikasi sebagai dibaca
      * 
      * @param int $schoolId ID sekolah
-     * @param int $studentId ID siswa
+     * @param int $studentId ID anggota
      * @return bool Success status
      */
     public function markAllAsRead($schoolId, $studentId) {
@@ -278,10 +278,10 @@ class NotificationsHelper {
     }
 
     /**
-     * Check dan generate late_warning notifikasi untuk siswa tertentu
+     * Check dan generate late_warning notifikasi untuk anggota tertentu
      * 
      * @param int $schoolId ID sekolah
-     * @param int $studentId ID siswa
+     * @param int $studentId ID anggota
      * @return int Jumlah notifikasi warning yang dibuat
      */
     public function checkAndCreateLateWarnings($schoolId, $studentId = null) {

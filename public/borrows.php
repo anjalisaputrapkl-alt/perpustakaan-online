@@ -684,7 +684,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
           <div class="card">
             <h2>Form Peminjaman Menunggu Konfirmasi</h2>
             <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">
-              Data peminjaman dari siswa yang menunggu konfirmasi admin
+              Data peminjaman dari anggota yang menunggu konfirmasi admin
             </p>
 
             <?php $pendingConfirm = array_filter($borrows, fn($b) => $b['status'] === 'pending_confirmation'); ?>
@@ -725,7 +725,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                     <div class="pending-borrow-header-grid">
                       <div>
                         <div class="pending-label">
-                          <iconify-icon icon="mdi:account" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Nama Siswa
+                          <iconify-icon icon="mdi:account" style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Nama Anggota
                         </div>
                         <div class="pending-value">
                           <?= htmlspecialchars($studentData['member_name']) ?>
@@ -860,7 +860,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                     <tr>
                       <th class="table-no">No</th>
                       <th>Nama Buku</th>
-                      <th>Nama Siswa</th>
+                      <th>Nama Anggota</th>
                       <th>Tanggal Pinjam</th>
                       <th>Jatuh Tempo</th>
                       <th>Status</th>
@@ -912,7 +912,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                     <tr>
                       <th class="table-no">No</th>
                       <th>Nama Buku</th>
-                      <th>Nama Siswa</th>
+                      <th>Nama Anggota</th>
                       <th>Tanggal Pinjam</th>
                       <th>Jatuh Tempo</th>
                       <th>Status</th>
@@ -988,7 +988,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                     <tr>
                       <th class="table-no">No</th>
                       <th>Nama Buku</th>
-                      <th>Nama Siswa</th>
+                      <th>Nama Anggota</th>
                       <th>Tanggal Pinjam</th>
                       <th>Tanggal Kembali</th>
                       <th>Denda</th>
@@ -1066,7 +1066,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
     }
 
     function approveAllBorrow(borrowIds) {
-      if (!confirm('Terima SEMUA peminjaman siswa ini?')) {
+      if (!confirm('Terima SEMUA peminjaman anggota ini?')) {
         return;
       }
 
@@ -1146,7 +1146,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
         return;
       }
 
-      if (!confirm(`Terima SEMUA peminjaman siswa ini dengan tenggat ${dueDays} hari?`)) {
+      if (!confirm(`Terima SEMUA peminjaman anggota ini dengan tenggat ${dueDays} hari?`)) {
         console.log('[APPROVE] User cancelled');
         return;
       }
@@ -1236,7 +1236,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
         return;
       }
 
-      if (!confirm(`Tolak SEMUA ${ids.length} peminjaman siswa ini?`)) {
+      if (!confirm(`Tolak SEMUA ${ids.length} peminjaman anggota ini?`)) {
         console.log('[REJECT] User cancelled');
         return;
       }
@@ -1319,7 +1319,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            alert(`✓ Tenggat waktu diperpanjang!\n\nBuku: ${data.book_title}\nSiswa: ${data.member_name}\nTenggat Baru: ${data.new_due_date}`);
+            alert(`✓ Tenggat waktu diperpanjang!\n\nBuku: ${data.book_title}\nAnggota: ${data.member_name}\nTenggat Baru: ${data.new_due_date}`);
             location.reload();
           } else {
             alert('❌ Gagal memperpanjang tenggat:\n' + data.message);

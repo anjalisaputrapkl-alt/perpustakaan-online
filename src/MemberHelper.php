@@ -3,7 +3,7 @@
  * MemberHelper - Handle member lookup and auto-creation
  * 
  * Menghandle koneksi antara users dan members table
- * Jika siswa login tanpa member record, otomatis buat member
+ * Jika anggota login tanpa member record, otomatis buat member
  */
 
 class MemberHelper

@@ -70,14 +70,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto']) && isset($_P
         }
 
         // Create upload directory if not exists
-        $upload_dir = __DIR__ . '/uploads/siswa';
+        $upload_dir = __DIR__ . '/uploads/anggota';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
 
         // Generate unique filename
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'siswa_' . $userId . '_' . time() . '_' . uniqid() . '.' . strtolower($ext);
+        $filename = 'anggota_' . $userId . '_' . time() . '_' . uniqid() . '.' . strtolower($ext);
         $filepath = $upload_dir . '/' . $filename;
 
         // Move uploaded file
@@ -85,14 +85,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto']) && isset($_P
             throw new Exception('Gagal menyimpan file');
         }
 
-        // Update siswa table with photo path
-        $photo_path = 'uploads/siswa/' . $filename;
+        // Update anggota table with photo path
+        $photo_path = 'uploads/anggota/' . $filename;
         $update = $pdo->prepare("UPDATE siswa SET foto = ?, updated_at = NOW() WHERE id_siswa = ?");
         $update->execute([$photo_path, $userId]);
 
         $success_message = 'Foto berhasil diubah!';
 
-        // Refresh siswa data to show new photo
+        // Refresh anggota data to show new photo
         $stmt = $pdo->prepare("SELECT foto FROM siswa WHERE id_siswa = ?");
         $stmt->execute([$userId]);
         $siswa['foto'] = $stmt->fetch(PDO::FETCH_ASSOC)['foto'];
@@ -113,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
         $alamat = trim($_POST['alamat'] ?? '');
         $no_hp = trim($_POST['no_hp'] ?? '');
 
-        // Update custom fields in siswa table
+        // Update custom fields in anggota table
         $update = $pdo->prepare("
             UPDATE siswa 
             SET 
@@ -154,14 +154,14 @@ try {
     $userData = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if (!$userData) {
-        die("User tidak ditemukan. Hubungi administrator.");
+        die("Anggota tidak ditemukan. Hubungi administrator.");
     }
 } catch (Exception $e) {
     error_log('Error fetching user: ' . $e->getMessage());
     die("Terjadi kesalahan saat memuat data pengguna.");
 }
 
-// Now try to get extended profile from siswa table
+// Now try to get extended profile from anggota table
 // If not exists, create from user data
 try {
     $stmt = $pdo->prepare("
@@ -175,7 +175,7 @@ try {
     $stmt->execute([$userId]);
     $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // If siswa record doesn't exist, create one from user data
+    // If anggota record doesn't exist, create one from user data
     if (!$siswa) {
         try {
             $insert = $pdo->prepare("
@@ -202,7 +202,7 @@ try {
             $stmt->execute([$userId]);
             $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
-            error_log('Error creating siswa record: ' . $e->getMessage());
+            error_log('Error creating anggota record: ' . $e->getMessage());
             // Fallback: use user data
             $siswa = [
                 'id_siswa' => $userData['id'],
@@ -222,7 +222,7 @@ try {
         }
     }
 } catch (Exception $e) {
-    error_log('Error fetching siswa: ' . $e->getMessage());
+    error_log('Error fetching anggota data: ' . $e->getMessage());
     die("Terjadi kesalahan saat memuat profil.");
 }
 
@@ -254,7 +254,7 @@ foreach ($memberDamageFines as $fine) {
     }
 }
 
-// Photo - get from siswa table if exists, otherwise default
+// Photo - get from anggota table if exists, otherwise default
 $photoUrl = $siswa['foto'] ? '/perpustakaan-online/public/' . htmlspecialchars($siswa['foto']) : '/perpustakaan-online/assets/img/default-avatar.png';
 
 $pageTitle = 'Profil Saya';
@@ -330,7 +330,7 @@ $pageTitle = 'Profil Saya';
             margin-top: 12px;
         }
 
-        /* Library Card Design (Exact Copy from student-barcodes.php) */
+        /* Library Card Design (Exact Copy from anggota-barcodes.php) */
         .library-card-wrapper {
             margin: 20px 0;
             display: flex;

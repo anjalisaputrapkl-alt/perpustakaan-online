@@ -146,7 +146,7 @@ class NotificationsService {
             $query = "
                 SELECT 
                     CONCAT('newbook_', b.id_buku) as id_notifikasi,
-                    {$studentId} as id_siswa,
+                    {$studentId} as id_anggota,
                     CONCAT('🆕 ', b.judul, ' - Buku Baru!') as judul,
                     CONCAT('Buku \"', b.judul, '\" karya ', COALESCE(b.penulis, 'Penulis Terkenal'), ' telah ditambahkan ke perpustakaan. Kategori: ', COALESCE(b.kategori, 'Umum'), '.') as pesan,
                     'buku' as jenis_notifikasi,
@@ -176,7 +176,7 @@ class NotificationsService {
             $query = "
                 SELECT 
                     CONCAT('newbook_', b.id_buku) as id_notifikasi,
-                    {$studentId} as id_siswa,
+                    {$studentId} as id_anggota,
                     CONCAT('🆕 ', b.judul, ' - Buku Baru!') as judul,
                     CONCAT('Buku \"', b.judul, '\" karya ', COALESCE(b.penulis, 'Penulis Terkenal'), ' telah ditambahkan ke perpustakaan. Kategori: ', COALESCE(b.kategori, 'Umum'), '.') as pesan,
                     'buku' as jenis_notifikasi,

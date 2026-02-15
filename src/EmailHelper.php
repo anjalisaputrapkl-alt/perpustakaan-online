@@ -155,7 +155,7 @@ function isVerificationCodeExpired($created_at, $expiry_minutes = 15)
 }
 
 /**
- * Kirim email notifikasi umum ke siswa
+ * Kirim email notifikasi umum ke anggota
  */
 function sendNotificationEmail($recipient_email, $subject, $title, $message) {
     // Wrap message in HTML template
