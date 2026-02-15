@@ -52,105 +52,158 @@ if ($activeKey) {
 
             echo "<!-- National Holiday Theme Active: $activeKey (V6 - Vibrant) -->\n";
             echo "<script>window.isSpecialThemeActive = true;</script>\n";
-            echo "<style>
+            echo <<<EOT
+            <style>
                 :root {
                     /* System Variable Overrides */
                     --primary: {$primary} !important;
                     --accent: {$primary} !important;
                     --bg: {$bg} !important;
                     --text: {$text} !important;
-                    --surface: {$card} !important;
-                    --card: {$card} !important;
-                    --border: {$border} !important;
+                    /* Premium Design System Tokens */
+                    --font-main: 'Inter', sans-serif;
+                    --font-heading: 'Outfit', sans-serif;
                     
-                    /* NEW V6 Layer Variables */
-                    --theme-primary: {$primary} !important;
-                    --theme-bg: {$bg} !important;
-                    --theme-text: {$text} !important;
-                    --theme-pattern: url('{$pattern}') !important;
+                    --primary: {$primary} !important;
+                    --primary-bg: rgba({$rgb_primary}, 0.1);
+                    --glass-bg: rgba(255, 255, 255, 0.7);
+                    --glass-border: rgba(255, 255, 255, 0.4);
+                    --glass-glow: rgba({$rgb_primary}, 0.3);
                     
-                    --sidebar-bg: {$primary} !important;
-                    --header-bg: {$primary} !important;
-                    --body-bg: {$bg} !important;
+                    --radius-lg: 24px;
+                    --radius-md: 16px;
+                    --shadow-premium: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+                    --shadow-glow: 0 0 20px -5px var(--glass-glow);
                 }
                 
-                /* Body & Global Background (Patterned) */
-                html body, 
-                html body .app, 
-                html body .content {
-                    background-image: var(--theme-pattern) !important;
-                    background-color: var(--body-bg) !important;
-                    background-repeat: repeat !important;
-                    background-attachment: fixed !important;
-                    background-size: 150px !important;
+                /* Global Font Override */
+                body, .app, .content {
+                    font-family: var(--font-main) !important;
+                    -webkit-font-smoothing: antialiased;
                 }
 
-                /* V6 Vibrant Sidebar (Dark/Primary color) */
+                h1, h2, h3, h4, h5, .nav-sidebar-header h2, .topbar strong {
+                    font-family: var(--font-heading) !important;
+                    font-weight: 700 !important;
+                    letter-spacing: -0.02em;
+                }
+
+                /* State-of-the-Art Mesh Gradient Background */
+                html body::before {
+                    content: '';
+                    position: fixed;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    z-index: -1;
+                    background-color: #f8fafc;
+                    background-image: 
+                        radial-gradient(at 0% 0%, rgba({$rgb_primary}, 0.15) 0px, transparent 50%),
+                        radial-gradient(at 100% 0%, rgba({$rgb_primary}, 0.1) 0px, transparent 50%),
+                        radial-gradient(at 100% 100%, rgba({$rgb_primary}, 0.05) 0px, transparent 50%),
+                        radial-gradient(at 0% 100%, rgba({$rgb_primary}, 0.1) 0px, transparent 50%);
+                    animation: meshMove 20s ease infinite alternate;
+                }
+
+                @keyframes meshMove {
+                    0% { filter: hue-rotate(0deg); }
+                    100% { filter: hue-rotate(15deg); }
+                }
+
+                /* Advanced Glassmorphism Sidebar */
                 html body .sidebar,
                 html body #navSidebar:not(.nav-sidebar) {
-                    background-color: var(--sidebar-bg) !important;
-                    background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), var(--theme-pattern) !important;
-                    background-blend-mode: overlay;
-                    box-shadow: 4px 0 15px rgba(0,0,0,0.1) !important;
-                }
-
-                /* Ensure Admin Sidebar stays fixed even when a special theme is active */
-                html body .nav-sidebar {
-                    background: linear-gradient(135deg, #0b3d61 0%, #062d4a 100%) !important;
-                    background-image: linear-gradient(135deg, #0b3d61 0%, #062d4a 100%) !important;
-                }
-
-                /* V6 Vibrant Header/Topbar */
-                html body .topbar,
-                html body .header {
-                    background-color: var(--header-bg) !important;
-                    background-image: linear-gradient(90deg, rgba(0,0,0,0.1), transparent) !important;
-                    color: #ffffff !important;
-                    border-bottom: 2px solid rgba(255,255,255,0.2) !important;
-                }
-
-                html body .topbar strong,
-                html body .topbar span,
-                html body .topbar iconify-icon,
-                html body .header h1,
-                html body .header p,
-                html body .header .subtitle {
-                    color: #ffffff !important;
-                    background: none !important;
-                    border: none !important;
+                    background: var(--glass-bg) !important;
+                    backdrop-filter: blur(20px) !important;
+                    border-right: 1px solid var(--glass-border) !important;
                     box-shadow: none !important;
                 }
 
-                /* Text Visibility on Dark Sidebar */
-                html body .nav-sidebar-menu a,
-                html body .nav-sidebar-header h2,
-                html body .school-name {
-                    color: #ffffff !important;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+                /* Premium Topbar & Header */
+                html body .topbar,
+                html body .header {
+                    background: rgba(255, 255, 255, 0.5) !important;
+                    backdrop-filter: blur(15px) !important;
+                    border-bottom: 1px solid var(--glass-border) !important;
+                    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.02) !important;
                 }
 
-                html body .nav-sidebar-menu a:hover,
-                html body .nav-sidebar-menu a.active {
-                    background: rgba(255, 255, 255, 0.15) !important;
-                    color: #ffffff !important;
-                }
-
-                /* Card Translucency (Refined) */
+                /* Card Overhaul - Modern "Floating" Look */
                 html body .card, 
-                html body .stat, 
-                html body .settings-tabs {
-                    background-color: rgba(255, 255, 255, 0.95) !important;
-                    backdrop-filter: blur(4px);
-                    border: 1px solid rgba({$rgb_primary}, 0.2) !important;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.05) !important;
+                html body .stat {
+                    background: #ffffff !important;
+                    border: 1px solid var(--glass-border) !important;
+                    border-radius: var(--radius-lg) !important;
+                    box-shadow: var(--shadow-premium) !important;
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                    overflow: hidden;
+                    position: relative;
                 }
 
-                /* Remove distracting ornaments */
-                body::before, body::after, .app::before, .app::after {
-                    display: none !important;
-                    content: none !important;
+                html body .card::after {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0; width: 100%; height: 4px;
+                    background: var(--primary);
+                    opacity: 0.8;
                 }
-            </style>\n";
+
+                html body .card:hover {
+                    transform: translateY(-8px) scale(1.01) !important;
+                    box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.15), var(--shadow-glow) !important;
+                }
+
+                /* Buttons - Specialized High-End Look */
+                html body .btn-primary {
+                    background: var(--primary) !important;
+                    color: #ffffff !important;
+                    border-radius: 12px !important;
+                    padding: 12px 24px !important;
+                    font-weight: 600 !important;
+                    font-family: var(--font-heading) !important;
+                    box-shadow: 0 10px 20px -5px rgba({$rgb_primary}, 0.3) !important;
+                    transition: all 0.3s ease !important;
+                    border: none !important;
+                }
+
+                html body .btn-primary:hover {
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 15px 30px -5px rgba({$rgb_primary}, 0.5) !important;
+                }
+
+                /* Administrative Components Balance */
+                html body .nav-sidebar {
+                    background: #0f172a !important; /* Keep Admin Dark for professionalism */
+                    border-right: 1px solid rgba(255,255,255,0.05) !important;
+                }
+
+                .theme-effect-overlay {
+                    position: fixed;
+                    top: 0; left: 0; width: 100%; height: 100%;
+                    pointer-events: none;
+                    z-index: 9999;
+                    opacity: 0.6;
+                }
+
+                /* Remove legacy ornaments */
+                body::before, body::after, .app::before, .app::after {
+                    background-image: none !important;
+                }
+            </style>
+EOT;
+
+            // Effect Engine Integration
+            $effect = $theme['effect_type'] ?? null;
+            if ($effect) {
+                echo "<div class='theme-effect-overlay' id='themeEffectLayer'></div>\n";
+                // Only load Script if needed
+                echo "<script>
+                    window.themeEffectConfig = {
+                        type: '{$effect}',
+                        primary: '{$primary}',
+                        activeKey: '{$activeKey}'
+                    };
+                </script>\n";
+                echo "<script src='/perpustakaan-online/assets/js/holiday-effects.js' defer></script>\n";
+            }
             
             // Load specific theme CSS file if it exists
             $paths = ["/perpustakaan-online/public/themes/special/{$activeKey}.css"];

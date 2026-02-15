@@ -1,98 +1,195 @@
-/* Tema Lunar New Year / Imlek (Red & Gold) - Vibrant V8 */
-
-html body {
-    --sidebar-bg: #991b1b !important;
-    /* Deep Red */
-    --header-bg: #b91c1c !important;
-    /* Vibrant Red */
-    --body-bg: #450a0a !important;
-    /* Dark Red/Maroon */
-    --text: #ffffff !important;
+/* Tema Lunar New Year - Imperial Crimson & Silk Gold V12 */
+:root {
+    --theme-primary: #991b1b;
+    /* Imperial Maroon */
+    --theme-primary-dark: #7f1d1d;
+    /* Deep Velvet Maroon */
+    --theme-accent: #fbbf24;
+    /* Liquid Gold Light */
+    --theme-accent-dark: #d97706;
+    /* Liquid Gold Deep */
+    --theme-jade: #065f46;
+    /* Imperial Jade */
+    --theme-text-ink: #1e293b;
+    /* Deep Ink for Readability */
+    --theme-glow: rgba(251, 191, 36, 0.4);
 }
 
-/* Total Section Colorization */
+/* Sidebar - Deep Imperial Silk Gradient */
+html body .nav-sidebar {
+    background: linear-gradient(180deg, #450a0a 0%, #1a0505 100%) !important;
+    border-right: 1px solid var(--theme-accent-dark) !important;
+}
+
+html body .nav-sidebar .nav-link.active {
+    background: linear-gradient(90deg, rgba(217, 119, 6, 0.2) 0%, transparent 100%) !important;
+    color: var(--theme-accent) !important;
+    border-left: 4px solid var(--theme-accent);
+    font-weight: 700 !important;
+}
+
+html body .nav-sidebar iconify-icon {
+    color: var(--theme-accent) !important;
+    filter: drop-shadow(0 0 8px var(--theme-glow));
+}
+
+/* Header - Royal Silk Glass */
+html body .header,
+html body .topbar {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(15px) !important;
+    border-bottom: 2px solid var(--theme-accent-dark) !important;
+}
+
+/* Typography Overrides for Premium Readability */
+html body .header h1,
+html body .topbar strong {
+    color: var(--theme-primary) !important;
+    letter-spacing: -0.01em;
+}
+
+html body .card h1,
+html body .card h2,
+html body .card h3,
+html body .card h4,
+html body .card h5 {
+    color: var(--theme-primary) !important;
+}
+
+/* HIGH-CONTRAST TYPOGRAPHY & OVERLAP FIXES */
 html body .card,
 html body .stat,
-html body .settings-tabs,
-html body .tab-content,
-html body .modal-content,
-html body .table-container {
-    background-color: rgba(127, 29, 29, 0.95) !important;
-    /* Maroon Glass */
-    border: 2px solid #facc15 !important;
-    /* Gold Border */
-    color: #ffffff !important;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 8px 32px rgba(185, 28, 28, 0.3) !important;
+html body .table,
+html body .content,
+html body .modal-body,
+html body label,
+html body .form-label,
+html body .control-label {
+    color: var(--theme-text-ink) !important;
 }
 
-/* Text visibility on Red Sections */
+/* Ensure ALL headings follow theme color */
 html body h1,
 html body h2,
 html body h3,
 html body h4,
 html body h5,
-html body label,
-html body p,
-html body span,
-html body strong {
-    color: #ffffff !important;
+html body h6,
+html body .card-title,
+html body .header-title {
+    color: var(--theme-primary) !important;
+    font-weight: 800 !important;
 }
 
-html body small,
-html body .muted,
-html body .text-muted {
-    color: #fef08a !important;
-    /* Soft Gold */
+/* Tables - Specific Cells and Info */
+html body .table td,
+html body .table th,
+html body .dataTables_info,
+html body .dataTables_paginate {
+    color: var(--theme-text-ink) !important;
 }
 
-/* Header & Topbar */
-html body .header,
-html body .topbar {
-    background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%) !important;
-    border-bottom: 4px solid #facc15 !important;
-    color: #ffffff !important;
-}
-
-html body .topbar strong,
-html body .school-name {
-    color: #ffffff !important;
-}
-
-/* Red Sidebar with Gold Icons */
-html body .nav-sidebar {
-    background: linear-gradient(to bottom, #991b1b, #450a0a) !important;
-}
-
-html body .nav-sidebar iconify-icon {
-    color: #facc15 !important;
-}
-
-/* Table styling for dark red theme */
-html body table {
-    color: #ffffff !important;
-}
-
-html body thead th {
-    background-color: #7f1d1d !important;
-    color: #facc15 !important;
-    border-bottom: 2px solid #facc15 !important;
-}
-
-/* Action Buttons as Gold */
-html body .btn-primary {
-    background: linear-gradient(135deg, #facc15 0%, #eab308 100%) !important;
-    color: #450a0a !important;
-    /* Dark Red text on Gold button */
-    border: none !important;
-    font-weight: 700 !important;
-}
-
-/* Inputs */
+/* Form Inputs - Persistent Visibility */
 html body input,
 html body select,
 html body textarea {
-    background-color: #7f1d1d !important;
-    border: 1px solid #facc15 !important;
+    color: #000000 !important;
+    /* Absolute black for inputs */
+    border: 1px solid rgba(217, 119, 6, 0.3) !important;
+}
+
+html body input::placeholder {
+    color: #94a3b8 !important;
+}
+
+/* Sidebar - Inactive Link Visibility */
+html body .nav-sidebar .nav-link:not(.active) {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html body .nav-sidebar .nav-link:not(.active):hover {
     color: #ffffff !important;
+    background: rgba(217, 119, 6, 0.1) !important;
+}
+
+/* Dropdown Menus */
+html body .dropdown-menu,
+html body .user-dropdown {
+    background: #ffffff !important;
+    border: 1px solid var(--theme-accent-dark) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+html body .dropdown-item {
+    color: var(--theme-text-ink) !important;
+}
+
+html body .dropdown-item:hover {
+    background: rgba(217, 119, 6, 0.1) !important;
+    color: var(--theme-primary) !important;
+}
+
+/* Modal Headers */
+html body .modal-header {
+    background: var(--theme-primary-dark) !important;
+    color: var(--theme-accent) !important;
+    border-bottom: 3px solid var(--theme-accent-dark) !important;
+}
+
+html body .modal-header .modal-title {
+    color: var(--theme-accent) !important;
+}
+
+/* Card - Imperial Floating Porcelain */
+html body .card,
+html body .stat {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(217, 119, 6, 0.15) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 40px -10px rgba(127, 29, 29, 0.1) !important;
+}
+
+html body .card:hover {
+    box-shadow: 0 30px 60px -15px rgba(127, 29, 29, 0.2), 0 0 20px var(--theme-glow) !important;
+    transform: translateY(-8px) scale(1.005) !important;
+}
+
+/* Buttons - Liquid Gold Lustre */
+html body .btn-primary {
+    background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%) !important;
+    color: #450a0a !important;
+    font-weight: 800 !important;
+    border-radius: 12px !important;
+    padding: 12px 28px !important;
+    box-shadow: 0 10px 20px -5px rgba(217, 119, 6, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+html body .btn-primary:hover {
+    box-shadow: 0 15px 30px -5px rgba(217, 119, 6, 0.6) !important;
+    filter: brightness(1.05);
+}
+
+/* Jade Success States */
+html body .badge-success,
+html body .btn-success {
+    background: var(--theme-jade) !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+/* Tables - Imperial Red Headers */
+html body thead th {
+    background-color: var(--theme-primary-dark) !important;
+    color: var(--theme-accent) !important;
+    border-bottom: 3px solid var(--theme-accent-dark) !important;
+    font-family: var(--font-heading) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Custom Scrollbar for Theme Consistency */
+::-webkit-scrollbar-thumb {
+    background: var(--theme-primary) !important;
+    border-radius: 10px;
 }

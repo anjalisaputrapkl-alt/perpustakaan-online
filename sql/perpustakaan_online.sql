@@ -60,6 +60,7 @@ CREATE TABLE `books` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `shelf` varchar(50) DEFAULT NULL,
   `row_number` int(11) DEFAULT NULL,
+  `lokasi_rak` varchar(255) DEFAULT NULL,
   `cover_image` varchar(225) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

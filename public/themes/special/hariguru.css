@@ -1,45 +1,86 @@
-/* Tema Hari Guru - Vibrant V7 */
-
-html body {
-    --sidebar-bg: #1e3a8a !important;
-    /* Navy */
-    --header-bg: #334155 !important;
-    /* Slate */
-    --body-bg: #f1f5f9 !important;
+/* Tema Hari Guru - Royal Azure Premium V9 */
+:root {
+    --theme-primary: #1e3a8a;
+    /* Royal Blue */
+    --theme-accent: #facc15;
+    /* Academic Gold */
+    --theme-glow: rgba(30, 58, 138, 0.15);
 }
 
-/* Vibrant Sections */
+/* Sidebar - Royal Academic Gradient */
+html body .nav-sidebar {
+    background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%) !important;
+    border-right: 1px solid var(--theme-accent) !important;
+}
+
+html body .nav-sidebar .nav-link.active {
+    background: linear-gradient(90deg, rgba(250, 204, 21, 0.1) 0%, transparent 100%) !important;
+    color: var(--theme-accent) !important;
+    border-left: 4px solid var(--theme-accent);
+}
+
+/* Header - Royal Glass */
+html body .header,
+html body .topbar {
+    border-bottom: 2px solid var(--theme-accent) !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Professional Cards */
+html body .card,
+html body .stat {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(30, 58, 138, 0.1) !important;
+    border-top: 4px solid var(--theme-primary) !important;
+    border-radius: 20px !important;
+}
+
+html body .card:hover {
+    box-shadow: 0 25px 50px -12px rgba(30, 58, 138, 0.2) !important;
+}
+
+/* HIGH-CONTRAST TYPOGRAPHY & OVERLAP FIXES */
 html body .card,
 html body .stat,
-html body .settings-tabs {
-    background-color: rgba(226, 232, 240, 0.9) !important;
-    /* Soft Slate/Blue */
-    border: 2px solid #1e3a8a !important;
-    backdrop-filter: blur(8px);
+html body .table,
+html body .content,
+html body .modal-body,
+html body label,
+html body .form-label,
+html body .control-label {
+    color: #1e293b !important;
+    /* Deep Ink */
 }
 
-/* Header & Topbar */
-html body .header,
-html body .topbar,
-html body .topbar strong,
-html body .topbar .school-name,
-html body .header h1,
-html body .header p,
-html body .breadcrumb-item,
-html body .breadcrumb-item.active,
-html body .header .subtitle {
-    color: #ffffff !important;
-    background: none !important;
-    border: none !important;
+/* Ensure ALL headings follow theme color */
+html body h1,
+html body h2,
+html body h3,
+html body h4,
+html body h5,
+html body h6,
+html body .card-title,
+html body .header-title {
+    color: var(--theme-primary) !important;
+    font-weight: 800 !important;
 }
 
-html body .topbar iconify-icon,
-html body .header iconify-icon {
-    color: #ffffff !important;
+/* Form Inputs */
+html body input,
+html body select,
+html body textarea {
+    color: #000000 !important;
+    border: 1px solid rgba(30, 58, 138, 0.2) !important;
 }
 
-/* Action Buttons */
+/* Academic Buttons */
 html body .btn-primary {
-    background-color: #1e3a8a !important;
-    border-color: #facc15 !important;
+    background: var(--theme-primary) !important;
+    color: #ffffff !important;
+    box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.4) !important;
+    border-radius: 12px !important;
+}
+
+html body .btn-primary:hover {
+    background: #1e40af !important;
 }

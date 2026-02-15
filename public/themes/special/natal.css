@@ -1,0 +1,109 @@
+/* Tema Natal - Frost & Crimson Premium V1 */
+:root {
+    --theme-primary: #ef4444;
+    /* Christmas Red */
+    --theme-accent: #0ea5e9;
+    /* Frost Blue */
+    --theme-bg: #f0f9ff;
+    --theme-glow: rgba(14, 165, 233, 0.2);
+}
+
+/* Base Body - Overriding Loader with Frost Mesh */
+html body::before {
+    background-image:
+        radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(255, 255, 255, 0.4) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(239, 68, 68, 0.05) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%) !important;
+}
+
+/* Sidebar - Frosted Glass with Crimson Indicator */
+html body .nav-sidebar {
+    background: rgba(15, 23, 42, 0.95) !important;
+    backdrop-filter: blur(20px) !important;
+    border-right: 1px solid rgba(14, 165, 233, 0.2) !important;
+}
+
+html body .nav-sidebar .nav-link.active {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, transparent 100%) !important;
+    color: var(--theme-primary) !important;
+    border-left: 4px solid var(--theme-primary);
+    font-weight: 700 !important;
+}
+
+html body .nav-sidebar iconify-icon {
+    color: var(--theme-accent) !important;
+    filter: drop-shadow(0 0 5px var(--theme-glow));
+}
+
+/* Header - Ultra Clean Frost Glass */
+html body .header,
+html body .topbar {
+    background: rgba(255, 255, 255, 0.7) !important;
+    border-bottom: 2px solid var(--theme-accent) !important;
+}
+
+/* Cards - "Iced" Look */
+html body .card,
+html body .stat {
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(14, 165, 233, 0.1) !important;
+    border-radius: 20px !important;
+    box-shadow: 0 15px 35px rgba(14, 165, 233, 0.05) !important;
+}
+
+html body .card:hover {
+    box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.15), 0 0 15px var(--theme-glow) !important;
+}
+
+/* HIGH-CONTRAST TYPOGRAPHY & OVERLAP FIXES */
+html body .card,
+html body .stat,
+html body .table,
+html body .content,
+html body .modal-body,
+html body label,
+html body .form-label,
+html body .control-label {
+    color: #1e293b !important;
+    /* Deep Ink */
+}
+
+/* Ensure ALL headings follow theme color */
+html body h1,
+html body h2,
+html body h3,
+html body h4,
+html body h5,
+html body h6,
+html body .card-title,
+html body .header-title {
+    color: var(--theme-primary) !important;
+    font-weight: 800 !important;
+}
+
+/* Form Inputs */
+html body input,
+html body select,
+html body textarea {
+    color: #000000 !important;
+    border: 1px solid rgba(14, 165, 233, 0.2) !important;
+}
+
+/* Specialized Buttons - Crimson Frost */
+html body .btn-primary {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4) !important;
+}
+
+html body .btn-primary:hover {
+    transform: translateY(-3px) !important;
+    box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.6) !important;
+}
+
+/* Snow Overlay Tweaks */
+.theme-effect-overlay {
+    opacity: 0.8 !important;
+}

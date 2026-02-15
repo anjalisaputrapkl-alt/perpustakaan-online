@@ -1,43 +1,107 @@
-/* Tema Idul Fitri - Total Section Theming V7 */
-
-html body {
-    --sidebar-bg: #115e59 !important;
-    --header-bg: #166534 !important;
-    --body-bg: #f0fdf4 !important;
+/* Tema Idul Fitri - Emerald Premium V10 */
+:root {
+    --theme-primary: #065f46;
+    /* Deep Emerald */
+    --theme-accent: #fbbf24;
+    /* Gold */
+    --theme-glow: rgba(5, 150, 105, 0.3);
 }
 
-/* Vibrant Sections */
-html body .card,
-html body .stat,
-html body .settings-tabs,
-html body .tab-content,
-html body .main-search-container,
-html body .table-wrap {
-    background-color: rgba(220, 252, 231, 0.9) !important;
-    /* Soft Green Background */
-    border: 2px solid #166534 !important;
-    backdrop-filter: blur(8px);
+/* Sidebar - Deep Emerald Gradient */
+html body .nav-sidebar {
+    background: linear-gradient(180deg, #064e3b 0%, #022c22 100%) !important;
+    border-right: 1px solid var(--theme-accent) !important;
 }
 
-/* Header & Topbar */
+html body .nav-sidebar .nav-link.active {
+    background: linear-gradient(90deg, rgba(251, 191, 36, 0.1) 0%, transparent 100%) !important;
+    color: var(--theme-accent) !important;
+    border-left: 4px solid var(--theme-accent);
+}
+
+html body .nav-sidebar iconify-icon {
+    color: var(--theme-accent) !important;
+    filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.4));
+}
+
+/* Header - Clean Modern Glass */
 html body .header,
 html body .topbar {
-    background: linear-gradient(90deg, #166534 0%, #15803d 100%) !important;
-    border-bottom: 3px solid #ca8a04 !important;
+    border-bottom: 2px solid var(--theme-primary) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
 }
 
-/* Action Buttons */
-html body .btn-primary,
-html body .tab-link.active {
-    background-color: #166534 !important;
-    border-color: #ca8a04 !important;
-    color: #ffffff !important;
+/* Card Improvements */
+html body .card,
+html body .stat {
+    background-color: #ffffff !important;
+    border: 1px solid rgba(6, 95, 70, 0.1) !important;
+    border-radius: 20px !important;
 }
 
-/* Inputs */
+html body .card:hover {
+    box-shadow: 0 25px 50px -12px rgba(6, 95, 70, 0.2), 0 0 20px var(--theme-glow) !important;
+}
+
+/* HIGH-CONTRAST TYPOGRAPHY & OVERLAP FIXES */
+html body .card,
+html body .stat,
+html body .table,
+html body .content,
+html body .modal-body,
+html body label,
+html body .form-label,
+html body .control-label {
+    color: #1e293b !important;
+    /* Standard Deep Ink */
+}
+
+/* Ensure ALL headings follow theme color */
+html body h1,
+html body h2,
+html body h3,
+html body h4,
+html body h5,
+html body h6,
+html body .card-title,
+html body .header-title {
+    color: var(--theme-primary) !important;
+    font-weight: 800 !important;
+}
+
+/* Tables - Specific Cells and Info */
+html body .table td,
+html body .table th,
+html body .dataTables_info,
+html body .dataTables_paginate {
+    color: #1e293b !important;
+}
+
+/* Form Inputs - Persistent Visibility */
 html body input,
 html body select,
 html body textarea {
-    background-color: #ffffff !important;
-    border-color: #166534 !important;
+    color: #000000 !important;
+    border: 1px solid rgba(6, 95, 70, 0.2) !important;
+}
+
+/* Sidebar - Inactive Link Visibility */
+html body .nav-sidebar .nav-link:not(.active) {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+html body .nav-sidebar .nav-link:not(.active):hover {
+    color: #ffffff !important;
+    background: rgba(5, 150, 105, 0.1) !important;
+}
+
+/* Specialized Buttons */
+html body .btn-primary {
+    background: linear-gradient(135deg, #059669 0%, #064e3b 100%) !important;
+    box-shadow: 0 10px 20px -5px rgba(6, 95, 70, 0.3) !important;
+    border-radius: 12px !important;
+}
+
+html body .btn-primary:hover {
+    box-shadow: 0 15px 30px -5px rgba(6, 95, 70, 0.5) !important;
 }

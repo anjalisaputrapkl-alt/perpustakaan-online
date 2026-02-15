@@ -644,6 +644,11 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                             <span class="modal-book-item-value" id="modalBookShelf">-</span>
                         </div>
 
+                        <div id="modalLokasiDetail" class="modal-book-item" style="display: none;">
+                            <span class="modal-book-item-label">Detail Lokasi</span>
+                            <span class="modal-book-item-value" id="modalBookLokasiRak">-</span>
+                        </div>
+
 
                     </div>
 
@@ -914,6 +919,16 @@ $pageTitle = 'Dashboard ' . $roleLabel;
             document.getElementById('modalBookCategory').textContent = bookData.category || 'Umum';
             document.getElementById('modalBookISBN').textContent = bookData.isbn || '-';
             document.getElementById('modalBookShelf').textContent = (bookData.shelf || '-') + (bookData.row_number ? ' (Baris ' + bookData.row_number + ')' : '');
+            
+            // Set lokasi rak spesifik
+            let lokasiRakEl = document.getElementById('modalBookLokasiRak');
+            let lokasiDetailWrap = document.getElementById('modalLokasiDetail');
+            if (bookData.lokasi_rak) {
+                if (lokasiRakEl) lokasiRakEl.textContent = bookData.lokasi_rak;
+                if (lokasiDetailWrap) lokasiDetailWrap.style.display = 'block';
+            } else {
+                if (lokasiDetailWrap) lokasiDetailWrap.style.display = 'none';
+            }
             
             // Set rating link
             document.getElementById('modalRatingBtn').href = 'book-rating.php?id=' + bookData.id;

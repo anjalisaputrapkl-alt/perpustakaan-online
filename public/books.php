@@ -35,8 +35,8 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
   }
 
   $pdo->prepare(
-    'INSERT INTO books (school_id,title,author,isbn,category,access_level,shelf,row_number,copies,max_borrow_days,cover_image)
-     VALUES (:sid,:title,:author,:isbn,:category,:access_level,:shelf,:row,:copies,:max_borrow_days,:cover_image)'
+    'INSERT INTO books (school_id,title,author,isbn,category,access_level,shelf,row_number,lokasi_rak,copies,max_borrow_days,cover_image)
+     VALUES (:sid,:title,:author,:isbn,:category,:access_level,:shelf,:row,:lokasi_rak,:copies,:max_borrow_days,:cover_image)'
   )->execute([
         'sid' => $sid,
         'title' => $_POST['title'],
@@ -46,6 +46,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'access_level' => $_POST['access_level'] ?? 'all',
         'shelf' => $_POST['shelf'],
         'row' => $_POST['row_number'],
+        'lokasi_rak' => $_POST['lokasi_rak'],
         'copies' => 1,
         'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
         'cover_image' => $coverImage
@@ -106,7 +107,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
     }
 
     $pdo->prepare(
-      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,access_level=:access_level,shelf=:shelf,row_number=:row,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image
+      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,access_level=:access_level,shelf=:shelf,row_number=:row,lokasi_rak=:lokasi_rak,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image
        WHERE id=:id AND school_id=:sid'
     )->execute([
           'title' => $_POST['title'],
@@ -116,6 +117,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
           'access_level' => $_POST['access_level'] ?? 'all',
           'shelf' => $_POST['shelf'],
           'row' => $_POST['row_number'],
+          'lokasi_rak' => $_POST['lokasi_rak'],
           'copies' => 1,
           'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
           'cover_image' => $coverImage,
@@ -243,10 +245,11 @@ $categories = [
                      <input type="hidden" name="copies" value="1">
                 </div>
                 <div class="form-col">
-                    <div class="form-group"><label>Lokasi (Rak / Baris)</label>
+                    <div class="form-group"><label>Lokasi (Rak / Baris / Detail)</label>
                         <div class="book-location-input">
-                            <input name="shelf" value="<?= $book['shelf'] ?? '' ?>" placeholder="Rak A1">
+                            <input name="shelf" value="<?= $book['shelf'] ?? '' ?>" placeholder="Rak A">
                             <input type="number" min="1" name="row_number" value="<?= $book['row_number'] ?? '' ?>" placeholder="Baris 1">
+                            <input name="lokasi_rak" value="<?= $book['lokasi_rak'] ?? '' ?>" placeholder="Detail: Rak Pojok Kiri">
                         </div>
                     </div>
                 </div>
@@ -328,9 +331,11 @@ $categories = [
                   <div class="book-author"><?= htmlspecialchars($b['author']) ?></div>
                   
                   <div class="book-card-footer">
-                      <div class="shelf-info">
-                          <iconify-icon icon="mdi:bookshelf"></iconify-icon> <?= htmlspecialchars($b['shelf'] ?? '-') ?>/<?= htmlspecialchars($b['row_number'] ?? '-') ?>
-                      </div>
+                          <iconify-icon icon="mdi:bookshelf"></iconify-icon> 
+                          <?= htmlspecialchars($b['shelf'] ?? '-') ?>/<?= htmlspecialchars($b['row_number'] ?? '-') ?>
+                          <?php if (!empty($b['lokasi_rak'])): ?>
+                            <small class="text-muted" style="display:block; font-size:10px;">(<?= htmlspecialchars($b['lokasi_rak']) ?>)</small>
+                          <?php endif; ?>
                       
                       <div class="action-buttons">
                         <button class="btn-icon-sm" onclick="openDetailModal(<?= $idx ?>)" title="Detail">
@@ -470,6 +475,10 @@ $categories = [
               <label>Lokasi</label>
               <div id="detailLocation"></div>
             </div>
+            <div class="detail-field detail-lokasi-spesifik" style="display: none;">
+              <label>Lokasi Spesifik</label>
+              <div id="detailLokasiRak"></div>
+            </div>
             <div class="detail-field">
               <label>Batas Pinjam</label>
               <div id="detailMaxBorrow"></div>
@@ -549,6 +558,15 @@ $categories = [
         set('detailISBN', book.isbn);
         set('detailCategory', book.category);
         set('detailLocation', `Rak ${book.shelf || '?'} / Baris ${book.row_number || '?'}`);
+        
+        // Lokasi Rak Spesifik
+        const specLoc = document.querySelector('.detail-lokasi-spesifik');
+        if (book.lokasi_rak) {
+            set('detailLokasiRak', book.lokasi_rak);
+            if (specLoc) specLoc.style.display = 'block';
+        } else {
+            if (specLoc) specLoc.style.display = 'none';
+        }
         set('detailCopies', `${book.copies} Salinan`);
         set('detailMaxBorrow', book.max_borrow_days ? `${book.max_borrow_days} Hari` : 'Default Sekolah');
         
