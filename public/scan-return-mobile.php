@@ -11,6 +11,10 @@ if (isset($_GET['key']) && !empty($_GET['key'])) {
 }
 
 requireAuth();
+
+// Determine Dashboard URL based on role
+$userRole = $_SESSION['user']['role'] ?? 'student';
+$dashboardUrl = ($userRole === 'student') ? 'student-dashboard.php' : 'index.php';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -246,9 +250,9 @@ requireAuth();
                 </div>
 
                 <div class="action-bar">
-                    <a href="returns.php" class="btn-back">
-                        <iconify-icon icon="mdi:arrow-left"></iconify-icon>
-                        Kembali ke Dashboard
+                    <a href="<?php echo $dashboardUrl; ?>" class="btn-back">
+                        <iconify-icon icon="mdi:check-circle"></iconify-icon>
+                        Selesai Scan
                     </a>
                 </div>
             </div>
@@ -334,6 +338,15 @@ requireAuth();
             } else {
                 fineArea.innerHTML = '';
             }
+
+            // Stay on page: Auto-hide success card after 5 seconds to allow next scan
+            setTimeout(() => {
+                card.style.opacity = '0';
+                setTimeout(() => {
+                    card.style.display = 'none';
+                    card.style.opacity = '1';
+                }, 500);
+            }, 5000);
         }
 
         function showToast(msg, type) {

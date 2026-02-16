@@ -94,7 +94,7 @@ if ($activeKey) {
                     position: fixed;
                     top: 0; left: 0; width: 100%; height: 100%;
                     z-index: -1;
-                    background-color: #f8fafc;
+                    background-color: {$bg};
                     background-image: 
                         radial-gradient(at 0% 0%, rgba({$rgb_primary}, 0.15) 0px, transparent 50%),
                         radial-gradient(at 100% 0%, rgba({$rgb_primary}, 0.1) 0px, transparent 50%),

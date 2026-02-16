@@ -1477,7 +1477,19 @@ $pageTitle = 'Profil Saya';
                      </div>
                      
                      <div class="id-card-body">
-                         <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto" class="id-card-photo" style="display:block;">
+                     <div class="id-card-photo">
+                         <?php if (!empty($siswa['foto']) && file_exists(__DIR__ . '/' . $siswa['foto'])): ?>
+                             <img src="/perpustakaan-online/public/<?php echo htmlspecialchars($siswa['foto']); ?>" 
+                                  alt="Foto" 
+                                  style="width: 100%; height: 100%; object-fit: cover; display: block;"
+                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                             <div style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%;">
+                                 <iconify-icon icon="mdi:account" style="font-size: 48px; color: rgba(255,255,255,0.8);"></iconify-icon>
+                             </div>
+                         <?php else: ?>
+                             <iconify-icon icon="mdi:account" style="font-size: 48px; color: rgba(255,255,255,0.8);"></iconify-icon>
+                         <?php endif; ?>
+                     </div>
                          
                          <div class="id-card-details">
                              <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Nama Anggota</p>

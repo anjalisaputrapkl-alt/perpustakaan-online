@@ -23,7 +23,7 @@ try {
 
     // Try to find as member (NISN)
     $stmt = $pdo->prepare(
-        'SELECT id, nisn as barcode, name, role, "member" as type FROM members 
+        'SELECT id, nisn as barcode, name, role, max_pinjam, "member" as type FROM members 
          WHERE nisn = ? OR id = ?
          LIMIT 1'
     );
@@ -31,6 +31,15 @@ try {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {
+        // Count active borrows
+        $countStmt = $pdo->prepare(
+            'SELECT COUNT(*) FROM borrows 
+             WHERE member_id = ? AND status NOT IN ("returned")'
+        );
+        $countStmt->execute([$result['id']]);
+        $result['current_borrow_count'] = (int) $countStmt->fetchColumn();
+        $result['max_pinjam'] = (int) ($result['max_pinjam'] ?? 2);
+
         echo json_encode([
             'success' => true,
             'data' => $result

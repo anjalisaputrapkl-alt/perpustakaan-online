@@ -11,6 +11,10 @@ if (isset($_GET['key']) && !empty($_GET['key'])) {
 }
 
 requireAuth();
+
+// Determine Dashboard URL based on role
+$user = $_SESSION['user'];
+$dashboardUrl = ($user['role'] === 'student') ? 'student-dashboard.php' : 'index.php';
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -19,6 +23,7 @@ requireAuth();
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Scanner Mobile</title>
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         /* Modern Immersive Scanner Design */
         :root {
@@ -431,9 +436,9 @@ requireAuth();
                     </button>
                 </div>
 
-                <a href="borrows.php" class="btn-back" id="backBtnContainer">
-                    <iconify-icon icon="mdi:arrow-left"></iconify-icon>
-                    Kembali ke Dashboard
+                <a href="<?php echo $dashboardUrl; ?>" class="btn-back" id="backBtnContainer">
+                    <iconify-icon icon="mdi:check-circle"></iconify-icon>
+                    Selesai Scan
                 </a>
             </div>
         </div>
@@ -582,6 +587,17 @@ requireAuth();
                         switchMode('book');
                     }
 
+                    // CHECK BORROW LIMIT
+                    if (currentMember.current_borrow_count >= currentMember.max_pinjam) {
+                        playSound('error');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Limit Peminjaman Tercapai!',
+                            html: `Anggota <b>${currentMember.name}</b> sudah meminjam <b>${currentMember.current_borrow_count}</b> buku.<br>Batas maksimal adalah <b>${currentMember.max_pinjam}</b> buku.`,
+                            confirmButtonColor: '#991b1b'
+                        });
+                    }
+
                      // VALIDATE EXISTING CART (Fix for Restricted Books)
                      if (currentMember.role === 'student') {
                         const validBooks = [];
@@ -632,6 +648,22 @@ requireAuth();
                         playSound('error');
                         showToast('Buku sudah ada', 'error');
                     } else {
+                        // CHECK BORROW LIMIT (Member's active count + currently scanned in session)
+                        if (currentMember) {
+                            const totalPotential = currentMember.current_borrow_count + scannedBooks.length;
+                            if (totalPotential >= currentMember.max_pinjam) {
+                                playSound('error');
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal Menambah Buku',
+                                    html: `Limit peminjaman anggota tercapai (<b>${currentMember.max_pinjam}</b> buku).`,
+                                    confirmButtonColor: '#991b1b'
+                                });
+                                showLoading(false);
+                                return;
+                            }
+                        }
+
                         // CHECK ACCESS LEVEL
                         if (currentMember && currentMember.role === 'student' && data.data.access_level === 'teacher_only') {
                             playSound('error');
@@ -690,10 +722,12 @@ requireAuth();
                 if (data.success) {
                     playSound('success');
                     showToast('Peminjaman Berhasil!', 'success');
-                    // Small delay to let user see toast
-                    setTimeout(() => {
-                        window.location.href = 'borrows.php';
-                    }, 1500);
+                    
+                    // Stay on page: Reset state for next transaction
+                    scannedBooks = [];
+                    currentMember = null;
+                    updateMemberUI();
+                    updateScannedList();
                 } else {
                     playSound('error');
                     showToast(data.message || 'Gagal', 'error');
@@ -744,12 +778,12 @@ requireAuth();
             if (scannedBooks.length === 0) {
                 container.innerHTML = '<div class="empty-placeholder">Belum ada buku discan</div>';
                 actionBar.style.display = 'none';
-                backBtn.style.display = 'block'; // Show back button when empty
+                backBtn.style.display = 'block'; 
                 return;
             }
 
             actionBar.style.display = 'grid';
-            backBtn.style.display = 'none'; // Hide back button when active (or keep it? Return page always has it. Let's keep it but maybe below?)
+            backBtn.style.display = 'block'; // Always keep Selesai Scan button visible
             // Actually return page hides back button when card is up? No, return page always shows back button.
             // But here "Action Bar" replaces the space.
             // Let's put Back button inside action bar or below it?
