@@ -153,10 +153,10 @@ try {
     }
 
     // 3. Insert into borrows table
-    // due_at = NOW() + 7 DAYS
+    // due_at = NOW() + dynamic duration
     $insertStmt = $pdo->prepare(
-        'INSERT INTO borrows (school_id, book_id, member_id, borrowed_at, due_at, status)
-         VALUES (:school_id, :book_id, :member_id, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY), "borrowed")'
+        "INSERT INTO borrows (school_id, book_id, member_id, borrowed_at, due_at, status)
+         VALUES (:school_id, :book_id, :member_id, NOW(), DATE_ADD(NOW(), INTERVAL $durasi_pinjam DAY), 'borrowed')"
     );
     $insertStmt->execute([
         'school_id' => $school_id,
@@ -174,7 +174,7 @@ try {
 
     // 5. Create notification for borrow event
     $helper = new NotificationsHelper($pdo);
-    $due_date = date('d/m/Y', strtotime('+7 days'));
+    $due_date = date('d/m/Y', strtotime('+' . $durasi_pinjam . ' days'));
     $notification_message = 'Anda telah meminjam buku "' . htmlspecialchars($book['title']) . '". Harap dikembalikan sebelum tanggal ' . $due_date . '.';
 
     $helper->createNotification(

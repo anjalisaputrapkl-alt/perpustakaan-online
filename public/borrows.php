@@ -55,9 +55,16 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
 }
 
 // Update overdue status and Calculate Fines
-$schoolStmt = $pdo->prepare('SELECT late_fine FROM schools WHERE id = :sid');
+// Fetch school data for dynamic defaults (Fine, Duration, etc)
+$schoolStmt = $pdo->prepare('SELECT * FROM schools WHERE id = :sid');
 $schoolStmt->execute(['sid' => $sid]);
-$late_fine = (int) ($schoolStmt->fetchColumn() ?: 500);
+$school = $schoolStmt->fetch();
+
+if (!$school) {
+    die('Error: School data not found');
+}
+
+$late_fine = (int) ($school['late_fine'] ?? 500);
 
 // 1. Mark overdue
 $pdo->prepare(
@@ -267,9 +274,10 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                     showScanStatus("Gagal membuka kamera: " + err, 'error');
                 });
                 
-                // Initialize Due Date (+7 days default)
+                // Initialize Due Date (Dynamic default from settings)
+                const defaultBorrowDays = <?php echo (int)($school['borrow_duration'] ?? 7); ?>;
                 const date = new Date();
-                date.setDate(date.getDate() + 7);
+                date.setDate(date.getDate() + defaultBorrowDays);
                 document.getElementById('borrowDueDate').valueAsDate = date;
                 
                 setScanMode('book');

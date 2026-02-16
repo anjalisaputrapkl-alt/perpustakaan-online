@@ -82,13 +82,19 @@ try {
             // Determine due date
             // 1. Priority: Book-specific limit
             // 2. Fallback: Provided date in request
-            // 3. Last Fallback: Default +7 days
-                // Get generic default duration
+            // 3. last Fallback: School default
+            $bookDuration = $bookInfo['max_borrow_days'] ?? null;
+            
+            if ($bookDuration) {
+                $dueDate = date('Y-m-d H:i:s', strtotime('+' . $bookDuration . ' days'));
+            } else if (!empty($input['due_date'])) {
+                $dueDate = $input['due_date'];
+            } else {
                 $schoolStmt = $pdo->prepare('SELECT borrow_duration FROM schools WHERE id = :sid');
                 $schoolStmt->execute(['sid' => $school_id]);
                 $defaultDuration = $schoolStmt->fetchColumn() ?: 7;
-                
-                $dueDate = $input['due_date'] ?? date('Y-m-d H:i:s', strtotime('+' . $defaultDuration . ' days'));
+                $dueDate = date('Y-m-d H:i:s', strtotime('+' . $defaultDuration . ' days'));
+            }
 
 
             // Enforce Access Level Restriction

@@ -90,8 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($action === 'update_borrows') {
         try {
             $schoolProfileModel->updateSchoolProfile($sid, [
-                'borrow_duration' => (int)($_POST['borrow_duration'] ?? $school['borrow_duration']),
-                'late_fine' => (float)($_POST['late_fine'] ?? $school['late_fine']),
                 'max_books_student' => (int)($_POST['max_books_student'] ?? $school['max_books_student']),
                 'max_books_teacher' => (int)($_POST['max_books_teacher'] ?? $school['max_books_teacher']),
                 'max_books_employee' => (int)($_POST['max_books_employee'] ?? $school['max_books_employee'])
@@ -507,25 +505,6 @@ if (!$school) {
                             <input type="hidden" name="action" value="update_borrows">
                             
                             <div class="form-group">
-                                <label for="borrow_duration">Durasi Peminjaman (Hari)</label>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <input type="number" name="borrow_duration" class="form-control" value="<?= htmlspecialchars($school['borrow_duration'] ?? 7) ?>" min="1" style="width: 100px;">
-                                    <span>Hari kerja</span>
-                                </div>
-                                <small class="text-muted">Waktu maksimal seorang anggota boleh memegang buku sebelum harus dikembalikan.</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="late_fine">Denda Keterlambatan (Rp)</label>
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <span>Rp</span>
-                                    <input type="number" name="late_fine" class="form-control" value="<?= htmlspecialchars($school['late_fine'] ?? 500) ?>" min="0" step="100" style="width: 150px;">
-                                    <span>/ hari</span>
-                                </div>
-                                <small class="text-muted">Besar denda yang dikenakan per buku per satu hari keterlambatan.</small>
-                            </div>
-
-                            <div class="form-group">
                                 <label>Maksimum Buku Disimpan (Berdasarkan Role)</label>
                                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-top: 5px;">
                                     <div>
@@ -565,7 +544,7 @@ if (!$school) {
                                 </div>
                                 <div class="info-text">
                                     <h4 style="font-size: 14px;">Tips Peraturan</h4>
-                                    <p style="font-size: 13px;">Gunakan durasi 7-14 hari untuk sirkulasi buku yang optimal di lingkungan sekolah.</p>
+                                    <p style="font-size: 13px;">Sesuaikan limit peminjaman buku untuk menjaga ketersediaan stok buku di perpustakaan.</p>
                                 </div>
                             </div>
                         </div>

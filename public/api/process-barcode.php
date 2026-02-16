@@ -23,8 +23,12 @@ try {
 
     // Try to find as member (NISN)
     $stmt = $pdo->prepare(
-        'SELECT id, nisn as barcode, name, role, max_pinjam, "member" as type FROM members 
-         WHERE nisn = ? OR id = ?
+        'SELECT m.id, m.nisn as barcode, m.name, m.role, m.max_pinjam, 
+                s.max_books_student, s.max_books_teacher, s.max_books_employee,
+                "member" as type 
+         FROM members m
+         JOIN schools s ON m.school_id = s.id
+         WHERE (m.nisn = ? OR m.id = ?)
          LIMIT 1'
     );
     $stmt->execute([$barcode, $barcode]);
@@ -38,7 +42,20 @@ try {
         );
         $countStmt->execute([$result['id']]);
         $result['current_borrow_count'] = (int) $countStmt->fetchColumn();
-        $result['max_pinjam'] = (int) ($result['max_pinjam'] ?? 2);
+        
+        // Determine dynamic max_pinjam
+        if (empty($result['max_pinjam'])) {
+            $role = $result['role'] ?? 'student';
+            if ($role === 'teacher') {
+                $result['max_pinjam'] = (int) ($result['max_books_teacher'] ?? 10);
+            } elseif ($role === 'employee') {
+                $result['max_pinjam'] = (int) ($result['max_books_employee'] ?? 5);
+            } else {
+                $result['max_pinjam'] = (int) ($result['max_books_student'] ?? 3);
+            }
+        } else {
+            $result['max_pinjam'] = (int) $result['max_pinjam'];
+        }
 
         echo json_encode([
             'success' => true,

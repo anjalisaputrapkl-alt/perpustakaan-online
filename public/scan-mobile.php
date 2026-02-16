@@ -14,7 +14,15 @@ requireAuth();
 
 // Determine Dashboard URL based on role
 $user = $_SESSION['user'];
+$sid = $user['school_id'];
 $dashboardUrl = ($user['role'] === 'student') ? 'student-dashboard.php' : 'index.php';
+
+// Fetch school settings for dynamic defaults
+$pdo = require __DIR__ . '/../src/db.php';
+$stmt = $pdo->prepare('SELECT borrow_duration FROM schools WHERE id = ?');
+$stmt->execute([$sid]);
+$schoolSettings = $stmt->fetch();
+$defaultBorrowDuration = (int)($schoolSettings['borrow_duration'] ?? 7);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -710,6 +718,14 @@ $dashboardUrl = ($user['role'] === 'student') ? 'student-dashboard.php' : 'index
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        due_date: (() => {
+                            const d = new Date();
+                            d.setDate(d.getDate() + <?php echo $defaultBorrowDuration; ?>);
+                            const yyyy = d.getFullYear();
+                            const mm = String(d.getMonth() + 1).padStart(2, '0');
+                            const dd = String(d.getDate()).padStart(2, '0');
+                            return `${yyyy}-${mm}-${dd} 23:59:59`;
+                        })(),
                         borrows: scannedBooks.map(book => ({
                             member_id: currentMember.id,
                             book_id: book.book_id
