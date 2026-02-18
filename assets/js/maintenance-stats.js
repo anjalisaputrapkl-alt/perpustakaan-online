@@ -29,6 +29,75 @@ const maintenanceStatsModal = {
 
         // Setup KPI card click listeners
         this.setupCardListeners();
+
+        // Initialize Search
+        this.initSearch();
+    },
+
+    initSearch() {
+        const searchInput = document.getElementById('searchStatsModal');
+        const clearBtn = document.getElementById('clearStatsSearch');
+
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase().trim();
+                this.filterTable(query);
+
+                if (clearBtn) {
+                    clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+                }
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                this.filterTable('');
+                clearBtn.style.display = 'none';
+                searchInput.focus();
+            });
+        }
+
+        // Shortcut Ctrl+K
+        document.addEventListener('keydown', (e) => {
+            const overlay = document.getElementById('statsModal');
+            if (overlay && overlay.classList.contains('active')) {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    if (searchInput) searchInput.focus();
+                }
+            }
+        });
+    },
+
+    filterTable(query) {
+        const rows = document.querySelectorAll('#statsModal .modal-table tbody tr');
+        let hasResults = false;
+
+        // Clear existing empty state
+        const oldEmpty = document.querySelector('#statsModal .modal-body .modal-empty-search');
+        if (oldEmpty) oldEmpty.remove();
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const isMatch = text.includes(query);
+            row.style.display = isMatch ? '' : 'none';
+            if (isMatch) hasResults = true;
+        });
+
+        // Show empty state if no results
+        if (!hasResults && query.length > 0) {
+            const body = document.querySelector('#statsModal .modal-body');
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'modal-empty modal-empty-search';
+            emptyDiv.style.padding = '40px 20px';
+            emptyDiv.innerHTML = `
+                <iconify-icon icon="mdi:magnify-close" style="font-size: 48px; opacity: 0.2; color: var(--accent); margin-bottom: 12px;"></iconify-icon>
+                <div style="font-weight: 600; color: var(--text);">Data tidak ditemukan</div>
+                <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">Tidak ada hasil untuk "${query}"</div>
+            `;
+            body.appendChild(emptyDiv);
+        }
     },
 
     setupCardListeners() {
@@ -58,6 +127,14 @@ const maintenanceStatsModal = {
 
         // Show overlay
         overlay.classList.add('active');
+
+        // Reset Search Input
+        const searchInput = document.getElementById('searchStatsModal');
+        const clearBtn = document.getElementById('clearStatsSearch');
+        if (searchInput) {
+            searchInput.value = '';
+            if (clearBtn) clearBtn.style.display = 'none';
+        }
 
         // Set title based on type
         const titles = {

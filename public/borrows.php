@@ -512,6 +512,95 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                  }
             }
 
+            // --- Unified Filtering Logic ---
+            function initFilter(inputId, targetSelector, isCard = false) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+
+                const clearBtn = input.parentElement.querySelector('.search-clear');
+                
+                input.addEventListener('input', function() {
+                    const query = this.value.toLowerCase().trim();
+                    const container = input.closest('.card');
+                    const items = container.querySelectorAll(targetSelector);
+                    let visibleCount = 0;
+
+                    if (clearBtn) clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+                    items.forEach(item => {
+                        const searchText = item.getAttribute('data-search-content') || item.innerText.toLowerCase();
+                        const isMatch = searchText.includes(query);
+                        
+                        if (isMatch) {
+                            item.style.display = isCard ? 'block' : '';
+                            item.classList.remove('search-fade-out');
+                            item.classList.add('search-fade-in');
+                            visibleCount++;
+                        } else {
+                            item.classList.add('search-fade-out');
+                            item.classList.remove('search-fade-in');
+                            setTimeout(() => {
+                                if (item.classList.contains('search-fade-out')) {
+                                    item.style.display = 'none';
+                                }
+                            }, 300);
+                        }
+                    });
+
+                    // Handle "No results" message
+                    let noResults = container.querySelector('.no-results-message');
+                    if (visibleCount === 0 && query !== '') {
+                        if (!noResults) {
+                            noResults = document.createElement('div');
+                            noResults.className = 'no-results-message';
+                            noResults.innerHTML = `
+                                <iconify-icon icon="mdi:magnify-close" style="font-size: 32px; margin-bottom: 8px;"></iconify-icon>
+                                <p>Tidak ditemukan hasil untuk "${escapeHtml(query)}"</p>
+                            `;
+                            const targetParent = isCard ? container : container.querySelector('tbody');
+                            if (isCard) container.appendChild(noResults);
+                            else {
+                                const row = document.createElement('tr');
+                                const cell = document.createElement('td');
+                                cell.colSpan = 10;
+                                cell.style.border = 'none';
+                                cell.appendChild(noResults);
+                                row.className = 'no-results-row';
+                                row.appendChild(cell);
+                                targetParent.appendChild(row);
+                            }
+                        }
+                    } else if (noResults) {
+                        if (isCard) noResults.remove();
+                        else noResults.closest('tr').remove();
+                    }
+                });
+
+                if (clearBtn) {
+                    clearBtn.addEventListener('click', () => {
+                        input.value = '';
+                        input.dispatchEvent(new Event('input'));
+                        input.focus();
+                    });
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                initFilter('searchPending', '.pending-borrow-card', true);
+                initFilter('searchRequests', '.borrows-table tbody tr:not(.no-results-row)');
+                initFilter('searchActive', '.borrows-table tbody tr:not(.no-results-row)');
+                initFilter('searchHistory', '.borrows-table tbody tr:not(.no-results-row)');
+
+                // Global Shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        const firstSearch = document.querySelector('.search-input');
+                        if (firstSearch) firstSearch.focus();
+                    }
+                });
+            });
+
             function resetScannerSession() {
                 scannedBooks = [];
                 currentMember = null;
@@ -571,62 +660,24 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                 document.getElementById('scannerLoading').style.display = 'none';
             }
           </script>
-    <script>
-        function filterStudents() {
-            const input = document.getElementById('searchInput').value.toLowerCase();
-            const items = document.querySelectorAll('.search-item');
-            let visibleCount = 0;
-
-            items.forEach(item => {
-                const searchText = item.getAttribute('data-search');
-                if (searchText.includes(input)) {
-                    item.style.display = '';
-                    visibleCount++;
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            // Optional: Show a message if no results found
-            // You can add this functionality if needed
-        }
-
-        function printBarcode(memberId, memberName) {
-            const win = window.open(`api/generate-student-barcode.php?member_id=${memberId}`, '_blank');
-            if (win) {
-                win.addEventListener('load', function () {
-                    setTimeout(() => {
-                        win.print();
-                    }, 250);
-                });
-            }
-        }
-
-        // Add keyboard shortcut for search
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('searchInput').addEventListener('keydown', function (e) {
-                if (e.key === 'Escape') {
-                    this.value = '';
-                    filterStudents();
-                }
-            });
-
-            // Focus search on Ctrl/Cmd + K
-            document.addEventListener('keydown', function (e) {
-                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                    e.preventDefault();
-                    document.getElementById('searchInput').focus();
-                }
-            });
-        });
-    </script>
     
     <!-- Stats Modal -->
     <div class="modal-overlay" id="statsModal">
         <div class="modal-container">
             <div class="modal-header">
-                <h2>Detail Data</h2>
-                <button class="modal-close" type="button">×</button>
+                <div style="flex: 1;">
+                    <h2>Detail Data</h2>
+                </div>
+                <div class="search-wrapper">
+                    <input type="text" id="searchModal" class="search-input" placeholder="Cari data...">
+                    <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                    <div class="search-kbd">
+                        <span style="font-size: 8px;">Ctrl</span>
+                        <span>K</span>
+                    </div>
+                    <button class="search-clear" id="clearModalSearch"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+                </div>
+                <button class="modal-close" type="button" style="margin-left: 20px;">×</button>
             </div>
             <div class="modal-body">
                 <div class="modal-loading">Memuat data...</div>
@@ -690,10 +741,23 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 
           <!-- Realtime Scan Form -->
           <div class="card">
-            <h2>Form Peminjaman Menunggu Konfirmasi</h2>
-            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">
-              Data peminjaman dari anggota yang menunggu konfirmasi admin
-            </p>
+            <div class="section-header-flex">
+              <div>
+                <h2>Form Peminjaman Menunggu Konfirmasi</h2>
+                <p style="color: var(--text-muted); font-size: 14px;">
+                  Data peminjaman dari anggota yang menunggu konfirmasi admin
+                </p>
+              </div>
+              <div class="search-wrapper">
+                <input type="text" id="searchPending" class="search-input" placeholder="Cari nama atau NISN...">
+                <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                <div class="search-kbd">
+                  <span style="font-size: 8px;">Ctrl</span>
+                  <span>K</span>
+                </div>
+                <button class="search-clear"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+              </div>
+            </div>
 
             <?php $pendingConfirm = array_filter($borrows, fn($b) => $b['status'] === 'pending_confirmation'); ?>
 
@@ -727,7 +791,7 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
               ?>
 
               <?php foreach ($groupedByMember as $studentId => $studentData): ?>
-                <div class="pending-borrow-card">
+                <div class="pending-borrow-card" data-search-content="<?= htmlspecialchars(strtolower($studentData['member_name'] . ' ' . $studentData['nisn'])) ?>">
                   <!-- Header -->
                   <div class="pending-borrow-header">
                     <div class="pending-borrow-header-grid">
@@ -855,7 +919,18 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 
           <!-- Pending Return Requests -->
           <div class="card">
-            <h2>Permintaan Pengembalian Menunggu Konfirmasi</h2>
+            <div class="section-header-flex">
+              <h2>Permintaan Pengembalian Menunggu Konfirmasi</h2>
+              <div class="search-wrapper">
+                <input type="text" id="searchRequests" class="search-input" placeholder="Cari buku atau nama siswa...">
+                <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                <div class="search-kbd">
+                  <span style="font-size: 8px;">Ctrl</span>
+                  <span>K</span>
+                </div>
+                <button class="search-clear"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+              </div>
+            </div>
             <?php if (empty(array_filter($borrows, fn($b) => $b['status'] === 'pending_return'))): ?>
               <div class="empty-state">
                 <iconify-icon icon="mdi:inbox-outline"></iconify-icon>
@@ -907,7 +982,18 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 
           <!-- Borrowing List Table -->
           <div class="card">
-            <h2>Daftar Peminjaman Aktif</h2>
+            <div class="section-header-flex">
+              <h2>Daftar Peminjaman Aktif</h2>
+              <div class="search-wrapper">
+                <input type="text" id="searchActive" class="search-input" placeholder="Cari buku atau nama siswa...">
+                <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                <div class="search-kbd">
+                  <span style="font-size: 8px;">Ctrl</span>
+                  <span>K</span>
+                </div>
+                <button class="search-clear"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+              </div>
+            </div>
             <?php if (empty(array_filter($borrows, fn($b) => $b['status'] !== 'returned' && $b['status'] !== 'pending_return' && $b['status'] !== 'pending_confirmation'))): ?>
               <div class="empty-state">
                 <iconify-icon icon="mdi:book-off-outline"></iconify-icon>
@@ -983,7 +1069,18 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
 
           <!-- Returned Books History -->
           <div class="card">
-            <h2>Riwayat Pengembalian Buku</h2>
+            <div class="section-header-flex">
+              <h2>Riwayat Pengembalian Buku</h2>
+              <div class="search-wrapper">
+                <input type="text" id="searchHistory" class="search-input" placeholder="Cari buku atau nama siswa...">
+                <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                <div class="search-kbd">
+                  <span style="font-size: 8px;">Ctrl</span>
+                  <span>K</span>
+                </div>
+                <button class="search-clear"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+              </div>
+            </div>
             <?php if (empty(array_filter($borrows, fn($b) => $b['status'] === 'returned'))): ?>
               <div class="empty-state">
                 <iconify-icon icon="mdi:history"></iconify-icon>

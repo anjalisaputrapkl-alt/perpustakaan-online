@@ -53,9 +53,71 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.target === modal) closeModal();
     });
 
+    // Modal Search Logic
+    const modalSearch = document.getElementById('searchModal');
+    const modalClear = document.getElementById('clearModalSearch');
+
+    if (modalSearch) {
+        modalSearch.addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim();
+            const rows = modalBody.querySelectorAll('.modal-table tbody tr:not(.no-results-row)');
+            let visibleCount = 0;
+
+            if (modalClear) modalClear.style.display = query.length > 0 ? 'flex' : 'none';
+
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    row.style.display = '';
+                    row.classList.remove('search-fade-out');
+                    row.classList.add('search-fade-in');
+                    visibleCount++;
+                } else {
+                    row.classList.add('search-fade-out');
+                    row.classList.remove('search-fade-in');
+                    setTimeout(() => {
+                        if (row.classList.contains('search-fade-out')) {
+                            row.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            });
+
+            // Handle No Results in Modal
+            let noResults = modalBody.querySelector('.no-results-message');
+            if (visibleCount === 0 && query !== '') {
+                if (!noResults) {
+                    const tr = document.createElement('tr');
+                    tr.className = 'no-results-row';
+                    tr.innerHTML = `<td colspan="10" style="border:none;">
+                        <div class="no-results-message">
+                            <iconify-icon icon="mdi:magnify-close" style="font-size: 32px; margin-bottom: 8px;"></iconify-icon>
+                            <p>Tidak ditemukan hasil untuk "${query}"</p>
+                        </div>
+                    </td>`;
+                    modalBody.querySelector('.modal-table tbody').appendChild(tr);
+                }
+            } else if (noResults) {
+                noResults.closest('tr').remove();
+            }
+        });
+
+        if (modalClear) {
+            modalClear.addEventListener('click', () => {
+                modalSearch.value = '';
+                modalSearch.dispatchEvent(new Event('input'));
+                modalSearch.focus();
+            });
+        }
+    }
+
     function openModal(config) {
         modalTitle.textContent = config.title;
         modalBody.innerHTML = '<div class="modal-loading">Memuat data...</div>';
+        if (modalSearch) {
+            modalSearch.value = '';
+            if (modalClear) modalClear.style.display = 'none';
+        }
         modal.style.display = 'flex';
 
         fetch(config.endpoint)

@@ -1,13 +1,13 @@
 // Modal Management System
 const modalManager = {
     currentModal: null,
-    
+
     init() {
         console.log('modalManager.init() called');
-        
+
         const overlay = document.getElementById('statsModal');
         console.log('Modal overlay found:', !!overlay);
-        
+
         if (overlay) {
             // Setup overlay click to close
             overlay.addEventListener('click', (e) => {
@@ -20,12 +20,74 @@ const modalManager = {
             // Setup close button
             const closeBtn = document.querySelector('.modal-close');
             console.log('Close button found:', !!closeBtn);
-            
+
             if (closeBtn) {
                 closeBtn.addEventListener('click', () => {
                     console.log('Close button clicked');
                     this.closeModal();
                 });
+            }
+
+            // --- Search Logic for Dashboard Modals ---
+            const modalSearch = document.getElementById('searchModalTab');
+            const modalClear = document.getElementById('clearModalTabSearch');
+            const modalBody = document.querySelector('.modal-body');
+
+            if (modalSearch) {
+                modalSearch.addEventListener('input', function () {
+                    const query = this.value.toLowerCase().trim();
+                    const table = modalBody.querySelector('.modal-table');
+                    if (!table) return;
+
+                    const rows = table.querySelectorAll('tbody tr:not(.no-results-row)');
+                    let visibleCount = 0;
+
+                    if (modalClear) modalClear.style.display = query.length > 0 ? 'flex' : 'none';
+
+                    rows.forEach(row => {
+                        const text = row.innerText.toLowerCase();
+                        if (text.includes(query)) {
+                            row.style.display = '';
+                            row.classList.remove('search-fade-out');
+                            row.classList.add('search-fade-in');
+                            visibleCount++;
+                        } else {
+                            row.classList.add('search-fade-out');
+                            row.classList.remove('search-fade-in');
+                            setTimeout(() => {
+                                if (row.classList.contains('search-fade-out')) {
+                                    row.style.display = 'none';
+                                }
+                            }, 300);
+                        }
+                    });
+
+                    // Handle No Results
+                    let noResults = modalBody.querySelector('.no-results-row');
+                    if (visibleCount === 0 && query !== '') {
+                        if (!noResults) {
+                            const tr = document.createElement('tr');
+                            tr.className = 'no-results-row';
+                            tr.innerHTML = `<td colspan="10" style="border:none;">
+                                <div class="no-results-message">
+                                    <iconify-icon icon="mdi:magnify-close" style="font-size: 32px; margin-bottom: 8px;"></iconify-icon>
+                                    <p>Tidak ditemukan hasil untuk "${query}"</p>
+                                </div>
+                            </td>`;
+                            table.querySelector('tbody').appendChild(tr);
+                        }
+                    } else if (noResults) {
+                        noResults.remove();
+                    }
+                });
+
+                if (modalClear) {
+                    modalClear.addEventListener('click', () => {
+                        modalSearch.value = '';
+                        modalSearch.dispatchEvent(new Event('input'));
+                        modalSearch.focus();
+                    });
+                }
             }
         }
 
@@ -36,11 +98,11 @@ const modalManager = {
     setupCardListeners() {
         const stats = document.querySelectorAll('.stat');
         console.log('Stats cards found:', stats.length);
-        
+
         stats.forEach((stat, index) => {
             const type = stat.dataset.statType;
             console.log(`Card ${index + 1}: type="${type}"`);
-            
+
             stat.addEventListener('click', () => {
                 console.log('Card clicked:', type);
                 this.openModal(type);
@@ -51,7 +113,7 @@ const modalManager = {
     openModal(type) {
         const overlay = document.getElementById('statsModal');
         const container = document.querySelector('.modal-container');
-        
+
         if (!overlay || !container) return;
 
         // Reset content
@@ -61,6 +123,14 @@ const modalManager = {
         // Show overlay
         overlay.classList.add('active');
 
+        // Reset Search
+        const modalSearch = document.getElementById('searchModalTab');
+        const modalClear = document.getElementById('clearModalTabSearch');
+        if (modalSearch) {
+            modalSearch.value = '';
+            if (modalClear) modalClear.style.display = 'none';
+        }
+
         // Set title based on type
         const titles = {
             'books': 'Daftar Semua Buku',
@@ -68,7 +138,7 @@ const modalManager = {
             'borrowed': 'Buku yang Sedang Dipinjam',
             'overdue': 'Peminjaman Terlambat'
         };
-        
+
         document.querySelector('.modal-header h2').textContent = titles[type] || 'Detail Data';
 
         // Fetch data based on type
@@ -93,12 +163,12 @@ const modalManager = {
         try {
             const url = endpoints[type] || endpoints.books;
             console.log('Fetching from:', url); // Debug log
-            
+
             const response = await fetch(url, {
                 credentials: 'include',
                 method: 'GET'
             });
-            
+
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }

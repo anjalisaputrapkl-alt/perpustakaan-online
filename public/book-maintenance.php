@@ -316,8 +316,19 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     <div class="modal-overlay" id="statsModal">
       <div class="modal-container">
         <div class="modal-header">
-          <h2>Detail Data</h2>
-          <button class="modal-close" type="button">×</button>
+          <div style="flex: 1;">
+            <h2 id="statsModalTitle">Detail Data</h2>
+          </div>
+          <div class="search-wrapper">
+              <input type="text" id="searchStatsModal" class="search-input" placeholder="Cari data...">
+              <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+              <div class="search-kbd">
+                  <span style="font-size: 8px;">Ctrl</span>
+                  <span>K</span>
+              </div>
+              <button class="search-clear" id="clearStatsSearch"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+          </div>
+          <button class="modal-close" type="button" style="margin-left: 20px;">×</button>
         </div>
         <div class="modal-body">
           <div class="modal-loading">Memuat data...</div>

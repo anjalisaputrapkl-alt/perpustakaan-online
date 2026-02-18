@@ -196,94 +196,134 @@ $categories = [
 
         <!-- SECTION 1: ADD/EDIT FORM (Full Width) -->
         <div class="card form-card">
-          <h2><?= $action === 'edit' ? 'Edit Buku' : 'Tambah Buku' ?></h2>
+          <div class="card-header-flex" style="border-bottom: none; margin-bottom: 24px; padding-bottom: 0;">
+             <div style="flex: 1;">
+                 <h2 style="border: none; padding: 0; margin-bottom: 4px;">
+                    <iconify-icon icon="mdi:book-plus-outline" style="color: var(--accent);"></iconify-icon>
+                    <?= $action === 'edit' ? 'Edit Detail Buku' : 'Tambah Koleksi Baru' ?>
+                 </h2>
+                 <p style="color: var(--muted); font-size: 13px;">Lengkapi informasi detail buku di bawah ini</p>
+             </div>
+          </div>
+
           <form method="post" action="<?= $action === 'edit' ? '' : 'books.php?action=add' ?>"
             enctype="multipart/form-data">
             
-            <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group"><label>Judul Buku</label>
-                        <input name="title" required value="<?= $book['title'] ?? '' ?>" placeholder="Judul Lengkap">
+            <div class="form-group-wrapper">
+                <div class="form-subheader">
+                    <iconify-icon icon="mdi:information-outline"></iconify-icon>
+                    Informasi Utama
+                </div>
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group"><label>Judul Buku</label>
+                            <input name="title" required value="<?= $book['title'] ?? '' ?>" placeholder="Contoh: Laskar Pelangi">
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group"><label>Pengarang</label>
+                            <input name="author" required value="<?= $book['author'] ?? '' ?>" placeholder="Nama Penulis">
+                        </div>
                     </div>
                 </div>
-                <div class="form-col">
-                    <div class="form-group"><label>Pengarang</label>
-                        <input name="author" required value="<?= $book['author'] ?? '' ?>" placeholder="Nama Pengarang">
+                <div class="form-row" style="margin-bottom: 0;">
+                    <div class="form-col">
+                        <div class="form-group"><label>ISBN / Kode Buku</label>
+                            <input name="isbn" value="<?= $book['isbn'] ?? '' ?>" placeholder="Contoh: 978-602-...">
+                        </div>
                     </div>
-                </div>
-                <div class="form-col">
-                    <div class="form-group"><label>ISBN</label>
-                        <input name="isbn" value="<?= $book['isbn'] ?? '' ?>" placeholder="Contoh: 978-602...">
+                    <div class="form-col">
+                        <div class="form-group"><label>Kategori</label>
+                            <select name="category">
+                            <option value="">-- Pilih Kategori --</option>
+                            <?php foreach ($categories as $cat): ?>
+                                <option value="<?= $cat ?>" <?= ($book['category'] ?? '') === $cat ? 'selected' : '' ?>><?= $cat ?>
+                                </option>
+                            <?php endforeach ?>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div class="form-row">
-                <div class="form-col">
-                    <div class="form-group"><label>Kategori</label>
-                        <select name="category">
-                        <option value="">-- Pilih --</option>
-                        <?php foreach ($categories as $cat): ?>
-                            <option value="<?= $cat ?>" <?= ($book['category'] ?? '') === $cat ? 'selected' : '' ?>><?= $cat ?>
-                            </option>
-                        <?php endforeach ?>
-                        </select>
-                    </div>
-                </div>
-                <!-- Access Level Field -->
-                <div class="form-col">
-                    <div class="form-group"><label>Target Peminjam</label>
-                        <select name="access_level">
-                            <option value="all" <?= ($book['access_level'] ?? '') === 'all' ? 'selected' : '' ?>>Semua (Siswa & Guru)</option>
-                            <option value="teacher_only" <?= ($book['access_level'] ?? '') === 'teacher_only' ? 'selected' : '' ?>>Khusus Guru & Karyawan</option>
-                        </select>
-                        <small style="color:var(--muted); font-size:11px;">Membatasi hak peminjaman</small>
-                    </div>
-                </div>
-                <div class="form-col">
-                     <!-- Stock hidden, always 1 -->
-                     <input type="hidden" name="copies" value="1">
-                </div>
-                <div class="form-col">
-                    <div class="form-group"><label>Lokasi (Rak / Baris / Detail)</label>
-                        <div class="book-location-input">
-                            <input name="shelf" value="<?= $book['shelf'] ?? '' ?>" placeholder="Rak A">
-                            <input type="number" min="1" name="row_number" value="<?= $book['row_number'] ?? '' ?>" placeholder="Baris 1">
-                            <input name="lokasi_rak" value="<?= $book['lokasi_rak'] ?? '' ?>" placeholder="Detail: Rak Pojok Kiri">
+                <div class="form-col wide">
+                    <div class="form-group-wrapper">
+                        <div class="form-subheader">
+                            <iconify-icon icon="mdi:map-marker-outline"></iconify-icon>
+                            Lokasi & Pengaturan
+                        </div>
+                        <div class="form-row">
+                            <div class="form-col">
+                                <div class="form-group"><label>Target Peminjam</label>
+                                    <select name="access_level">
+                                        <option value="all" <?= ($book['access_level'] ?? '') === 'all' ? 'selected' : '' ?>>Semua (Umum)</option>
+                                        <option value="teacher_only" <?= ($book['access_level'] ?? '') === 'teacher_only' ? 'selected' : '' ?>>Khusus Guru/Staf</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-col">
+                                <div class="form-group"><label>Batas Pinjam (Hari)</label>
+                                    <input type="number" name="max_borrow_days" placeholder="<?= (int)$defaultDuration ?> hari (Default)" 
+                                           value="<?= $action === 'edit' && isset($book['max_borrow_days']) ? (int)$book['max_borrow_days'] : '' ?>">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label>Lokasi Rak (Rak / Baris / Detail)</label>
+                            <div class="book-location-input">
+                                <input name="shelf" value="<?= $book['shelf'] ?? '' ?>" placeholder="Rak A" style="flex: 1;">
+                                <input type="number" min="1" name="row_number" value="<?= $book['row_number'] ?? '' ?>" placeholder="Baris 1" style="flex: 1;">
+                                <input name="lokasi_rak" value="<?= $book['lokasi_rak'] ?? '' ?>" placeholder="Detail Spesifik Lokasi" style="flex: 2;">
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="form-col">
-                    <div class="form-group"><label>Lama Pinjam (Hari)</label>
-                        <input type="number" name="max_borrow_days" placeholder="Default: <?= (int)$defaultDuration ?> hari" 
-                               value="<?= $action === 'edit' && isset($book['max_borrow_days']) ? (int)$book['max_borrow_days'] : '' ?>">
-                        <small style="color:var(--muted); font-size:11px;">Kosongkan untuk mengikuti default sekolah (<?= (int)$defaultDuration ?> hari)</small>
+
+                <div class="form-col wide">
+                    <div class="form-group-wrapper" style="margin-bottom: 0;">
+                        <div class="form-subheader">
+                            <iconify-icon icon="mdi:image-outline"></iconify-icon>
+                            Sampul Buku (Opsional)
+                        </div>
+                        <div class="form-row" style="align-items: center; margin-bottom: 0; gap: 32px;">
+                            <div class="form-col" style="flex: 0 0 160px;">
+                                <div id="imagePreview" class="image-preview-mini" style="height: 220px; width: 160px; border: 2px dashed var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: var(--bg); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 8px; box-sizing: border-box;">
+                                    <?php if (!empty($book['cover_image'])): ?>
+                                        <img src="../img/covers/<?= htmlspecialchars($book['cover_image']) ?>" alt="Preview" style="max-height: 100%; max-width: 100%; object-fit: contain; border-radius: 4px; box-shadow: 0 8px 15px rgba(0,0,0,0.1);">
+                                    <?php else: ?>
+                                        <div style="text-align: center;">
+                                            <iconify-icon icon="mdi:camera-outline" style="font-size: 32px; color: var(--muted); opacity: 0.5;"></iconify-icon>
+                                            <div style="font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 600;">PREVIEW</div>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="form-col" style="flex: 1;">
+                                <div class="form-group">
+                                    <label>Pilih File Gambar</label>
+                                    <div class="file-input-wrapper">
+                                        <input type="file" name="cover_image" accept="image/jpeg,image/png,image/gif" id="imageInput"
+                                        onchange="previewImage(event)">
+                                    </div>
+                                    <p style="color: var(--muted); font-size: 13px; margin-top: 12px; line-height: 1.5;">
+                                        Unggah gambar sampul untuk memudahkan identifikasi buku. 
+                                        <br>
+                                        <iconify-icon icon="mdi:information-outline" style="vertical-align: middle;"></iconify-icon>
+                                        Format: JPG, PNG, GIF. Maks: 5MB. 
+                                        <br>
+                                        <iconify-icon icon="mdi:aspect-ratio" style="vertical-align: middle;"></iconify-icon>
+                                        Rasio ideal: 2:3 (Tegak).
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            
-             <div class="form-row">
-                 <div class="form-col wide">
-                    <div class="form-group"><label>Sampul Buku</label>
-                        <div class="file-input-wrapper">
-                            <input type="file" name="cover_image" accept="image/jpeg,image/png,image/gif" id="imageInput"
-                            onchange="previewImage(event)">
-                        </div>
-                        <small>Format: JPG, PNG, GIF (Max 5MB)</small>
-                    </div>
-                 </div>
-                 <div class="form-col">
-                     <?php if ($action === 'edit' || !empty($book['cover_image'])): ?>
-                        <div id="imagePreview" class="image-preview-mini">
-                             <?php if (!empty($book['cover_image'])): ?>
-                                <img src="../img/covers/<?= htmlspecialchars($book['cover_image']) ?>" alt="Preview">
-                             <?php endif; ?>
-                        </div>
-                    <?php else: ?>
-                        <div id="imagePreview" class="image-preview-mini"></div>
-                    <?php endif; ?>
-                 </div>
-            </div>
+
+            <!-- Stock hidden, always 1 -->
+            <input type="hidden" name="copies" value="1">
 
             <div class="form-actions">
                 <button class="btn" type="submit"><?= $action === 'edit' ? 'Simpan Perubahan' : 'Tambah Buku Baru' ?></button>
@@ -295,11 +335,23 @@ $categories = [
         </div>
 
         <!-- SECTION 2: BOOK LIST (Full Width) -->
-        <div class="card">
-          <div class="card-header-flex">
-             <h2>Daftar Buku (<?= count($books) ?>)</h2>
-             <div class="view-controls">
-                 <!-- Optional search -->
+        <div class="card" style="padding-top: 0;">
+          <div class="card-header-flex" style="border-bottom: 3px solid var(--accent-soft); margin-bottom: 24px; padding: 24px 0 16px 0;">
+             <div style="flex: 1;">
+                 <h2 style="border: none; padding: 0; margin-bottom: 4px;">
+                    <iconify-icon icon="mdi:bookshelf" style="color: var(--accent);"></iconify-icon>
+                    Daftar Koleksi Buku (<?= count($books) ?>)
+                 </h2>
+                 <p style="color: var(--muted); font-size: 13px;">Kelola dan cari koleksi buku perpustakaan anda secara real-time</p>
+             </div>
+             <div class="search-wrapper">
+                 <input type="text" id="searchBooksList" class="search-input" placeholder="Cari judul, penulis, atau ISBN...">
+                 <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                 <div class="search-kbd">
+                     <span style="font-size: 8px;">Ctrl</span>
+                     <span>K</span>
+                 </div>
+                 <button class="search-clear" id="clearBooksSearch"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
              </div>
           </div>
           
@@ -312,16 +364,17 @@ $categories = [
                       alt="<?= htmlspecialchars($b['title']) ?>" loading="lazy">
                   <?php else: ?>
                     <div class="no-image-placeholder">
-                        <iconify-icon icon="mdi:book-open-variant" style="font-size: 32px;"></iconify-icon>
+                        <iconify-icon icon="mdi:book-open-variant" style="font-size: 32px; color: var(--accent); opacity: 0.5;"></iconify-icon>
                     </div>
                   <?php endif; ?>
                   
                   <div class="stock-badge-overlay" style="
-                      background: <?= $b['copies'] > 0 ? 'color-mix(in srgb, var(--success) 15%, transparent)' : 'color-mix(in srgb, var(--danger) 15%, transparent)' ?>;
-                      color: <?= $b['copies'] > 0 ? 'var(--success)' : 'var(--danger)' ?>;
-                      border: 1px solid <?= $b['copies'] > 0 ? 'color-mix(in srgb, var(--success) 30%, transparent)' : 'color-mix(in srgb, var(--danger) 30%, transparent)' ?>;
+                      background: <?= $b['copies'] > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)' ?>;
+                      color: <?= $b['copies'] > 0 ? '#059669' : '#dc2626' ?>;
+                      border: 1px solid <?= $b['copies'] > 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)' ?>;
                   ">
-                      <?= $b['copies'] > 0 ? 'Tersedia' : 'Dipinjam' ?>
+                      <iconify-icon icon="<?= $b['copies'] > 0 ? 'mdi:check-circle' : 'mdi:clock-alert' ?>" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                      <?= $b['copies'] > 0 ? 'Tersedia' : 'Sirkulasi' ?>
                   </div>
                 </div>
                 
@@ -331,22 +384,21 @@ $categories = [
                   <div class="book-author"><?= htmlspecialchars($b['author']) ?></div>
                   
                   <div class="book-card-footer">
-                          <iconify-icon icon="mdi:bookshelf"></iconify-icon> 
-                          <?= htmlspecialchars($b['shelf'] ?? '-') ?>/<?= htmlspecialchars($b['row_number'] ?? '-') ?>
-                          <?php if (!empty($b['lokasi_rak'])): ?>
-                            <small class="text-muted" style="display:block; font-size:10px;">(<?= htmlspecialchars($b['lokasi_rak']) ?>)</small>
-                          <?php endif; ?>
+                      <div class="shelf-info">
+                          <iconify-icon icon="mdi:bookshelf" style="color: var(--accent);"></iconify-icon>
+                          <span>Rak <?= htmlspecialchars($b['shelf'] ?? '-') ?> / <?= htmlspecialchars($b['row_number'] ?? '-') ?></span>
+                      </div>
                       
                       <div class="action-buttons">
-                        <button class="btn-icon-sm" onclick="openDetailModal(<?= $idx ?>)" title="Detail">
-                           <iconify-icon icon="mdi:eye"></iconify-icon>
+                        <button class="btn-icon-sm" onclick="openDetailModal(<?= $idx ?>)" title="Lihat Detail">
+                           <iconify-icon icon="mdi:eye-outline"></iconify-icon>
                         </button>
-                        <a href="books.php?action=edit&id=<?= $b['id'] ?>" class="btn-icon-sm" title="Edit">
-                           <iconify-icon icon="mdi:pencil"></iconify-icon>
+                        <a href="books.php?action=edit&id=<?= $b['id'] ?>" class="btn-icon-sm" title="Ubah Data">
+                           <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
                         </a>
                         <a href="books.php?action=delete&id=<?= $b['id'] ?>" class="btn-icon-sm btn-icon-danger" 
-                           onclick="return confirm('Hapus buku ini?')" title="Hapus">
-                           <iconify-icon icon="mdi:trash-can"></iconify-icon>
+                           onclick="return confirm('Hapus buku ini dari database?')" title="Hapus Buku">
+                           <iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
                         </a>
                       </div>
                   </div>
@@ -392,19 +444,6 @@ $categories = [
                         </div>
                     </div>
 
-                    <!-- Card 2: Total Salinan -->
-                    <div class="stat-card-modern" onclick="showStatDetail('copies')">
-                        <div class="stat-icon purple">
-                            <iconify-icon icon="mdi:layers-triple"></iconify-icon>
-                        </div>
-                        <div class="stat-info">
-                            <div class="stat-value"><?= array_sum(array_map(fn($b) => $b['copies'], $books)) ?></div>
-                            <div class="stat-label">Total Eksemplar</div>
-                        </div>
-                        <div class="stat-arrow">
-                            <iconify-icon icon="mdi:chevron-right" style="font-size: 24px;"></iconify-icon>
-                        </div>
-                    </div>
 
                     <!-- Card 3: Kategori -->
                     <div class="stat-card-modern" onclick="showStatDetail('categories')">
@@ -504,11 +543,15 @@ $categories = [
         if (input.files && input.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
-                preview.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover; border-radius:6px;">`;
+                preview.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 4px; box-shadow: 0 8px 15px rgba(0,0,0,0.1);">`;
             }
             reader.readAsDataURL(input.files[0]);
         } else {
-            preview.innerHTML = '';
+            preview.innerHTML = `
+                <div style="text-align: center;">
+                    <iconify-icon icon="mdi:camera-outline" style="font-size: 32px; color: var(--muted); opacity: 0.5;"></iconify-icon>
+                    <div style="font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 600;">PREVIEW</div>
+                </div>`;
         }
     }
 
@@ -628,19 +671,6 @@ $categories = [
             }
             content += `</div>`;
 
-        } else if (type === 'copies') {
-            titleEl.textContent = 'Stok Buku Tertinggi';
-            const sorted = [...books].sort((a,b) => b.copies - a.copies).slice(0, 10);
-            content = `<div class="modal-stat-list">`;
-            sorted.forEach(b => {
-                content += `
-                    <div class="modal-stat-item">
-                        <span class="stat-item-label">${b.title}</span>
-                        <span class="stat-item-val">${b.copies} Eks.</span>
-                    </div>
-                `;
-            });
-            content += `</div>`;
 
         } else if (type === 'categories') {
             titleEl.textContent = 'Statistik Kategori';
@@ -668,6 +698,84 @@ $categories = [
     function closeStatModal() {
         document.getElementById('statModal').style.display = 'none';
     }
+
+    /**
+     * FEATURE 3: REAL-TIME SEARCH FOR BOOKS
+     */
+    document.addEventListener('DOMContentLoaded', () => {
+        const searchInput = document.getElementById('searchBooksList');
+        const clearBtn = document.getElementById('clearBooksSearch');
+        const grid = document.querySelector('.books-grid');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                const cards = document.querySelectorAll('.book-card-vertical');
+                let hasResults = false;
+
+                // Clear any existing no-results message
+                const oldNoResults = document.querySelector('.no-results-message');
+                if (oldNoResults) oldNoResults.remove();
+
+                cards.forEach(card => {
+                    const title = card.querySelector('.book-title').textContent.toLowerCase();
+                    const author = card.querySelector('.book-author').textContent.toLowerCase();
+                    const category = card.querySelector('.book-category').textContent.toLowerCase();
+                    const shelf = card.querySelector('.book-card-footer').textContent.toLowerCase();
+                    
+                    const isMatch = title.includes(query) || 
+                                   author.includes(query) || 
+                                   category.includes(query) || 
+                                   shelf.includes(query);
+                    
+                    if (isMatch) {
+                        card.style.display = 'flex';
+                        card.classList.remove('search-fade-out');
+                        card.classList.add('search-fade-in');
+                        hasResults = true;
+                    } else {
+                        card.classList.add('search-fade-out');
+                        setTimeout(() => {
+                            if (card.classList.contains('search-fade-out')) {
+                                card.style.display = 'none';
+                            }
+                        }, 300);
+                    }
+                });
+
+                // Show/Hide Clear Button
+                if (clearBtn) clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+                // No results handling
+                if (!hasResults && query.length > 0) {
+                    const noResults = document.createElement('div');
+                    noResults.className = 'no-results-message';
+                    noResults.innerHTML = `
+                        <iconify-icon icon="mdi:book-search-outline" style="font-size: 48px; margin-bottom: 16px; display: block; margin-left: auto; margin-right: auto; opacity: 0.2; color: var(--accent);"></iconify-icon>
+                        <div style="font-weight: 700; font-size: 18px; color: var(--text);">Buku tidak ditemukan</div>
+                        <p style="color: var(--muted); margin-top: 8px;">Tidak ada buku yang sesuai dengan kata kunci "${query}"</p>
+                    `;
+                    grid.appendChild(noResults);
+                }
+            });
+
+            if (clearBtn) {
+                clearBtn.addEventListener('click', () => {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                    searchInput.focus();
+                });
+            }
+
+            // --- Shortcut Key (Ctrl+K or Cmd+K) ---
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+        }
+    });
 
     // Global Close Click Outside
     window.onclick = function(event) {

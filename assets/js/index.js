@@ -10,7 +10,84 @@ document.querySelectorAll('.activity-tab').forEach(tab => {
     // Add active class to clicked tab and its content
     tab.classList.add('active');
     document.getElementById(tabName + '-content').classList.add('active');
+
+    // Clear search when switching tabs
+    const searchInput = document.getElementById('searchActivityList');
+    if (searchInput && searchInput.value !== '') {
+      searchInput.value = '';
+      searchInput.dispatchEvent(new Event('input'));
+    }
   });
+});
+
+// --- Search Activity Logic ---
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('searchActivityList');
+  const clearBtn = document.getElementById('clearActivitySearch');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', function () {
+      const query = this.value.toLowerCase().trim();
+      const activeContent = document.querySelector('.activity-content.active');
+      if (!activeContent) return;
+
+      const items = activeContent.querySelectorAll('.activity-item');
+      const listContainer = activeContent.querySelector('.activity-list');
+      let hasResults = false;
+
+      // Clear any existing no-results message
+      const oldNoResults = activeContent.querySelector('.no-results-activity');
+      if (oldNoResults) oldNoResults.remove();
+
+      items.forEach(item => {
+        const title = item.querySelector('.book-title').textContent.toLowerCase();
+        const name = item.querySelector('.member-name').textContent.toLowerCase();
+        const isMatch = title.includes(query) || name.includes(query);
+
+        if (isMatch) {
+          item.style.display = 'flex';
+          item.classList.remove('search-fade-out');
+          item.classList.add('search-fade-in');
+          hasResults = true;
+        } else {
+          item.classList.add('search-fade-out');
+          setTimeout(() => {
+            if (item.classList.contains('search-fade-out')) {
+              item.style.display = 'none';
+            }
+          }, 300);
+        }
+      });
+
+      // Show/Hide Clear Button
+      if (clearBtn) clearBtn.style.display = query.length > 0 ? 'flex' : 'none';
+
+      // No results handling
+      if (!hasResults && query.length > 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'no-results-activity';
+        noResults.style.cssText = 'padding: 40px 20px; text-align: center; color: var(--muted); background: var(--border); border-radius: 12px; margin: 10px; opacity: 0; transform: translateY(10px); transition: all 0.3s ease;';
+        noResults.innerHTML = `
+                    <iconify-icon icon="mdi:magnify-close" style="font-size: 32px; margin-bottom: 8px; opacity: 0.5;"></iconify-icon>
+                    <div style="font-weight: 600;">Tidak ada hasil ditemukan</div>
+                    <div style="font-size: 13px;">Coba gunakan kata kunci lain</div>
+                `;
+        listContainer.appendChild(noResults);
+        setTimeout(() => {
+          noResults.style.opacity = '1';
+          noResults.style.transform = 'translateY(0)';
+        }, 10);
+      }
+    });
+
+    if (clearBtn) {
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+      });
+    }
+  }
 });
 
 // FAQ functionality

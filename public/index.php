@@ -193,7 +193,21 @@ if ($is_authenticated) {
                     </div>
 
                     <div class="activity-section">
-                        <h2><iconify-icon icon="mdi:clipboard-list" class="section-header-icon"></iconify-icon>Aktivitas Terbaru</h2>
+                        <div class="section-header-flex">
+                            <div style="flex: 1;">
+                                <h2><iconify-icon icon="mdi:clipboard-list" class="section-header-icon"></iconify-icon>Aktivitas Terbaru</h2>
+                                <p style="color: var(--muted); font-size: 13px; margin-top: 4px;">Pantau sirkulasi data terbaru secara real-time</p>
+                            </div>
+                            <div class="search-wrapper">
+                                <input type="text" id="searchActivityList" class="search-input" placeholder="Cari aktivitas...">
+                                <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                                <div class="search-kbd">
+                                    <span style="font-size: 8px;">Ctrl</span>
+                                    <span>K</span>
+                                </div>
+                                <button class="search-clear" id="clearActivitySearch"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+                            </div>
+                        </div>
 
                         <div class="activity-tabs">
                             <button class="activity-tab active btn-sm" data-tab="all"><iconify-icon
@@ -374,8 +388,19 @@ if ($is_authenticated) {
         <div class="modal-overlay" id="statsModal">
             <div class="modal-container">
                 <div class="modal-header">
-                    <h2>Detail Data</h2>
-                    <button class="modal-close" type="button">×</button>
+                    <div style="flex: 1;">
+                        <h2>Detail Data</h2>
+                    </div>
+                    <div class="search-wrapper">
+                        <input type="text" id="searchModalTab" class="search-input" placeholder="Cari data...">
+                        <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+                        <div class="search-kbd">
+                            <span style="font-size: 8px;">Ctrl</span>
+                            <span>K</span>
+                        </div>
+                        <button class="search-clear" id="clearModalTabSearch"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+                    </div>
+                    <button class="modal-close" type="button" style="margin-left: 20px;">×</button>
                 </div>
                 <div class="modal-body">
                     <div class="modal-loading">Memuat data...</div>
