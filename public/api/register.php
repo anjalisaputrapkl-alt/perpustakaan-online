@@ -97,7 +97,16 @@ try {
     exit;
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan server: ' . $e->getMessage()]);
+    $message = $e->getMessage();
+    
+    // Handle specific duplicate entry error for slug
+    if (str_contains($message, '1062') && str_contains($message, 'slug')) {
+        $message = "Nama sekolah ini sudah terdaftar di sistem kami. Silakan coba nama yang lebih spesifik atau hubungi admin support.";
+    } else {
+        $message = 'Terjadi kesalahan server: ' . $message;
+    }
+    
+    echo json_encode(['success' => false, 'message' => $message]);
     exit;
 }
 ?>

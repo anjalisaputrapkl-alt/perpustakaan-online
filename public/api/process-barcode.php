@@ -6,8 +6,13 @@
 
 header('Content-Type: application/json');
 
+
+require __DIR__ . '/../../src/auth.php';
+requireAuth();
+
 $input = json_decode(file_get_contents('php://input'), true);
 $barcode = trim($input['barcode'] ?? '');
+$sid = $_SESSION['user']['school_id'];
 
 if (!$barcode) {
     http_response_code(400);
@@ -28,10 +33,10 @@ try {
                 "member" as type 
          FROM members m
          JOIN schools s ON m.school_id = s.id
-         WHERE (m.nisn = ? OR m.id = ?)
+         WHERE (m.nisn = ? OR m.id = ?) AND m.school_id = ?
          LIMIT 1'
     );
-    $stmt->execute([$barcode, $barcode]);
+    $stmt->execute([$barcode, $barcode, $sid]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {
@@ -66,10 +71,10 @@ try {
 
     $stmt = $pdo->prepare(
         'SELECT id, isbn as barcode, title as name, cover_image, copies, max_borrow_days, access_level, "book" as type FROM books 
-         WHERE isbn = ? OR id = ?
+         WHERE (isbn = ? OR id = ?) AND school_id = ?
          LIMIT 1'
     );
-    $stmt->execute([$barcode, $barcode]);
+    $stmt->execute([$barcode, $barcode, $sid]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {

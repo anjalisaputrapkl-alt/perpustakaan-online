@@ -36,6 +36,7 @@ body {
         opacity: 0;
         transform: translateY(-30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -47,6 +48,7 @@ body {
         opacity: 0;
         transform: translateX(-40px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -58,6 +60,7 @@ body {
         opacity: 0;
         transform: translateY(30px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -469,7 +472,7 @@ body {
     min-height: 90px;
 }
 
-.stat-card-header > div:first-child {
+.stat-card-header>div:first-child {
     flex: 1;
 }
 
@@ -1485,25 +1488,104 @@ iconify-icon {
         border-radius: 12px 12px 0 0;
         max-width: 95vw;
     }
-    
+
     .borrowing-modal-header {
         padding: 16px;
     }
-    
+
     .borrowing-modal-header h2 {
         font-size: 14px;
     }
-    
+
     .borrowing-modal-body {
         padding: 0;
     }
-    
+
     .borrowing-modal-table {
         font-size: 12px;
     }
-    
+
     .borrowing-modal-table thead th,
     .borrowing-modal-table tbody td {
         padding: 12px 14px;
+    }
+}
+
+/* Denda Summary Card */
+.denda-summary-card {
+    animation: fadeInSlideUp 0.4s ease-out;
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-left: 4px solid transparent;
+}
+
+.denda-danger {
+    background-color: rgba(239, 68, 68, 0.05);
+    border-left-color: #ef4444;
+}
+
+.denda-success {
+    background-color: rgba(16, 185, 129, 0.05);
+    border-left-color: #10b981;
+}
+
+.denda-icon {
+    font-size: 24px;
+}
+
+.denda-danger .denda-icon {
+    color: #dc2626;
+}
+
+.denda-success .denda-icon {
+    color: #059669;
+}
+
+.denda-content {
+    flex: 1;
+}
+
+.denda-label {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.denda-value {
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.denda-danger .denda-value {
+    color: #dc2626;
+}
+
+.denda-success .denda-value {
+    color: #059669;
+}
+
+.denda-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 4px 0 0 0;
+    line-height: 1.5;
+}
+
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

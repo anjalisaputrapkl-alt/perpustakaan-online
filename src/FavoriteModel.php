@@ -172,7 +172,10 @@ class FavoriteModel
                         b.title as judul,
                         b.author as penulis,
                         b.category as buku_kategori,
-                        b.cover_image as cover
+                        b.cover_image as cover,
+                        b.shelf as shelf,
+                        b.row_number as row_number,
+                        b.lokasi_rak as lokasi_rak
                     FROM favorites f
                     JOIN books b ON f.book_id = b.id
                     WHERE f.student_id = ? AND f.category = ?
@@ -191,7 +194,10 @@ class FavoriteModel
                         b.title as judul,
                         b.author as penulis,
                         b.category as buku_kategori,
-                        b.cover_image as cover
+                        b.cover_image as cover,
+                        b.shelf as shelf,
+                        b.row_number as row_number,
+                        b.lokasi_rak as lokasi_rak
                     FROM favorites f
                     JOIN books b ON f.book_id = b.id
                     WHERE f.student_id = ?

@@ -47,8 +47,8 @@ try {
             $memStmt = $pdo->prepare('SELECT m.max_pinjam, m.role, s.max_books_student, s.max_books_teacher, s.max_books_employee 
                                       FROM members m 
                                       JOIN schools s ON s.id = m.school_id 
-                                      WHERE m.id = :mid');
-            $memStmt->execute(['mid' => $borrow['member_id']]);
+                                      WHERE m.id = :mid AND m.school_id = :sid');
+            $memStmt->execute(['mid' => $borrow['member_id'], 'sid' => $school_id]);
             $memberData = $memStmt->fetch();
             $memberRole = $memberData['role'] ?? 'student';
             
@@ -70,8 +70,8 @@ try {
             }
 
             // Check if book is available and get its custom borrow limit
-            $checkStmt = $pdo->prepare('SELECT copies, title, max_borrow_days, access_level FROM books WHERE id = :bid');
-            $checkStmt->execute(['bid' => $borrow['book_id']]);
+            $checkStmt = $pdo->prepare('SELECT copies, title, max_borrow_days, access_level FROM books WHERE id = :bid AND school_id = :sid');
+            $checkStmt->execute(['bid' => $borrow['book_id'], 'sid' => $school_id]);
             $bookInfo = $checkStmt->fetch();
             
             if (!$bookInfo || $bookInfo['copies'] < 1) {

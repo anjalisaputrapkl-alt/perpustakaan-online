@@ -189,15 +189,15 @@ $pageTitle = 'Riwayat Peminjaman';
         </div>
 
         <!-- Total Denda Section -->
-        <div style="animation: fadeInSlideUp 0.4s ease-out; margin-bottom: 24px; padding: 16px; background-color: <?php echo $pendingMemberDenda > 0 ? 'rgba(239, 68, 68, 0.05)' : 'rgba(16, 185, 129, 0.05)'; ?>; border-radius: 8px; border-left: 4px solid <?php echo $pendingMemberDenda > 0 ? '#ef4444' : '#10b981'; ?>; display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 24px; color: <?php echo $pendingMemberDenda > 0 ? '#dc2626' : '#059669'; ?>;">
+        <div class="denda-summary-card <?php echo $pendingMemberDenda > 0 ? 'denda-danger' : 'denda-success'; ?>">
+            <div class="denda-icon">
                 <iconify-icon icon="<?php echo $pendingMemberDenda > 0 ? 'mdi:alert-circle' : 'mdi:check-circle'; ?>" width="24" height="24"></iconify-icon>
             </div>
-            <div style="flex: 1;">
-                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px;">Denda Tertunda</div>
-                <div style="font-size: 24px; font-weight: 700; color: <?php echo $pendingMemberDenda > 0 ? '#dc2626' : '#059669'; ?>;">Rp <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></div>
+            <div class="denda-content">
+                <div class="denda-label">Denda Tertunda</div>
+                <div class="denda-value">Rp <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></div>
                 <?php if ($pendingMemberDenda > 0): ?>
-                    <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0; line-height: 1.5;">Denda dari kerusakan buku saat peminjaman. Hubungi admin untuk detail lebih lanjut.</p>
+                    <p class="denda-hint">Denda dari kerusakan buku saat peminjaman. Hubungi admin untuk detail lebih lanjut.</p>
                 <?php else: ?>
                     <p style="font-size: 12px; color: #10b981; margin: 4px 0 0 0;">✓ Tidak ada denda tertunda</p>
                 <?php endif; ?>
@@ -406,124 +406,15 @@ $pageTitle = 'Riwayat Peminjaman';
         </div>
     </div>
 
-    <script src="../assets/js/student-borrowing-history.js"></script>
     <script>
-        // Store modal data
-        const modalDataStore = {
+        // Pass modal data to external JS
+        window.modalDataStore = {
             'semua': <?php echo json_encode(array_map(function($b){ return ['title' => $b['book_title'] ?? '-', 'author' => $b['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0, 'borrowed_at' => $b['borrowed_at'], 'returned_at' => $b['returned_at'], 'due_at' => $b['due_at'], 'status' => $b['status']]; }, $borrowingHistory)); ?>,
             'dipinjam': <?php echo json_encode(array_values(array_map(function($b){ return ['title' => $b['book_title'] ?? '-', 'author' => $b['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0, 'borrowed_at' => $b['borrowed_at'], 'returned_at' => $b['returned_at'], 'due_at' => $b['due_at'], 'status' => $b['status']]; }, array_filter($borrowingHistory, fn($b) => $b['status'] === 'borrowed')))); ?>,
             'dikembalikan': <?php echo json_encode(array_values(array_map(function($b){ return ['title' => $b['book_title'] ?? '-', 'author' => $b['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0, 'borrowed_at' => $b['borrowed_at'], 'returned_at' => $b['returned_at'], 'due_at' => $b['due_at'], 'status' => $b['status']]; }, array_filter($borrowingHistory, fn($b) => $b['status'] === 'returned')))); ?>,
             'telat': <?php echo json_encode(array_values(array_map(function($b){ return ['title' => $b['book_title'] ?? '-', 'author' => $b['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0, 'borrowed_at' => $b['borrowed_at'], 'returned_at' => $b['returned_at'], 'due_at' => $b['due_at'], 'status' => $b['status']]; }, array_filter($borrowingHistory, fn($b) => $b['status'] === 'overdue')))); ?>
         };
-
-        /**
-         * Show borrowing modal with table view
-         * Opens overlay modal with filtered borrowing data
-         */
-        function showBorrowingModal(title, dataKey) {
-            const data = modalDataStore[dataKey] || [];
-            
-            // Create modal overlay
-            const modal = document.createElement('div');
-            modal.className = 'borrowing-modal-overlay';
-            modal.onclick = (e) => {
-                if (e.target === modal) closeBorrowingModal(modal);
-            };
-            
-            // Modal content
-            const modalContent = document.createElement('div');
-            modalContent.className = 'borrowing-modal-content';
-            modalContent.innerHTML = `
-                <div class="borrowing-modal-header">
-                    <h2>${title}</h2>
-                    <button onclick="closeBorrowingModal()" class="borrowing-modal-close">
-                        <iconify-icon icon="mdi:close" width="20" height="20"></iconify-icon>
-                    </button>
-                </div>
-                <div class="borrowing-modal-body">
-                    ${data && data.length > 0 ? renderBorrowingTableHtml(data) : '<div class="empty-state"><p>Data tidak ditemukan</p></div>'}
-                </div>
-            `;
-            
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-            
-            // Trigger animation
-            setTimeout(() => modal.classList.add('active'), 10);
-        }
-
-        /**
-         * Close borrowing modal
-         */
-        function closeBorrowingModal(modalElement) {
-            const modal = modalElement || document.querySelector('.borrowing-modal-overlay.active');
-            if (modal) {
-                modal.classList.remove('active');
-                setTimeout(() => modal.remove(), 300);
-            }
-        }
-
-        /**
-         * Render borrowing data as HTML table
-         */
-        function renderBorrowingTableHtml(data) {
-            if (!data || data.length === 0) {
-                return '<div class="empty-state"><p>Data tidak ditemukan</p></div>';
-            }
-            
-            let html = '<table class="borrowing-modal-table"><thead><tr>';
-            html += '<th>Judul Buku</th>';
-            html += '<th>Tanggal Pinjam</th>';
-            html += '<th>Tanggal Kembali</th>';
-            html += '<th>Status</th>';
-            html += '</tr></thead><tbody>';
-            
-            data.forEach(item => {
-                let statusBadge = '';
-                switch(item.status) {
-                    case 'borrowed':
-                        statusBadge = '<span class="badge badge-borrowed">Dipinjam</span>';
-                        break;
-                    case 'returned':
-                        statusBadge = '<span class="badge badge-returned">Dikembalikan</span>';
-                        break;
-                    case 'overdue':
-                        statusBadge = '<span class="badge badge-overdue">Telat</span>';
-                        break;
-                    default:
-                        statusBadge = '<span class="badge">' + item.status + '</span>';
-                }
-                
-                html += `<tr>
-                    <td class="title-cell">${item.title || '-'}</td>
-                    <td>${formatDateModal(item.borrowed_at)}</td>
-                    <td>${item.returned_at ? formatDateModal(item.returned_at) : '-'}</td>
-                    <td>${statusBadge}</td>
-                </tr>`;
-            });
-            
-            html += '</tbody></table>';
-            return html;
-        }
-
-        /**
-         * Format date untuk modal display
-         */
-        function formatDateModal(dateStr) {
-            if (!dateStr) return '-';
-            const date = new Date(dateStr);
-            const d = String(date.getDate()).padStart(2, '0');
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const y = date.getFullYear();
-            return `${d}/${m}/${y}`;
-        }
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                closeBorrowingModal();
-            }
-        });
     </script>
+    <script src="../assets/js/student-borrowing-history-manage.js"></script>
 </body>
 </html>

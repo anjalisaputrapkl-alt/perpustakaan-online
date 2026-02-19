@@ -408,16 +408,7 @@ if ($is_authenticated) {
             </div>
         </div>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", function () {
-                console.log("📌 DOM Loaded → Load Dashboard Stats");
-                initLoadDashboardStats();
-                // Also initialize modal manager
-                if (typeof modalManager !== 'undefined') {
-                    modalManager.init();
-                }
-            });
-        </script>
+        <script src="../assets/js/index-manage.js"></script>
     <?php endif; ?>
 
 </body>
