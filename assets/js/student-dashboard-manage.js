@@ -57,6 +57,10 @@ function filterAndDisplayBooks() {
     const searchInput = document.querySelector('input[name="search"]');
     const searchTerm = (searchInput?.value || '').toLowerCase();
 
+    // Get sort option
+    const sortSelect = document.getElementById('sortSelect');
+    const sortBy = sortSelect?.value || 'newest';
+
     filteredBooks = allBooks.filter(book => {
         const matchSearch = !searchTerm ||
             (book.title || '').toLowerCase().includes(searchTerm) ||
@@ -64,6 +68,20 @@ function filterAndDisplayBooks() {
         const matchCategory = !currentCategoryFilter || book.category === currentCategoryFilter;
         return matchSearch && matchCategory;
     });
+
+    // Apply Sorting
+    if (sortBy === 'rating') {
+        filteredBooks.sort((a, b) => {
+            const ratingA = parseFloat(a.avg_rating) || 0;
+            const ratingB = parseFloat(b.avg_rating) || 0;
+            // First by rating, then by total reviews as tie-breaker
+            if (ratingB !== ratingA) return ratingB - ratingA;
+            return (parseInt(b.total_reviews) || 0) - (parseInt(a.total_reviews) || 0);
+        });
+    } else {
+        // Default: Newest
+        filteredBooks.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+    }
 
     updateBooksDisplay();
 }
@@ -118,7 +136,7 @@ function updateBooksDisplay() {
                         <iconify-icon icon="mdi:star" style="color: #FFD700;"></iconify-icon>
                         <span style="font-weight: 700;">${avgRating}</span>
                         <span style="opacity: 0.6; margin-left: 2px;">(${totalReviews})</span>
-                        ${book.shelf ? `<span style="opacity: 0.6; font-size: 10px; margin-left: auto;" title="${book.lokasi_rak || ''}">• Rak ${book.shelf}${book.row_number ? ' / ' + book.row_number : ''}</span>` : ''}
+                        ${book.shelf ? `<span style="opacity: 0.6; font-size: 10px; margin-left: auto;" title="Detail: ${book.lokasi_rak || ''}">• Rak ${book.shelf} / ${book.row_number || '-'} / ${book.lokasi_rak || '-'}</span>` : ''}
                     </div>
                     <div class="action-buttons">
                         <button class="btn-icon-sm" onclick='openBookModal(${JSON.stringify(book).replace(/'/g, "&#39;")})' title="Detail">
@@ -231,17 +249,8 @@ function openBookModal(bookData) {
     document.getElementById('modalBookAuthor').textContent = bookData.author || '-';
     document.getElementById('modalBookCategory').textContent = bookData.category || 'Umum';
     document.getElementById('modalBookISBN').textContent = bookData.isbn || '-';
-    document.getElementById('modalBookShelf').textContent = (bookData.shelf || '-') + (bookData.row_number ? ' / ' + bookData.row_number : '');
+    document.getElementById('modalBookShelf').textContent = `Rak ${bookData.shelf || '-'} / Baris ${bookData.row_number || '-'} / Kolom ${bookData.lokasi_rak || '-'}`;
 
-    // Set lokasi rak spesifik
-    let lokasiRakEl = document.getElementById('modalBookLokasiRak');
-    let lokasiDetailWrap = document.getElementById('modalLokasiDetail');
-    if (bookData.lokasi_rak) {
-        if (lokasiRakEl) lokasiRakEl.textContent = bookData.lokasi_rak;
-        if (lokasiDetailWrap) lokasiDetailWrap.style.display = 'block';
-    } else {
-        if (lokasiDetailWrap) lokasiDetailWrap.style.display = 'none';
-    }
 
     // Set rating link
     document.getElementById('modalRatingBtn').href = 'book-rating.php?id=' + bookData.id;
@@ -574,6 +583,12 @@ function toggleAllCategories() {
 
 // Initialize on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
+    // Sync data from PHP
+    if (typeof window.allBooks !== 'undefined') {
+        allBooks = window.allBooks;
+        filteredBooks = [...allBooks];
+    }
+
     loadFavorites();
     initCategoryFilter();
 
@@ -585,6 +600,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const categorySelect = document.getElementById('categorySelect');
     if (categorySelect) {
         categorySelect.addEventListener('change', onCategoryChange);
+    }
+
+    const sortSelect = document.getElementById('sortSelect');
+    if (sortSelect) {
+        sortSelect.addEventListener('change', filterAndDisplayBooks);
     }
 
     // Modal click-outside handler

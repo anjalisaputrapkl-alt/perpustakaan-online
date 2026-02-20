@@ -24,29 +24,28 @@ if (!$book_id || !$rating || empty($comment)) {
     exit;
 }
 
-// Check if user has already rated this book (optional, but good practice)
-/*
+// Check if user has already rated this book
 $checkStmt = $pdo->prepare('SELECT id_rating FROM rating_buku WHERE id_user = :user_id AND id_buku = :book_id');
 $checkStmt->execute(['user_id' => $user['id'], 'book_id' => $book_id]);
-if ($checkStmt->fetch()) {
+$existingRating = $checkStmt->fetch();
+
+if ($existingRating) {
     echo json_encode(['success' => false, 'message' => 'Anda sudah memberikan ulasan untuk buku ini.']);
     exit;
 }
-*/
 
 try {
+    // Insert new rating
     $stmt = $pdo->prepare('
         INSERT INTO rating_buku (id_user, id_buku, rating, komentar, created_at)
         VALUES (:id_user, :id_buku, :rating, :komentar, NOW())
     ');
-    
     $stmt->execute([
         'id_user' => $user['id'],
         'id_buku' => $book_id,
         'rating' => (int)$rating,
         'komentar' => $comment
     ]);
-
     echo json_encode(['success' => true, 'message' => 'Ulasan Anda berhasil dikirim!']);
     
 } catch (Exception $e) {

@@ -1,109 +1,129 @@
-/* Tema Natal - Frost & Crimson Premium V1 */
+/* Tema Natal - Nordic Minimalist Premium V50 */
 :root {
-    --theme-primary: #ef4444;
-    /* Christmas Red */
-    --theme-accent: #0ea5e9;
-    /* Frost Blue */
-    --theme-bg: #f0f9ff;
-    --theme-glow: rgba(14, 165, 233, 0.2);
+    --theme-primary: #334155;
+    /* Refined Slate */
+    --theme-accent: #64748b;
+    /* Muted Slate Blue */
+    --theme-ice: #f1f5f9;
+    --theme-bg: #ffffff;
+    --theme-border: rgba(148, 163, 184, 0.2);
+    --theme-link: #475569;
 }
 
-/* Base Body - Overriding Loader with Frost Mesh */
+/* Base Body - Soft Nordic Fog */
 html body::before {
     background-image:
-        radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.15) 0px, transparent 50%),
-        radial-gradient(at 100% 0%, rgba(255, 255, 255, 0.4) 0px, transparent 50%),
-        radial-gradient(at 100% 100%, rgba(239, 68, 68, 0.05) 0px, transparent 50%),
-        radial-gradient(at 0% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%) !important;
+        radial-gradient(at 0% 0%, #f1f5f9 0px, transparent 50%),
+        radial-gradient(at 100% 100%, #e2e8f0 0px, transparent 50%) !important;
+    background-color: #ffffff !important;
 }
 
-/* Sidebar - Frosted Glass with Crimson Indicator */
+/* Sidebar - Matte Frosted Slate */
 html body .nav-sidebar {
-    background: rgba(15, 23, 42, 0.95) !important;
-    backdrop-filter: blur(20px) !important;
-    border-right: 1px solid rgba(14, 165, 233, 0.2) !important;
+    background: #1e293b !important;
+    /* Solid Professional Slate */
+    border-right: 1px solid var(--theme-border) !important;
+}
+
+html body .nav-sidebar .school-name {
+    color: #ffffff !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.2px;
 }
 
 html body .nav-sidebar .nav-link.active {
-    background: linear-gradient(90deg, rgba(239, 68, 68, 0.15) 0%, transparent 100%) !important;
-    color: var(--theme-primary) !important;
-    border-left: 4px solid var(--theme-primary);
-    font-weight: 700 !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #ffffff !important;
+    border-left: 3px solid #ffffff !important;
+    font-weight: 600 !important;
 }
 
 html body .nav-sidebar iconify-icon {
-    color: var(--theme-accent) !important;
-    filter: drop-shadow(0 0 5px var(--theme-glow));
+    color: rgba(255, 255, 255, 0.6) !important;
 }
 
-/* Header - Ultra Clean Frost Glass */
+/* Header - Clean Matte Glass */
 html body .header,
 html body .topbar {
-    background: rgba(255, 255, 255, 0.7) !important;
-    border-bottom: 2px solid var(--theme-accent) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-bottom: 1px solid var(--theme-border) !important;
 }
 
-/* Cards - "Iced" Look */
+/* Minimalist Cards */
 html body .card,
 html body .stat {
-    background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(15px) !important;
-    border: 1px solid rgba(14, 165, 233, 0.1) !important;
-    border-radius: 20px !important;
-    box-shadow: 0 15px 35px rgba(14, 165, 233, 0.05) !important;
+    background: #ffffff !important;
+    border: 1px solid var(--theme-border) !important;
+    border-radius: 16px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease !important;
 }
 
 html body .card:hover {
-    box-shadow: 0 25px 50px -12px rgba(14, 165, 233, 0.15), 0 0 15px var(--theme-glow) !important;
+    transform: translateY(-4px) !important;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02) !important;
 }
 
-/* HIGH-CONTRAST TYPOGRAPHY & OVERLAP FIXES */
+/* Typography Harmony */
 html body .card,
 html body .stat,
 html body .table,
-html body .content,
-html body .modal-body,
-html body label,
-html body .form-label,
-html body .control-label {
-    color: #1e293b !important;
-    /* Deep Ink */
+html body label {
+    color: #475569 !important;
 }
 
-/* Ensure ALL headings follow theme color */
-html body h1,
-html body h2,
-html body h3,
-html body h4,
-html body h5,
-html body h6,
-html body .card-title,
-html body .header-title {
-    color: var(--theme-primary) !important;
-    font-weight: 800 !important;
+html body h3:not(.school-name),
+html body .card-title {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+    letter-spacing: -0.2px;
+}
+
+/* Clean Professional Buttons */
+html body .btn-primary {
+    background: #1e293b !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    padding: 10px 20px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+html body .btn-primary:hover {
+    background: #334155 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Subtle Effect Layer */
+.theme-effect-overlay {
+    opacity: 0.6 !important;
+    pointer-events: none;
+}
+
+/* Table Refinements */
+html body .table th {
+    background: #f8fafc !important;
+    border-bottom: 2px solid #f1f5f9 !important;
 }
 
 /* Form Inputs */
 html body input,
-html body select,
-html body textarea {
-    color: #000000 !important;
-    border: 1px solid rgba(14, 165, 233, 0.2) !important;
+html body select {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
 }
 
-/* Specialized Buttons - Crimson Frost */
-html body .btn-primary {
-    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 10px 20px -5px rgba(239, 68, 68, 0.4) !important;
+html body input:focus {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 0 0 3px rgba(148, 163, 184, 0.1) !important;
 }
 
-html body .btn-primary:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 15px 30px -5px rgba(239, 68, 68, 0.6) !important;
-}
-
-/* Snow Overlay Tweaks */
-.theme-effect-overlay {
-    opacity: 0.8 !important;
+/* Form Styling - Crystal Focus */
+html body input:focus,
+html body select:focus,
+html body textarea:focus {
+    border-color: var(--theme-secondary) !important;
+    box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1) !important;
 }

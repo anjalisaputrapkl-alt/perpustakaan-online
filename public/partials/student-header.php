@@ -74,7 +74,6 @@ try {
 </style>
 <?php if ($specialTheme): ?>
     <script>window.isSpecialThemeActive = true;</script>
-    <link rel="stylesheet" id="special-theme-css" href="/perpustakaan-online/public/themes/special/<?php echo htmlspecialchars($specialTheme); ?>.css">
 <?php endif; ?>
 <header class="header">
     <div class="header-container">

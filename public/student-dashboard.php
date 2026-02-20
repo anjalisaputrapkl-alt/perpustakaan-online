@@ -379,16 +379,25 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                             <iconify-icon icon="mdi:magnify" class="search-icon"></iconify-icon>
                             <input type="text" name="search" class="modern-search-input"
                                 placeholder="Cari buku…"
-                                value="">
+                                value="<?php echo htmlspecialchars($search); ?>">
                         </div>
                     </div>
 
                     <!-- Category Dropdown - Select Element -->
                     <select id="categorySelect" class="category-dropdown-select">
                         <option value="">Semua Kategori</option>
+                        <?php foreach ($categories as $cat): ?>
+                            <option value="<?php echo htmlspecialchars($cat); ?>" <?php echo (isset($_GET['category']) && $_GET['category'] === $cat) ? 'selected' : ''; ?>><?php echo htmlspecialchars($cat); ?></option>
+                        <?php endforeach; ?>
                     </select>
 
-                    <input type="hidden" name="category" id="categoryInput" value="">
+                    <!-- Sort Dropdown -->
+                    <select id="sortSelect" class="category-dropdown-select">
+                        <option value="newest">Terbaru</option>
+                        <option value="rating">Rating Tertinggi</option>
+                    </select>
+
+                    <input type="hidden" name="category" id="categoryInput" value="<?php echo htmlspecialchars($_GET['category'] ?? ''); ?>">
                 </form>
 
                 <!-- Books Grid -->
@@ -450,7 +459,7 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                                             <span style="font-weight: 700;"><?php echo $book['avg_rating'] ? round($book['avg_rating'], 1) : '0'; ?></span>
                                             <span style="opacity: 0.6; margin-left: 2px;">(<?php echo (int)$book['total_reviews']; ?>)</span>
                                             <?php if(!empty($book['lokasi_rak'])): ?>
-                                                <span style="opacity: 0.6; font-size: 10px; margin-left: auto;">• <?= htmlspecialchars($book['lokasi_rak']) ?></span>
+                                                <span style="opacity: 0.6; font-size: 10px; margin-left: auto;">• Rak <?= htmlspecialchars($book['shelf'] ?? '-') ?> / <?= htmlspecialchars($book['row_number'] ?? '-') ?> / <?= htmlspecialchars($book['lokasi_rak']) ?></span>
                                             <?php endif; ?>
                                         </div>
                                         
@@ -520,10 +529,6 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                             <span class="modal-book-item-value" id="modalBookShelf">-</span>
                         </div>
 
-                        <div id="modalLokasiDetail" class="modal-book-item" style="display: none;">
-                            <span class="modal-book-item-label">Keterangan / Kolom</span>
-                            <span class="modal-book-item-value" id="modalBookLokasiRak">-</span>
-                        </div>
 
 
                     </div>

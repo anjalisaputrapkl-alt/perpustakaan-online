@@ -1782,11 +1782,39 @@ iconify-icon {
 
 @media (max-width:480px) {
     .kpi-grid {
-        grid-template-columns: 1fr
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 
     .kpi-card {
-        padding: 16px
+        padding: 14px;
+        border-radius: 12px;
+    }
+
+    .kpi-value {
+        font-size: 20px;
+    }
+
+    .kpi-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .modern-search-bar-form {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .search-bar-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .category-dropdown-select,
+    .sort-select {
+        width: 100%;
     }
 }
 

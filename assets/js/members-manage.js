@@ -287,3 +287,122 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// ============================================
+// STATS MODAL
+// ============================================
+
+const statModalMeta = {
+    semua: { label: 'Semua Anggota', icon: 'mdi:account-group', color: '#3b82f6', bg: 'rgba(59,130,246,0.12)' },
+    siswa: { label: 'Siswa / Pelajar', icon: 'mdi:account-school', color: '#10b981', bg: 'rgba(16,185,129,0.12)' },
+    staf: { label: 'Guru & Karyawan', icon: 'mdi:account-tie', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+    aktif: { label: 'Sedang Meminjam', icon: 'mdi:book-open-variant', color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
+};
+
+let currentStatKey = 'semua';
+let currentStatData = [];
+
+function showMembersStatModal(key) {
+    currentStatKey = key;
+    currentStatData = (typeof membersStatData !== 'undefined' && membersStatData[key]) ? membersStatData[key] : [];
+    const meta = statModalMeta[key] || statModalMeta.semua;
+
+    // Update header
+    document.getElementById('statModalTitle').textContent = meta.label;
+    document.getElementById('statModalCount').textContent = currentStatData.length + ' anggota';
+    const iconWrap = document.getElementById('statModalIconWrap');
+    iconWrap.style.background = meta.bg;
+    const icon = document.getElementById('statModalIcon');
+    icon.setAttribute('icon', meta.icon);
+    icon.style.color = meta.color;
+
+    // Clear search
+    const searchEl = document.getElementById('statModalSearch');
+    if (searchEl) searchEl.value = '';
+
+    // Render list
+    renderStatModalList(currentStatData, meta);
+
+    // Show modal
+    const modal = document.getElementById('membersStatModal');
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('active'), 10);
+}
+
+function closeMembersStatModal() {
+    const modal = document.getElementById('membersStatModal');
+    modal.classList.remove('active');
+    setTimeout(() => { modal.style.display = 'none'; }, 300);
+}
+
+function filterStatModal(query) {
+    const meta = statModalMeta[currentStatKey] || statModalMeta.semua;
+    const q = query.toLowerCase();
+    const filtered = currentStatData.filter(m =>
+        (m.name || '').toLowerCase().includes(q) ||
+        (m.nisn || '').toLowerCase().includes(q) ||
+        (m.email || '').toLowerCase().includes(q)
+    );
+    renderStatModalList(filtered, meta);
+    document.getElementById('statModalCount').textContent =
+        filtered.length + ' dari ' + currentStatData.length + ' anggota';
+}
+
+function renderStatModalList(data, meta) {
+    const body = document.getElementById('statModalBody');
+    if (!data || data.length === 0) {
+        body.innerHTML = `
+            <div style="padding:48px 24px; text-align:center; color:#94a3b8;">
+                <iconify-icon icon="mdi:account-off-outline" style="font-size:48px; display:block; margin-bottom:12px;"></iconify-icon>
+                <p style="font-size:14px; margin:0;">Tidak ada anggota ditemukan</p>
+            </div>`;
+        return;
+    }
+
+    const colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#f43f5e'];
+    const roleLabel = { student: 'Siswa', teacher: 'Guru', employee: 'Karyawan' };
+    const roleBadgeColor = { student: '#3b82f6', teacher: '#f59e0b', employee: '#8b5cf6' };
+
+    const rows = data.map(m => {
+        const initial = (m.name || '?')[0].toUpperCase();
+        const bg = colors[(m.name || '').length % colors.length];
+        const role = m.role || 'student';
+        const roleLbl = roleLabel[role] || role;
+        const roleColor = roleBadgeColor[role] || '#64748b';
+        const active = parseInt(m.active_borrows) || 0;
+        const max = parseInt(m.max_pinjam) || 3;
+
+        return `<div class="stat-modal-row" onclick="location.href='members.php?action=edit&id=${m.id}'" title="Klik untuk edit">
+            <div style="width:38px; height:38px; border-radius:50%; background:${bg}; display:flex; align-items:center; justify-content:center; color:white; font-weight:700; font-size:15px; flex-shrink:0;">${initial}</div>
+            <div style="flex:1; min-width:0;">
+                <div style="font-weight:600; font-size:14px; color:#0f172a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(m.name || '-')}</div>
+                <div style="font-size:12px; color:#64748b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${escHtml(m.nisn || '')} • ${escHtml(m.email || '-')}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0;">
+                <span style="background:${roleColor}1a; color:${roleColor}; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px;">${roleLbl}</span>
+                ${active > 0 ? `<span style="font-size:11px; color:#ef4444; font-weight:500;">${active}/${max} pinjam</span>` : ''}
+            </div>
+        </div>`;
+    }).join('');
+
+    body.innerHTML = rows;
+}
+
+function escHtml(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// Close stat modal when clicking backdrop
+document.addEventListener('click', function (e) {
+    const modal = document.getElementById('membersStatModal');
+    if (modal && e.target === modal) closeMembersStatModal();
+});
+
+// ESC key support for stat modal
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('membersStatModal');
+        if (modal && modal.classList.contains('active')) closeMembersStatModal();
+    }
+});
+

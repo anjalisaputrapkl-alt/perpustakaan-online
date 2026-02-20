@@ -12,8 +12,15 @@ document.getElementById('ratingForm').addEventListener('submit', async function 
         return;
     }
 
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalBtnHtml = submitBtn.innerHTML;
+
     const formData = new FormData(this);
     try {
+        // Disable button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<iconify-icon icon="mdi:loading" class="animate-spin"></iconify-icon> Mengirim...';
+
         const res = await fetch(this.action, { method: 'POST', body: formData });
         const json = await res.json();
         if (json.success) {
@@ -41,5 +48,9 @@ document.getElementById('ratingForm').addEventListener('submit', async function 
             background: 'var(--card)',
             color: 'var(--text)'
         });
+    } finally {
+        // Restore button state
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
     }
 });

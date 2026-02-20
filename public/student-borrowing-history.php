@@ -149,13 +149,13 @@ $pageTitle = 'Riwayat Peminjaman';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Peminjaman Buku - Perpustakaan Digital</title>
     <script src="../assets/js/db-theme-loader.js"></script>
-    <?php require_once __DIR__ . '/../theme-loader.php'; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/student-borrowing-history.css">
+    <?php require_once __DIR__ . '/../theme-loader.php'; ?>
 </head>
 
 <body>
@@ -381,13 +381,7 @@ $pageTitle = 'Riwayat Peminjaman';
                                         <span class="badge <?php echo $statusClass; ?>">
                                             <?php echo $statusText; ?>
                                         </span>
-                                        <?php if ($item['status'] === 'borrowed' || $item['status'] === 'overdue'): ?>
-                                            <div style="margin-top: 8px;">
-                                                <button onclick="requestReturn(<?php echo $item['borrow_id']; ?>)" style="padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.2s ease; white-space: nowrap;">
-                                                    Ajukan Pengembalian
-                                                </button>
-                                            </div>
-                                        <?php endif; ?>
+
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -416,5 +410,6 @@ $pageTitle = 'Riwayat Peminjaman';
         };
     </script>
     <script src="../assets/js/student-borrowing-history-manage.js"></script>
+    <script src="../assets/js/sidebar.js"></script>
 </body>
 </html>

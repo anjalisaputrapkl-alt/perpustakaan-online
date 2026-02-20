@@ -65,16 +65,8 @@ function openDetailModal(index) {
     set('detailAuthor', book.author);
     set('detailISBN', book.isbn);
     set('detailCategory', book.category);
-    set('detailLocation', `Rak ${book.shelf || '?'} / Baris ${book.row_number || '?'}`);
+    set('detailLocation', `Rak ${book.shelf || '-'} / Baris ${book.row_number || '-'} / Kolom ${book.lokasi_rak || '-'}`);
 
-    // Lokasi Rak Spesifik
-    const specLoc = document.querySelector('.detail-lokasi-spesifik');
-    if (book.lokasi_rak) {
-        set('detailLokasiRak', book.lokasi_rak);
-        if (specLoc) specLoc.style.display = 'block';
-    } else {
-        if (specLoc) specLoc.style.display = 'none';
-    }
     set('detailCopies', `${book.copies} Salinan`);
     set('detailMaxBorrow', book.max_borrow_days ? `${book.max_borrow_days} Hari` : 'Default Sekolah');
 

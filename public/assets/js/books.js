@@ -51,7 +51,7 @@ function openDetailModal(index) {
     set('detailAuthor', book.author);
     set('detailISBN', book.isbn || '-');
     set('detailCategory', book.category || '-');
-    set('detailLocation', `Rak ${book.shelf || '-'} / Baris ${book.row_number || '-'}`);
+    set('detailLocation', `Rak ${book.shelf || '-'} / Baris ${book.row_number || '-'} / Kolom ${book.lokasi_rak || '-'}`);
     set('detailCopies', `${book.copies} Salinan Tersedia`);
 
     // Handle Image

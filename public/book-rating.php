@@ -51,12 +51,21 @@ $commentsStmt = $pdo->prepare('
     SELECT r.*, u.name, u.role, s.foto
     FROM rating_buku r
     JOIN users u ON r.id_user = u.id
-    LEFT JOIN siswa s ON u.nisn = s.nisn
+    LEFT JOIN siswa s ON u.id = s.id_siswa
     WHERE r.id_buku = :book_id
     ORDER BY r.created_at DESC
 ');
 $commentsStmt->execute(['book_id' => $book_id]);
 $comments = $commentsStmt->fetchAll();
+
+// Get current user's rating for this book
+$userRatingStmt = $pdo->prepare('SELECT * FROM rating_buku WHERE id_buku = :book_id AND id_user = :user_id');
+$userRatingStmt->execute(['book_id' => $book_id, 'user_id' => $user['id']]);
+$userRating = $userRatingStmt->fetch();
+
+$hasRated = (bool)$userRating;
+$formRating = $hasRated ? (int)$userRating['rating'] : 0;
+$formComment = $hasRated ? $userRating['komentar'] : '';
 
 $pageTitle = 'Rating & Komentar: ' . $book['title'];
 ?>
@@ -133,38 +142,47 @@ $pageTitle = 'Rating & Komentar: ' . $book['title'];
                 </div>
             </div>
 
-            <!-- FORM SELECTION - RADIO BASED -->
-            <div class="star-rating-form">
-                <span class="rating-help-text">Klik bintang untuk memberi rating</span>
-                <form id="ratingForm" action="api/submit-rating.php" method="POST">
-                    <input type="hidden" name="book_id" value="<?php echo $book_id; ?>">
-                    
-                    <div class="star-group">
-                        <input type="radio" id="st5" name="rating" value="5">
-                        <label for="st5" title="Sangat Bagus">★</label>
-                        
-                        <input type="radio" id="st4" name="rating" value="4">
-                        <label for="st4" title="Bagus">★</label>
-                        
-                        <input type="radio" id="st3" name="rating" value="3">
-                        <label for="st3" title="Cukup">★</label>
-                        
-                        <input type="radio" id="st2" name="rating" value="2">
-                        <label for="st2" title="Buruk">★</label>
-                        
-                        <input type="radio" id="st1" name="rating" value="1">
-                        <label for="st1" title="Sangat Buruk">★</label>
+            <?php if ($hasRated): ?>
+                <div class="star-rating-form completed">
+                    <div style="text-align: center; padding: 20px;">
+                        <iconify-icon icon="mdi:check-decagram" width="48" color="var(--success)"></iconify-icon>
+                        <h3 style="margin-top: 15px; color: var(--text);">Terima kasih atas ulasan Anda!</h3>
+                        <p style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">Ulasan Anda telah tersimpan dan membantu anggota lain.</p>
                     </div>
+                </div>
+            <?php else: ?>
+                <div class="star-rating-form">
+                    <span class="rating-help-text">Klik bintang untuk memberi rating</span>
+                    <form id="ratingForm" action="api/submit-rating.php" method="POST">
+                        <input type="hidden" name="book_id" value="<?php echo $book_id; ?>">
+                        
+                        <div class="star-group">
+                            <input type="radio" id="st5" name="rating" value="5">
+                            <label for="st5" title="Sangat Bagus">★</label>
+                            
+                            <input type="radio" id="st4" name="rating" value="4">
+                            <label for="st4" title="Bagus">★</label>
+                            
+                            <input type="radio" id="st3" name="rating" value="3">
+                            <label for="st3" title="Cukup">★</label>
+                            
+                            <input type="radio" id="st2" name="rating" value="2">
+                            <label for="st2" title="Buruk">★</label>
+                            
+                            <input type="radio" id="st1" name="rating" value="1">
+                            <label for="st1" title="Sangat Buruk">★</label>
+                        </div>
 
-                    <textarea name="comment" class="comment-textarea" placeholder="Apa pendapatmu tentang buku ini? Berikan ulasan jujurmu..." required></textarea>
-                    
-                    <div style="text-align: right;">
-                        <button type="submit" class="btn-submit-rating">
-                            <iconify-icon icon="mdi:send-variant"></iconify-icon> Kirim Ulasan
-                        </button>
-                    </div>
-                </form>
-            </div>
+                        <textarea name="comment" class="comment-textarea" placeholder="Apa pendapatmu tentang buku ini? Berikan ulasan jujurmu..." required></textarea>
+                        
+                        <div style="text-align: right;">
+                            <button type="submit" class="btn-submit-rating">
+                                <iconify-icon icon="mdi:send-variant"></iconify-icon> Kirim Ulasan
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            <?php endif; ?>
 
             <!-- Comments List -->
             <div class="comments-section" style="margin-top: 60px;">

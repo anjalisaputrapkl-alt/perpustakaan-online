@@ -59,7 +59,7 @@ html body .control-label {
 /* Ensure ALL headings follow theme color */
 html body h1,
 html body h2,
-html body h3,
+html body h3:not(.school-name),
 html body h4,
 html body h5,
 html body h6,
@@ -67,6 +67,11 @@ html body .card-title,
 html body .header-title {
     color: var(--theme-primary) !important;
     font-weight: 800 !important;
+}
+
+/* Sidebar Specific Header Fix */
+html body .nav-sidebar .school-name {
+    color: #ffffff !important;
 }
 
 /* Tables - Specific Cells and Info */

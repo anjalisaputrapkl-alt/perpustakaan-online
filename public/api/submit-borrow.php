@@ -69,6 +69,24 @@ try {
                 continue;
             }
 
+            // Check if book is already actively borrowed by ANYONE
+            $activeBorrowStmt = $pdo->prepare(
+                'SELECT b.id, m.name as borrower_name
+                 FROM borrows b
+                 LEFT JOIN members m ON b.member_id = m.id
+                 WHERE b.book_id = :bid
+                   AND b.returned_at IS NULL
+                   AND b.status != "rejected"
+                 LIMIT 1'
+            );
+            $activeBorrowStmt->execute(['bid' => $borrow['book_id']]);
+            $activeBorrow = $activeBorrowStmt->fetch();
+            if ($activeBorrow !== false) {
+                $borrowerName = $activeBorrow['borrower_name'] ?? 'anggota lain';
+                $errors[] = "Buku sudah sedang dipinjam oleh '{$borrowerName}'. Harus dikembalikan terlebih dahulu.";
+                continue;
+            }
+
             // Check if book is available and get its custom borrow limit
             $checkStmt = $pdo->prepare('SELECT copies, title, max_borrow_days, access_level FROM books WHERE id = :bid AND school_id = :sid');
             $checkStmt->execute(['bid' => $borrow['book_id'], 'sid' => $school_id]);

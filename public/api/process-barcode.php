@@ -78,6 +78,25 @@ try {
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {
+        // Dual check: copies=0 means approved borrow; active borrow record means pending/borrowed/overdue
+        $isBorrowedByCopies = ((int)$result['copies'] < 1);
+
+        $borrowStmt = $pdo->prepare(
+            "SELECT b.id, m.name AS borrower_name
+             FROM borrows b
+             LEFT JOIN members m ON b.member_id = m.id
+             WHERE b.book_id = ?
+               AND b.status NOT IN ('returned', 'rejected')
+             ORDER BY b.id DESC LIMIT 1"
+        );
+        $borrowStmt->execute([$result['id']]);
+        $activeBorrow = $borrowStmt->fetch(PDO::FETCH_ASSOC);
+        $isBorrowedByRecord = ($activeBorrow !== false);
+
+        // Either signals book is not available
+        $result['is_borrowed']   = $isBorrowedByCopies || $isBorrowedByRecord;
+        $result['borrower_name'] = ($activeBorrow !== false) ? ($activeBorrow['borrower_name'] ?? null) : null;
+
         echo json_encode([
             'success' => true,
             'data' => $result

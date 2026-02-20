@@ -145,7 +145,23 @@ $stmt->execute(['sid' => $sid]);
 $school = $stmt->fetch();
 $defaultDuration = $school['borrow_duration'] ?? 7;
 
-$stmt = $pdo->prepare('SELECT * FROM books WHERE school_id=:sid ORDER BY id DESC');
+$stmt = $pdo->prepare('
+  SELECT bk.*, 
+         curr_b.id as current_borrow_id, 
+         curr_b.status as borrow_status,
+         m.name as borrower_name
+  FROM books bk
+  -- Join with the MOST RECENT active borrow record
+  LEFT JOIN borrows curr_b ON curr_b.id = (
+      SELECT id FROM borrows 
+      WHERE book_id = bk.id 
+      AND status NOT IN ("returned", "rejected")
+      ORDER BY id DESC LIMIT 1
+  )
+  LEFT JOIN members m ON curr_b.member_id = m.id
+  WHERE bk.school_id = :sid 
+  ORDER BY bk.id DESC
+');
 $stmt->execute(['sid' => $sid]);
 $books = $stmt->fetchAll();
 
@@ -270,19 +286,14 @@ $categories = [
                             </div>
                         </div>
                         <div class="form-row" style="margin-top: 16px;">
-                            <div class="form-col">
+                            <div class="form-col" style="flex: 1;">
                                 <div class="form-group">
-                                    <label>Penempatan Rak (Rak & Baris)</label>
+                                    <label>Penempatan Rak (Rak, Baris, Kolom)</label>
                                     <div class="book-location-input">
-                                        <input name="shelf" value="<?= $book['shelf'] ?? '' ?>" placeholder="Rak A" style="flex: 1;">
-                                        <input type="number" min="1" name="row_number" value="<?= $book['row_number'] ?? '' ?>" placeholder="Brs 1" style="max-width: 80px;">
+                                        <input name="shelf" value="<?= $book['shelf'] ?? '' ?>" placeholder="Rak A" style="flex: 1.5;">
+                                        <input type="number" min="1" name="row_number" value="<?= $book['row_number'] ?? '' ?>" placeholder="Brs 1" style="flex: 1; max-width: 80px;">
+                                        <input type="number" min="1" name="lokasi_rak" value="<?= $book['lokasi_rak'] ?? '' ?>" placeholder="Klm 1" style="flex: 1; max-width: 80px;">
                                     </div>
-                                </div>
-                            </div>
-                            <div class="form-col" style="flex: 1.5;">
-                                <div class="form-group">
-                                    <label>Keterangan / Kolom</label>
-                                    <input name="lokasi_rak" value="<?= $book['lokasi_rak'] ?? '' ?>" placeholder="Contoh: Kolom 3, Pojok Kiri, Lemari Belakang..." style="flex: 1;">
                                 </div>
                             </div>
                         </div>
@@ -377,13 +388,52 @@ $categories = [
                     </div>
                   <?php endif; ?>
                   
+                  <?php 
+                    $isBorrowed = !empty($b['current_borrow_id']);
+                    $bStatus = $b['borrow_status'] ?? '';
+                    
+                    $badgeText = 'Tersedia';
+                    $badgeColor = '#059669';
+                    $badgeBg = 'rgba(16, 185, 129, 0.15)';
+                    $badgeBorder = 'rgba(16, 185, 129, 0.3)';
+                    $badgeIcon = 'mdi:check-circle';
+                    $badgeTooltip = 'Buku Tersedia';
+
+                    if ($isBorrowed) {
+                        $badgeColor = '#dc2626';
+                        $badgeBg = 'rgba(239, 68, 68, 0.15)';
+                        $badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                        $badgeIcon = 'mdi:clock-alert';
+                        
+                        if ($bStatus === 'pending_confirmation') {
+                            $badgeText = 'Booking';
+                            $badgeColor = '#d97706'; // Orange-ish
+                            $badgeBg = 'rgba(217, 119, 6, 0.15)';
+                            $badgeBorder = 'rgba(217, 119, 6, 0.3)';
+                            $badgeTooltip = 'Menunggu Konfirmasi Admin';
+                        } else {
+                            $badgeText = 'Dipinjam';
+                        }
+                        
+                        if (!empty($b['borrower_name'])) {
+                            $badgeTooltip = 'Oleh: ' . htmlspecialchars($b['borrower_name']) . ($bStatus === 'pending_confirmation' ? ' (Menunggu)' : '');
+                        }
+                    } else if ($b['copies'] <= 0) {
+                        $badgeText = 'Sirkulasi';
+                        $badgeColor = '#dc2626';
+                        $badgeBg = 'rgba(239, 68, 68, 0.15)';
+                        $badgeBorder = 'rgba(239, 68, 68, 0.3)';
+                        $badgeIcon = 'mdi:clock-alert';
+                        $badgeTooltip = 'Sedang tidak di rak';
+                    }
+                  ?>
                   <div class="stock-badge-overlay" style="
-                      background: <?= $b['copies'] > 0 ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)' ?>;
-                      color: <?= $b['copies'] > 0 ? '#059669' : '#dc2626' ?>;
-                      border: 1px solid <?= $b['copies'] > 0 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)' ?>;
-                  ">
-                      <iconify-icon icon="<?= $b['copies'] > 0 ? 'mdi:check-circle' : 'mdi:clock-alert' ?>" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
-                      <?= $b['copies'] > 0 ? 'Tersedia' : 'Sirkulasi' ?>
+                      background: <?= $badgeBg ?>;
+                      color: <?= $badgeColor ?>;
+                      border: 1px solid <?= $badgeBorder ?>;
+                  " title="<?= $badgeTooltip ?>">
+                      <iconify-icon icon="<?= $badgeIcon ?>" style="vertical-align: middle; margin-right: 4px;"></iconify-icon>
+                      <?= $badgeText ?>
                   </div>
                 </div>
                 
@@ -392,14 +442,17 @@ $categories = [
                   <div class="book-title" title="<?= htmlspecialchars($b['title']) ?>"><?= htmlspecialchars($b['title']) ?></div>
                   <div class="book-author"><?= htmlspecialchars($b['author']) ?></div>
                   
+                  <?php if ($isBorrowed): ?>
+                      <p style="font-size: 10px; color: <?= $bStatus === 'pending_confirmation' ? '#d97706' : 'var(--danger)' ?>; margin: 4px 0 0 0;">
+                          Oleh: <?= htmlspecialchars($b['borrower_name'] ?? 'Unknown') ?>
+                      </p>
+                  <?php endif; ?>
+                  
                   <div class="book-card-footer">
                       <div class="shelf-info">
                           <iconify-icon icon="mdi:bookshelf" style="color: var(--accent);"></iconify-icon>
                           <span title="<?= !empty($b['lokasi_rak']) ? 'Detail: ' . htmlspecialchars($b['lokasi_rak']) : '' ?>">
-                            Rak <?= htmlspecialchars($b['shelf'] ?? '-') ?> / <?= htmlspecialchars($b['row_number'] ?? '-') ?>
-                            <?php if(!empty($b['lokasi_rak'])): ?>
-                                <span style="opacity: 0.6; font-size: 10px;">• <?= htmlspecialchars($b['lokasi_rak']) ?></span>
-                            <?php endif; ?>
+                            Rak <?= htmlspecialchars($b['shelf'] ?? '-') ?> / <?= htmlspecialchars($b['row_number'] ?? '-') ?> / <?= htmlspecialchars($b['lokasi_rak'] ?? '-') ?>
                           </span>
                       </div>
                       
@@ -527,10 +580,6 @@ $categories = [
             <div class="detail-field">
               <label>Lokasi</label>
               <div id="detailLocation"></div>
-            </div>
-            <div class="detail-field detail-lokasi-spesifik" style="display: none;">
-              <label>Keterangan / Kolom</label>
-              <div id="detailLokasiRak"></div>
             </div>
             <div class="detail-field">
               <label>Batas Pinjam</label>

@@ -168,6 +168,8 @@ async function processBarcode(barcode) {
                 playSound('error');
                 showToast('Buku sudah ada', 'error');
             } else {
+                console.log('[DEBUG] Book data:', JSON.stringify(data.data));
+
                 // CHECK BORROW LIMIT (Member's active count + currently scanned in session)
                 if (currentMember) {
                     const totalPotential = currentMember.current_borrow_count + scannedBooks.length;
@@ -192,6 +194,22 @@ async function processBarcode(barcode) {
                     return;
                 }
 
+                // CHECK IF BOOK IS ALREADY BORROWED
+                if (data.data.is_borrowed) {
+                    playSound('error');
+                    const borrowerMsg = data.data.borrower_name
+                        ? `Sedang dipinjam oleh <b>${data.data.borrower_name}</b>.`
+                        : 'Buku ini sedang dipinjam oleh anggota lain.';
+                    showLoading(false); // hide overlay FIRST so Swal is visible
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Buku Tidak Tersedia',
+                        html: `${borrowerMsg}<br>Buku harus dikembalikan terlebih dahulu.`,
+                        confirmButtonColor: '#991b1b'
+                    });
+                    return;
+                }
+
                 scannedBooks.push({
                     book_id: data.data.id,
                     book_title: data.data.name,
@@ -201,6 +219,7 @@ async function processBarcode(barcode) {
                 updateScannedList();
                 playSound('success');
                 showToast('Buku ditambahkan', 'success');
+
             }
         }
 
@@ -247,19 +266,42 @@ async function submitScannedBooks() {
 
         const data = await response.json();
 
-        if (data.success) {
+        if (data.inserted > 0) {
             playSound('success');
-            showToast('Peminjaman Berhasil!', 'success');
-
-            // Stay on page: Reset state for next transaction
+            if (data.errors && data.errors.length > 0) {
+                // Partial success: some books were accepted, some rejected
+                Swal.fire({
+                    icon: 'warning',
+                    title: `${data.inserted} Buku Berhasil Dipinjam`,
+                    html: `<div style="text-align:left;font-size:13px;">`
+                        + data.errors.map(e => `⚠️ ${e}`).join('<br>')
+                        + `</div>`,
+                    confirmButtonColor: '#d97706'
+                });
+            } else {
+                showToast('Peminjaman Berhasil!', 'success');
+            }
+            // Reset state for next transaction
             scannedBooks = [];
             currentMember = null;
             updateMemberUI();
             updateScannedList();
         } else {
+            // All books were rejected (inserted = 0)
             playSound('error');
-            showToast(data.message || 'Gagal', 'error');
+            const errorList = (data.errors && data.errors.length > 0)
+                ? data.errors
+                : [data.message || 'Peminjaman gagal'];
+            Swal.fire({
+                icon: 'error',
+                title: 'Peminjaman Gagal',
+                html: `<div style="text-align:left;font-size:13px;">`
+                    + errorList.map(e => `❌ ${e}`).join('<br>')
+                    + `</div>`,
+                confirmButtonColor: '#991b1b'
+            });
         }
+
     } catch (error) {
         playSound('error');
         showToast('Error koneksi', 'error');

@@ -1,86 +1,98 @@
-/* Tema Hari Guru - Royal Azure Premium V9 */
+/* Tema Hari Guru - Academic Excellence Premium V12 */
 :root {
     --theme-primary: #1e3a8a;
-    /* Royal Blue */
-    --theme-accent: #facc15;
-    /* Academic Gold */
-    --theme-glow: rgba(30, 58, 138, 0.15);
+    /* Deep Academic Blue */
+    --theme-primary-light: #3b82f6;
+    --theme-accent: #f59e0b;
+    /* Sophisticated Amber/Gold */
+    --theme-glow: rgba(30, 58, 138, 0.2);
+    --sidebar-bg: linear-gradient(180deg, #1e3a8a 0%, #172554 100%);
 }
 
-/* Sidebar - Royal Academic Gradient */
+/* Sidebar - Professional Academic Look */
 html body .nav-sidebar {
-    background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%) !important;
-    border-right: 1px solid var(--theme-accent) !important;
+    background: var(--sidebar-bg) !important;
+    border-right: 1px solid rgba(245, 158, 11, 0.3) !important;
+}
+
+html body .nav-sidebar .school-name {
+    color: #ffffff !important;
+    font-family: 'Outfit', sans-serif !important;
+    letter-spacing: 0.5px;
 }
 
 html body .nav-sidebar .nav-link.active {
-    background: linear-gradient(90deg, rgba(250, 204, 21, 0.1) 0%, transparent 100%) !important;
+    background: linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, transparent 100%) !important;
     color: var(--theme-accent) !important;
-    border-left: 4px solid var(--theme-accent);
+    border-left: 4px solid var(--theme-accent) !important;
+    font-weight: 700 !important;
 }
 
-/* Header - Royal Glass */
+html body .nav-sidebar iconify-icon {
+    color: var(--theme-accent) !important;
+}
+
+/* Header - Modern Academic Integrity */
 html body .header,
 html body .topbar {
-    border-bottom: 2px solid var(--theme-accent) !important;
-    background: rgba(255, 255, 255, 0.85) !important;
+    border-bottom: 2px solid var(--theme-primary) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(10px);
 }
 
-/* Professional Cards */
+/* Premium Academic Cards */
 html body .card,
 html body .stat {
     background-color: #ffffff !important;
     border: 1px solid rgba(30, 58, 138, 0.1) !important;
-    border-top: 4px solid var(--theme-primary) !important;
-    border-radius: 20px !important;
+    border-top: 5px solid var(--theme-primary) !important;
+    border-radius: 24px !important;
+    box-shadow: 0 10px 25px -5px rgba(30, 58, 138, 0.05) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 
 html body .card:hover {
+    transform: translateY(-10px) !important;
     box-shadow: 0 25px 50px -12px rgba(30, 58, 138, 0.2) !important;
 }
 
-/* HIGH-CONTRAST TYPOGRAPHY & OVERLAP FIXES */
+/* Typography & Contrast Checks */
 html body .card,
 html body .stat,
 html body .table,
 html body .content,
-html body .modal-body,
-html body label,
-html body .form-label,
-html body .control-label {
-    color: #1e293b !important;
-    /* Deep Ink */
+html body label {
+    color: #334155 !important;
+    /* Professional Slate */
 }
 
-/* Ensure ALL headings follow theme color */
-html body h1,
-html body h2,
-html body h3,
-html body h4,
-html body h5,
-html body h6,
-html body .card-title,
-html body .header-title {
+html body h3:not(.school-name),
+html body .card-title {
     color: var(--theme-primary) !important;
-    font-weight: 800 !important;
+    font-weight: 700 !important;
 }
 
-/* Form Inputs */
-html body input,
-html body select,
-html body textarea {
-    color: #000000 !important;
-    border: 1px solid rgba(30, 58, 138, 0.2) !important;
-}
-
-/* Academic Buttons */
+/* Buttons - Dynamic and Professional */
 html body .btn-primary {
-    background: var(--theme-primary) !important;
-    color: #ffffff !important;
-    box-shadow: 0 10px 20px -5px rgba(30, 58, 138, 0.4) !important;
-    border-radius: 12px !important;
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%) !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 12px 24px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 8px 16px -4px rgba(30, 58, 138, 0.3) !important;
+    transition: all 0.3s ease !important;
 }
 
 html body .btn-primary:hover {
-    background: #1e40af !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 24px -6px rgba(30, 58, 138, 0.5) !important;
+    background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%) !important;
+}
+
+/* Form Styling - Deep Focus */
+html body input:focus,
+html body select:focus,
+html body textarea:focus {
+    border-color: var(--theme-primary) !important;
+    box-shadow: 0 0 0 4px rgba(30, 58, 138, 0.1) !important;
 }

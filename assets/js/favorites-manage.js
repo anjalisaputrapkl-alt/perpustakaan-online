@@ -262,7 +262,7 @@ function createBookCard(fav) {
                     <iconify-icon icon="mdi:star" style="color: #FFD700;"></iconify-icon> 
                     <span style="font-weight: 700;">${avgRating}</span>
                     <span style="opacity: 0.6; margin-left: 2px;">(${totalReviews})</span>
-                    ${fav.shelf ? `<span style="opacity: 0.6; font-size: 10px; margin-left: auto;" title="${fav.lokasi_rak || ''}">• Rak ${fav.shelf}${fav.row_number ? ' / ' + fav.row_number : ''}</span>` : ''}
+                    ${fav.shelf ? `<span style="opacity: 0.6; font-size: 10px; margin-left: auto;" title="Detail: ${fav.lokasi_rak || ''}">• Rak ${fav.shelf} / ${fav.row_number || '-'} / ${fav.lokasi_rak || '-'}</span>` : ''}
                 </div>
                 
                 <div class="action-buttons">
@@ -368,17 +368,8 @@ function openBookModal(bookData) {
     document.getElementById('modalBookAuthor').textContent = bookData.author || '-';
     document.getElementById('modalBookCategory').textContent = bookData.category || 'Umum';
     document.getElementById('modalBookISBN').textContent = bookData.isbn || '-';
-    document.getElementById('modalBookShelf').textContent = (bookData.shelf || '-') + (bookData.row_number ? ' (Baris ' + bookData.row_number + ')' : '');
+    document.getElementById('modalBookShelf').textContent = `Rak ${bookData.shelf || '-'} / Baris ${bookData.row_number || '-'} / Kolom ${bookData.lokasi_rak || '-'}`;
 
-    // Set lokasi rak spesifik
-    let lokasiRakEl = document.getElementById('modalBookLokasiRak');
-    let lokasiDetailWrap = document.getElementById('modalLokasiDetail');
-    if (bookData.lokasi_rak) {
-        if (lokasiRakEl) lokasiRakEl.textContent = bookData.lokasi_rak;
-        if (lokasiDetailWrap) lokasiDetailWrap.style.display = 'block';
-    } else {
-        if (lokasiDetailWrap) lokasiDetailWrap.style.display = 'none';
-    }
 
     // Show modal
     document.getElementById('bookModal').classList.add('active');
@@ -396,23 +387,13 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Hamburger Toggle
-function setupNavbar() {
-    const navToggle = document.getElementById('navToggle');
-    const navSidebar = document.querySelector('.nav-sidebar');
-    if (navToggle && navSidebar) {
-        navToggle.addEventListener('click', () => {
-            navSidebar.classList.toggle('active');
-        });
-    }
-}
+
 
 // ============================================
 // INITIALIZATION
 // ============================================
 
 document.addEventListener('DOMContentLoaded', function () {
-    setupNavbar();
     setupSearch();
     if (allFavorites.length > 0) {
         initializeCategoryFilter();

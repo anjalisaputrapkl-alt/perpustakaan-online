@@ -267,7 +267,6 @@ $pageTitle = 'Profil Saya';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Profil Saya</title>
     <script src="../assets/js/db-theme-loader.js"></script>
-    <?php require_once __DIR__ . '/../theme-loader.php'; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -277,6 +276,7 @@ $pageTitle = 'Profil Saya';
     <!-- JsBarcode for client-side barcode generation -->
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <link rel="stylesheet" href="../assets/css/profil-style.css">
+    <?php require_once __DIR__ . '/../theme-loader.php'; ?>
 </head>
 
 <body>
@@ -291,6 +291,15 @@ $pageTitle = 'Profil Saya';
     <?php include 'partials/student-header.php'; ?>
 
     <div class="container-main">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="topbar-title">
+                <iconify-icon icon="mdi:account-circle" width="28" height="28" style="color: var(--accent);"></iconify-icon>
+                <h1>Profil Saya</h1>
+            </div>
+            <p>Kelola informasi pribadi dan lihat kartu perpustakaan Anda</p>
+        </div>
+
         <div class="card">
             <div class="profile-header">
                 <?php
@@ -489,36 +498,30 @@ $pageTitle = 'Profil Saya';
             <div class="library-card-wrapper">
                 <div class="id-card-mockup" id="printableCard">
                      <div class="id-card-header">
-                        <div class="school-logo">
+                        <div class="id-card-school-logo">
                             <?php if (!empty($school['logo'])): ?>
                                 <img src="<?= htmlspecialchars($school['logo']) ?>" alt="Logo">
                             <?php else: ?>
                                 <iconify-icon icon="mdi:school"></iconify-icon>
                             <?php endif; ?>
                         </div>
-                        <div class="school-name"><?= htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN DIGITAL') ?></div>
+                        <div class="id-card-school-name"><?= htmlspecialchars($school['name'] ?? 'PERPUSTAKAAN DIGITAL') ?></div>
                      </div>
                      
                      <div class="id-card-body">
-                     <div class="id-card-photo">
-                         <?php if (!empty($siswa['foto']) && file_exists(__DIR__ . '/' . $siswa['foto'])): ?>
-                             <img src="/perpustakaan-online/public/<?php echo htmlspecialchars($siswa['foto']); ?>" 
-                                  alt="Foto" 
-                                  style="width: 100%; height: 100%; object-fit: cover; display: block;"
-                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                             <div style="display: none; align-items: center; justify-content: center; width: 100%; height: 100%;">
-                                 <iconify-icon icon="mdi:account" style="font-size: 48px; color: rgba(255,255,255,0.8);"></iconify-icon>
-                             </div>
-                         <?php else: ?>
-                             <iconify-icon icon="mdi:account" style="font-size: 48px; color: rgba(255,255,255,0.8);"></iconify-icon>
-                         <?php endif; ?>
-                     </div>
-                         
-                         <div class="id-card-details">
-                             <p style="font-size: 10px; margin-bottom: 4px; opacity: 0.6; text-transform: uppercase;">Nama Anggota</p>
-                             <h3 id="modal-name"><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></h3>
-                             <p id="modal-nisn">ID/NISN: <?php echo htmlspecialchars($siswa['nisn']); ?></p>
-                         </div>
+                          <div class="id-card-photo">
+                              <?php if ($photoExists): ?>
+                                  <img src="<?php echo htmlspecialchars($photoUrl); ?>" alt="Foto">
+                              <?php else: ?>
+                                  <iconify-icon icon="mdi:account" style="font-size: 48px; opacity: 0.8;"></iconify-icon>
+                              <?php endif; ?>
+                          </div>
+                          
+                          <div class="id-card-details">
+                              <p class="id-card-label">Nama Anggota</p>
+                              <h3 id="modal-name"><?php echo htmlspecialchars($siswa['nama_lengkap']); ?></h3>
+                              <p class="id-card-nisn">NISN: <?php echo htmlspecialchars($siswa['nisn']); ?></p>
+                          </div>
                      </div>
 
                      <div class="id-card-barcode-area">

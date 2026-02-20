@@ -159,6 +159,15 @@ async function processScannedCode(rawCode) {
                     return;
                 }
 
+                // Block if currently borrowed by someone
+                if (item.is_borrowed) {
+                    const who = item.borrower_name ? ` oleh ${item.borrower_name}` : '';
+                    showScanStatus('Buku sedang dipinjam' + who, 'error');
+                    alert(`Buku "${item.name}" sedang dipinjam${who}.\nBuku harus dikembalikan terlebih dahulu.`);
+                    document.getElementById('scannerLoading').style.display = 'none';
+                    return;
+                }
+
                 addBookToCart(item);
                 showScanStatus('Buku ditambahkan: ' + item.name, 'success');
             }

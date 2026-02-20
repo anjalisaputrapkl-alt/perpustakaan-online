@@ -429,19 +429,86 @@ $members = $stmt->fetchAll();
           </div>
         </div>
 
+        <?php
+          // Pre-compute stats for each category
+          $totalMembers = count($members);
+          $students = array_values(array_filter($members, fn($m) => ($m['role'] ?? 'student') === 'student'));
+          $staffMembers = array_values(array_filter($members, fn($m) => in_array($m['role'] ?? '', ['teacher', 'employee'])));
+          $activeMembers = array_values(array_filter($members, fn($m) => ($m['active_borrows'] ?? 0) > 0));
+          $hasAccountMembers = [];
+          foreach ($members as $m) {
+            $chk = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND (role = "student" OR role = "teacher" OR role = "employee")');
+            $chk->execute(['nisn' => $m['nisn']]);
+            if ($chk->fetch()) $hasAccountMembers[] = $m;
+          }
+          $statCards = [
+            [
+              'label'   => 'Total Anggota',
+              'value'   => $totalMembers,
+              'icon'    => 'mdi:account-group',
+              'color'   => '#3b82f6',
+              'bg'      => 'rgba(59,130,246,0.1)',
+              'key'     => 'semua',
+            ],
+            [
+              'label'   => 'Siswa/Pelajar',
+              'value'   => count($students),
+              'icon'    => 'mdi:account-school',
+              'color'   => '#10b981',
+              'bg'      => 'rgba(16,185,129,0.1)',
+              'key'     => 'siswa',
+            ],
+            [
+              'label'   => 'Guru & Karyawan',
+              'value'   => count($staffMembers),
+              'icon'    => 'mdi:account-tie',
+              'color'   => '#f59e0b',
+              'bg'      => 'rgba(245,158,11,0.1)',
+              'key'     => 'staf',
+            ],
+            [
+              'label'   => 'Sedang Meminjam',
+              'value'   => count($activeMembers),
+              'icon'    => 'mdi:book-open-variant',
+              'color'   => '#ef4444',
+              'bg'      => 'rgba(239,68,68,0.1)',
+              'key'     => 'aktif',
+            ],
+          ];
+        ?>
         <div class="card" style="grid-column: 1/-1">
-          <h2>Statistik Anggota</h2>
-          <div class="stats-container" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-            <div class="stat-card">
-              <div class="stat-label">Total Anggota</div>
-              <div class="stat-value"><?= count($members) ?></div>
+          <h2 style="margin-bottom: 20px;">Statistik Anggota</h2>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;">
+            <?php foreach ($statCards as $sc): ?>
+            <div class="stat-card-clickable" onclick="showMembersStatModal('<?= $sc['key'] ?>')" 
+                 style="background: var(--card, #fff); border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px 18px; cursor: pointer; transition: all 0.2s; position: relative; overflow: hidden;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 12px; background: <?= $sc['bg'] ?>; display: flex; align-items: center; justify-content: center;">
+                  <iconify-icon icon="<?= $sc['icon'] ?>" style="font-size: 22px; color: <?= $sc['color'] ?>;"></iconify-icon>
+                </div>
+                <iconify-icon icon="mdi:chevron-right" style="color: #cbd5e1; font-size: 18px;"></iconify-icon>
+              </div>
+              <div style="font-size: 32px; font-weight: 800; color: <?= $sc['color'] ?>; line-height: 1; margin-bottom: 6px;"><?= $sc['value'] ?></div>
+              <div style="font-size: 13px; color: #64748b; font-weight: 500;"><?= $sc['label'] ?></div>
+              <div style="position: absolute; bottom: -20px; right: -10px; width: 80px; height: 80px; border-radius: 50%; background: <?= $sc['bg'] ?>; pointer-events: none;"></div>
             </div>
-            <div class="stat-card">
-              <div class="stat-label">Email Terdaftar</div>
-              <div class="stat-value"><?= count(array_filter($members, fn($m) => !empty($m['email']))) ?></div>
-            </div>
+            <?php endforeach; ?>
           </div>
+          <p style="margin-top: 14px; font-size: 12px; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
+            <iconify-icon icon="mdi:information-outline" style="font-size: 14px;"></iconify-icon>
+            Klik kartu untuk melihat daftar anggota
+          </p>
         </div>
+
+          <?php
+          // Inject stats data to JS
+          $statsData = [
+            'semua' => $members,
+            'siswa' => $students,
+            'staf'  => $staffMembers,
+            'aktif' => $activeMembers,
+          ];
+          ?>
 
         <div class="card" style="grid-column: 1/-1">
           <h2>Pertanyaan Umum</h2>
@@ -482,6 +549,46 @@ $members = $stmt->fetchAll();
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- Stats Modal -->
+  <div id="membersStatModal" class="modal-overlay" style="display:none;">
+    <div class="stat-modal-card">
+      <div class="stat-modal-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div id="statModalIconWrap" style="width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+            <iconify-icon id="statModalIcon" icon="mdi:account-group" style="font-size:22px;"></iconify-icon>
+          </div>
+          <div>
+            <h3 id="statModalTitle" style="margin:0; font-size:18px; font-weight:700; color:#0f172a;">-</h3>
+            <p id="statModalCount" style="margin:0; font-size:13px; color:#64748b;"></p>
+          </div>
+        </div>
+        <button class="modal-close-btn" onclick="closeMembersStatModal()" style="position:static; flex-shrink:0;">
+          <iconify-icon icon="mdi:close"></iconify-icon>
+        </button>
+      </div>
+
+      <!-- Search in modal -->
+      <div style="padding: 12px 24px; border-bottom: 1px solid #f1f5f9;">
+        <div style="position: relative;">
+          <iconify-icon icon="mdi:magnify" style="position:absolute; left:10px; top:50%; transform:translateY(-50%); color:#94a3b8;"></iconify-icon>
+          <input type="text" id="statModalSearch" placeholder="Cari nama, NISN..." 
+                 style="width:100%; padding:9px 12px 9px 36px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; box-sizing:border-box; outline:none;"
+                 oninput="filterStatModal(this.value)">
+        </div>
+      </div>
+
+      <!-- Member List -->
+      <div class="stat-modal-body" id="statModalBody">
+        <!-- filled by JS -->
+      </div>
+
+      <!-- Footer -->
+      <div style="padding: 16px 24px; border-top: 1px solid #f1f5f9; text-align:right;">
+        <button onclick="closeMembersStatModal()" class="btn btn-secondary" style="padding: 9px 20px;">Tutup</button>
+      </div>
     </div>
   </div>
 
@@ -540,8 +647,11 @@ $members = $stmt->fetchAll();
     const allMembersData = <?= json_encode($members) ?>;
     const schoolData = <?= json_encode($school) ?>;
     let currentMemberData = null;
+    // Stats data for clickable stat cards
+    const membersStatData = <?= json_encode($statsData) ?>;
   </script>
   <script src="../assets/js/members-manage.js"></script>
+
 
 </body>
 

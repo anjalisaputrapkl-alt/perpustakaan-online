@@ -120,7 +120,7 @@ function openBookModal(bookData) {
     document.getElementById('modalBookCategory').textContent = bookData.category || 'Umum';
     document.getElementById('modalBookISBN').textContent = bookData.isbn || '-';
     document.getElementById('modalBookCopies').textContent = bookData.copies || '0';
-    document.getElementById('modalBookShelf').textContent = (bookData.shelf || '-') + (bookData.row_number ? ' (Baris ' + bookData.row_number + ')' : '');
+    document.getElementById('modalBookShelf').textContent = `Rak ${bookData.shelf || '-'} / Baris ${bookData.row_number || '-'} / Kolom ${bookData.lokasi_rak || '-'}`;
 
     // Set status
     const isAvailable = (bookData.copies || 1) > 0;

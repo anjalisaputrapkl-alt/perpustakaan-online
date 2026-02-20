@@ -47,7 +47,6 @@ $pageTitle = 'Koleksi Favorit';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Koleksi Favorit - Perpustakaan Digital</title>
     <script src="../assets/js/db-theme-loader.js"></script>
-    <?php require_once __DIR__ . '/../theme-loader.php'; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -55,8 +54,8 @@ $pageTitle = 'Koleksi Favorit';
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/school-profile.css">
     <link rel="stylesheet" href="../assets/css/student-dashboard.css">
-
     <link rel="stylesheet" href="../assets/css/favorites-style.css">
+    <?php require_once __DIR__ . '/../theme-loader.php'; ?>
 </head>
 
 <body>
@@ -181,7 +180,7 @@ $pageTitle = 'Koleksi Favorit';
                                         <span style="font-weight: 700;"><?php echo $fav['avg_rating'] ? round($fav['avg_rating'], 1) : '0'; ?></span>
                                         <span style="opacity: 0.6; margin-left: 2px;">(<?php echo (int)$fav['total_reviews']; ?>)</span>
                                         <?php if(!empty($fav['lokasi_rak'])): ?>
-                                            <span style="opacity: 0.6; font-size: 10px; margin-left: auto;">• <?= htmlspecialchars($fav['lokasi_rak']) ?></span>
+                                            <span style="opacity: 0.6; font-size: 10px; margin-left: auto;">• Rak <?= htmlspecialchars($fav['shelf'] ?? '-') ?> / <?= htmlspecialchars($fav['row_number'] ?? '-') ?> / <?= htmlspecialchars($fav['lokasi_rak']) ?></span>
                                         <?php endif; ?>
                                     </div>
                                     
@@ -240,10 +239,6 @@ $pageTitle = 'Koleksi Favorit';
                             <span class="modal-book-item-value" id="modalBookShelf">-</span>
                         </div>
 
-                        <div id="modalLokasiDetail" class="modal-book-item" style="display: none;">
-                            <span class="modal-book-item-label">Keterangan / Kolom</span>
-                            <span class="modal-book-item-value" id="modalBookLokasiRak">-</span>
-                        </div>
 
 
                     </div>
