@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 20, 2026 at 09:52 AM
+-- Generation Time: Feb 27, 2026 at 08:51 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -72,10 +72,10 @@ INSERT INTO `books` (`id`, `school_id`, `title`, `author`, `isbn`, `category`, `
 (1, 4, 'Mengunyah Rindu', 'Budi Maryono', '982384', 'Fiksi', 'all', 1, NULL, '2026-01-26 02:48:25', '1A', 1, '11', 'book_1769399260_6976e3dc930ca.jpg'),
 (2, 4, 'Bu, aku ingin pelukmu', 'Reza Mustopa', '4522343', 'Fiksi', 'all', 1, NULL, '2026-01-26 02:49:48', '1A', 1, '10', 'book_1769399253_6976e3d564a9a.png'),
 (3, 4, 'Madilog', 'Tan Malaka', '533454', 'Referensi', 'all', 1, NULL, '2026-01-26 02:52:47', '1B', 1, '9', 'book_1769399247_6976e3cfbddeb.jpeg'),
-(4, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', '345645', 'Non-Fiksi', 'all', 1, NULL, '2026-01-26 02:55:04', '1B', 2, '8', 'book_1769399240_6976e3c8d253c.png'),
+(4, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', '345645', 'Non-Fiksi', 'all', 0, NULL, '2026-01-26 02:55:04', '1B', 2, '8', 'book_1769399240_6976e3c8d253c.png'),
 (5, 4, 'The Psychology of Money', 'Morgan Housel', '9786238371044', 'Lainnya', 'all', 1, NULL, '2026-01-26 04:02:19', '1B', 5, '7', 'book_1769400139_6976e74ba9d73.jpg'),
 (6, 4, 'Sang Alkemis', 'Paulo Coelho', '9786020656069', 'Lainnya', 'all', 1, NULL, '2026-01-26 04:03:53', '1B', 4, '6', 'book_1769400245_6976e7b53bd5e.jpg'),
-(7, 4, 'B.J. Habibie : Sebuah Biografi', 'Fatimah Fayrus', '9786231643094', 'Biografi', 'all', 0, NULL, '2026-01-26 04:07:07', '1C', 2, '4', 'book_1769400427_6976e86b698e3.jpg'),
+(7, 4, 'B.J. Habibie : Sebuah Biografi', 'Fatimah Fayrus', '9786231643094', 'Biografi', 'all', 1, NULL, '2026-01-26 04:07:07', '1C', 2, '4', 'book_1769400427_6976e86b698e3.jpg'),
 (8, 10, 'dfgdfg', 'dfgdfg', '232343', 'Referensi', 'all', 1, NULL, '2026-01-29 04:24:26', '1A', 3, NULL, 'book_1769660674_697ae1029671b.jpg'),
 (14, 4, 'The Art of Stoicism', 'Adora Kinara', '34567890', 'Non-Fiksi', 'teacher_only', 1, NULL, '2026-02-10 07:15:57', '1', 2, '5', 'book_1770707752_698adb282818f.jpg'),
 (18, 14, 'Spy X Familyy', 'Tatsuya Endo', '987-982', 'Fiksi', 'all', 0, 2, '2026-02-19 03:53:24', '1D', 3, '4', 'book_1771473204_6996893442426.jpg'),
@@ -170,8 +170,12 @@ INSERT INTO `borrows` (`id`, `school_id`, `book_id`, `member_id`, `borrowed_at`,
 (53, 4, 2, 4, '2026-02-20 13:49:26', '2026-02-23 13:49:32', '2026-02-20 13:56:17', 'returned', 0.00, 'unpaid'),
 (54, 4, 2, 4, '2026-02-20 13:59:23', '2026-02-23 14:04:27', '2026-02-20 14:25:14', 'returned', 0.00, 'unpaid'),
 (55, 4, 1, 6, '2026-02-20 14:23:49', '2026-02-23 14:24:13', '2026-02-20 14:25:16', 'returned', 0.00, 'unpaid'),
-(56, 4, 7, 6, '2026-02-20 14:26:22', '2026-02-23 14:28:05', NULL, 'borrowed', 0.00, 'unpaid'),
-(58, 4, 4, 6, '2026-02-20 14:27:34', '2026-02-23 14:28:05', '2026-02-20 14:49:57', 'returned', 0.00, 'unpaid');
+(56, 4, 7, 6, '2026-02-20 14:26:22', '2026-02-23 14:28:05', '2026-02-23 08:17:49', 'returned', 0.00, 'unpaid'),
+(58, 4, 4, 6, '2026-02-20 14:27:34', '2026-02-23 14:28:05', '2026-02-20 14:49:57', 'returned', 0.00, 'unpaid'),
+(62, 4, 4, 4, '2026-02-23 08:35:49', '2026-02-26 08:36:18', '2026-02-23 08:36:23', 'returned', 0.00, 'unpaid'),
+(63, 4, 1, 4, '2026-02-23 08:35:49', '2026-02-26 08:36:18', '2026-02-23 08:36:21', 'returned', 0.00, 'unpaid'),
+(64, 4, 4, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', NULL, 'borrowed', 0.00, 'unpaid'),
+(65, 4, 1, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', '2026-02-26 10:14:33', 'returned', 0.00, 'unpaid');
 
 -- --------------------------------------------------------
 
@@ -348,7 +352,7 @@ CREATE TABLE `schools` (
 --
 
 INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `created_at`, `email`, `phone`, `address`, `description`, `logo`, `profile_picture`, `npsn`, `website`, `photo_path`, `founded_year`, `borrow_duration`, `late_fine`, `max_books`, `max_books_student`, `max_books_teacher`, `max_books_employee`, `scan_access_key`, `custom_base_url`) VALUES
-(4, 'AUSTRALIA INDEPENDENTS SCHOOL', '', 'pending', NULL, '2026-01-26 02:42:13', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'public/uploads/school-photos/school_1769399275_6976e3ebe6757.jpg', 0, 3, 1000.00, 4, 2, 5, 5, 'dd4a4d7aa46b9e287cab0ee8ba269153', 'https://ungaudy-bitless-jeffrey.ngrok-free.dev'),
+(4, 'AUSTRALIA INDEPENDENTS SCHOOL', '', 'pending', NULL, '2026-01-26 02:42:13', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'public/uploads/school-photos/school_1769399275_6976e3ebe6757.jpg', 0, 3, 1000.00, 4, 2, 5, 5, 'be85702d488a2deb9551de4341465227', 'https://ungaudy-bitless-jeffrey.ngrok-free.dev'),
 (5, 'sdfsdf', 'sdfsdf', 'pending', NULL, '2026-01-26 04:37:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
 (7, 'sdfsdfasdasd', 'sdfsdfasdasd', 'pending', NULL, '2026-01-26 04:39:59', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
 (8, 'sdfbhsd', 'sdfbhsd', 'pending', NULL, '2026-01-26 04:42:48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
@@ -378,7 +382,28 @@ CREATE TABLE `school_themes` (
 --
 
 INSERT INTO `school_themes` (`id`, `school_id`, `theme_name`, `custom_colors`, `typography`, `created_at`, `updated_at`) VALUES
-(2, 4, 'light', NULL, NULL, '2026-01-26 02:43:32', '2026-02-20 02:24:07');
+(2, 4, 'custom', '{\"color-bg\":\"#80ffb0\",\"color-surface\":\"#ffffff\",\"color-text\":\"#8d5e5e\",\"color-accent\":\"#000000\",\"color-muted\":\"#000000\",\"color-border\":\"#000000\",\"color-sidebar-bg\":\"#254139\",\"color-sidebar-text\":\"#ffffff\",\"color-sidebar-accent\":\"#246b59\",\"metadata\":{\"display_name\":\"Custom\"}}', NULL, '2026-01-26 02:43:32', '2026-02-25 04:34:56');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `school_theme_presets`
+--
+
+CREATE TABLE `school_theme_presets` (
+  `id` int(11) NOT NULL,
+  `school_id` int(11) NOT NULL,
+  `preset_name` varchar(100) NOT NULL,
+  `colors` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`colors`)),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `school_theme_presets`
+--
+
+INSERT INTO `school_theme_presets` (`id`, `school_id`, `preset_name`, `colors`, `created_at`) VALUES
+(1, 4, 'Green White', '{\"color-bg\":\"#99ffd8\",\"color-surface\":\"#ffffff\",\"color-text\":\"#000000\",\"color-accent\":\"#000000\",\"color-muted\":\"#000000\",\"color-border\":\"#000000\"}', '2026-02-23 02:37:09');
 
 -- --------------------------------------------------------
 
@@ -440,11 +465,26 @@ CREATE TABLE `special_themes` (
 
 INSERT INTO `special_themes` (`id`, `school_id`, `name`, `date`, `is_active`, `theme_key`, `description`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Test Theme', '2026-02-12', 1, 'kemerdekaan', NULL, '2026-02-12 02:10:07', '2026-02-12 02:10:07'),
-(18, 4, 'Imlek', '2026-02-20', 0, 'tahunbaru', '', '2026-02-20 02:21:14', '2026-02-20 08:03:51'),
-(19, 4, 'Lebaran', '2026-02-20', 0, 'idulfitri', '', '2026-02-20 02:21:26', '2026-02-20 02:24:01'),
-(20, 4, 'Hari Guru', '2026-02-20', 1, 'hariguru', '', '2026-02-20 02:24:16', '2026-02-20 08:05:00'),
+(19, 4, 'Lebaran', '2026-02-20', 0, 'idulfitri', '', '2026-02-20 02:21:26', '2026-02-24 01:49:35'),
+(20, 4, 'Hari Guru', '2026-02-20', 0, 'hariguru', '', '2026-02-20 02:24:16', '2026-02-24 01:49:31'),
 (21, 4, 'Natal', '2026-02-20', 0, 'natal', '', '2026-02-20 02:30:56', '2026-02-20 02:49:05'),
-(22, 4, 'imlek', '2027-01-20', 1, 'tahunbaru', '', '2026-02-20 08:04:18', '2026-02-20 08:04:18');
+(22, 4, 'imlek', '2027-01-20', 0, 'tahunbaru', '', '2026-02-20 08:04:18', '2026-02-23 02:22:54');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `theme_templates`
+--
+
+CREATE TABLE `theme_templates` (
+  `id` int(11) NOT NULL,
+  `school_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `colors` longtext DEFAULT NULL,
+  `typography` longtext DEFAULT NULL,
+  `created_at` datetime DEFAULT current_timestamp(),
+  `updated_at` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -605,6 +645,13 @@ ALTER TABLE `school_themes`
   ADD KEY `idx_school_id` (`school_id`);
 
 --
+-- Indexes for table `school_theme_presets`
+--
+ALTER TABLE `school_theme_presets`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_school_id` (`school_id`);
+
+--
 -- Indexes for table `siswa`
 --
 ALTER TABLE `siswa`
@@ -619,6 +666,12 @@ ALTER TABLE `special_themes`
   ADD PRIMARY KEY (`id`),
   ADD KEY `school_id` (`school_id`),
   ADD KEY `date` (`date`,`is_active`);
+
+--
+-- Indexes for table `theme_templates`
+--
+ALTER TABLE `theme_templates`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `users`
@@ -662,7 +715,7 @@ ALTER TABLE `book_maintenance`
 -- AUTO_INCREMENT for table `borrows`
 --
 ALTER TABLE `borrows`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
 
 --
 -- AUTO_INCREMENT for table `favorites`
@@ -704,7 +757,13 @@ ALTER TABLE `schools`
 -- AUTO_INCREMENT for table `school_themes`
 --
 ALTER TABLE `school_themes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- AUTO_INCREMENT for table `school_theme_presets`
+--
+ALTER TABLE `school_theme_presets`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `siswa`
@@ -717,6 +776,12 @@ ALTER TABLE `siswa`
 --
 ALTER TABLE `special_themes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+
+--
+-- AUTO_INCREMENT for table `theme_templates`
+--
+ALTER TABLE `theme_templates`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `users`
