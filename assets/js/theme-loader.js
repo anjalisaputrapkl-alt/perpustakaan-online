@@ -161,7 +161,15 @@
                     const customColors = JSON.parse(cachedCustom);
                     Object.entries(customColors).forEach(([colorId, value]) => {
                         const cssVar = colorId.replace('color-', '--');
-                        document.documentElement.style.setProperty(cssVar, value);
+
+                        // Sidebar colors are global branding
+                        if (cssVar.startsWith('--sidebar-')) {
+                            document.documentElement.style.setProperty(cssVar, value);
+                        }
+                        // Other app colors only apply for the 'custom' theme mode
+                        else if (cachedTheme === 'custom') {
+                            document.documentElement.style.setProperty(cssVar, value);
+                        }
                     });
                 } catch (e) {
                     console.warn('Could not parse custom colors');

@@ -15,6 +15,27 @@ $themeModel = new ThemeModel($pdo);
 $school_id = $_SESSION['user']['school_id'] ?? 1;
 $activeKey = $themeModel->checkSpecialTheme($school_id);
 
+// 2. Load School Theme and Custom Colors
+$themeData = $themeModel->getThemeData($school_id);
+$customColors = $themeData['custom_colors'] ?? [];
+
+if (!empty($customColors)) {
+    echo "<style>\n:root {\n";
+    foreach ($customColors as $key => $value) {
+        $cssVar = str_replace('color-', '--', $key);
+        
+        // Sidebar colors are always applied for consistent branding across all themes
+        if (strpos($cssVar, '--sidebar-') === 0) {
+            echo "    $cssVar: $value !important;\n";
+        } 
+        // Other custom colors only apply if the theme is set to 'custom'
+        elseif ($themeData['theme_name'] === 'custom') {
+            echo "    $cssVar: $value !important;\n";
+        }
+    }
+    echo "}\n</style>\n";
+}
+
 if ($activeKey) {
     $configPath = __DIR__ . '/theme-config.json';
     if (file_exists($configPath)) {
@@ -216,4 +237,5 @@ EOT;
         }
     }
 }
+
 ?>

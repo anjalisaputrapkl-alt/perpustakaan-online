@@ -1,7 +1,7 @@
 // Global Theme System
 // Automatically loads the saved theme on all pages from per-school database storage
 
-(function() {
+(function () {
     const themes = {
         light: {
             '--bg': '#f1f4f8',
@@ -213,26 +213,6 @@
             '--danger': '#d4545f',
             '--success': '#8b9d6e'
         },
-        ocean: {
-            '--bg': '#0a1628',
-            '--surface': '#1a2a42',
-            '--text': '#c7e5f5',
-            '--muted': '#7a9ac9',
-            '--border': '#2d4a6f',
-            '--accent': '#1fa3f4',
-            '--danger': '#ff6b6b',
-            '--success': '#51cf66'
-        },
-        sunset: {
-            '--bg': '#2d1810',
-            '--surface': '#3d2416',
-            '--text': '#ffd4a3',
-            '--muted': '#b8906f',
-            '--border': '#5c4033',
-            '--accent': '#ff9f4a',
-            '--danger': '#ff6b5b',
-            '--success': '#ffc044'
-        },
         teal: {
             '--bg': '#0d4f4f',
             '--surface': '#1a6b6b',
@@ -251,29 +231,35 @@
             const response = await fetch('/perpustakaan-online/public/api/theme.php');
             if (!response.ok) throw new Error('Failed to load theme');
             const data = await response.json();
-            
+
             if (data.success) {
                 const theme = themes[data.theme_name] || themes.light;
-                
+
                 // Cache theme name in sessionStorage for instant loading on next page
                 sessionStorage.setItem('theme_cache', data.theme_name);
-                
+
                 // Apply base theme colors
                 Object.entries(theme).forEach(([key, value]) => {
                     document.documentElement.style.setProperty(key, value);
                 });
-                
-                // Apply custom colors if any (override theme)
+
+                // Apply custom colors
                 if (data.custom_colors && Object.keys(data.custom_colors).length > 0) {
                     sessionStorage.setItem('custom_colors_cache', JSON.stringify(data.custom_colors));
                     Object.entries(data.custom_colors).forEach(([colorId, value]) => {
                         const cssVar = colorId.replace('color-', '--');
-                        document.documentElement.style.setProperty(cssVar, value);
+
+                        // Sidebar colors are global, others are isolated to 'custom' theme
+                        if (cssVar.startsWith('--sidebar-')) {
+                            document.documentElement.style.setProperty(cssVar, value);
+                        } else if (data.theme_name === 'custom') {
+                            document.documentElement.style.setProperty(cssVar, value);
+                        }
                     });
                 }
-                
-                // Apply typography if any
-                if (data.typography && Object.keys(data.typography).length > 0) {
+
+                // Apply typography if theme is set to 'custom'
+                if (data.theme_name === 'custom' && data.typography && Object.keys(data.typography).length > 0) {
                     if (data.typography['font-family']) {
                         document.documentElement.style.fontFamily = data.typography['font-family'];
                         document.body.style.fontFamily = data.typography['font-family'];
@@ -283,13 +269,13 @@
                         document.body.style.fontWeight = data.typography['font-weight'];
                     }
                 }
-                
+
                 return;
             }
         } catch (error) {
             console.warn('Could not load theme from API:', error);
         }
-        
+
         // Fallback: use default light theme
         applyDefaultTheme();
     }

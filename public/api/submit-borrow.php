@@ -34,6 +34,14 @@ try {
     // Start transaction
     $pdo->beginTransaction();
 
+    // Fetch member's current active borrow count once (assuming all borrows are for the same member)
+    $currentBorrows = 0;
+    if (!empty($borrows[0]['member_id'])) {
+        $countStmt = $pdo->prepare('SELECT COUNT(*) FROM borrows WHERE member_id = ? AND status NOT IN ("returned", "rejected")');
+        $countStmt->execute([$borrows[0]['member_id']]);
+        $currentBorrows = (int)$countStmt->fetchColumn();
+    }
+
     foreach ($borrows as $borrow) {
         try {
             // Validate required fields
@@ -59,10 +67,6 @@ try {
             else $roleDefaultLimit = $memberData['max_books_student'] ?? 3;
 
             $maxLimit = $memberData['max_pinjam'] ?? $roleDefaultLimit;
-
-            $countStmt = $pdo->prepare('SELECT COUNT(*) as total FROM borrows WHERE member_id = :mid AND status NOT IN ("returned", "rejected")');
-            $countStmt->execute(['mid' => $borrow['member_id']]);
-            $currentBorrows = (int)$countStmt->fetchColumn();
 
             if (($currentBorrows + $inserted) >= $maxLimit) {
                 $errors[] = "Siswa sudah mencapai batas maksimal peminjaman ($maxLimit buku)";
@@ -127,10 +131,10 @@ try {
                  file_put_contents(__DIR__ . '/../../debug_borrow.log', $logMsg, FILE_APPEND);
             }
 
-            // Insert into borrows table with pending_confirmation status
+            // Insert into borrows table with borrowed status (no verification needed)
             $stmt = $pdo->prepare(
                 'INSERT INTO borrows (school_id, member_id, book_id, borrowed_at, due_at, status)
-                 VALUES (:school_id, :member_id, :book_id, NOW(), :due_at, "pending_confirmation")'
+                 VALUES (:school_id, :member_id, :book_id, NOW(), :due_at, "borrowed")'
             );
             $stmt->execute([
                 'school_id' => $school_id,
@@ -139,8 +143,12 @@ try {
                 'due_at' => $dueDate
             ]);
 
+            // Decrement book copies
+            $updateCopyStmt = $pdo->prepare('UPDATE books SET copies = copies - 1 WHERE id = ? AND school_id = ?');
+            $updateCopyStmt->execute([$borrow['book_id'], $school_id]);
+
             $inserted++;
-            error_log("[BORROW] Inserted: member_id=" . $borrow['member_id'] .
+            error_log("[BORROW] Direct Borrow Inserted: member_id=" . $borrow['member_id'] .
                 ", book_id=" . $borrow['book_id']);
 
         } catch (Exception $e) {

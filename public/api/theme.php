@@ -47,9 +47,21 @@ try {
             exit;
         }
 
+        // Fetch current to preserve typography if not provided
+        $stmt = $pdo->prepare('SELECT typography FROM school_themes WHERE school_id = ?');
+        $stmt->execute([$school_id]);
+        $current = $stmt->fetch();
+        
         $theme_name = $data['theme_name'];
-        $custom_colors = isset($data['custom_colors']) ? json_encode($data['custom_colors']) : null;
-        $typography = isset($data['typography']) ? json_encode($data['typography']) : null;
+        $custom_colors = $data['custom_colors'] ?? [];
+        
+        // Store display name inside custom_colors metadata
+        if (isset($data['theme_display_name'])) {
+            $custom_colors['metadata']['display_name'] = $data['theme_display_name'];
+        }
+        
+        $custom_colors_json = json_encode($custom_colors);
+        $typography = isset($data['typography']) ? json_encode($data['typography']) : ($current['typography'] ?? null);
 
         // Check if exists
         $stmt = $pdo->prepare('SELECT id FROM school_themes WHERE school_id = ?');
@@ -58,10 +70,10 @@ try {
 
         if ($exists) {
             $stmt = $pdo->prepare('UPDATE school_themes SET theme_name = ?, custom_colors = ?, typography = ? WHERE school_id = ?');
-            $stmt->execute([$theme_name, $custom_colors, $typography, $school_id]);
+            $stmt->execute([$theme_name, $custom_colors_json, $typography, $school_id]);
         } else {
             $stmt = $pdo->prepare('INSERT INTO school_themes (school_id, theme_name, custom_colors, typography) VALUES (?, ?, ?, ?)');
-            $stmt->execute([$school_id, $theme_name, $custom_colors, $typography]);
+            $stmt->execute([$school_id, $theme_name, $custom_colors_json, $typography]);
         }
 
         echo json_encode([

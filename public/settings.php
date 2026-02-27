@@ -230,6 +230,9 @@ $school = $stmt->fetch();
 
 // Get current theme
 $currentTheme = $themeModel->getSchoolTheme($sid);
+$customColors = json_decode($currentTheme['custom_colors'] ?? '{}', true);
+$themeDisplayName = $customColors['metadata']['display_name'] ?? 'Kustomisasi Saya';
+
 $specialThemes = $themeModel->getSpecialThemes($sid);
 $activeSpecialTheme = $themeModel->checkSpecialTheme($sid);
 
@@ -361,8 +364,8 @@ if (!$school) {
                                         <img src="../<?php echo htmlspecialchars($school['photo_path']); ?>" 
                                              class="profile-photo" alt="Logo Sekolah" id="preview-img">
                                     <?php else: ?>
-                                        <div class="photo-placeholder" id="preview-placeholder">
-                                            <iconify-icon icon="mdi:school"></iconify-icon>
+                                        <div class="school-photo-placeholder" id="preview-placeholder">
+                                            <iconify-icon icon="mdi:school-outline"></iconify-icon>
                                         </div>
                                         <img src="" class="profile-photo" alt="Logo Sekolah" id="preview-img" style="display: none;">
                                     <?php endif; ?>
@@ -566,134 +569,330 @@ if (!$school) {
             <!-- Tab: Themes -->
             <div class="tab-content" id="themes">
                 <div class="settings-grid">
-                    <div class="card">
-                        <h2 class="card-title">
-                            <iconify-icon icon="mdi:palette-swatch-outline"></iconify-icon> Kustomisasi Tema
-                        </h2>
-                        <p class="card-subtitle">Pilih tema global yang akan diterapkan ke seluruh anggota di sekolah ini.</p>
+                    <div class="main-column">
+                        <div class="card">
+                            <h2 class="card-title">
+                                <iconify-icon icon="mdi:palette-swatch-outline"></iconify-icon> Tema Dasar
+                            </h2>
+                            <p class="card-subtitle">Pilih warna dasar aplikasi yang paling sesuai dengan mata Anda.</p>
 
-                        <?php if (!empty($theme_success)): ?>
-                            <div class="alert alert-success">
-                                <iconify-icon icon="mdi:check-circle" style="font-size: 20px;"></iconify-icon>
-                                <div><?php echo htmlspecialchars($theme_success); ?></div>
-                            </div>
-                        <?php endif; ?>
+                            <?php if (!empty($theme_success)): ?>
+                                <div class="alert alert-success">
+                                    <iconify-icon icon="mdi:check-circle" style="font-size: 20px;"></iconify-icon>
+                                    <div><?php echo htmlspecialchars($theme_success); ?></div>
+                                </div>
+                            <?php endif; ?>
 
-                        <form method="post">
-                            <input type="hidden" name="action" value="update_theme">
-                            <div class="theme-grid">
-                                <?php 
-                                $themes = [
-                                    'light' => 'Terang',
-                                    'dark' => 'Gelap',
-                                    'blue' => 'Biru',
-                                    'monochrome' => 'Hitam Putih',
-                                    'sepia' => 'Klasik'
-                                ];
-                                $activeTheme = $currentTheme['theme_name'] ?? 'light';
-                                foreach ($themes as $val => $label): 
-                                ?>
-                                <label class="theme-option">
-                                    <input type="radio" name="theme_name" value="<?php echo $val; ?>" 
-                                        <?php echo $activeTheme === $val ? 'checked' : ''; ?>
-                                        onchange="this.form.submit()">
-                                    <div class="theme-card">
-                                        <div class="theme-preview <?php echo $val; ?>">
-                                            <div class="preview-top"></div>
-                                            <div class="preview-mid"></div>
-                                            <div class="preview-bot"></div>
+                            <form method="post">
+                                <input type="hidden" name="action" value="update_theme">
+                                <div class="theme-grid">
+                                    <?php 
+                                    $themes = [
+                                        'light' => 'Terang',
+                                        'dark' => 'Gelap',
+                                        'blue' => 'Biru',
+                                        'monochrome' => 'Hitam Putih',
+                                        'custom' => $themeDisplayName,
+                                    ];
+                                    $activeTheme = $currentTheme['theme_name'] ?? 'light';
+                                    foreach ($themes as $val => $label): 
+                                    ?>
+                                    <label class="theme-option">
+                                        <input type="radio" name="theme_name" value="<?php echo $val; ?>" 
+                                            <?php echo $activeTheme === $val ? 'checked' : ''; ?>
+                                            onchange="this.form.submit()">
+                                        <div class="theme-card">
+                                            <div class="theme-preview <?php echo $val; ?>">
+                                                <div class="preview-top"></div>
+                                                <div class="preview-mid"></div>
+                                                <div class="preview-bot"></div>
+                                            </div>
+                                            <span class="theme-name"><?php echo $label; ?></span>
                                         </div>
-                                        <span class="theme-name"><?php echo $label; ?></span>
+                                    </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Section Tema Hari Penting -->
+                        <div class="card">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                                <div>
+                                    <h2 class="card-title">
+                                        <iconify-icon icon="mdi:calendar-heart"></iconify-icon> Event & Hari Penting
+                                    </h2>
+                                    <p class="card-subtitle">Atur tema otomatis untuk memeriahkan hari-hari besar sekolah.</p>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="openAddSpecialThemeModal()">
+                                    <iconify-icon icon="mdi:plus"></iconify-icon> Tambah Event
+                                </button>
+                            </div>
+
+                            <?php if (!empty($theme_error)): ?>
+                                <div class="alert alert-danger" style="margin-bottom: 24px;">
+                                    <iconify-icon icon="mdi:alert-circle-outline" style="font-size: 20px;"></iconify-icon>
+                                    <div><?php echo htmlspecialchars($theme_error); ?></div>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="special-theme-list-premium">
+                                <?php if (empty($specialThemes)): ?>
+                                    <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--muted); background: var(--bg); border: 2px dashed var(--border); border-radius: 20px;">
+                                        <iconify-icon icon="mdi:calendar-multiple-check" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px;"></iconify-icon>
+                                        <p>Belum ada event yang dikonfigurasi.</p>
                                     </div>
-                                </label>
+                                <?php endif; ?>
+                                
+                                <?php foreach ($specialThemes as $st): ?>
+                                <div class="special-theme-item <?php echo $st['is_active'] ? 'active' : ''; ?>">
+                                    <div>
+                                        <h3 style="font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px;"><?php echo htmlspecialchars($st['name']); ?></h3>
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                                            <span class="st-badge">
+                                                <iconify-icon icon="mdi:calendar-clock"></iconify-icon> 
+                                                <?php echo date('d M Y', strtotime($st['date'])); ?>
+                                            </span>
+                                            <span class="st-badge" style="color: var(--accent);">
+                                                <iconify-icon icon="mdi:file-code-outline"></iconify-icon> 
+                                                <?php echo htmlspecialchars($st['theme_key']); ?>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div style="display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
+                                        <form method="post">
+                                            <input type="hidden" name="action" value="toggle_special_theme">
+                                            <input type="hidden" name="theme_id" value="<?php echo $st['id']; ?>">
+                                            <input type="hidden" name="status" value="<?php echo $st['is_active'] ? 0 : 1; ?>">
+                                            <button type="submit" class="btn" style="min-width: 90px; padding: 6px; font-size: 10px; font-weight: 800; background: <?php echo $st['is_active'] ? 'var(--success)' : 'var(--bg)'; ?>; color: <?php echo $st['is_active'] ? 'white' : 'var(--muted)'; ?>; border: <?php echo $st['is_active'] ? 'none' : '1px solid var(--border)'; ?>;">
+                                                <?php echo $st['is_active'] ? 'AKTIF' : 'NONAKTIF'; ?>
+                                            </button>
+                                        </form>
+                                        <form method="post" onsubmit="return confirm('Hapus event ini?')">
+                                            <input type="hidden" name="action" value="delete_special_theme">
+                                            <input type="hidden" name="theme_id" value="<?php echo $st['id']; ?>">
+                                            <button type="submit" class="btn-text" style="color: var(--danger); font-size: 11px; font-weight: 600;">
+                                                <iconify-icon icon="mdi:delete-outline"></iconify-icon> Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                                 <?php endforeach; ?>
                             </div>
-                        </form>
+                        </div>
                     </div>
 
                     <div class="sidebar-widgets">
                         <div class="card">
-                            <h3 class="card-title" style="font-size: 14px;">Preview Tema</h3>
-                            <p style="font-size: 13px; color: var(--muted); line-height: 1.6;">
-                                Tema yang Anda pilih akan langsung diterapkan pada:<br>
-                                • Sidebar Navigation<br>
-                                • Dashboard Widgets<br>
-                                • Data Tables<br>
-                                • Kartu Anggota
+                            <h3 class="card-title" style="font-size: 14px;">Panduan Desain</h3>
+                            <p style="font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px;">
+                                • Pastikan <strong>Kontras Teks</strong> cukup tinggi agar mudah dibaca.<br>
+                                • Gunakan <strong>Warna Aksen</strong> yang mewakili identitas sekolah.<br>
+                                • Simpan perubahan setelah Anda puas dengan hasilnya.
                             </p>
+                            <button type="button" class="btn btn-primary btn-full" onclick="openThemeCustomizerModal()" style="font-size: 12px;">
+                                <iconify-icon icon="mdi:palette-outline"></iconify-icon> Buka Panel Kustomisasi
+                            </button>
+
+                            <?php if (!empty($customColors)): ?>
+                            <div class="sidebar-palette">
+                                <span class="sidebar-palette-title">Palet Kustom Aktif</span>
+                                <div class="palette-grid">
+                                    <?php foreach (['color-bg', 'color-surface', 'color-text', 'color-accent', 'color-muted', 'color-border'] as $id): ?>
+                                        <div class="palette-swatch" style="background: <?php echo htmlspecialchars($customColors[$id] ?? '#eee'); ?>"></div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <div class="sidebar-mini-preview">
+                                    <div class="mini-mock-avatar"></div>
+                                    <div class="mini-mock-lines">
+                                        <div class="mini-mock-line"></div>
+                                        <div class="mini-mock-line short"></div>
+                                    </div>
+                                    <iconify-icon icon="mdi:check-decagram" style="color: var(--success); font-size: 18px;"></iconify-icon>
+                                </div>
+                            </div>
+                            <?php else: ?>
+                            <div class="sidebar-palette" style="opacity: 0.5;">
+                                <p style="font-size: 11px; text-align: center; color: var(--muted); margin: 0;">Belum ada kustomisasi aktif.</p>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Section Tema Hari Penting -->
-                <div class="card" style="margin-top: 24px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <div>
-                            <h2 class="card-title">
-                                <iconify-icon icon="mdi:calendar-star-outline"></iconify-icon> Tema Hari Penting (Otomatis)
-                            </h2>
-                            <p class="card-subtitle">Tema akan berganti otomatis pada tanggal yang ditentukan.</p>
+
+
+
+
+            <!-- Modal: Custom Theme Builder -->
+            <div id="themeCustomizerModal" class="modal-overlay theme-customizer-overlay" style="display: none;">
+                <div class="theme-customizer-card glass-modal">
+                    <div class="theme-customizer-header">
+                        <div class="title-group">
+                            <h3 class="modal-title">
+                                <iconify-icon icon="mdi:palette-swatch-variant"></iconify-icon> 
+                                Kustomisasi Tema
+                            </h3>
+                            <p class="modal-subtitle">Personalisasi identitas visual sekolah Anda secara real-time.</p>
                         </div>
-                        <button type="button" class="btn btn-primary" onclick="openAddSpecialThemeModal()">
-                            <iconify-icon icon="mdi:plus"></iconify-icon> Tambah
-                        </button>
-                    </div>
-
-                    <?php if (!empty($theme_error)): ?>
-                        <div class="alert alert-danger" style="margin-bottom: 20px;">
-                            <iconify-icon icon="mdi:alert-circle"></iconify-icon>
-                            <div><?php echo htmlspecialchars($theme_error); ?></div>
-                        </div>
-                    <?php endif; ?>
-
-                    <div class="special-themes-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
-                        <?php if (empty($specialThemes)): ?>
-                            <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--muted); background: var(--bg); border: 1px dashed var(--border); border-radius: 12px;">
-                                <iconify-icon icon="mdi:calendar-blank" style="font-size: 48px; margin-bottom: 10px;"></iconify-icon>
-                                <p>Belum ada tema hari penting yang dikonfigurasi.</p>
-                            </div>
-                        <?php endif; ?>
                         
-                        <?php foreach ($specialThemes as $st): ?>
-                        <div class="card" style="padding: 15px; border: 1px solid var(--border); box-shadow: none;">
-                            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                                <div>
-                                    <h3 style="font-size: 15px; margin-bottom: 10px; font-weight: 600;"><?php echo htmlspecialchars($st['name']); ?></h3>
-                                    <div style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                                        <iconify-icon icon="mdi:calendar-outline" style="font-size: 16px; color: var(--primary);"></iconify-icon> 
-                                        <?php echo date('d F Y', strtotime($st['date'])); ?>
-                                    </div>
-                                    <div style="display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; background: color-mix(in srgb, var(--primary) 10%, transparent); color: var(--primary);">
-                                        CSS: <?php echo htmlspecialchars($st['theme_key']); ?>.css
-                                    </div>
+                        <div class="theme-name-input-group">
+                            <label>Nama Tema</label>
+                            <input type="text" id="customThemeDisplayName" 
+                                value="<?= htmlspecialchars($themeDisplayName) ?>" 
+                                placeholder="Misal: Warna Sekolah Kami">
+                        </div>
+
+                        <div class="modal-actions">
+                            <button type="button" class="btn-icon-text" onclick="closeThemeCustomizerModal()">
+                                <iconify-icon icon="mdi:close"></iconify-icon> Tutup
+                            </button>
+                            <button type="button" id="resetCustomThemeBtn" class="btn-icon-text danger-hover">
+                                <iconify-icon icon="mdi:refresh"></iconify-icon> Reset
+                            </button>
+                            <button type="button" id="saveCustomThemeBtn" class="btn btn-primary btn-save-theme">
+                                <iconify-icon icon="mdi:content-save-check"></iconify-icon> Simpan Tema
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="theme-customizer-body">
+                        <!-- Left Column: Controls -->
+                        <div class="theme-customizer-controls">
+                            <!-- Main Colors Group -->
+                            <div class="customizer-group">
+                                <div class="group-header">
+                                    <iconify-icon icon="mdi:application-settings-outline"></iconify-icon>
+                                    <h4>Warna Aplikasi</h4>
+                                    <span class="badge-info">Khusus Tema Kustom</span>
                                 </div>
-                                <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
-                                    <form method="post">
-                                        <input type="hidden" name="action" value="toggle_special_theme">
-                                        <input type="hidden" name="theme_id" value="<?php echo $st['id']; ?>">
-                                        <input type="hidden" name="status" value="<?php echo $st['is_active'] ? 0 : 1; ?>">
-                                        <button type="submit" class="btn" style="padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; border: none; background: <?php echo $st['is_active'] ? 'var(--success)' : 'var(--muted)'; ?>; color: white;">
-                                            <?php echo $st['is_active'] ? 'AKTIF' : 'NONAKTIF'; ?>
-                                        </button>
-                                    </form>
-                                    <form method="post" onsubmit="return confirm('Hapus tema ini?')">
-                                        <input type="hidden" name="action" value="delete_special_theme">
-                                        <input type="hidden" name="theme_id" value="<?php echo $st['id']; ?>">
-                                        <button type="submit" class="btn-text" style="font-size: 11px; color: var(--danger); background: none; border: none; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-                                            <iconify-icon icon="mdi:trash-can-outline"></iconify-icon> Hapus
-                                        </button>
-                                    </form>
+                                <div class="color-picker-grid-compact">
+                                    <?php
+                                    $mainColors = [
+                                        '--bg' => 'Latar Belakang',
+                                        '--surface' => 'Kartu & Panel',
+                                        '--text' => 'Teks Utama',
+                                        '--accent' => 'Aksen Utama',
+                                        '--muted' => 'Teks Sekunder',
+                                        '--border' => 'Garis Pemisah'
+                                    ];
+
+                                    foreach ($mainColors as $cssVar => $label):
+                                        $colorId = str_replace('--', 'color-', $cssVar);
+                                        $currentVal = $customColors[$colorId] ?? ''; 
+                                        if (!$currentVal) {
+                                            $fallbacks = [
+                                                '--bg' => '#f8f9fa', '--surface' => '#ffffff', '--text' => '#1a202c', 
+                                                '--accent' => '#007bff', '--muted' => '#718096', '--border' => '#e2e8f0'
+                                            ];
+                                            $currentVal = $fallbacks[$cssVar] ?? '#000000';
+                                        }
+                                    ?>
+                                    <div class="color-picker-item-minimal">
+                                        <div class="color-info">
+                                            <span class="color-label"><?= $label ?></span>
+                                            <span class="color-code-display"><?= strtoupper($currentVal) ?></span>
+                                        </div>
+                                        <div class="picker-control">
+                                            <input type="color" class="color-box-input" data-color-id="<?= $colorId ?>" value="<?= $currentVal ?>">
+                                            <input type="text" class="color-hex-input" value="<?= strtoupper($currentVal) ?>" spellcheck="false" maxlength="7">
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+
+                            <!-- Sidebar Group -->
+                            <div class="customizer-group">
+                                <div class="group-header">
+                                    <iconify-icon icon="mdi:sidebar-outline"></iconify-icon>
+                                    <h4>Branding Sidebar</h4>
+                                    <span class="badge-info">Semua Tema</span>
+                                </div>
+                                <div class="color-picker-grid-compact">
+                                    <?php
+                                    $sidebarColors = [
+                                        '--sidebar-bg' => 'Latar Sidebar',
+                                        '--sidebar-text' => 'Teks Sidebar',
+                                        '--sidebar-accent' => 'Aksen Sidebar'
+                                    ];
+
+                                    foreach ($sidebarColors as $cssVar => $label):
+                                        $colorId = str_replace('--', 'color-', $cssVar);
+                                        $currentVal = $customColors[$colorId] ?? ''; 
+                                        if (!$currentVal) {
+                                            $fallbacks = [
+                                                '--sidebar-bg' => '#0b3d61', '--sidebar-text' => '#ffffff', '--sidebar-accent' => 'rgba(255,255,255,0.1)'
+                                            ];
+                                            $currentVal = $fallbacks[$cssVar] ?? '#000000';
+                                        }
+                                    ?>
+                                    <div class="color-picker-item-minimal">
+                                        <div class="color-info">
+                                            <span class="color-label"><?= $label ?></span>
+                                            <span class="color-code-display"><?= strtoupper($currentVal) ?></span>
+                                        </div>
+                                        <div class="picker-control">
+                                            <input type="color" class="color-box-input" data-color-id="<?= $colorId ?>" value="<?= $currentVal ?>">
+                                            <input type="text" class="color-hex-input" value="<?= strtoupper($currentVal) ?>" spellcheck="false" maxlength="7">
+                                        </div>
+                                    </div>
+                                    <?php endforeach; ?>
                                 </div>
                             </div>
                         </div>
-                        <?php endforeach; ?>
+
+                        <!-- Right Column: Live Preview (Sticky) -->
+                        <div class="theme-customizer-preview">
+                            <div class="sticky-preview-wrapper">
+                                <div class="preview-card-header">
+                                    <iconify-icon icon="mdi:eye-outline"></iconify-icon>
+                                    <span>Pratinjau Langsung</span>
+                                </div>
+                                
+                                <div class="preview-mock-app">
+                                    <div class="mock-sidebar">
+                                        <div class="mock-logo"></div>
+                                        <div class="mock-nav">
+                                            <div class="mock-nav-item active"></div>
+                                            <div class="mock-nav-item"></div>
+                                            <div class="mock-nav-item"></div>
+                                        </div>
+                                    </div>
+                                    <div class="mock-content">
+                                        <div class="mock-topbar"></div>
+                                        <div class="mock-inner">
+                                            <div class="mock-stats">
+                                                <div class="mock-stat"></div>
+                                                <div class="mock-stat"></div>
+                                            </div>
+                                            <div class="mock-main-card">
+                                                <div class="mock-avatar"></div>
+                                                <div class="mock-lines">
+                                                    <div class="mock-line title"></div>
+                                                    <div class="mock-line"></div>
+                                                    <div class="mock-line short"></div>
+                                                </div>
+                                                <div class="mock-button">DEMO TOMBOL</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="preview-tips">
+                                    <iconify-icon icon="mdi:lightbulb-on-outline"></iconify-icon>
+                                    <p>Perubahan warna dapat langsung terlihat pada aplikasi di sistem real-time.</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Modal Tambah Tema Khusus -->
-                <div id="addSpecialThemeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
-                    <div class="card" style="width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
-                        <h2 class="card-title" style="margin-bottom: 25px;">
+            </div>
+            <!-- Modal Tambah Tema Khusus -->
+            <div id="addSpecialThemeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+                <div class="card" style="width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                    <h2 class="card-title" style="margin-bottom: 25px;">
                             <iconify-icon icon="mdi:plus-circle-outline"></iconify-icon> Tambah Hari Penting
                         </h2>
                         <form method="post">
@@ -748,7 +947,8 @@ if (!$school) {
                         </form>
                     </div>
                 </div>
-            </div>
+
+
 
             <!-- Tab: Scanner Mobile -->
             <div class="tab-content" id="scanner">

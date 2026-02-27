@@ -1,5 +1,5 @@
 let scanner = null;
-let scanMode = 'book'; // Default mode Book
+let scanMode = 'member'; // Default mode Member first
 let currentMember = null;
 let scannedBooks = []; // Array to store scanned books
 let lastScannedTime = 0;
@@ -88,17 +88,8 @@ async function processBarcode(barcode) {
         // Handle member scan
         if (scanMode === 'member') {
             if (data.data.type !== 'member') {
-                // Intelligent auto-switch
-                if (data.data.type === 'book') {
-                    playSound('success');
-                    showToast('Buku terdeteksi. Mode: Buku', 'info');
-                    switchMode('book');
-                    scanMode = 'book'; // Force update local var
-                    processBarcode(barcode); // Retry with new mode
-                    return;
-                }
                 playSound('error');
-                showToast('Bukan kartu anggota!', 'error');
+                showToast('Wajib scan KARTU ANGGOTA dulu!', 'error');
                 showLoading(false);
                 return;
             }
@@ -148,14 +139,22 @@ async function processBarcode(barcode) {
         }
         // Handle book scan
         else if (scanMode === 'book') {
+            if (!currentMember) {
+                playSound('error');
+                showToast('Scan kartu anggota dulu!', 'error');
+                switchMode('member');
+                showLoading(false);
+                return;
+            }
+
             if (data.data.type !== 'book') {
-                // Intelligent auto-switch
+                // If scanning another member card while in book mode, switch member
                 if (data.data.type === 'member') {
+                    currentMember = data.data;
+                    updateMemberUI();
                     playSound('success');
-                    showToast('Kartu anggota terdeteksi', 'info');
-                    switchMode('member');
-                    scanMode = 'member';
-                    processBarcode(barcode);
+                    showToast(`Ganti anggota: ${currentMember.name}`, 'success');
+                    showLoading(false);
                     return;
                 }
                 playSound('error');
@@ -319,6 +318,11 @@ function playSound(type) {
 }
 
 function switchMode(mode) {
+    if (mode === 'book' && !currentMember) {
+        playSound('error');
+        showToast('Scan kartu anggota dulu!', 'error');
+        return;
+    }
     scanMode = mode;
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     const btn = document.getElementById(mode === 'book' ? 'btnModeBook' : 'btnModeMember');
@@ -328,12 +332,23 @@ function switchMode(mode) {
 function updateMemberUI() {
     const badge = document.getElementById('memberBadge');
     const nameEl = document.getElementById('badgeName');
+    const btnBook = document.getElementById('btnModeBook');
 
     if (currentMember) {
         if (nameEl) nameEl.textContent = currentMember.name;
         if (badge) badge.classList.add('active');
+        if (btnBook) {
+            btnBook.disabled = false;
+            btnBook.style.opacity = '1';
+            btnBook.style.cursor = 'pointer';
+        }
     } else {
         if (badge) badge.classList.remove('active');
+        if (btnBook) {
+            btnBook.disabled = true;
+            btnBook.style.opacity = '0.5';
+            btnBook.style.cursor = 'not-allowed';
+        }
     }
 }
 

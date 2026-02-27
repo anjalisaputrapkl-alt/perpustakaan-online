@@ -68,6 +68,25 @@ function closeAddSpecialThemeModal() {
     document.getElementById('addSpecialThemeModal').style.display = 'none';
 }
 
+function openThemeCustomizerModal() {
+    document.getElementById('themeCustomizerModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent scroll
+}
+
+function closeThemeCustomizerModal() {
+    document.getElementById('themeCustomizerModal').style.display = 'none';
+    document.body.style.overflow = ''; // Restore scroll
+}
+
+// Global modal background click to close
+window.addEventListener('click', (e) => {
+    const themeModal = document.getElementById('themeCustomizerModal');
+    const specialModal = document.getElementById('addSpecialThemeModal');
+
+    if (e.target === themeModal) closeThemeCustomizerModal();
+    if (e.target === specialModal) closeAddSpecialThemeModal();
+});
+
 // Copy to clipboard helper
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
@@ -80,5 +99,130 @@ function copyToClipboard(text) {
         document.execCommand('copy');
         document.body.removeChild(temp);
         alert('Link berhasil disalin ke clipboard!');
+    });
+}
+
+// Theme Customizer Logic
+document.querySelectorAll('.color-box-input').forEach(input => {
+    const parent = input.closest('.color-picker-item-minimal');
+    const hexInput = parent ? parent.querySelector('.color-hex-input') : input.nextElementSibling;
+    const codeDisplay = parent ? parent.querySelector('.color-code-display') : null;
+
+    input.addEventListener('input', (e) => {
+        const colorId = e.target.getAttribute('data-color-id');
+        const value = e.target.value;
+        const cssVar = colorId.replace('color-', '--');
+
+        // Sync Hex Input & Display
+        const upperVal = value.toUpperCase();
+        if (hexInput) hexInput.value = upperVal;
+        if (codeDisplay) codeDisplay.textContent = upperVal;
+
+        // Live Apply to Root
+        document.documentElement.style.setProperty(cssVar, value, 'important');
+    });
+});
+
+document.querySelectorAll('.color-hex-input').forEach(input => {
+    const parent = input.closest('.color-picker-item-minimal');
+    const colorBox = parent ? parent.querySelector('.color-box-input') : input.previousElementSibling;
+    const codeDisplay = parent ? parent.querySelector('.color-code-display') : null;
+
+    input.addEventListener('input', (e) => {
+        const value = e.target.value;
+        if (/^#[0-9A-F]{6}$/i.test(value)) {
+            const colorId = colorBox.getAttribute('data-color-id');
+            const cssVar = colorId.replace('color-', '--');
+
+            // Sync color box & display
+            colorBox.value = value;
+            if (codeDisplay) codeDisplay.textContent = value.toUpperCase();
+
+            // Live Apply
+            document.documentElement.style.setProperty(cssVar, value, 'important');
+        }
+    });
+});
+
+// Save Custom Theme Logic
+const saveBtn = document.getElementById('saveCustomThemeBtn');
+if (saveBtn) {
+    saveBtn.addEventListener('click', async function () {
+        const colors = {};
+        document.querySelectorAll('.color-box-input').forEach(input => {
+            colors[input.getAttribute('data-color-id')] = input.value;
+        });
+
+        // Use checked radio or default to light
+        const themeRadio = document.querySelector('input[name="theme_name"]:checked');
+        const currentThemeName = themeRadio ? themeRadio.value : 'light';
+
+        const btn = this;
+        const originalText = btn.innerHTML;
+
+        btn.disabled = true;
+        btn.innerHTML = '<iconify-icon icon="mdi:loading" class="spin"></iconify-icon> Menyimpan...';
+
+        const displayNameInput = document.getElementById('customThemeDisplayName');
+        const displayName = displayNameInput ? displayNameInput.value : 'Kustomisasi Saya';
+
+        try {
+            const response = await fetch('api/theme.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    theme_name: 'custom',
+                    theme_display_name: displayName,
+                    custom_colors: colors
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('✓ Template tema kustom berhasil disimpan!');
+                sessionStorage.removeItem('custom_colors_cache');
+                location.reload();
+            } else {
+                alert('Gagal: ' + result.message);
+            }
+        } catch (error) {
+            console.error('Error saving theme:', error);
+            alert('Terjadi kesalahan saat menyimpan tema.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        }
+    });
+}
+
+// Reset Custom Theme Logic
+const resetBtn = document.getElementById('resetCustomThemeBtn');
+if (resetBtn) {
+    resetBtn.addEventListener('click', async function () {
+        if (!confirm('Hapus semua kustomisasi warna dan kembali ke default tema?')) return;
+
+        const themeRadio = document.querySelector('input[name="theme_name"]:checked');
+        const currentThemeName = themeRadio ? themeRadio.value : 'light';
+        const btn = this;
+
+        try {
+            const response = await fetch('api/theme.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    theme_name: 'light',
+                    custom_colors: null
+                })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                sessionStorage.removeItem('custom_colors_cache');
+                alert('Tema telah direset ke default.');
+                location.reload();
+            }
+        } catch (error) {
+            console.error('Error resetting theme:', error);
+        }
     });
 }

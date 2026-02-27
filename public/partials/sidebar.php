@@ -104,8 +104,8 @@ function _is_active_sidebar($path, $current)
             top: 0;
             height: 100vh;
             width: 240px;
-            background: linear-gradient(135deg, #0b3d61 0%, #062d4a 100%) !important; /* Fixed Admin Background */
-            color: white;
+            background: var(--sidebar-bg, linear-gradient(135deg, #0b3d61 0%, #062d4a 100%)) !important; 
+            color: var(--sidebar-text, white);
             padding: 24px 0;
             z-index: 1002;
             overflow-y: auto;
@@ -144,6 +144,7 @@ function _is_active_sidebar($path, $current)
             font-size: 14px;
             font-weight: 700;
             margin: 0;
+            color: var(--sidebar-text, white);
         }
 
         .nav-sidebar-menu {
@@ -161,7 +162,7 @@ function _is_active_sidebar($path, $current)
             align-items: center;
             gap: 12px;
             padding: 12px 24px;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--sidebar-text, rgba(255, 255, 255, 0.8));
             text-decoration: none;
             font-size: 13px;
             font-weight: 500;
@@ -171,14 +172,14 @@ function _is_active_sidebar($path, $current)
         }
 
         .nav-sidebar-menu a:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
+            background: var(--sidebar-accent, rgba(255, 255, 255, 0.1));
+            color: var(--sidebar-text, white);
         }
 
         .nav-sidebar-menu a.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: white;
-            border-left-color: white;
+            background: var(--sidebar-accent, rgba(255, 255, 255, 0.15));
+            color: var(--sidebar-text, white);
+            border-left-color: var(--sidebar-text, white);
             font-weight: 600;
         }
 
@@ -198,7 +199,7 @@ function _is_active_sidebar($path, $current)
             font-size: 18px;
             width: 24px;
             height: 24px;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--sidebar-text, rgba(255, 255, 255, 0.8));
         }
 
         .nav-sidebar-menu a:hover iconify-icon,
@@ -208,7 +209,7 @@ function _is_active_sidebar($path, $current)
 
         .nav-sidebar-divider {
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--sidebar-accent, rgba(255, 255, 255, 0.1));
             margin: 16px 0;
         }
 
@@ -268,14 +269,14 @@ function _is_active_sidebar($path, $current)
         <div class="school-photo-wrapper">
             <?php if ($school_photo && file_exists(__DIR__ . '/../../' . $school_photo)): ?>
                 <img src="<?php echo $base; ?>/../<?php echo htmlspecialchars($school_photo); ?>"
-                    alt="<?php echo htmlspecialchars($school['name'] ?? 'School Logo'); ?>" class="school-photo"
+                    alt="<?php echo htmlspecialchars($sidebarSchool['name'] ?? 'School Logo'); ?>" class="school-photo"
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="school-photo-placeholder" style="display: none;">
-                    <iconify-icon icon="mdi:school"></iconify-icon>
+                <div class="school-photo-placeholder" style="display: none; background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 1px solid rgba(255,255,255,0.1);">
+                    <iconify-icon icon="mdi:school-outline"></iconify-icon>
                 </div>
             <?php else: ?>
-                <div class="school-photo-placeholder">
-                    <iconify-icon icon="mdi:school"></iconify-icon>
+                <div class="school-photo-placeholder" style="background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 1px solid rgba(255,255,255,0.1);">
+                    <iconify-icon icon="mdi:school-outline"></iconify-icon>
                 </div>
             <?php endif; ?>
         </div>

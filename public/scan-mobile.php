@@ -65,8 +65,8 @@ $defaultBorrowDuration = (int)($schoolSettings['borrow_duration'] ?? 7);
             <!-- Controls -->
             <div class="controls-area">
                 <div class="mode-switch">
-                    <button class="mode-btn active" id="btnModeBook" onclick="switchMode('book')">Scan Buku</button>
-                    <button class="mode-btn" id="btnModeMember" onclick="switchMode('member')">Scan Anggota</button>
+                    <button class="mode-btn active" id="btnModeMember" onclick="switchMode('member')">1. Scan Anggota</button>
+                    <button class="mode-btn" id="btnModeBook" onclick="switchMode('book')" disabled style="opacity: 0.5; cursor: not-allowed;">2. Scan Buku</button>
                 </div>
 
                 <div class="scanned-list" id="scannedListMini">
@@ -111,7 +111,7 @@ $defaultBorrowDuration = (int)($schoolSettings['borrow_duration'] ?? 7);
             defaultBorrowDuration: <?php echo $defaultBorrowDuration; ?>
         };
     </script>
-    <script src="../assets/js/scan-mobile-manage.js"></script>
+    <script src="../assets/js/scan-mobile-manage.js?v=2"></script>
 </body>
 </html>
 

@@ -1,0 +1,9 @@
+[
+    {
+        "id": 1,
+        "school_id": 4,
+        "preset_name": "Green White",
+        "colors": "{\"color-bg\":\"#99ffd8\",\"color-surface\":\"#ffffff\",\"color-text\":\"#000000\",\"color-accent\":\"#000000\",\"color-muted\":\"#000000\",\"color-border\":\"#000000\"}",
+        "created_at": "2026-02-23 09:37:09"
+    }
+]

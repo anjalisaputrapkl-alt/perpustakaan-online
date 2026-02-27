@@ -35,8 +35,8 @@ requireAuth();
         <div class="mode-indicator">
             <div class="mode-text">Mode Pemindaian</div>
             <div class="mode-buttons">
-                <button class="mode-btn active" id="btnModeBook">Scan Buku</button>
-                <button class="mode-btn inactive" id="btnModeMember">Scan Anggota</button>
+                <button class="mode-btn active" id="btnModeMember">1. Scan Anggota</button>
+                <button class="mode-btn inactive" id="btnModeBook" disabled style="opacity: 0.5; cursor: not-allowed;">2. Scan Buku</button>
             </div>
         </div>
 
@@ -83,8 +83,8 @@ requireAuth();
 
         <!-- Instruction -->
         <div class="instruction">
-            1. Scan Buku <br>
-            2. Scan Anggota <br>
+            1. Scan Anggota <br>
+            2. Scan Buku <br>
             3. Tekan Pinjam
         </div>
 
@@ -104,7 +104,7 @@ requireAuth();
     </div>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
-    <script src="../assets/js/barcode-scan-simple-manage.js"></script>
+    <script src="../assets/js/barcode-scan-simple-manage.js?v=2"></script>
 </body>
 
 </html>

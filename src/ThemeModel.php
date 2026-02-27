@@ -22,7 +22,7 @@ class ThemeModel
     public function getSchoolTheme($school_id)
     {
         $stmt = $this->pdo->prepare('
-            SELECT theme_name, custom_colors, typography
+            SELECT id, theme_name, custom_colors, typography
             FROM school_themes
             WHERE school_id = :school_id
             LIMIT 1
@@ -68,15 +68,13 @@ class ThemeModel
      */
     public function saveSchoolTheme($school_id, $theme_name, $custom_colors = null, $typography = null)
     {
-        // Check if exists
-        $stmt = $this->pdo->prepare('SELECT id FROM school_themes WHERE school_id = :school_id');
-        $stmt->execute(['school_id' => $school_id]);
-        $exists = $stmt->fetchColumn();
+        // Fetch current values to preserve if null passed
+        $current = $this->getSchoolTheme($school_id);
+        
+        $colors_json = ($custom_colors !== null) ? json_encode($custom_colors) : ($current['custom_colors'] ?? null);
+        $typo_json = ($typography !== null) ? json_encode($typography) : ($current['typography'] ?? null);
 
-        $colors_json = $custom_colors ? json_encode($custom_colors) : null;
-        $typo_json = $typography ? json_encode($typography) : null;
-
-        if ($exists) {
+        if ($current && isset($current['id'])) {
             // Update
             $stmt = $this->pdo->prepare('
                 UPDATE school_themes 

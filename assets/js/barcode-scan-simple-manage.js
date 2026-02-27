@@ -1,5 +1,5 @@
 let scanner = null;
-let scanMode = 'book'; // Default mode Book
+let scanMode = 'member'; // Default mode Member first
 let currentMember = null;
 let scannedBooks = []; // Array to store scanned books
 let lastScannedTime = 0;
@@ -77,14 +77,7 @@ async function processBarcode(barcode) {
         // Handle member scan
         if (scanMode === 'member') {
             if (data.data.type !== 'member') {
-                // Intelligent auto-switch attempt
-                if (data.data.type === 'book') {
-                    showStatus('Terdeteksi Buku. Beralih ke mode Buku...', 'info');
-                    switchMode('book');
-                    processBarcode(barcode); // Recursive call for book
-                    return;
-                }
-                showStatus('Ini buku, bukan anggota!', 'error');
+                showStatus('Wajib scan KARTU ANGGOTA dulu!', 'error');
                 showLoading(false);
                 return;
             }
@@ -101,15 +94,23 @@ async function processBarcode(barcode) {
         }
         // Handle book scan
         else if (scanMode === 'book') {
+            if (!currentMember) {
+                showStatus('Scan kartu anggota dulu!', 'error');
+                switchMode('member');
+                showLoading(false);
+                return;
+            }
+
             if (data.data.type !== 'book') {
-                // Intelligent auto-switch attempt
+                // If scanning another member card while in book mode, switch member
                 if (data.data.type === 'member') {
-                    showStatus('Terdeteksi Anggota. Beralih ke mode Anggota...', 'info');
-                    switchMode('member');
-                    processBarcode(barcode); // Recursive call for member
+                    currentMember = data.data;
+                    displayMember();
+                    showStatus(`Ganti anggota: ${currentMember.name}`, 'success');
+                    showLoading(false);
                     return;
                 }
-                showStatus('Ini anggota, bukan buku!', 'error');
+                showStatus('Bukan kode buku!', 'error');
                 showLoading(false);
                 return;
             }
@@ -274,6 +275,10 @@ function escapeHtml(text) {
 }
 
 function switchMode(mode) {
+    if (mode === 'book' && !currentMember) {
+        showStatus('Scan kartu anggota dulu!', 'error');
+        return;
+    }
     scanMode = mode;
     const btnMember = document.getElementById('btnModeMember');
     const btnBook = document.getElementById('btnModeBook');
@@ -303,9 +308,17 @@ function displayMember() {
     const nameEl = document.getElementById('memberName');
     const nisnEl = document.getElementById('memberNisn');
     const displayEl = document.getElementById('memberDisplay');
+    const btnBook = document.getElementById('btnModeBook');
+
     if (nameEl) nameEl.textContent = currentMember.name;
     if (nisnEl) nisnEl.textContent = currentMember.barcode;
     if (displayEl) displayEl.classList.add('show');
+
+    if (btnBook) {
+        btnBook.disabled = false;
+        btnBook.style.opacity = '1';
+        btnBook.style.cursor = 'pointer';
+    }
 }
 
 function showStatus(message, type = 'info') {
