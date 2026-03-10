@@ -114,14 +114,15 @@ $category = $_GET['category'] ?? '';
 $sort = $_GET['sort'] ?? 'newest';
 
 // Build query to get books with availability status and current borrower
-$query = 'SELECT bk.*, 
-                 curr_b.id as current_borrow_id, curr_b.due_at as borrower_due_at,
-                 m.name as borrower_name,
-                 (SELECT AVG(rating) FROM rating_buku WHERE id_buku = bk.id) as avg_rating,
-                 (SELECT COUNT(*) FROM rating_buku WHERE id_buku = bk.id) as total_reviews
+$query = 'SELECT bk.title, bk.author, bk.category, bk.cover_image, bk.shelf, bk.row_number, bk.lokasi_rak, bk.access_level, 
+                 GROUP_CONCAT(DISTINCT bk.isbn SEPARATOR ", ") as isbn,
+                 COALESCE(MAX(CASE WHEN bk.copies > 0 THEN bk.id ELSE NULL END), MAX(bk.id)) as id, 
+                 COUNT(bk.id) as total_copies,
+                 SUM(bk.copies) as available_copies,
+                 (SELECT GROUP_CONCAT(m.name SEPARATOR ", ") FROM borrows b JOIN members m ON b.member_id = m.id WHERE b.book_id IN (SELECT id FROM books b2 WHERE b2.title = bk.title AND b2.author = bk.author) AND b.returned_at IS NULL) as borrower_names,
+                 (SELECT AVG(rating) FROM rating_buku WHERE id_buku IN (SELECT id FROM books b2 WHERE b2.title = bk.title AND b2.author = bk.author)) as avg_rating,
+                 (SELECT COUNT(*) FROM rating_buku WHERE id_buku IN (SELECT id FROM books b2 WHERE b2.title = bk.title AND b2.author = bk.author)) as total_reviews
           FROM books bk
-          LEFT JOIN borrows curr_b ON bk.id = curr_b.book_id AND curr_b.returned_at IS NULL
-          LEFT JOIN members m ON curr_b.member_id = m.id
           WHERE bk.school_id = :school_id';
 $params = ['school_id' => $school_id];
 
@@ -144,7 +145,7 @@ switch ($sort) {
         $query .= ' ORDER BY view_count DESC';
         break;
     default: // newest
-        $query .= ' ORDER BY created_at DESC';
+        $query .= ' GROUP BY bk.title, bk.author ORDER BY MAX(bk.created_at) DESC';
 }
 
 $query .= ' LIMIT 100';
@@ -177,16 +178,18 @@ sort($categories);
 
 // Daftar semua buku sekolah (untuk ditampilkan ketika anggota klik 'Total Buku')
 try {
-    $booksAvailStmt = $pdo->prepare('SELECT bk.*, 
-                                            curr_b.id as current_borrow_id, curr_b.due_at as borrower_due_at,
-                                            m.name as borrower_name,
-                                            (SELECT AVG(rating) FROM rating_buku WHERE id_buku = bk.id) as avg_rating,
-                                            (SELECT COUNT(*) FROM rating_buku WHERE id_buku = bk.id) as total_reviews
-                                     FROM books bk
-                                     LEFT JOIN borrows curr_b ON bk.id = curr_b.book_id AND curr_b.returned_at IS NULL
-                                     LEFT JOIN members m ON curr_b.member_id = m.id
-                                     WHERE bk.school_id = :school_id 
-                                     ORDER BY bk.created_at DESC');
+    $booksAvailStmt = $pdo->prepare('SELECT bk.title, bk.author, bk.category, bk.cover_image, bk.shelf, bk.row_number, bk.lokasi_rak, bk.access_level, 
+                                             GROUP_CONCAT(DISTINCT bk.isbn SEPARATOR ", ") as isbn,
+                                             COALESCE(MAX(CASE WHEN bk.copies > 0 THEN bk.id ELSE NULL END), MAX(bk.id)) as id, 
+                                             COUNT(bk.id) as total_copies,
+                                             SUM(bk.copies) as available_copies,
+                                             (SELECT GROUP_CONCAT(m.name SEPARATOR ", ") FROM borrows b JOIN members m ON b.member_id = m.id WHERE b.book_id IN (SELECT id FROM books b2 WHERE b2.title = bk.title AND b2.author = bk.author) AND b.returned_at IS NULL) as borrower_names,
+                                             (SELECT AVG(rating) FROM rating_buku WHERE id_buku IN (SELECT id FROM books b2 WHERE b2.title = bk.title AND b2.author = bk.author)) as avg_rating,
+                                             (SELECT COUNT(*) FROM rating_buku WHERE id_buku IN (SELECT id FROM books b2 WHERE b2.title = bk.title AND b2.author = bk.author)) as total_reviews
+                                      FROM books bk
+                                      WHERE bk.school_id = :school_id 
+                                      GROUP BY bk.title, bk.author
+                                      ORDER BY MAX(bk.created_at) DESC');
     $booksAvailStmt->execute(['school_id' => $school_id]);
     $books_available = $booksAvailStmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
@@ -225,8 +228,155 @@ $pageTitle = 'Dashboard ' . $roleLabel;
     <link rel="stylesheet" href="../assets/css/sidebar.css">
     <link rel="stylesheet" href="../assets/css/school-profile.css">
     <link rel="stylesheet" href="../assets/css/student-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <?php require_once __DIR__ . '/../theme-loader.php'; ?>
 
+    <style>
+        /* SweetAlert2 Z-Index Fix */
+        .swal2-container {
+            z-index: 3000 !important;
+        }
+
+        /* Improved Modal Styles */
+        .modal-body {
+            padding: 24px;
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
+        .modal-book-left {
+            flex: 0 0 200px;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .modal-book-info {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .modal-book-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            margin: 0;
+        }
+
+        .modal-book-item {
+            background: var(--bg);
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-book-item:hover {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        }
+
+        .modal-book-item-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .modal-book-item-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            word-break: break-word;
+        }
+
+        .borrower-section {
+            padding: 16px;
+            background: color-mix(in srgb, var(--primary) 3%, transparent);
+            border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent);
+            border-radius: 12px;
+        }
+
+        .borrower-list {
+            list-style: none;
+            padding: 0;
+            margin: 12px 0 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .borrower-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--text);
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid var(--border);
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .modal-actions .modal-btn {
+            flex: 1 1 140px;
+            min-width: 0;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 95%;
+            }
+            .modal-body {
+                flex-direction: column;
+                gap: 20px;
+                padding: 16px;
+            }
+            .modal-book-left {
+                flex: none;
+                width: 100%;
+                flex-direction: row;
+                gap: 16px;
+                align-items: center;
+            }
+            .modal-book-cover {
+                width: 80px !important;
+                height: 120px !important;
+                flex-shrink: 0;
+            }
+            .modal-book-title {
+                font-size: 16px;
+                text-align: left;
+                margin: 0;
+            }
+            .modal-book-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -419,6 +569,7 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                                         </div>
                                     <?php endif; ?>
 
+
                                     <?php if ($is_teacher_only): ?>
                                         <div class="stock-badge-overlay" style="
                                             background: color-mix(in srgb, var(--warning) 15%, transparent);
@@ -429,11 +580,11 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                                         </div>
                                     <?php else: ?>
                                         <div class="stock-badge-overlay" style="
-                                            background: <?= $is_available ? 'color-mix(in srgb, var(--success) 15%, transparent)' : 'color-mix(in srgb, var(--danger) 15%, transparent)' ?>;
-                                            color: <?= $is_available ? 'var(--success)' : 'var(--danger)' ?>;
-                                            border: 1px solid <?= $is_available ? 'color-mix(in srgb, var(--success) 30%, transparent)' : 'color-mix(in srgb, var(--danger) 30%, transparent)' ?>;
+                                            background: <?= $book['available_copies'] > 0 ? 'color-mix(in srgb, var(--success) 15%, transparent)' : 'color-mix(in srgb, var(--danger) 15%, transparent)' ?>;
+                                            color: <?= $book['available_copies'] > 0 ? 'var(--success)' : 'var(--danger)' ?>;
+                                            border: 1px solid <?= $book['available_copies'] > 0 ? 'color-mix(in srgb, var(--success) 30%, transparent)' : 'color-mix(in srgb, var(--danger) 30%, transparent)' ?>;
                                         ">
-                                            <?= $is_available ? 'Tersedia' : 'Dipinjam' ?>
+                                            <?= $book['available_copies'] > 0 ? 'Tersedia (' . $book['available_copies'] . ')' : 'Dipinjam' ?>
                                         </div>
                                     <?php endif; ?>
 
@@ -463,8 +614,15 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                                             <?php endif; ?>
                                         </div>
                                         
-                                        <div class="action-buttons">
-                                          <button class="btn-icon-sm" onclick="openBookModal(<?php echo htmlspecialchars(json_encode($book)); ?>)" title="Detail">
+                                         <div class="action-buttons">
+                                           <?php if ($book['available_copies'] <= 0 && !empty($book['title'])): ?>
+                                              <button class="btn-icon-sm" style="color: var(--danger); border-color: var(--danger);" 
+                                                      onclick="joinWaitlist('<?php echo addslashes($book['title']); ?>', '<?php echo addslashes($book['author'] ?? '-'); ?>')" 
+                                                      title="Ingatkan Saya">
+                                                 <iconify-icon icon="mdi:bell-plus-outline"></iconify-icon>
+                                              </button>
+                                           <?php endif; ?>
+                                           <button class="btn-icon-sm" onclick="openBookModal(<?php echo htmlspecialchars(json_encode($book)); ?>)" title="Detail">
                                              <iconify-icon icon="mdi:eye"></iconify-icon>
                                           </button>
                                           <a href="book-rating.php?id=<?php echo $book['id']; ?>" class="btn-icon-sm" title="Rating & Review" style="color: var(--primary);">
@@ -508,29 +666,36 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                 <div class="modal-book-info">
                     <div class="modal-book-meta">
                         <div class="modal-book-item">
-                            <span class="modal-book-item-label">Pengarang</span>
+                            <span class="modal-book-item-label">
+                                <iconify-icon icon="mdi:account-edit-outline"></iconify-icon> Pengarang
+                            </span>
                             <span class="modal-book-item-value" id="modalBookAuthor">-</span>
                         </div>
 
                         <div class="modal-book-item">
-                            <span class="modal-book-item-label">Kategori</span>
+                            <span class="modal-book-item-label">
+                                <iconify-icon icon="mdi:tag-outline"></iconify-icon> Kategori
+                            </span>
                             <span class="modal-book-item-value" id="modalBookCategory">-</span>
                         </div>
 
                         <div class="modal-book-item">
-                            <span class="modal-book-item-label">ISBN</span>
+                            <span class="modal-book-item-label">
+                                <iconify-icon icon="mdi:barcode"></iconify-icon> ISBN
+                            </span>
                             <span class="modal-book-item-value" id="modalBookISBN">-</span>
                         </div>
 
-
-
                         <div class="modal-book-item">
-                            <span class="modal-book-item-label">Lokasi / Rak</span>
+                            <span class="modal-book-item-label">
+                                <iconify-icon icon="mdi:map-marker-outline"></iconify-icon> Lokasi / Rak
+                            </span>
                             <span class="modal-book-item-value" id="modalBookShelf">-</span>
                         </div>
+                    </div>
 
-
-
+                    <div id="modalBorrowerSection" style="display: none;">
+                        <!-- Will be populated by JS -->
                     </div>
 
                     <div class="modal-actions">
@@ -553,9 +718,10 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                 'title' => $b['title'] ?? '', 
                 'author' => $b['author'] ?? '-', 
                 'category' => $b['category'] ?? '-', 
-                'current_borrow_id' => $b['current_borrow_id'],
-                'borrower_name' => $b['borrower_name'],
-                'borrower_due_at' => $b['borrower_due_at']
+                'isbn' => $b['isbn'] ?? '-',
+                'available_copies' => $b['available_copies'],
+                'total_copies' => $b['total_copies'],
+                'borrower_names' => $b['borrower_names'] ?? null
             ]; 
         }, $books_available ?? [])), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?> || [];
         
@@ -565,9 +731,10 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                 'title' => $b['title'] ?? '', 
                 'author' => $b['author'] ?? '-', 
                 'category' => $b['category'] ?? '-', 
-                'current_borrow_id' => $b['current_borrow_id'],
-                'borrower_name' => $b['borrower_name'],
-                'borrower_due_at' => $b['borrower_due_at']
+                'isbn' => $b['isbn'] ?? '-',
+                'available_copies' => $b['available_copies'],
+                'total_copies' => $b['total_copies'],
+                'borrower_names' => $b['borrower_names'] ?? null
             ]; 
         }, $books ?? [])), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT); ?> || [];
         

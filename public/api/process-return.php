@@ -98,6 +98,46 @@ try {
     $updateStock = $pdo->prepare('UPDATE books SET copies = copies + 1 WHERE id = ?');
     $updateStock->execute([$book['id']]);
 
+    // 6. Waitlist Notification Logic
+    // Check if there are students waiting for this book title/author
+    $waitlistStmt = $pdo->prepare(
+        'SELECT w.*, m.user_id as student_real_id 
+         FROM waitlist w
+         JOIN members m ON w.member_id = m.id
+         WHERE w.school_id = :sid 
+         AND w.book_title = :title 
+         AND w.book_author = :author 
+         AND w.status = "pending"
+         ORDER BY w.created_at ASC'
+    );
+    $waitlistStmt->execute([
+        'sid' => $sid,
+        'title' => $book['title'],
+        'author' => $book['author']
+    ]);
+    
+    $waitingStudents = $waitlistStmt->fetchAll();
+
+    if ($waitingStudents) {
+        require_once __DIR__ . '/../../src/NotificationsHelper.php';
+        $notifHelper = new NotificationsHelper($pdo);
+        
+        // Notify the first person in line
+        $firstStudent = $waitingStudents[0];
+        
+        $notifHelper->createNotification(
+            $sid,
+            $firstStudent['student_real_id'],
+            'info',
+            'Buku Tersedia!',
+            'Buku "' . htmlspecialchars($book['title']) . '" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!'
+        );
+        
+        // Mark as notified
+        $updateWaitlist = $pdo->prepare('UPDATE waitlist SET status = "notified" WHERE id = ?');
+        $updateWaitlist->execute([$firstStudent['id']]);
+    }
+
     $pdo->commit();
 
     echo json_encode([

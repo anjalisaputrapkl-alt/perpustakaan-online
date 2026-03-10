@@ -103,7 +103,7 @@ function updateBooksDisplay() {
     }
 
     booksGrid.innerHTML = filteredBooks.map(book => {
-        const is_available = !book.current_borrow_id;
+        const has_available = book.available_copies > 0;
         const avgRating = book.avg_rating ? parseFloat(book.avg_rating).toFixed(1) : '0';
         const totalReviews = parseInt(book.total_reviews) || 0;
 
@@ -115,11 +115,11 @@ function updateBooksDisplay() {
                 `<div class="no-image-placeholder"><iconify-icon icon="mdi:book-open-variant" style="font-size: 32px;"></iconify-icon></div>`
             }
                 <div class="stock-badge-overlay" style="
-                    background: ${is_available ? 'color-mix(in srgb, var(--success) 15%, transparent)' : 'color-mix(in srgb, var(--danger) 15%, transparent)'};
-                    color: ${is_available ? 'var(--success)' : 'var(--danger)'};
-                    border: 1px solid ${is_available ? 'color-mix(in srgb, var(--success) 30%, transparent)' : 'color-mix(in srgb, var(--danger) 30%, transparent)'};
+                    background: ${has_available ? 'color-mix(in srgb, var(--success) 15%, transparent)' : 'color-mix(in srgb, var(--danger) 15%, transparent)'};
+                    color: ${has_available ? 'var(--success)' : 'var(--danger)'};
+                    border: 1px solid ${has_available ? 'color-mix(in srgb, var(--success) 30%, transparent)' : 'color-mix(in srgb, var(--danger) 30%, transparent)'};
                 ">
-                    ${is_available ? 'Tersedia' : 'Dipinjam'}
+                    ${has_available ? `Tersedia (${book.available_copies})` : 'Dipinjam'}
                 </div>
                 <button class="btn-love ${favorites.has(parseInt(book.id)) ? 'loved' : ''}" onclick="toggleFavorite(event, ${book.id}, '${(book.title || '').replace(/'/g, "\\'")}')">
                     <iconify-icon icon="mdi:heart${favorites.has(parseInt(book.id)) ? '' : '-outline'}"></iconify-icon>
@@ -129,7 +129,7 @@ function updateBooksDisplay() {
                 <div class="book-category">${book.category || 'Umum'}</div>
                 <div class="book-title" title="${book.title}">${book.title}</div>
                 <div class="book-author">${book.author || '-'}</div>
-                ${!is_available ? `<p style="font-size: 10px; color: var(--danger); margin: -8px 0 8px 0;">Oleh: ${book.borrower_name}</p>` : ''}
+                ${!has_available ? `<p style="font-size: 10px; color: var(--danger); margin: -8px 0 8px 0;">Stok sedang kosong</p>` : ''}
                 
                 <div class="book-card-footer">
                     <div class="shelf-info">
@@ -139,6 +139,12 @@ function updateBooksDisplay() {
                         ${book.shelf ? `<span style="opacity: 0.6; font-size: 10px; margin-left: auto;" title="Detail: ${book.lokasi_rak || ''}">• Rak ${book.shelf} / ${book.row_number || '-'} / ${book.lokasi_rak || '-'}</span>` : ''}
                     </div>
                     <div class="action-buttons">
+                        ${!has_available ? `
+                        <button class="btn-icon-sm" style="color: var(--danger); border-color: var(--danger);" 
+                                onclick="joinWaitlist('${(book.title || '').replace(/'/g, "\\'")}', '${(book.author || '').replace(/'/g, "\\'")}')" 
+                                title="Ingatkan Saya">
+                            <iconify-icon icon="mdi:bell-plus-outline"></iconify-icon>
+                        </button>` : ''}
                         <button class="btn-icon-sm" onclick='openBookModal(${JSON.stringify(book).replace(/'/g, "&#39;")})' title="Detail">
                             <iconify-icon icon="mdi:eye"></iconify-icon>
                         </button>
@@ -153,10 +159,42 @@ function updateBooksDisplay() {
     }).join('');
 }
 
+// Helper to truncate ISBN list
+function formatISBNList(isbnString) {
+    if (!isbnString || isbnString === '-') return '-';
+    const isbns = isbnString.split(', ');
+    if (isbns.length <= 1) return isbnString;
+
+    const displayed = isbns.slice(0, 1).join(', ');
+    const remainingCount = isbns.length - 1;
+
+    return `
+        <span class="isbn-short">${displayed}</span>
+        <span class="isbn-more-indicator" style="color: var(--primary); cursor: pointer; font-size: 0.85em; font-weight: 600; margin-left: 4px;" 
+              onclick="toggleISBN(this, '${escapeHtml(isbnString).replace(/'/g, "\\'")}')">
+            +${remainingCount} lagi
+        </span>
+    `;
+}
+
+function toggleISBN(element, fullString) {
+    const parent = element.parentElement;
+    parent.innerHTML = `
+        <span class="isbn-full" style="display: block; max-height: 80px; overflow-y: auto; font-size: 0.9em; line-height: 1.4;">${fullString}</span>
+        <span style="color: var(--text-muted); cursor: pointer; font-size: 0.8em; text-decoration: underline; display: block; margin-top: 4px;" 
+              onclick="revertISBN(this, '${fullString.replace(/'/g, "\\'")}')">Sembunyikan</span>
+    `;
+}
+
+function revertISBN(element, fullString) {
+    const parent = element.parentElement;
+    parent.innerHTML = formatISBNList(fullString);
+}
+
 // Load favorites on page load
 async function loadFavorites() {
     try {
-        const response = await fetch('/perpustakaan-online/public/api/favorites.php?action=get_favorites');
+        const response = await fetch('api/favorites.php?action=get_favorites');
         const data = await response.json();
         if (data.success && data.data) {
             data.data.forEach(fav => {
@@ -201,7 +239,7 @@ async function toggleFavorite(e, bookId, bookTitle) {
         const action = wasLoved ? 'remove' : 'add';
 
         // 2. Kirim request di background
-        const response = await fetch(`/perpustakaan-online/public/api/favorites.php?action=${action}`, {
+        const response = await fetch(`api/favorites.php?action=${action}`, {
             method: 'POST',
             body: formData
         });
@@ -248,49 +286,118 @@ function openBookModal(bookData) {
     document.getElementById('modalBookTitle').textContent = bookData.title || '-';
     document.getElementById('modalBookAuthor').textContent = bookData.author || '-';
     document.getElementById('modalBookCategory').textContent = bookData.category || 'Umum';
-    document.getElementById('modalBookISBN').textContent = bookData.isbn || '-';
+    document.getElementById('modalBookISBN').innerHTML = formatISBNList(bookData.isbn);
     document.getElementById('modalBookShelf').textContent = `Rak ${bookData.shelf || '-'} / Baris ${bookData.row_number || '-'} / Kolom ${bookData.lokasi_rak || '-'}`;
 
+    // Handle Availability & Borrowers
+    const borrowerSection = document.getElementById('modalBorrowerSection');
+    const modalActions = document.querySelector('.modal-actions');
+
+    // Clear Waitlist Button
+    const existingWaitlistBtn = document.getElementById('modalWaitlistBtn');
+    if (existingWaitlistBtn) existingWaitlistBtn.remove();
+
+    if (bookData.total_copies > 0) {
+        borrowerSection.style.display = 'block';
+        borrowerSection.className = 'borrower-section';
+
+        const isAllBorrowed = bookData.available_copies == 0;
+        const statusClass = isAllBorrowed ? 'busy' : 'available';
+        const statusText = isAllBorrowed ? 'Stok Habis' : `Tersedia (${bookData.available_copies}/${bookData.total_copies})`;
+
+        let html = `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; gap: 12px;">
+                <span class="modal-book-item-label"><iconify-icon icon="mdi:information-outline"></iconify-icon> Status Ketersediaan</span>
+                <span class="status-badge ${statusClass} position-inline">${statusText}</span>
+            </div>
+        `;
+
+        // Highlight borrowers if any copies are out
+        if (bookData.available_copies < bookData.total_copies && bookData.borrower_names) {
+            const borrowers = bookData.borrower_names.split(', ');
+            html += `
+                <div style="margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px;">
+                    <span class="modal-book-item-label" style="color: var(--danger); margin-bottom: 8px;">
+                        <iconify-icon icon="mdi:account-group-outline"></iconify-icon> Saat ini dipinjam oleh:
+                    </span>
+                    <div class="borrower-list">
+                        ${borrowers.map(name => `
+                            <div class="borrower-item">
+                                <iconify-icon icon="mdi:account-circle" style="color: var(--primary); font-size: 18px;"></iconify-icon>
+                                <span style="font-weight: 500;">${escapeHtml(name)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        } else if (isAllBorrowed && !bookData.borrower_names) {
+            html += `<p style="font-size: 13px; color: var(--text-muted); margin: 10px 0;">Data peminjam tidak tersedia.</p>`;
+        }
+
+        borrowerSection.innerHTML = html;
+
+        // Waitlist button if empty
+        if (isAllBorrowed) {
+            const waitlistBtn = document.createElement('button');
+            waitlistBtn.id = 'modalWaitlistBtn';
+            waitlistBtn.className = 'modal-btn';
+            waitlistBtn.style.background = 'rgba(239, 68, 68, 0.1)';
+            waitlistBtn.style.color = 'var(--danger)';
+            waitlistBtn.style.border = '1px solid var(--danger)';
+            waitlistBtn.style.display = 'flex';
+            waitlistBtn.style.alignItems = 'center';
+            waitlistBtn.style.justifyContent = 'center';
+            waitlistBtn.style.gap = '8px';
+            waitlistBtn.innerHTML = '<iconify-icon icon="mdi:bell-plus"></iconify-icon> Ingatkan Saya';
+            waitlistBtn.onclick = () => joinWaitlist(bookData.title, bookData.author);
+            if (modalActions) modalActions.prepend(waitlistBtn);
+        }
+    } else {
+        borrowerSection.style.display = 'none';
+    }
 
     // Set rating link
     document.getElementById('modalRatingBtn').href = 'book-rating.php?id=' + bookData.id;
 
     // Show modal
     document.getElementById('bookModal').classList.add('active');
+}
 
-    // Add borrower info if not available
-    let borrowerInfoDiv = document.getElementById('modalBorrowerInfo');
-    if (!borrowerInfoDiv) {
-        borrowerInfoDiv = document.createElement('div');
-        borrowerInfoDiv.id = 'modalBorrowerInfo';
-        borrowerInfoDiv.className = 'modal-book-item';
-        borrowerInfoDiv.style.marginTop = '12px';
-        borrowerInfoDiv.style.padding = '12px';
-        borrowerInfoDiv.style.borderRadius = '8px';
-        document.querySelector('.modal-book-meta').appendChild(borrowerInfoDiv);
+async function joinWaitlist(title, author) {
+    try {
+        const response = await fetch('api/waitlist-join.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title: title,
+                author: author,
+                action: 'join'
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: data.message,
+                confirmButtonColor: 'var(--primary)'
+            });
+        } else {
+            throw new Error(data.message || 'Gagal mendaftar antrean');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: error.message || 'Terjadi kesalahan sistem',
+            confirmButtonColor: 'var(--primary)'
+        });
     }
-
-    if (bookData.current_borrow_id) {
-        const dueDate = new Date(bookData.borrower_due_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
-        borrowerInfoDiv.style.display = 'block';
-        borrowerInfoDiv.style.background = 'rgba(239, 68, 68, 0.05)';
-        borrowerInfoDiv.style.border = '1px solid rgba(239, 68, 68, 0.2)';
-        borrowerInfoDiv.innerHTML = `
-            <p style="margin: 0 0 4px 0; font-size: 11px; color: #dc2626; font-weight: 600; text-transform: uppercase;">Sedang Dipinjam</p>
-            <p style="margin: 0; font-size: 13px; font-weight: 500;">Peminjam: <span style="color: var(--text);">${bookData.borrower_name}</span></p>
-            <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--text-muted);">Tenggat: ${dueDate}</p>
-        `;
-    } else {
-        borrowerInfoDiv.style.display = 'block';
-        borrowerInfoDiv.style.background = 'rgba(16, 185, 129, 0.05)';
-        borrowerInfoDiv.style.border = '1px solid rgba(16, 185, 129, 0.2)';
-        borrowerInfoDiv.innerHTML = `
-            <p style="margin: 0; font-size: 11px; color: #059669; font-weight: 600; text-transform: uppercase;">✓ Buku Tersedia</p>
-        `;
-    }
-
-    // Show modal
-    document.getElementById('bookModal').classList.add('active');
 }
 
 function closeBookModal() {
@@ -431,9 +538,10 @@ function renderBooksListHtml(list) {
                 <thead>
                     <tr style="background: var(--bg); border-bottom: 2px solid var(--border);">
                         <th style="padding: 16px 24px; text-align: left; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Judul Buku</th>
+                        <th style="padding: 16px 24px; text-align: left; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">ISBN</th>
                         <th style="padding: 16px 24px; text-align: left; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Penulis</th>
                         <th style="padding: 16px 24px; text-align: center; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Status</th>
-                        <th style="padding: 16px 24px; text-align: left; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Peminjam & Tenggat</th>
+                        <th style="padding: 16px 24px; text-align: left; font-weight: 600; color: var(--text-muted); text-transform: uppercase;">Stok</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -441,25 +549,28 @@ function renderBooksListHtml(list) {
 
     list.forEach((item) => {
         const title = (item.title || '-').toString();
+        const isbn = (item.isbn || '-').toString();
         const author = (item.author || '-').toString();
-        const is_available = !item.current_borrow_id;
-        const statusText = is_available ? 'Tersedia' : 'Dipinjam';
-        const statusClass = is_available ? 'badge-available' : 'badge-borrowed';
+        const availableCount = parseInt(item.available_copies) || 0;
+        const totalCount = parseInt(item.total_copies) || 0;
+        const has_available = availableCount > 0;
+        const statusText = has_available ? `Tersedia (${availableCount})` : 'Dipinjam';
+        const statusClass = has_available ? 'badge-available' : 'badge-borrowed';
 
-        let borrowerInfo = '<span style="color: var(--text-muted);">Tersedia di rak</span>';
-        if (!is_available) {
-            const dueDate = item.borrower_due_at ? new Date(item.borrower_due_at).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }) : '-';
-            borrowerInfo = `<div style="font-weight: 600; color: var(--text);">${item.borrower_name}</div><div style="color: var(--text-muted); font-size: 11px;">Hingga: ${dueDate}</div>`;
+        let availabilityInfo = `<span style="color: ${has_available ? 'var(--success)' : 'var(--danger)'}; font-weight: 600;">${availableCount} / ${totalCount} Eksemplar</span>`;
+        if (!has_available) {
+            availabilityInfo = `<div style="color: var(--danger); font-weight: 600;">Semua dipinjam</div>`;
         }
 
         html += `
             <tr style="border-bottom: 1px solid var(--border); transition: all 0.2s ease;">
                 <td style="padding: 16px 24px; color: var(--text); font-weight: 600;">${escapeHtml(title)}</td>
+                <td style="padding: 16px 24px; color: var(--text-muted); max-width: 250px;">${formatISBNList(item.isbn)}</td>
                 <td style="padding: 16px 24px; color: var(--text-muted);">${escapeHtml(author)}</td>
                 <td style="padding: 16px 24px; text-align: center;">
                     <span class="cover-status-badge ${statusClass}" style="position: static; padding: 4px 10px; font-size: 10px;">${statusText}</span>
                 </td>
-                <td style="padding: 16px 24px; color: var(--text);">${borrowerInfo}</td>
+                <td style="padding: 16px 24px; color: var(--text);">${availabilityInfo}</td>
             </tr>
         `;
     });
