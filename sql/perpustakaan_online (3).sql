@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Feb 27, 2026 at 08:51 AM
+-- Generation Time: Mar 10, 2026 at 09:53 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -80,7 +80,7 @@ INSERT INTO `books` (`id`, `school_id`, `title`, `author`, `isbn`, `category`, `
 (14, 4, 'The Art of Stoicism', 'Adora Kinara', '34567890', 'Non-Fiksi', 'teacher_only', 1, NULL, '2026-02-10 07:15:57', '1', 2, '5', 'book_1770707752_698adb282818f.jpg'),
 (18, 14, 'Spy X Familyy', 'Tatsuya Endo', '987-982', 'Fiksi', 'all', 0, 2, '2026-02-19 03:53:24', '1D', 3, '4', 'book_1771473204_6996893442426.jpg'),
 (19, 14, 'B.J Habibie', 'Fatimah Fayrus', '987492', 'Biografi', 'teacher_only', 0, 3, '2026-02-19 03:55:35', '1B', 2, '2', 'book_1771473335_699689b72f067.jpg'),
-(20, 4, 'Spy X Familyy', 'Tatsuya Endo', '098-878', 'Fiksi', 'all', 1, 5, '2026-02-20 07:33:33', '1C', 1, '2', 'book_1771572813_69980e4d2eeb3.jpg');
+(21, 4, 'B.J. Habibie : Sebuah Biografi', 'Fatimah Fayrus', '4534243', 'Biografi', 'all', 1, NULL, '2026-03-09 01:26:12', '2', 2, '5', 'book_1773019572_69ae21b4a1d4f.jpg');
 
 -- --------------------------------------------------------
 
@@ -174,7 +174,7 @@ INSERT INTO `borrows` (`id`, `school_id`, `book_id`, `member_id`, `borrowed_at`,
 (58, 4, 4, 6, '2026-02-20 14:27:34', '2026-02-23 14:28:05', '2026-02-20 14:49:57', 'returned', 0.00, 'unpaid'),
 (62, 4, 4, 4, '2026-02-23 08:35:49', '2026-02-26 08:36:18', '2026-02-23 08:36:23', 'returned', 0.00, 'unpaid'),
 (63, 4, 1, 4, '2026-02-23 08:35:49', '2026-02-26 08:36:18', '2026-02-23 08:36:21', 'returned', 0.00, 'unpaid'),
-(64, 4, 4, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', NULL, 'borrowed', 0.00, 'unpaid'),
+(64, 4, 4, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', NULL, 'overdue', 0.00, 'unpaid'),
 (65, 4, 1, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', '2026-02-26 10:14:33', 'returned', 0.00, 'unpaid');
 
 -- --------------------------------------------------------
@@ -266,7 +266,9 @@ INSERT INTO `notifications` (`id`, `school_id`, `student_id`, `title`, `message`
 (55, 4, 13, 'Buku Ditambahkan ke Favorit', 'Anda telah menambahkan \"The Art of Stoicism\" ke koleksi favorit Anda.', 'info', 0, '2026-02-20 04:08:09', '2026-02-20 04:08:09'),
 (56, 4, 14, 'Buku Ditambahkan ke Favorit', 'Anda telah menambahkan \"The Art of Stoicism\" ke koleksi favorit Anda.', 'info', 0, '2026-02-20 07:31:24', '2026-02-20 07:31:24'),
 (57, 4, 13, 'Buku Baru Tersedia', 'Buku \"Spy X Family\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-02-20 07:33:33', '2026-02-20 07:33:33'),
-(58, 4, 14, 'Buku Baru Tersedia', 'Buku \"Spy X Family\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-02-20 07:33:36', '2026-02-20 07:33:36');
+(58, 4, 14, 'Buku Baru Tersedia', 'Buku \"Spy X Family\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-02-20 07:33:36', '2026-02-20 07:33:36'),
+(59, 4, 13, 'Buku Baru Tersedia', 'Buku \"B.J. Habibie : Sebuah Biografi\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-03-09 01:26:12', '2026-03-09 01:26:12'),
+(60, 4, 14, 'Buku Baru Tersedia', 'Buku \"B.J. Habibie : Sebuah Biografi\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-03-09 01:26:16', '2026-03-09 01:26:16');
 
 -- --------------------------------------------------------
 
@@ -382,7 +384,7 @@ CREATE TABLE `school_themes` (
 --
 
 INSERT INTO `school_themes` (`id`, `school_id`, `theme_name`, `custom_colors`, `typography`, `created_at`, `updated_at`) VALUES
-(2, 4, 'custom', '{\"color-bg\":\"#80ffb0\",\"color-surface\":\"#ffffff\",\"color-text\":\"#8d5e5e\",\"color-accent\":\"#000000\",\"color-muted\":\"#000000\",\"color-border\":\"#000000\",\"color-sidebar-bg\":\"#254139\",\"color-sidebar-text\":\"#ffffff\",\"color-sidebar-accent\":\"#246b59\",\"metadata\":{\"display_name\":\"Custom\"}}', NULL, '2026-01-26 02:43:32', '2026-02-25 04:34:56');
+(2, 4, 'light', '{\"color-bg\":\"#80ffb0\",\"color-surface\":\"#ffffff\",\"color-text\":\"#8d5e5e\",\"color-accent\":\"#000000\",\"color-muted\":\"#000000\",\"color-border\":\"#000000\",\"color-sidebar-bg\":\"#254139\",\"color-sidebar-text\":\"#ffffff\",\"color-sidebar-accent\":\"#246b59\",\"metadata\":{\"display_name\":\"Custom\"}}', NULL, '2026-01-26 02:43:32', '2026-03-09 01:14:47');
 
 -- --------------------------------------------------------
 
@@ -526,6 +528,29 @@ INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `ve
 (16, 14, 'Gani', 'smkbinamandirimultimedia@sch.id', NULL, '$2y$10$xJgd.CLQLLrZQ.osocHNR.484jKUUJYOlsvhUSokbXbN.qX6glc2a', NULL, '2026-02-18 22:06:47', 1, '2026-02-19 03:51:55', 'admin', '2026-02-19 03:51:47'),
 (17, 14, 'Ganiiii', 'gani@gmail.com', '222222', '$2y$10$AC4JYVpuJSn.cVwGAIRuB.MQ6vetNZqr6DTqKTF/Anhaxm98Ij0Rq', NULL, NULL, 0, NULL, 'student', '2026-02-19 03:57:50'),
 (18, 14, 'Anjali Saputra', 'anjalisaputra@gmail.com', '111111', '$2y$10$.DDjhK6LF0TIl5P4AobyJOf3LgrIptdQ50B4EgD4riej9.EWb/tvG', NULL, NULL, 0, NULL, 'student', '2026-02-19 04:02:36');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `waitlist`
+--
+
+CREATE TABLE `waitlist` (
+  `id` int(11) NOT NULL,
+  `school_id` int(11) NOT NULL,
+  `book_title` varchar(255) NOT NULL,
+  `book_author` varchar(255) NOT NULL,
+  `member_id` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `status` enum('pending','notified','fulfilled','cancelled') DEFAULT 'pending'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `waitlist`
+--
+
+INSERT INTO `waitlist` (`id`, `school_id`, `book_title`, `book_author`, `member_id`, `created_at`, `status`) VALUES
+(1, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', 4, '2026-03-09 07:32:03', 'pending');
 
 --
 -- Indexes for dumped tables
@@ -684,6 +709,16 @@ ALTER TABLE `users`
   ADD KEY `idx_is_verified` (`is_verified`);
 
 --
+-- Indexes for table `waitlist`
+--
+ALTER TABLE `waitlist`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `school_id` (`school_id`),
+  ADD KEY `book_title` (`book_title`,`book_author`),
+  ADD KEY `member_id` (`member_id`),
+  ADD KEY `status` (`status`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -697,7 +732,7 @@ ALTER TABLE `barcode_sessions`
 -- AUTO_INCREMENT for table `books`
 --
 ALTER TABLE `books`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- AUTO_INCREMENT for table `book_damage_fines`
@@ -733,7 +768,7 @@ ALTER TABLE `members`
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
@@ -788,6 +823,12 @@ ALTER TABLE `theme_templates`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+
+--
+-- AUTO_INCREMENT for table `waitlist`
+--
+ALTER TABLE `waitlist`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
