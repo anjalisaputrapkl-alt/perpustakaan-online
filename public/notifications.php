@@ -13,7 +13,6 @@ $user = $_SESSION['user'];
 $school_id = $user['school_id'];
 $studentId = $user['id'];
 
-// Initialize variables
 $notifications = [];
 $stats = [];
 $errorMessage = '';
@@ -61,25 +60,21 @@ try {
 
 $pageTitle = 'Notifikasi';
 
-// Helper function untuk format tanggal
 function formatDate($date)
 {
     return NotificationsService::formatDate($date);
 }
 
-// Helper function untuk get icon
 function getIcon($type)
 {
     return NotificationsService::getIcon($type);
 }
 
-// Helper function untuk get badge class
 function getBadgeClass($type)
 {
     return NotificationsService::getBadgeClass($type);
 }
 
-// Helper function untuk get label
 function getLabel($type)
 {
     return NotificationsService::getLabel($type);
@@ -117,7 +112,6 @@ function getLabel($type)
 
     <!-- Main Container -->
     <div class="container-main">
-        <!-- Page Header -->
         <div class="page-header">
             <div class="topbar-title">
                 <iconify-icon icon="mdi:bell-outline" width="28" height="28" style="color: var(--accent);"></iconify-icon>
@@ -126,7 +120,6 @@ function getLabel($type)
             <p>Pantau semua notifikasi penting dari sistem perpustakaan</p>
         </div>
 
-        <!-- Error Alert -->
         <?php if (!empty($errorMessage)): ?>
             <div class="alert alert-danger" style="background: var(--danger-soft); color: var(--danger); border-color: var(--danger-soft);">
                 <iconify-icon icon="mdi:alert-circle" width="18" height="18"></iconify-icon>
@@ -134,7 +127,6 @@ function getLabel($type)
             </div>
         <?php endif; ?>
 
-        <!-- Success Alert -->
         <?php if (!empty($successMessage)): ?>
             <div class="alert alert-success" style="background: var(--success-soft); color: var(--success); border-color: var(--success-soft);">
                 <iconify-icon icon="mdi:check-circle" width="18" height="18"></iconify-icon>
@@ -231,7 +223,6 @@ function getLabel($type)
                 </a>
             </div>
         <?php else: ?>
-            <!-- Notifications Cards -->
             <?php foreach ($notifications as $notif): ?>
                 <div
                     class="notification-card <?php echo !$notif['status_baca'] ? 'unread' : ''; ?> <?php echo htmlspecialchars($notif['jenis_notifikasi']); ?>">
@@ -266,7 +257,6 @@ function getLabel($type)
     </div>
 
     <script>
-        // Seed modal data with current PHP-provided notifications as fallback
         window.allNotificationsForModal = <?php echo json_encode($notifications); ?> || [];
     </script>
     <script src="../assets/js/notifications-manage.js"></script>

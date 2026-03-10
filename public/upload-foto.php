@@ -7,9 +7,8 @@ if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
 }
 
 $pdo = require __DIR__ . '/../src/db.php';
-$anggotaId = (int) $_SESSION['user']['id'];  // ID Anggota
+$anggotaId = (int) $_SESSION['user']['id'];
 
-// Get current photo
 $stmt = $pdo->prepare("SELECT foto FROM siswa WHERE id_siswa = ?");
 $stmt->execute([$anggotaId]);
 $result = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -18,13 +17,11 @@ $currentFoto = $result['foto'] ?? '';
 $message = '';
 $errorMessage = '';
 
-// Create upload directory if not exists
 $uploadDir = __DIR__ . '/uploads/anggota';
 if (!is_dir($uploadDir)) {
     @mkdir($uploadDir, 0755, true);
 }
 
-// Handle file upload
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
     $file = $_FILES['foto'];
 
@@ -48,10 +45,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
 
         // Upload file
         if (move_uploaded_file($file['tmp_name'], $uploadPath)) {
-            // Construct public URL (Relative path)
             $photoUrl = 'uploads/anggota/' . $newFilename;
 
-            // Delete old photo if exists
+            // Delete old photo
             if (!empty($currentFoto)) {
                 $oldPath = __DIR__ . str_replace('/perpustakaan-online/public', '', $currentFoto);
                 if (file_exists($oldPath)) {
@@ -65,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto'])) {
                 $updateStmt->execute([$photoUrl, $anggotaId]);
                 $message = "Foto berhasil diperbarui!";
                 
-                // Update session to keep it in sync with database
+                // Update session
                 if (isset($_SESSION['user'])) {
                     $_SESSION['user']['foto'] = $photoUrl;
                 }

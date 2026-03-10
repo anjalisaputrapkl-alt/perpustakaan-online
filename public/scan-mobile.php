@@ -1,23 +1,18 @@
 <?php
 require __DIR__ . '/../src/auth.php';
 
-// Handle Token-based access for scanners
 if (isset($_GET['key']) && !empty($_GET['key'])) {
     if (loginByScanKey($_GET['key'])) {
-        // Redirect to same page without key in URL for clean UI (optional)
-        // header('Location: scan-mobile.php');
-        // exit;
+
     }
 }
 
 requireAuth();
 
-// Determine Dashboard URL based on role
 $user = $_SESSION['user'];
 $sid = $user['school_id'];
 $dashboardUrl = ($user['role'] === 'student') ? 'student-dashboard.php' : 'index.php';
 
-// Fetch school settings for dynamic defaults
 $pdo = require __DIR__ . '/../src/db.php';
 $stmt = $pdo->prepare('SELECT borrow_duration FROM schools WHERE id = ?');
 $stmt->execute([$sid]);
@@ -40,9 +35,7 @@ $defaultBorrowDuration = (int)($schoolSettings['borrow_duration'] ?? 7);
     <div class="scanner-container">
         <!-- QR Reader -->
         <div id="reader"></div>
-        <!-- Scan Target Box Removed to match Return Page -->
 
-        <!-- UI Layer -->
         <div class="ui-layer">
             <!-- Top Bar -->
             <div class="top-bar">
@@ -91,20 +84,16 @@ $defaultBorrowDuration = (int)($schoolSettings['borrow_duration'] ?? 7);
         </div>
     </div>
 
-    <!-- Hidden logout form -->
     <form id="logoutForm" action="logout.php" method="POST" style="display: none;"></form>
 
-    <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <iconify-icon icon="mdi:loading" style="font-size: 40px; color: var(--primary); animation: spin 1s linear infinite;"></iconify-icon>
         <p style="margin-top: 16px; font-weight: 600;">Memproses...</p>
     </div>
 
-    <!-- Audio Sounds -->
     <audio id="soundSuccess" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
     <audio id="soundError" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
 
-    <!-- Html5 QRCode Library -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <script>
         window.appConfig = {

@@ -78,9 +78,6 @@ requireAuth();
             </button>
         </div>
 
-        <!-- Date Picker Removed -->
-
-
         <!-- Instruction -->
         <div class="instruction">
             1. Scan Anggota <br>

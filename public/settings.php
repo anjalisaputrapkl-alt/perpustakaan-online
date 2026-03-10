@@ -38,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
     if ($action === 'update_identity') {
-        // Update basic identity info
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
         $npsn = trim($_POST['school_npsn'] ?? '') ?: null;
@@ -47,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($name === '') {
             $error = 'Nama sekolah wajib diisi.';
         } else {
-            // Auto-generate slug from name if not provided
+            // Auto-generate slug from name
             if ($slug === '') {
                 $slug = strtolower(trim(preg_replace('/[^a-zA-Z0-9\s-]/', '', $name)));
                 $slug = preg_replace('/\s+/', '-', $slug);
@@ -76,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($action === 'update_theme') {
-        // Update school theme and save to database
+        // Update school theme
         try {
             $theme_name = trim($_POST['theme_name'] ?? 'light');
             if (!$theme_name) {
@@ -118,7 +117,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Password baru minimal 6 karakter.');
             }
 
-            // Verify old password from users table
+            // Verify old password
             $stmt = $pdo->prepare('SELECT password FROM users WHERE id = :id');
             $stmt->execute(['id' => $user['id']]);
             $user_data = $stmt->fetch();
@@ -127,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Password lama tidak sesuai.');
             }
 
-            // Update password in users table
+            // Update password
             $hashed_password = password_hash($password_new, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare('UPDATE users SET password = :password WHERE id = :id');
             $stmt->execute(['password' => $hashed_password, 'id' => $user['id']]);
@@ -143,10 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('File tidak ditemukan');
             }
 
-            // Validate file first
+            // Validate
             $schoolProfileModel->validatePhotoFile($_FILES['school_photo']);
 
-            // Delete old photo if exists
+            // Delete old photo
             $old_photo = $schoolProfileModel->getSchoolPhoto($sid);
             if ($old_photo) {
                 $old_path = __DIR__ . '/' . $old_photo;
@@ -223,12 +222,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Re-fetch school data after POST to reflect updates in the UI
 $stmt = $pdo->prepare('SELECT * FROM schools WHERE id = :id');
 $stmt->execute(['id' => $sid]);
 $school = $stmt->fetch();
 
-// Get current theme
 $currentTheme = $themeModel->getSchoolTheme($sid);
 $customColors = json_decode($currentTheme['custom_colors'] ?? '{}', true);
 $themeDisplayName = $customColors['metadata']['display_name'] ?? 'Kustomisasi Saya';
@@ -236,10 +233,7 @@ $themeDisplayName = $customColors['metadata']['display_name'] ?? 'Kustomisasi Sa
 $specialThemes = $themeModel->getSpecialThemes($sid);
 $activeSpecialTheme = $themeModel->checkSpecialTheme($sid);
 
-// Debug: Display what we got from database
-// var_dump($school); // Uncomment for debugging
 
-// Safety check
 if (!$school) {
     die('Error: School data not found');
 }
@@ -275,7 +269,7 @@ if (!$school) {
         </div>
 
         <div class="content">
-            <!-- Tabs Navigation -->
+            <!-- Navigation -->
             <div class="settings-tabs">
                 <div class="tab-link active" data-tab="identity">
                     <iconify-icon icon="mdi:bank-outline"></iconify-icon> Identitas
@@ -297,7 +291,7 @@ if (!$school) {
                 </div>
             </div>
 
-            <!-- Tab: Identity (Previously General & Profile) -->
+            <!-- Identity -->
             <div class="tab-content active" id="identity">
                 <div class="settings-grid">
                     <div class="card">
@@ -414,7 +408,7 @@ if (!$school) {
                 </div>
             </div>
 
-            <!-- Tab: Security -->
+            <!-- Security -->
             <div class="tab-content" id="security">
                 <div class="settings-grid">
                     <div class="card">
@@ -481,7 +475,7 @@ if (!$school) {
                 </div>
             </div>
 
-            <!-- Tab: Peminjaman -->
+            <!-- Peminjaman -->
             <div class="tab-content" id="borrows">
                 <div class="settings-grid">
                     <div class="card">
@@ -566,7 +560,7 @@ if (!$school) {
                 </div>
             </div>
 
-            <!-- Tab: Themes -->
+            <!-- Themes -->
             <div class="tab-content" id="themes">
                 <div class="settings-grid">
                     <div class="main-column">
@@ -722,10 +716,6 @@ if (!$school) {
             </div>
 
 
-
-
-
-            <!-- Modal: Custom Theme Builder -->
             <div id="themeCustomizerModal" class="modal-overlay theme-customizer-overlay" style="display: none;">
                 <div class="theme-customizer-card glass-modal">
                     <div class="theme-customizer-header">
@@ -758,9 +748,7 @@ if (!$school) {
                     </div>
 
                     <div class="theme-customizer-body">
-                        <!-- Left Column: Controls -->
                         <div class="theme-customizer-controls">
-                            <!-- Main Colors Group -->
                             <div class="customizer-group">
                                 <div class="group-header">
                                     <iconify-icon icon="mdi:application-settings-outline"></iconify-icon>
@@ -843,7 +831,6 @@ if (!$school) {
                             </div>
                         </div>
 
-                        <!-- Right Column: Live Preview (Sticky) -->
                         <div class="theme-customizer-preview">
                             <div class="sticky-preview-wrapper">
                                 <div class="preview-card-header">
@@ -889,7 +876,6 @@ if (!$school) {
                     </div>
                 </div>
             </div>
-            <!-- Modal Tambah Tema Khusus -->
             <div id="addSpecialThemeModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
                 <div class="card" style="width: 450px; padding: 30px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
                     <h2 class="card-title" style="margin-bottom: 25px;">
@@ -949,8 +935,6 @@ if (!$school) {
                 </div>
 
 
-
-            <!-- Tab: Scanner Mobile -->
             <div class="tab-content" id="scanner">
                 <div class="settings-grid">
                     <div class="card">
@@ -962,7 +946,6 @@ if (!$school) {
                         <?php 
                         $scanKey = $school['scan_access_key']; 
                         
-                        // Robust Base URL detection
                         $protocol = 'http';
                         if (isset($_SERVER['HTTP_X_FORWARDED_PROTO'])) {
                             $protocol = $_SERVER['HTTP_X_FORWARDED_PROTO'];
@@ -973,17 +956,13 @@ if (!$school) {
                         $host = $_SERVER['HTTP_HOST'];
                         $currentDir = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
                         
-                        // Use custom base URL if provided
                         $detectedBaseUrl = $protocol . "://" . $host . $currentDir;
                         
-                        // Intelligent Custom URL processing:
                         $displayBaseUrl = $detectedBaseUrl;
                         if (!empty($school['custom_base_url'])) {
                             $custom = rtrim($school['custom_base_url'], '/');
                             $parsed = parse_url($custom);
                             
-                            // If user only provided domain (e.g. https://xyz.ngrok-free.app) 
-                            // and no path, append the current project directory.
                             if (empty($parsed['path']) || $parsed['path'] === '/') {
                                 $displayBaseUrl = $custom . $currentDir;
                             } else {
@@ -1065,7 +1044,7 @@ if (!$school) {
                 </div>
             </div>
 
-            <!-- Tab: FAQ -->
+            <!-- FAQ -->
             <div class="tab-content" id="faq">
                 <div class="settings-grid">
                     <div class="card">

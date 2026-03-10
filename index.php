@@ -19,7 +19,7 @@
 
 <body>
 
-  <!-- GLASS HEADER -->
+  <!-- HEADER -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="index.php" class="brand">
@@ -36,7 +36,7 @@
         <a href="#audience">Solusi</a>
         <a href="#stats">Statistik</a>
         <a href="#testimonials">Testimoni</a>
-        <!-- Mobile only login link style handled by current mobile flex logic -->
+        <!-- Mobile only -->
         <a href="#" onclick="openLoginModal(event)" class="nav-btn login hide-on-desktop" style="margin-top: 10px; background: var(--primary); color: #fff; padding: 12px 32px; border-radius: 50px;">Masuk</a>
       </nav>
 
@@ -52,7 +52,7 @@
   </header>
 
   <main>
-    <!-- MODERN HERO -->
+    <!-- HERO -->
     <section class="hero">
       <div class="hero-bg-glow"></div>
       <div class="container hero-inner">
@@ -71,7 +71,6 @@
           <div class="hero-trust">
             <p>Dipercaya oleh 50+ Sekolah di Indonesia</p>
             <div class="trust-icons">
-               <!-- Placeholder for logos if needed -->
             </div>
           </div>
         </div>
@@ -84,7 +83,7 @@
             </div>
             <img src="img/g1.jpg" alt="Dashboard Preview" class="dashboard-img">
             
-            <!-- Floating Elements -->
+            <!-- Elements -->
             <div class="float-stat glass-card">
               <div class="stat-icon"><iconify-icon icon="solar:book-bookmark-bold"></iconify-icon></div>
               <div>
@@ -97,7 +96,7 @@
       </div>
     </section>
 
-    <!-- BENTO GRID FEATURES -->
+    <!-- FEATURES -->
     <section id="features" class="section">
       <div class="container">
         <div class="section-header text-center animate-on-scroll">
@@ -106,7 +105,6 @@
         </div>
 
         <div class="bento-grid">
-          <!-- Large Feature -->
           <div class="bento-item large bento-1 animate-on-scroll delay-100">
             <div class="bento-content">
               <h3>Manajemen Sirkulasi Otomatis</h3>
@@ -117,7 +115,6 @@
             </div>
           </div>
 
-          <!-- Medium Features -->
           <div class="bento-item medium bento-2 animate-on-scroll delay-200">
             <div class="icon-box"><iconify-icon icon="solar:users-group-rounded-bold-duotone"></iconify-icon></div>
             <h3>Manajemen Anggota</h3>
@@ -130,8 +127,6 @@
             <p>Visualisasi data peminjaman real-time untuk keputusan yang lebih baik.</p>
           </div>
 
-          <!-- Wide Feature -->
-          <!-- Wide Feature -->
           <div class="bento-item wide bento-4 animate-on-scroll delay-100">
             <div class="bento-flex">
               <div class="bento-text">
@@ -156,7 +151,7 @@
       </div>
     </section>
 
-    <!-- AUDIENCE SOLUTIONS -->
+    <!-- AUDIENCE -->
     <section id="audience" class="section bg-white animate-on-scroll">
       <div class="container">
         <div class="section-header text-center">
@@ -164,7 +159,6 @@
           <p class="section-subtitle">Didesain khusus untuk memenuhi kebutuhan ekosistem sekolah</p>
         </div>
         <div class="audience-grid">
-          <!-- Students -->
           <div class="audience-card glass-card animate-on-scroll delay-100">
             <div class="audience-icon-wrap">
               <img src="img/murid.jpg" alt="Siswa sedang belajar digital" loading="lazy">
@@ -177,7 +171,6 @@
             </ul>
           </div>
 
-          <!-- Teachers -->
           <div class="audience-card glass-card animate-on-scroll delay-200">
             <div class="audience-icon-wrap accent">
               <img src="img/guru.jpg" alt="Guru mengajar menggunakan materi digital" loading="lazy">
@@ -190,7 +183,6 @@
             </ul>
           </div>
 
-          <!-- Librarians -->
           <div class="audience-card glass-card animate-on-scroll delay-300">
             <div class="audience-icon-wrap dark">
               <img src="img/pustakawan.jpg" alt="Pustakawan mengelola sistem administrasi" loading="lazy">
@@ -206,7 +198,7 @@
       </div>
     </section>
 
-    <!-- STATS COUNTER -->
+    <!-- STATS -->
     <section id="stats" class="section stats-section animate-on-scroll">
       <div class="container">
         <div class="stats-grid">
@@ -230,7 +222,7 @@
       </div>
     </section>
 
-    <!-- TESTIMONIALS & FAQ SPLIT -->
+    <!-- TESTIMONIALS -->
     <section id="testimonials" class="section bg-soft">
       <div class="container split-layout">
         <div class="testimonials-col animate-on-scroll">
@@ -339,8 +331,7 @@
     </div>
   </footer>
 
-  <!-- MODALS (Login/Register/UserType) - Reused Logic -->
-  <!-- User Type Modal -->
+  <!-- MODALS (Login/Register/UserType) -->
   <div id="userTypeModal" class="modal" onclick="closeUserTypeModal(event)">
     <div class="modal-content glass-modal">
        <button class="modal-close" onclick="closeUserTypeModal()">&times;</button>
@@ -436,11 +427,10 @@
           </div>
       </div>
 
-   <!-- OTP Verification Modal - MODERN PREMIUM DESIGN -->
+   <!-- OTP Verification Modal -->
    <div id="otpModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 61, 97, 0.15); backdrop-filter: blur(10px); z-index: 99999; justify-content: center; align-items: center; animation: fadeIn 0.3s ease;">
       <div style="background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-radius: 24px; padding: 0; max-width: 480px; width: 90%; box-shadow: 0 25px 80px rgba(11, 61, 97, 0.25), 0 0 1px rgba(0,0,0,0.1); position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.8);">
         
-        <!-- Decorative gradient header -->
         <div style="background: linear-gradient(135deg, #0B3D61 0%, #1e40af 100%); padding: 32px 40px; position: relative; overflow: hidden;">
           <div style="position: absolute; top: -50px; right: -50px; width: 150px; height: 150px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px);"></div>
           <div style="position: absolute; bottom: -30px; left: -30px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(30px);"></div>
@@ -456,10 +446,8 @@
           </div>
         </div>
         
-        <!-- Content area -->
         <div style="padding: 32px 40px 40px;">
           
-          <!-- OTP Code Display - PREMIUM STYLE -->
           <div id="otpCodeDisplayNew" style="display: none; background: linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%); border: 2px dashed #3b82f6; border-radius: 16px; padding: 24px; margin-bottom: 24px; text-align: center; position: relative; overflow: hidden;">
             <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(59, 130, 246, 0.1); border-radius: 50%; filter: blur(30px);"></div>
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px;">
@@ -495,9 +483,7 @@
    </div>
    </div>
 
-   <!-- JS Logic -->
    <script>
-    // --- Mobile Menu Logic ---
     const navToggle = document.querySelector('.nav-toggle');
     const mainNav = document.querySelector('.main-nav');
     const toggleIcon = navToggle.querySelector('iconify-icon');
@@ -514,7 +500,6 @@
       }
     });
 
-    // Close menu when clicking links
     document.querySelectorAll('.main-nav a').forEach(link => {
       link.addEventListener('click', () => {
         mainNav.classList.remove('active');
@@ -523,7 +508,6 @@
       });
     });
 
-    // --- Modal Logic ---
     function openLoginModal(e) {
       if(e) e.preventDefault();
       if (window.innerWidth <= 768) {
@@ -538,7 +522,6 @@
     function selectUserType(type) {
       closeUserTypeModal();
       
-      // Clear forms before opening
       document.querySelectorAll('#loginModal form').forEach(form => form.reset());
       document.querySelectorAll('.login-error-msg').forEach(msg => {
         msg.style.display = 'none';
@@ -553,12 +536,10 @@
       else document.getElementById('schoolLoginForm').style.display = 'block';
     }
     function closeLoginModal(event) {
-       // Stop if clicked inside modal content
        if(event && event.target !== event.currentTarget) return;
        
        document.getElementById('loginModal').classList.remove('active');
        
-       // Clear all forms and error messages
        document.querySelectorAll('#loginModal form').forEach(form => form.reset());
        document.querySelectorAll('.login-error-msg').forEach(msg => {
          msg.style.display = 'none';
@@ -569,20 +550,16 @@
       if(e) e.preventDefault();
       closeLoginModal();
       
-      // Clear form before opening
       const form = document.querySelector('#registerModal form');
       if(form) form.reset();
       
       document.getElementById('registerModal').classList.add('active');
     }
     function closeRegisterModal(event) {
-      // Stop if clicked inside modal content
       if(event && event.target !== event.currentTarget) return;
       
-      // ONLY close register modal - DO NOT close OTP modal!
       document.getElementById('registerModal').classList.remove('active');
       
-      // Only clear register form
       const form = document.querySelector('#registerModal form');
       if(form) form.reset();
       
@@ -591,7 +568,6 @@
     function closeOTPModal(event) {
       if(event && event.target !== event.currentTarget) return;
       document.getElementById('otpModal').classList.remove('active');
-      // Clear OTP form
       document.getElementById('otpCode').value = '';
       document.getElementById('otpCodeDisplay').style.display = 'none';
       document.getElementById('otpError').style.display = 'none';
@@ -604,13 +580,11 @@
        }
     }
 
-    // --- Accordion Logic ---
     function toggleAccordion(btn) {
       const item = btn.parentElement;
       item.classList.toggle('active');
     }
 
-    // --- Stats Animation ---
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if(entry.isIntersecting) {
@@ -637,14 +611,12 @@
     });
     document.querySelector('.stats-section') && observer.observe(document.querySelector('.stats-section'));
 
-    // --- Navbar Sticky ---
     window.addEventListener('scroll', () => {
       const header = document.querySelector('.site-header');
       if(window.scrollY > 50) header.classList.add('scrolled');
       else header.classList.remove('scrolled');
     });
 
-    // --- Scroll Fade In Animation ---
     const scrollObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if(entry.isIntersecting) {
@@ -655,7 +627,6 @@
 
     document.querySelectorAll('.animate-on-scroll').forEach(el => scrollObserver.observe(el));
 
-    // --- AJAX Login Logic ---
     async function handleLogin(e, type) {
       e.preventDefault();
       const form = e.target;
@@ -663,7 +634,6 @@
       const errorMsg = document.getElementById(type + 'LoginError');
       const originalText = btn.innerText;
 
-      // Reset state
       errorMsg.style.display = 'none';
       errorMsg.innerText = '';
       btn.disabled = true;
@@ -681,21 +651,19 @@
 
         if (result.success) {
           btn.innerText = 'Berhasil!';
-          form.reset(); // Clear form fields
+          form.reset();
           window.location.href = result.redirect_url;
         } else {
           throw new Error(result.message || 'Login gagal.');
         }
       } catch (err) {
         errorMsg.style.display = 'block';
-        // Handle JSON parse error or network error
         errorMsg.innerText = err.message || 'Terjadi kesalahan koneksi.';
         btn.disabled = false;
         btn.innerText = originalText;
       }
     }
 
-    // --- AJAX Register Logic - REBUILT ---
     async function handleRegister(e) {
       e.preventDefault();
       console.log('🔵 Register form submitted');
@@ -725,25 +693,20 @@
         if (result.success) {
           console.log('✅ Registration successful!');
           
-          // Reset form and button
           form.reset();
           btn.disabled = false;
           btn.innerText = originalText;
           
-          // RADICAL APPROACH: DON'T close register modal AT ALL!
-          // Just show OTP modal on top with higher z-index (already 9999)
           console.log('🟣 Opening OTP modal WITHOUT closing register...');
           
           const otpModal = document.getElementById('otpModal');
           otpModal.style.display = 'flex';
-          otpModal.style.zIndex = '99999'; // Even higher than before
+          otpModal.style.zIndex = '99999';
           console.log('✅ OTP modal opened on top of register modal');
           
-          // Set user_id and email
           document.getElementById('otpUserIdNew').value = result.user_id;
           document.getElementById('otpEmailNew').value = result.email;
           
-          // Display OTP code for demo
           if (result.verification_code) {
             console.log('🔑 OTP Code:', result.verification_code);
             document.getElementById('otpCodeDisplayNew').style.display = 'block';
@@ -751,7 +714,6 @@
             document.getElementById('otpCodeNew').value = result.verification_code;
           }
           
-          // SAVE to sessionStorage for persistence across refresh
           sessionStorage.setItem('otpPending', JSON.stringify({
             user_id: result.user_id,
             email: result.email,
@@ -775,14 +737,12 @@
       return false;
     }
 
-    // --- NEW OTP Functions ---
     function closeOTPModalNew() {
       document.getElementById('otpModal').style.display = 'none';
       document.getElementById('otpCodeNew').value = '';
       document.getElementById('otpCodeDisplayNew').style.display = 'none';
       document.getElementById('otpErrorNew').style.display = 'none';
       
-      // Clear sessionStorage when modal is closed
       sessionStorage.removeItem('otpPending');
     }
 
@@ -816,16 +776,13 @@
         const result = await response.json();
 
         if (result.success) {
-          // Clear sessionStorage on success
           sessionStorage.removeItem('otpPending');
           
           alert('✅ Email berhasil diverifikasi! Silakan login.');
           closeOTPModalNew();
           
-          // Close register modal juga
           document.getElementById('registerModal').classList.remove('active');
           
-          // Redirect to dashboard if auto-login
           if (result.redirect_url) {
             window.location.href = result.redirect_url;
           } else {
@@ -858,14 +815,12 @@
         if (result.success) {
           alert('📧 Kode OTP baru telah dikirim ke email Anda.');
           
-          // Update displayed OTP code with NEW code
           if (result.verification_code) {
             console.log('🔑 New OTP Code:', result.verification_code);
             document.getElementById('otpCodeDisplayNew').style.display = 'block';
             document.getElementById('otpCodeValueNew').innerText = result.verification_code;
             document.getElementById('otpCodeNew').value = result.verification_code;
             
-            // Update sessionStorage with new code
             const otpData = JSON.parse(sessionStorage.getItem('otpPending') || '{}');
             otpData.verification_code = result.verification_code;
             otpData.timestamp = Date.now();
@@ -879,7 +834,6 @@
       }
     }
 
-    // Copy OTP to clipboard
     function copyOTP() {
       const code = document.getElementById('otpCodeValue').innerText;
       navigator.clipboard.writeText(code).then(() => {
@@ -887,7 +841,6 @@
       });
     }
 
-    // --- OTP Verification Logic ---
     async function handleOTPVerification(e) {
       e.preventDefault();
       const form = e.target;
@@ -926,7 +879,6 @@
       }
     }
 
-    // --- Resend OTP ---
     async function resendOTP(e) {
       e.preventDefault();
       const email = document.getElementById('otpEmail').value;
@@ -950,7 +902,6 @@
       }
     }
 
-    // DEBUG: Test function to open OTP modal directly
     function testOpenOTP() {
       console.log('🧪 TEST: Opening OTP modal...');
       const otpModal = document.getElementById('otpModal');
@@ -962,21 +913,18 @@
       console.log('🧪 After - Display:', otpModal.style.display);
       console.log('🧪 Computed style:', window.getComputedStyle(otpModal).display);
       
-      // Set demo OTP
       document.getElementById('otpCodeDisplayNew').style.display = 'block';
       document.getElementById('otpCodeValueNew').innerText = '123456';
       document.getElementById('otpCodeNew').value = '123456';
       
       console.log('✅ TEST: Modal should be visible now!');
       
-      // Check after 1 second if it's still visible
       setTimeout(() => {
         console.log('🔍 Check after 1s - Display:', otpModal.style.display);
         console.log('🔍 Check after 1s - Computed:', window.getComputedStyle(otpModal).display);
       }, 1000);
     }
     
-    // --- RESTORE OTP MODAL ON PAGE LOAD ---
     function restoreOTPModal() {
       const otpPending = sessionStorage.getItem('otpPending');
       console.log('🔍 Checking sessionStorage for OTP:', otpPending);
@@ -986,23 +934,19 @@
           const otpData = JSON.parse(otpPending);
           console.log('📦 OTP Data found:', otpData);
           
-          // Check if OTP is not too old (e.g., within 15 minutes)
           const ageMinutes = (Date.now() - otpData.timestamp) / (1000 * 60);
           console.log(`⏰ OTP age: ${ageMinutes.toFixed(2)} minutes`);
           
           if (ageMinutes < 15) {
             console.log('🔄 Restoring OTP modal from sessionStorage...');
             
-            // Restore OTP modal
             const otpModal = document.getElementById('otpModal');
             otpModal.style.display = 'flex';
             otpModal.style.zIndex = '99999';
             
-            // Restore form data
             document.getElementById('otpUserIdNew').value = otpData.user_id || '';
             document.getElementById('otpEmailNew').value = otpData.email || '';
             
-            // Restore OTP code display
             if (otpData.verification_code) {
               document.getElementById('otpCodeDisplayNew').style.display = 'block';
               document.getElementById('otpCodeValueNew').innerText = otpData.verification_code;
@@ -1011,7 +955,6 @@
             
             console.log('✅ OTP modal restored successfully!');
           } else {
-            // Too old, remove from storage
             console.log('⏰ OTP code expired, clearing sessionStorage');
             sessionStorage.removeItem('otpPending');
           }
@@ -1024,11 +967,9 @@
       }
     }
     
-    // Run immediately AND on DOMContentLoaded
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', restoreOTPModal);
     } else {
-      // DOM already loaded, run immediately
       restoreOTPModal();
     }
    </script>

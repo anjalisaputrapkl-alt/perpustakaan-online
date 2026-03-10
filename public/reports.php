@@ -6,8 +6,6 @@ requireAuth();
 
 $schoolId = (int) $_SESSION['user']['school_id'];
 
-// Summary stats
-// Summary stats
 $tot_books = (int) $pdo->query("SELECT COUNT(*) FROM books WHERE school_id = $schoolId")->fetchColumn();
 $tot_copies = (int) $pdo->query("SELECT SUM(copies) FROM books WHERE school_id = $schoolId")->fetchColumn();
 $tot_borrows_month = (int) $pdo->query("SELECT COUNT(*) FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND MONTH(br.borrowed_at) = MONTH(CURRENT_DATE()) AND YEAR(br.borrowed_at)=YEAR(CURRENT_DATE())")->fetchColumn();
@@ -17,7 +15,6 @@ $tot_returns_today = (int) $pdo->query("SELECT COUNT(*) FROM borrows br JOIN boo
 $active_members = (int) $pdo->query("SELECT COUNT(DISTINCT br.member_id) FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.borrowed_at >= DATE_SUB(CURRENT_DATE(), INTERVAL 90 DAY)")->fetchColumn();
 $tot_categories = (int) $pdo->query("SELECT COUNT(DISTINCT category) FROM books WHERE school_id = $schoolId")->fetchColumn();
 
-// Total fines (late return fines)
 $per_day = 1000;
 $fines = 0;
 $rows = $pdo->query("SELECT br.due_at, br.returned_at FROM borrows br JOIN books b ON br.book_id = b.id WHERE b.school_id = $schoolId AND br.due_at IS NOT NULL AND (br.returned_at IS NOT NULL OR CURRENT_DATE() > br.due_at)")->fetchAll();
@@ -29,7 +26,6 @@ foreach ($rows as $r) {
     $fines += $diff * $per_day;
 }
 
-// Damage/book condition fines
 $damageController = new DamageController($pdo, $schoolId);
 $damageRecords = $damageController->getAll();
 $totalDamageFines = $damageController->getTotalFines();

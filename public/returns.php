@@ -6,14 +6,12 @@ $pdo = require __DIR__ . '/../src/db.php';
 $user = $_SESSION['user'];
 $sid = $user['school_id'];
 
-// Get some basic stats for the return page
 $stmt = $pdo->prepare(
   'SELECT COUNT(*) FROM borrows WHERE school_id = :sid AND status IN ("borrowed", "overdue")'
 );
 $stmt->execute(['sid' => $sid]);
 $activeBorrowsCount = $stmt->fetchColumn();
 
-// Get recent returns
 $stmt = $pdo->prepare(
   'SELECT b.*, bk.title, m.name as member_name 
    FROM borrows b
@@ -57,9 +55,8 @@ $recentReturns = $stmt->fetchAll();
     <div class="content">
       <div class="main">
         
-        <!-- Scanner Wrapper (Fixes button width issue) -->
+        <!-- Scanner Wrapper -->
         <div>
-            <!-- Toggle Button -->
             <div class="scanner-toggle-wrap">
                 <button onclick="toggleScanner()" class="btn-barcode-start">
                   <iconify-icon icon="mdi:barcode-scan"></iconify-icon>
@@ -67,10 +64,9 @@ $recentReturns = $stmt->fetchAll();
                 </button>
             </div>
 
-            <!-- Scanner Section (Hidden by default) -->
+            <!-- Scanner Section -->
             <div id="scannerSection" class="card scanner-section">
                 <div class="scanner-grid">
-                    <!-- Left: Scanner Controls -->
                     <div>
                        <div id="reader"></div>
                        <div id="scanStatus" style="display:none; margin-bottom: 10px; padding: 10px; border-radius: 8px;"></div>
@@ -87,14 +83,12 @@ $recentReturns = $stmt->fetchAll();
                        </div>
                     </div>
 
-                    <!-- Right: Result Display -->
                     <div>
                         <h2 class="flex-center gap-2">
                             <iconify-icon icon="mdi:history" style="font-size: 20px;"></iconify-icon>
                             Riwayat Sesi Ini
                         </h2>
 
-                        <!-- Session Info / Stats (Custom to Returns but styled consistently) -->
                         <div id="lastReturnCard" style="display: none; margin-bottom: 20px;">
                             <div class="scanned-info-card" style="display: block;">
                                  <div class="scanned-info-label" style="display: flex; justify-content: space-between;">
@@ -109,13 +103,11 @@ $recentReturns = $stmt->fetchAll();
                             </div>
                         </div>
 
-                        <!-- Intro/Empty State -->
                         <div id="scanEmptyState" class="scanner-empty-state">
                             <iconify-icon icon="mdi:barcode-scan"></iconify-icon>
                             <p>Scan buku untuk memulai sesi pengembalian</p>
                         </div>
 
-                        <!-- Session History Table -->
                         <div id="sessionHistory" style="display: none;">
                              <div class="borrows-table-wrap mb-4">
                                 <table class="borrows-table">

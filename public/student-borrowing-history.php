@@ -13,11 +13,9 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 $school_id = $user['school_id'];
 
-// Get member_id dengan auto-create jika belum ada
 $memberHelper = new MemberHelper($pdo);
 $member_id = $memberHelper->getMemberId($user);
 
-// Get damage fines for this member
 $damageController = new DamageController($pdo, $school_id);
 $memberDamageFines = $damageController->getByMember($member_id);
 $totalMemberDenda = 0;
@@ -29,7 +27,6 @@ foreach ($memberDamageFines as $fine) {
     }
 }
 
-// Inisialisasi variabel
 $borrowingHistory = [];
 $totalBooks = 0;
 $borrowedBooks = 0;
@@ -38,15 +35,6 @@ $overdueBooks = 0;
 $errorMessage = '';
 
 try {
-    /**
-     * Query untuk mengambil riwayat peminjaman dengan informasi buku
-     * 
-     * JOIN antara tabel:
-     * - borrows: data peminjaman
-     * - books: informasi buku (judul, penulis, cover)
-     * 
-     * Filter berdasarkan member_id dan sortir dari tanggal pinjam terbaru
-     */
     $query = "
         SELECT 
             b.id AS borrow_id,
@@ -103,7 +91,7 @@ try {
     $errorMessage = 'Error: ' . htmlspecialchars($e->getMessage());
 }
 
-// Helper function untuk format tanggal
+//untuk format tanggal
 function formatDate($date) {
     if (empty($date) || $date === '0000-00-00 00:00:00') {
         return '-';
@@ -111,7 +99,7 @@ function formatDate($date) {
     return date('d M Y H:i', strtotime($date));
 }
 
-// Helper function untuk format status
+//untuk format status
 function getStatusBadge($status) {
     switch ($status) {
         case 'borrowed':
@@ -125,7 +113,7 @@ function getStatusBadge($status) {
     }
 }
 
-// Helper function untuk status warna
+//untuk status warna
 function getStatusColor($status) {
     switch ($status) {
         case 'borrowed':
@@ -159,19 +147,15 @@ $pageTitle = 'Riwayat Peminjaman';
 </head>
 
 <body>
-    <!-- Navigation Sidebar -->
     <?php include 'partials/student-sidebar.php'; ?>
-    <!-- Hamburger Menu Button -->
     <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Global Student Header -->
     <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container-main">
-        <!-- Error Alert -->
         <?php if (!empty($errorMessage)): ?>
             <div class="alert alert-danger">
                 <iconify-icon icon="mdi:alert-circle" width="18" height="18"></iconify-icon>
@@ -267,7 +251,7 @@ $pageTitle = 'Riwayat Peminjaman';
             </div>
 
             <?php if (empty($borrowingHistory)): ?>
-                <!-- Empty State -->
+
                 <div class="empty-state">
                     <div class="empty-state-icon">
                         <iconify-icon icon="mdi:inbox-multiple" width="64" height="64"></iconify-icon>
@@ -280,7 +264,7 @@ $pageTitle = 'Riwayat Peminjaman';
                     </a>
                 </div>
             <?php else: ?>
-                <!-- Tabel Responsif -->
+                <!-- Tabel -->
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
@@ -401,7 +385,6 @@ $pageTitle = 'Riwayat Peminjaman';
     </div>
 
     <script>
-        // Pass modal data to external JS
         window.modalDataStore = {
             'semua': <?php echo json_encode(array_map(function($b){ return ['title' => $b['book_title'] ?? '-', 'author' => $b['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0, 'borrowed_at' => $b['borrowed_at'], 'returned_at' => $b['returned_at'], 'due_at' => $b['due_at'], 'status' => $b['status']]; }, $borrowingHistory)); ?>,
             'dipinjam': <?php echo json_encode(array_values(array_map(function($b){ return ['title' => $b['book_title'] ?? '-', 'author' => $b['author'] ?? '-', 'category' => '-', 'isbn' => '-', 'copies' => 0, 'borrowed_at' => $b['borrowed_at'], 'returned_at' => $b['returned_at'], 'due_at' => $b['due_at'], 'status' => $b['status']]; }, array_filter($borrowingHistory, fn($b) => $b['status'] === 'borrowed')))); ?>,

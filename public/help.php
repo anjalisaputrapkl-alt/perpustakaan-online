@@ -29,20 +29,16 @@ $pageTitle = 'Bantuan';
 </head>
 
 <body>
-    <!-- Navigation Sidebar -->
     <?php include 'partials/student-sidebar.php'; ?>
 
-    <!-- Hamburger Menu Button -->
     <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Global Student Header -->
     <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container-main">
-        <!-- Page Header -->
         <div class="page-header">
             <h1>
                 <iconify-icon icon="mdi:help-circle" width="28" height="28"></iconify-icon>

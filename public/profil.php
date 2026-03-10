@@ -1,20 +1,16 @@
 <?php
-// No output before session
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
-// Start session safely
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Check if user is logged in
 if (!isset($_SESSION['user']) || !isset($_SESSION['user']['school_id'])) {
     header('Location: index.php', true, 302);
     exit;
 }
 
-// Load dependencies
 require_once __DIR__ . '/../src/auth.php';
 
 try {
@@ -69,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto']) && isset($_P
             throw new Exception('Format file harus JPG, PNG, atau WEBP');
         }
 
-        // Create upload directory if not exists
+        // Create upload directory
         $upload_dir = __DIR__ . '/uploads/anggota';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
@@ -85,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto']) && isset($_P
             throw new Exception('Gagal menyimpan file');
         }
 
-        // Update anggota table with photo path
         $photo_path = 'uploads/anggota/' . $filename;
         $update = $pdo->prepare("UPDATE siswa SET foto = ?, updated_at = NOW() WHERE id_siswa = ?");
         $update->execute([$photo_path, $userId]);
@@ -102,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['foto']) && isset($_P
     }
 }
 
-// Handle form submission (save custom fields)
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
     try {
         // Validate and sanitize input
@@ -143,7 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_profile'])) {
     }
 }
 
-// First, get user data from users table (source of truth for login)
 try {
     $stmt = $pdo->prepare("
         SELECT id, school_id, name, nisn, email, role, is_verified, created_at
@@ -161,8 +155,6 @@ try {
     die("Terjadi kesalahan saat memuat data pengguna.");
 }
 
-// Now try to get extended profile from anggota table
-// If not exists, create from user data
 try {
     $stmt = $pdo->prepare("
         SELECT 
@@ -175,7 +167,6 @@ try {
     $stmt->execute([$userId]);
     $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // If anggota record doesn't exist, create one from user data
     if (!$siswa) {
         try {
             $insert = $pdo->prepare("
@@ -190,7 +181,6 @@ try {
                 $userData['email']
             ]);
 
-            // Fetch the newly created record
             $stmt = $pdo->prepare("
                 SELECT 
                     id_siswa, nama_lengkap, nisn, kelas, jurusan,
@@ -203,7 +193,6 @@ try {
             $siswa = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             error_log('Error creating anggota record: ' . $e->getMessage());
-            // Fallback: use user data
             $siswa = [
                 'id_siswa' => $userData['id'],
                 'nama_lengkap' => $userData['name'],
@@ -226,23 +215,19 @@ try {
     die("Terjadi kesalahan saat memuat profil.");
 }
 
-// Format dates
 $tanggalLahir = !empty($siswa['tanggal_lahir']) ? date('d M Y', strtotime($siswa['tanggal_lahir'])) : '-';
 $createdAt = !empty($siswa['created_at']) ? date('d M Y, H:i', strtotime($siswa['created_at'])) : '-';
 $updatedAt = !empty($siswa['updated_at']) ? date('d M Y, H:i', strtotime($siswa['updated_at'])) : '-';
 
-// Gender display
 $genderDisplay = match ($siswa['jenis_kelamin'] ?? null) {
     'L', 'M' => 'Laki-laki',
     'P', 'F' => 'Perempuan',
     default => '-'
 };
 
-// Get member_id dengan auto-create jika belum ada
 $memberHelper = new MemberHelper($pdo);
 $member_id = $memberHelper->getMemberId($userData);
 
-// Get damage fines for this member
 $damageController = new DamageController($pdo, $schoolId);
 $memberDamageFines = $damageController->getByMember($member_id);
 $totalMemberDenda = 0;
@@ -254,7 +239,6 @@ foreach ($memberDamageFines as $fine) {
     }
 }
 
-// Photo - get from anggota table if exists, otherwise default
 $photoUrl = $siswa['foto'] ? '/perpustakaan-online/public/' . htmlspecialchars($siswa['foto']) : '/perpustakaan-online/assets/img/default-avatar.png';
 
 $pageTitle = 'Profil Saya';
@@ -282,7 +266,6 @@ $pageTitle = 'Profil Saya';
 <body>
     <?php require __DIR__ . '/partials/student-sidebar.php'; ?>
 
-    <!-- Hamburger Menu Button -->
     <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
@@ -291,7 +274,6 @@ $pageTitle = 'Profil Saya';
     <?php include 'partials/student-header.php'; ?>
 
     <div class="container-main">
-        <!-- Page Header -->
         <div class="page-header">
             <div class="topbar-title">
                 <iconify-icon icon="mdi:account-circle" width="28" height="28" style="color: var(--accent);"></iconify-icon>
@@ -383,7 +365,6 @@ $pageTitle = 'Profil Saya';
             </div>
 
             <form method="POST" class="profile-form" id="form-profile">
-                <!-- Read-only Fields (Auto-synced from members) -->
                 <div style="margin-bottom: 24px;">
                     <h3
                         style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 12px; font-weight: 600;">

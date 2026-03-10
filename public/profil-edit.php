@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get member_id dengan auto-create jika belum ada
+// Get member_id dengan auto-create
 $memberHelper = new MemberHelper($pdo);
 $userData = $_SESSION['user'];
 $member_id = $memberHelper->getMemberId($userData);

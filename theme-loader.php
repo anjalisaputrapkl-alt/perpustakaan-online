@@ -1,8 +1,4 @@
 <?php
-/**
- * Theme Loader Engine - V6 (Vibrant Predominance Mode)
- * Introduces layout layer separation for higher contrast and vibrancy.
- */
 
 if (!isset($pdo)) {
     $pdo = require __DIR__ . '/src/db.php';
@@ -11,11 +7,9 @@ if (!isset($pdo)) {
 require_once __DIR__ . '/src/ThemeModel.php';
 $themeModel = new ThemeModel($pdo);
 
-// 1. Dapatkan theme_key dari database
 $school_id = $_SESSION['user']['school_id'] ?? 1;
 $activeKey = $themeModel->checkSpecialTheme($school_id);
 
-// 2. Load School Theme and Custom Colors
 $themeData = $themeModel->getThemeData($school_id);
 $customColors = $themeData['custom_colors'] ?? [];
 
@@ -24,11 +18,9 @@ if (!empty($customColors)) {
     foreach ($customColors as $key => $value) {
         $cssVar = str_replace('color-', '--', $key);
         
-        // Sidebar colors are always applied for consistent branding across all themes
         if (strpos($cssVar, '--sidebar-') === 0) {
             echo "    $cssVar: $value !important;\n";
         } 
-        // Other custom colors only apply if the theme is set to 'custom'
         elseif ($themeData['theme_name'] === 'custom') {
             echo "    $cssVar: $value !important;\n";
         }
@@ -44,7 +36,6 @@ if ($activeKey) {
         if (isset($config[$activeKey])) {
             $theme = $config[$activeKey];
             
-            // Define Fallbacks & Variables
             $primary = $theme['primary_color'];
             $bg = $theme['background_color'];
             $text = $theme['text_color'];
@@ -52,7 +43,6 @@ if ($activeKey) {
             $card = $theme['card_color'] ?? '#ffffff';
             $border = $theme['border_color'] ?? '#e2e8f0';
             
-            // Helper for RGB conversion
             if (!function_exists('hexToRgb_local')) {
                 function hexToRgb_local($hex) {
                     $hex = str_replace("#", "", $hex);
@@ -211,11 +201,9 @@ if ($activeKey) {
             </style>
 EOT;
 
-            // Effect Engine Integration
             $effect = $theme['effect_type'] ?? null;
             if ($effect) {
                 echo "<div class='theme-effect-overlay' id='themeEffectLayer'></div>\n";
-                // Only load Script if needed
                 echo "<script>
                     window.themeEffectConfig = {
                         type: '{$effect}',
@@ -226,7 +214,6 @@ EOT;
                 echo "<script src='/perpustakaan-online/assets/js/holiday-effects.js' defer></script>\n";
             }
             
-            // Load specific theme CSS file if it exists
             $paths = ["/perpustakaan-online/public/themes/special/{$activeKey}.css"];
             foreach($paths as $p) {
                 $fsPath = __DIR__ . str_replace('/perpustakaan-online', '', $p);

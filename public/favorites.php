@@ -12,7 +12,6 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 $studentId = $user['id'];
 
-// Initialize variables
 $categories = [];
 $books = [];
 $favorites = [];
@@ -59,20 +58,16 @@ $pageTitle = 'Koleksi Favorit';
 </head>
 
 <body>
-    <!-- Navigation Sidebar -->
     <?php include 'partials/student-sidebar.php'; ?>
 
-    <!-- Hamburger Menu Button -->
     <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Global Student Header -->
     <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container-main">
-        <!-- Page Header -->
         <div class="page-header">
             <h1>
                 <iconify-icon icon="mdi:heart" width="28" height="28"></iconify-icon>
@@ -81,7 +76,6 @@ $pageTitle = 'Koleksi Favorit';
             <p>Simpan dan kelola buku-buku pilihan Anda</p>
         </div>
 
-        <!-- Error Alert -->
         <?php if (!empty($errorMessage)): ?>
             <div class="alert alert-danger">
                 <iconify-icon icon="mdi:alert-circle" width="16" height="16"></iconify-icon>
@@ -89,7 +83,6 @@ $pageTitle = 'Koleksi Favorit';
             </div>
         <?php endif; ?>
 
-        <!-- Success Alert -->
         <?php if (!empty($successMessage)): ?>
             <div class="alert alert-success">
                 <iconify-icon icon="mdi:check-circle" width="16" height="16"></iconify-icon>
@@ -99,10 +92,7 @@ $pageTitle = 'Koleksi Favorit';
 
         <!-- Favorites Grid Section -->
         <div>
-            <!-- Header dengan Stats -->
 
-
-            <!-- Search, Filter, dan Sort Bar -->
             <?php if (!empty($favorites)): ?>
             <div class="favorites-controls">
                 <!-- Search Bar -->

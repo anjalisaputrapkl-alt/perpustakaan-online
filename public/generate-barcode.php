@@ -82,11 +82,9 @@ if (!$school_id) {
                     </div>
                 </div>
                 <div id="searchResults" class="search-results">
-                    <!-- Results will be populated here -->
                 </div>
             </div>
 
-                <!-- Empty State -->
                 <div id="emptyState" class="empty-state">
                     <div class="empty-state-icon">
                         <iconify-icon icon="mdi:book-search-outline"></iconify-icon>
@@ -96,7 +94,6 @@ if (!$school_id) {
                 </div>
             </div>
 
-            <!-- Bulk Action Bar -->
             <div id="bulkActionBar" class="bulk-action-bar">
                 <span class="bulk-info-text"><span id="selectedCount">0</span> buku dipilih</span>
                 <button class="btn-bulk-generate" onclick="generateBulk()">
@@ -133,7 +130,6 @@ if (!$school_id) {
             </div>
             
             <div id="modalBulkBody" class="barcode-grid" style="display: none; padding: 10px; background: var(--bg); border-radius: 20px;">
-                <!-- Bulk entries will go here -->
             </div>
 
             <div class="modal-actions">

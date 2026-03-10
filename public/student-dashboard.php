@@ -4,7 +4,6 @@ $pdo = require __DIR__ . '/../src/db.php';
 require_once __DIR__ . '/../src/MemberHelper.php';
 require_once __DIR__ . '/../src/maintenance/DamageController.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['user'])) {
     header('Location: /?login_required=1');
     exit;
@@ -13,11 +12,9 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 $school_id = $user['school_id'];
 
-// Get member_id dengan auto-create jika belum ada
 $memberHelper = new MemberHelper($pdo);
 $member_id = $memberHelper->getMemberId($user);
 
-// Get damage fines for this member
 $damageController = new DamageController($pdo, $school_id);
 $memberDamageFines = $damageController->getByMember($member_id);
 $totalMemberDenda = 0;
@@ -29,8 +26,7 @@ foreach ($memberDamageFines as $fine) {
     }
 }
 
-// ===================== STATISTIK DASHBOARD =====================
-// 1. Total Buku di sekolah ini
+// Total Buku
 try {
     $totalBooksStmt = $pdo->prepare('SELECT COUNT(*) as total FROM books WHERE school_id = :school_id');
     $totalBooksStmt->execute(['school_id' => $school_id]);
@@ -39,7 +35,7 @@ try {
     $totalBooks = 0;
 }
 
-// 2. Jumlah buku yang sedang dipinjam anggota ini
+// Jumlah buku yang sedang dipinjam
 try {
     $borrowCountStmt = $pdo->prepare(
         'SELECT COUNT(*) as total FROM borrows 
@@ -53,8 +49,7 @@ try {
     $borrowCount = 0;
 }
 
-// 3. Denda tertunda (overdue fines) dari keterlambatan peminjaman
-// Menghitung denda keterlambatan (bukan damage fine, melainkan denda dari due date yang terlewat)
+// Denda tertunda terlambat
 try {
     $lateFinesStmt = $pdo->prepare(
         'SELECT COUNT(*) as total FROM borrows 
@@ -69,7 +64,7 @@ try {
     $overdueCount = 0;
 }
 
-// 4. Get student's loan limit (max_pinjam)
+// max pinjam
 try {
     $maxPinjamStmt = $pdo->prepare('SELECT max_pinjam FROM members WHERE id = :member_id');
     $maxPinjamStmt->execute(['member_id' => $member_id]);
@@ -77,9 +72,7 @@ try {
 } catch (Exception $e) {
     $maxPinjam = 2;
 }
-// ===================== END STATISTIK DASHBOARD =====================
 
-// ===================== QUERY PEMINJAMAN ANGGOTA =====================
 // Update overdue status
 $pdo->prepare(
     'UPDATE borrows SET status = "overdue"
@@ -89,7 +82,7 @@ $pdo->prepare(
      AND due_at < NOW()'
 )->execute(['school_id' => $school_id, 'member_id' => $member_id]);
 
-// Get all borrowing records untuk anggota ini
+// semua record peminjaman
 $borrowStmt = $pdo->prepare(
     'SELECT b.id, b.borrowed_at, b.due_at, b.returned_at, b.status, 
             bk.id as book_id, bk.title, bk.author
@@ -106,14 +99,12 @@ $my_borrows = $borrowStmt->fetchAll();
 $active_borrows = count(array_filter($my_borrows, fn($b) => $b['status'] !== 'returned'));
 $overdue_count = count(array_filter($my_borrows, fn($b) => $b['status'] === 'overdue'));
 $returned_count = count(array_filter($my_borrows, fn($b) => $b['status'] === 'returned'));
-// ===================== END QUERY PEMINJAMAN ANGGOTA =====================
 
 // Get filter parameters
 $search = $_GET['search'] ?? '';
 $category = $_GET['category'] ?? '';
 $sort = $_GET['sort'] ?? 'newest';
 
-// Build query to get books with availability status and current borrower
 $query = 'SELECT bk.title, bk.author, bk.category, bk.cover_image, bk.shelf, bk.row_number, bk.lokasi_rak, bk.access_level, 
                  GROUP_CONCAT(DISTINCT bk.isbn SEPARATOR ", ") as isbn,
                  COALESCE(MAX(CASE WHEN bk.copies > 0 THEN bk.id ELSE NULL END), MAX(bk.id)) as id, 
@@ -136,7 +127,6 @@ if (!empty($category)) {
     $params['category'] = $category;
 }
 
-// Sort options
 switch ($sort) {
     case 'oldest':
         $query .= ' ORDER BY created_at ASC';
@@ -158,7 +148,6 @@ try {
     $books = [];
 }
 
-// Get categories for filter
 try {
     $catStmt = $pdo->prepare('SELECT DISTINCT category FROM books WHERE school_id = :school_id AND category IS NOT NULL AND category != "" ORDER BY category');
     $catStmt->execute(['school_id' => $school_id]);
@@ -167,16 +156,13 @@ try {
     $categories = [];
 }
 
-// Tambahkan default categories untuk option yang komprehensif
 $defaultCategories = ['Fiksi', 'Non-Fiksi', 'Referensi', 'Biografi', 'Sejarah', 'Seni & Budaya', 'Teknologi', 'Pendidikan', 'Anak-anak', 'Komik', 'Majalah', 'Lainnya'];
 
-// Merge dengan database categories untuk menampilkan semua opsi
 $categories = array_unique(array_merge($categories, $defaultCategories));
 sort($categories);
 
 
 
-// Daftar semua buku sekolah (untuk ditampilkan ketika anggota klik 'Total Buku')
 try {
     $booksAvailStmt = $pdo->prepare('SELECT bk.title, bk.author, bk.category, bk.cover_image, bk.shelf, bk.row_number, bk.lokasi_rak, bk.access_level, 
                                              GROUP_CONCAT(DISTINCT bk.isbn SEPARATOR ", ") as isbn,
@@ -196,7 +182,6 @@ try {
     $books_available = [];
 }
 
-// Top viewed books (to represent 'buku yang sedang dilihat' apabila tidak ada tracking per-user)
 try {
     $topViewedStmt = $pdo->prepare('SELECT id, title, author, cover_image, view_count FROM books WHERE school_id = :school_id ORDER BY view_count DESC LIMIT 10');
     $topViewedStmt->execute(['school_id' => $school_id]);
@@ -205,7 +190,6 @@ try {
     $top_viewed_books = [];
 }
 
-// Set dynamic page title
 $userRole = $_SESSION['user']['role'] ?? 'student';
 $roleLabel = 'Anggota';
 if ($userRole === 'teacher') $roleLabel = 'Guru';
@@ -232,12 +216,10 @@ $pageTitle = 'Dashboard ' . $roleLabel;
     <?php require_once __DIR__ . '/../theme-loader.php'; ?>
 
     <style>
-        /* SweetAlert2 Z-Index Fix */
         .swal2-container {
             z-index: 3000 !important;
         }
 
-        /* Improved Modal Styles */
         .modal-body {
             padding: 24px;
             display: flex;
@@ -380,21 +362,17 @@ $pageTitle = 'Dashboard ' . $roleLabel;
 </head>
 
 <body>
-    <!-- Navigation Sidebar -->
     <?php include 'partials/student-sidebar.php'; ?>
 
-    <!-- Hamburger Menu Button -->
     <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
         <iconify-icon icon="mdi:menu" width="24" height="24"></iconify-icon>
     </button>
 
-    <!-- Global Anggota Header -->
     <?php include 'partials/student-header.php'; ?>
 
     <!-- Main Container -->
     <div class="container">
         <div class="content-wrapper">
-            <!-- Sidebar -->
             <aside class="sidebar">
                 <!-- Total Denda -->
                 <div class="sidebar-section" style="animation: fadeInSlideUp 0.4s ease-out;">
@@ -492,8 +470,6 @@ $pageTitle = 'Dashboard ' . $roleLabel;
 
             <!-- Main Content -->
             <div class="main-content">
-                <!-- Modern Search Bar with Category Dropdown -->
-                <!-- KPI Cards -->
                 <div class="kpi-grid" role="list">
                     <a class="kpi-card" href="javascript:void(0)" onclick="showTotalBooksModal()" role="listitem">
                         <div class="kpi-left">
@@ -523,7 +499,7 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                 </div>
 
                 <form method="get" class="modern-search-bar-form" onsubmit="return false;">
-                    <!-- Search Bar (Dominant) -->
+                    <!-- Search Bar -->
                     <div class="search-bar-wrapper">
                         <div class="search-bar-container">
                             <iconify-icon icon="mdi:magnify" class="search-icon"></iconify-icon>
@@ -533,7 +509,7 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                         </div>
                     </div>
 
-                    <!-- Category Dropdown - Select Element -->
+                    <!-- Category Dropdown -->
                     <select id="categorySelect" class="category-dropdown-select">
                         <option value="">Semua Kategori</option>
                         <?php foreach ($categories as $cat): ?>
@@ -695,7 +671,6 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                     </div>
 
                     <div id="modalBorrowerSection" style="display: none;">
-                        <!-- Will be populated by JS -->
                     </div>
 
                     <div class="modal-actions">

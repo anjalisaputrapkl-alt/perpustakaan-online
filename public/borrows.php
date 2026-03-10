@@ -10,13 +10,11 @@ $sid = $user['school_id'];
 if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])) {
   $pdo->beginTransaction();
   try {
-    // 1. Get book_id AND due_at
     $stmt = $pdo->prepare('SELECT book_id, due_at FROM borrows WHERE id=:id AND school_id=:sid');
     $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
     $borrowData = $stmt->fetch();
     
     if ($borrowData) {
-      // Calculate final fine
       $schoolStmt = $pdo->prepare('SELECT late_fine FROM schools WHERE id = :sid');
       $schoolStmt->execute(['sid' => $sid]);
       $late_fine = (int) ($schoolStmt->fetchColumn() ?: 500);
@@ -32,19 +30,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
         }
       }
 
-      // 2. Update borrows
       $stmt = $pdo->prepare(
         'UPDATE borrows SET returned_at=NOW(), status="returned", fine_amount=:fine
          WHERE id=:id AND school_id=:sid'
       );
       $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid, 'fine' => $fineAmount]);
 
-      // 3. Update stock
       $stmt = $pdo->prepare('UPDATE books SET copies = copies + 1 WHERE id = :bid');
       $stmt->execute(['bid' => $borrowData['book_id']]);
       
-      // 4. Waitlist Notification Logic
-      // Get book title and author first
       $stmt = $pdo->prepare('SELECT title, author FROM books WHERE id = :bid');
       $stmt->execute(['bid' => $borrowData['book_id']]);
       $book = $stmt->fetch();
@@ -72,7 +66,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
               require_once __DIR__ . '/../src/NotificationsHelper.php';
               $notifHelper = new NotificationsHelper($pdo);
               
-              // Notify the first person in line
               $firstStudent = $waitingStudents[0];
               
               $notifHelper->createNotification(
@@ -83,7 +76,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
                   'Buku "' . htmlspecialchars($book['title']) . '" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!'
               );
               
-              // Mark as notified
               $updateWaitlist = $pdo->prepare('UPDATE waitlist SET status = "notified" WHERE id = ?');
               $updateWaitlist->execute([$firstStudent['id']]);
           }
@@ -100,8 +92,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
   exit;
 }
 
-// Update overdue status and Calculate Fines
-// Fetch school data for dynamic defaults (Fine, Duration, etc)
 $schoolStmt = $pdo->prepare('SELECT * FROM schools WHERE id = :sid');
 $schoolStmt->execute(['sid' => $sid]);
 $school = $schoolStmt->fetch();
@@ -112,14 +102,11 @@ if (!$school) {
 
 $late_fine = (int) ($school['late_fine'] ?? 500);
 
-// 1. Mark overdue
 $pdo->prepare(
   'UPDATE borrows SET status="overdue"
    WHERE school_id=:sid AND returned_at IS NULL AND due_at < NOW() AND status != "overdue"'
 )->execute(['sid' => $sid]);
 
-// 2. Calculate fines (Hanya untuk yang belum dikembalikan dan sudah lewat jatuh tempo)
-// Fine = (Now - DueDate in Days) * late_fine
 if ($late_fine > 0) {
     $pdo->prepare(
       'UPDATE borrows 
@@ -130,7 +117,6 @@ if ($late_fine > 0) {
     )->execute(['sid' => $sid, 'fine' => $late_fine]);
 }
 
-// Get all borrowing data
 $stmt = $pdo->prepare(
   'SELECT b.*, bk.title, bk.cover_image, bk.isbn, bk.max_borrow_days, m.name AS member_name, m.nisn
    FROM borrows b
@@ -176,14 +162,12 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
         <strong>Manajemen Peminjaman</strong>
       </div>
       <div class="topbar-actions">
-        <!-- Future notification/user icons can go here -->
       </div>
     </div>
 
     <div class="content">
       <div class="main">
         <div>
-          <!-- Scanner Toggle Button -->
           <div class="scanner-toggle-wrap">
             <button onclick="toggleScanner()" class="btn-barcode-start">
               <iconify-icon icon="mdi:barcode-scan"></iconify-icon>
@@ -191,10 +175,8 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
             </button>
           </div>
 
-          <!-- Embedded Scanner Section -->
           <div id="scannerSection" class="card scanner-section">
               <div class="scanner-grid">
-                  <!-- Left: Camera -->
                   <div>
                       <div id="reader"></div>
                       <div id="scanStatus"></div>
@@ -205,14 +187,12 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                       </div>
                   </div>
 
-                  <!-- Right: Transaction Details -->
                   <div>
                       <h2 class="flex-center gap-2">
                           <iconify-icon icon="mdi:basket-outline" style="font-size: 20px;"></iconify-icon>
                           Keranjang Peminjaman
                       </h2>
 
-                      <!-- Member Info -->
                       <div id="scannedMemberInfo" class="scanned-info-card">
                           <div class="scanned-info-label">Peminjam</div>
                           <div class="scanned-info-value">
@@ -221,13 +201,11 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                           <div class="scanned-info-meta">NISN: <span id="scannedMemberNisn"></span></div>
                       </div>
 
-                      <!-- Empty State -->
                       <div id="scanEmptyState" class="scanner-empty-state">
                           <iconify-icon icon="mdi:barcode"></iconify-icon>
                           <p>Scan buku atau anggota untuk memulai</p>
                       </div>
 
-                      <!-- Book List -->
                       <div id="scannedBooksContainer" style="display: none;">
                           <div class="borrows-table-wrap mb-4">
                               <table class="borrows-table">
@@ -242,13 +220,11 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
                               </table>
                           </div>
 
-                          <!-- Due Date -->
                           <div class="form-group">
                               <label>Tanggal Pengembalian</label>
                               <input type="date" id="borrowDueDate">
                           </div>
 
-                          <!-- Actions -->
                           <div class="action-grid">
                               <button onclick="submitBorrow()" id="btnSubmitBorrow" class="btn primary" style="flex: 1; justify-content: center;">
                                   Konfirmasi Peminjaman
@@ -262,7 +238,6 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
               </div>
           </div>
 
-          <!-- Loading Overlay (Local) -->
           <div id="scannerLoading" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; color: white; backdrop-filter: blur(4px);">
               <div class="spinner" style="width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 10px;"></div>
               <p>Memproses...</p>
@@ -493,21 +468,12 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
   </div>
 
   <script>
-    // ========================================================================
-    // Approve/Reject Borrow
-    // ========================================================================
-
-
-
-    // ========================================================================
-    // Extend Due Date Function
-    // ========================================================================
 
     function extendDueDate(borrowId, bookTitle) {
       const days = prompt(`Perpanjang tenggat untuk "${bookTitle}":\n\nMasukkan jumlah hari perpanjangan (1-365):`, '7');
 
       if (days === null) {
-        return; // User cancelled
+        return;
       }
 
       const daysInt = parseInt(days, 10);
@@ -517,7 +483,6 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
         return;
       }
 
-      // Send request to extend due date
       fetch('api/extend-due-date.php', {
         method: 'POST',
         headers: {
@@ -539,10 +504,6 @@ $withFines = count(array_filter($borrows, fn($b) => !empty($b['fine_amount'])));
           alert('Terjadi kesalahan saat memperpanjang tenggat');
         });
     }
-
-    // ========================================================================
-    // Confirm Return Function (Admin)
-    // ========================================================================
 
     function confirmReturn(borrowId) {
       if (!confirm('Konfirmasi pengembalian buku ini?')) {

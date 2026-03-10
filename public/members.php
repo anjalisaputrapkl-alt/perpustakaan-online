@@ -8,7 +8,6 @@ $sid = $user['school_id'];
 
 $action = $_GET['action'] ?? 'list';
 
-// Get school info at the top so it's available for both POST and GET
 $schoolStmt = $pdo->prepare('SELECT * FROM schools WHERE id = :sid');
 $schoolStmt->execute(['sid' => $sid]);
 $school = $schoolStmt->fetch();
@@ -32,7 +31,6 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the inserted NISN for password generation
     $nisn = $_POST['nisn'];
     $password = $_POST['password'];
-    // Hash the password
     $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
     // Create account in users table
@@ -68,13 +66,11 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($action === 'edit' && isset($_GET['id'])) {
   $id = (int) $_GET['id'];
   if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 1. Ambil NISN lama sebelum update untuk acuan update ke tabel users
     $oldMemberStmt = $pdo->prepare('SELECT nisn FROM members WHERE id=:id AND school_id=:sid');
     $oldMemberStmt->execute(['id' => $id, 'sid' => $sid]);
     $oldMember = $oldMemberStmt->fetch();
     $oldNisn = $oldMember['nisn'] ?? $_POST['nisn'];
 
-    // 2. Update tabel members
     $stmt = $pdo->prepare(
       'UPDATE members SET name=:name,email=:email,nisn=:nisn,role=:role,max_pinjam=:max_pinjam
        WHERE id=:id AND school_id=:sid'
@@ -89,8 +85,6 @@ if ($action === 'edit' && isset($_GET['id'])) {
       'sid' => $sid
     ]);
 
-    // 3. Update tabel users & siswa (Sinkronisasi Data)
-    // Ambil user_id dulu berdasarkan NISN lama
     $getUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND (role = "student" OR role = "teacher" OR role = "employee")');
     $getUserStmt->execute(['nisn' => $oldNisn]);
     $user = $getUserStmt->fetch();
@@ -98,7 +92,6 @@ if ($action === 'edit' && isset($_GET['id'])) {
     if ($user) {
         $userId = $user['id'];
         
-        // A. Update Users
         $updateUserSql = 'UPDATE users SET name=:name, email=:email, nisn=:new_nisn';
         $updateUserParams = [
             'name' => $_POST['name'],
@@ -117,13 +110,10 @@ if ($action === 'edit' && isset($_GET['id'])) {
         $updateUserStmt = $pdo->prepare($updateUserSql);
         $updateUserStmt->execute($updateUserParams);
 
-        // B. Update Siswa (Profile Data)
-        // Periksa apakah record siswa ada
         $checkSiswa = $pdo->prepare('SELECT id_siswa FROM siswa WHERE id_siswa = :id');
         $checkSiswa->execute(['id' => $userId]);
         
         if ($checkSiswa->fetch()) {
-            // Update existing
             $updateSiswaStmt = $pdo->prepare('UPDATE siswa SET nama_lengkap = :name, email = :email, nisn = :nisn WHERE id_siswa = :id');
             $updateSiswaStmt->execute([
                 'name' => $_POST['name'],
@@ -132,7 +122,6 @@ if ($action === 'edit' && isset($_GET['id'])) {
                 'id' => $userId
             ]);
         } else {
-            // Create new if not exists (Lazy create)
             $insertSiswa = $pdo->prepare('INSERT INTO siswa (id_siswa, nama_lengkap, email, nisn) VALUES (:id, :name, :email, :nisn)');
             $insertSiswa->execute([
                 'id' => $userId,
@@ -153,17 +142,14 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
 if ($action === 'delete' && isset($_GET['id'])) {
   try {
-    // Get member data to find associated user
     $getMemberStmt = $pdo->prepare('SELECT email, nisn FROM members WHERE id=:id AND school_id=:sid');
     $getMemberStmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
     $member = $getMemberStmt->fetch();
 
     if ($member) {
-      // Delete user account if exists (by NISN)
       $deleteUserStmt = $pdo->prepare('DELETE FROM users WHERE nisn=:nisn AND role=:role');
       $deleteUserStmt->execute(['nisn' => $member['nisn'], 'role' => 'student']);
 
-      // Delete member
       $stmt = $pdo->prepare('DELETE FROM members WHERE id=:id AND school_id=:sid');
       $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
     }
@@ -178,9 +164,7 @@ if ($action === 'delete' && isset($_GET['id'])) {
   }
 }
 
-// (School info already fetched at top)
 
-// Update query to join with users and siswa to get photo
 $stmt = $pdo->prepare('
     SELECT m.*, s.foto,
     (SELECT COUNT(*) FROM borrows WHERE member_id = m.id AND returned_at IS NULL) as active_borrows
@@ -211,7 +195,6 @@ $members = $stmt->fetchAll();
   <link rel="stylesheet" href="../assets/css/members.css">
   <link rel="stylesheet" href="../assets/css/members-style.css">
   <?php require_once __DIR__ . '/../theme-loader.php'; ?>
-  <!-- JsBarcode for client-side barcode generation -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 
@@ -323,20 +306,16 @@ $members = $stmt->fetchAll();
               </thead>
               <tbody id="membersTableBody">
                 <?php foreach ($members as $m):
-                  // Check if account exists
                   $checkUserStmt = $pdo->prepare('SELECT id FROM users WHERE nisn = :nisn AND (role = "student" OR role = "teacher" OR role = "employee")');
                   $checkUserStmt->execute(['nisn' => $m['nisn']]);
                   $userExists = $checkUserStmt->fetch() ? true : false;
                   
-                  // Photo
                   $photoSrc = !empty($m['foto']) ? htmlspecialchars($m['foto']) : null;
                   if ($photoSrc && strpos($photoSrc, 'http') !== 0) {
-                      // Fix relative paths
                       $photoSrc = str_replace(['./', '../'], '', $photoSrc);
                       if (file_exists(__DIR__ . '/' . $photoSrc)) {
                           $photoSrc = $photoSrc; 
                       } else {
-                          // Try uploads
                            if (file_exists(__DIR__ . '/uploads/siswa/' . basename($photoSrc))) {
                                $photoSrc = 'uploads/siswa/' . basename($photoSrc);
                            } else {
@@ -345,10 +324,8 @@ $members = $stmt->fetchAll();
                       }
                   }
                   $initial = strtoupper(substr($m['name'], 0, 1));
-                  // Random-ish color based on name length
                   $colors = ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981', '#06b6d4', '#3b82f6', '#8b5cf6', '#d946ef', '#f43f5e'];
                   $bg = $colors[strlen($m['name']) % count($colors)];
-                  // Create data for modal with fixed photo path
                   $modalData = $m;
                   $modalData['foto'] = $photoSrc;
                   ?>
@@ -430,7 +407,6 @@ $members = $stmt->fetchAll();
         </div>
 
         <?php
-          // Pre-compute stats for each category
           $totalMembers = count($members);
           $students = array_values(array_filter($members, fn($m) => ($m['role'] ?? 'student') === 'student'));
           $staffMembers = array_values(array_filter($members, fn($m) => in_array($m['role'] ?? '', ['teacher', 'employee'])));
@@ -501,7 +477,6 @@ $members = $stmt->fetchAll();
         </div>
 
           <?php
-          // Inject stats data to JS
           $statsData = [
             'semua' => $members,
             'siswa' => $students,
@@ -582,7 +557,6 @@ $members = $stmt->fetchAll();
 
       <!-- Member List -->
       <div class="stat-modal-body" id="statModalBody">
-        <!-- filled by JS -->
       </div>
 
       <!-- Footer -->
@@ -643,11 +617,9 @@ $members = $stmt->fetchAll();
 
   <script src="../assets/js/members.js"></script>
   <script>
-    // Inject PHP members data to JS for bulk printing
     const allMembersData = <?= json_encode($members) ?>;
     const schoolData = <?= json_encode($school) ?>;
     let currentMemberData = null;
-    // Stats data for clickable stat cards
     const membersStatData = <?= json_encode($statsData) ?>;
   </script>
   <script src="../assets/js/members-manage.js"></script>

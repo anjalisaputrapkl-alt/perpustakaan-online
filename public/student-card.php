@@ -1,5 +1,4 @@
 <?php
-// Load auth helpers (this will handle session_start internally)
 require __DIR__ . '/../src/auth.php';
 
 // Initialize database
@@ -9,18 +8,15 @@ try {
     error_log("DB Error: " . $e->getMessage());
 }
 
-// Check if preview mode is enabled (localhost only, for development)
 $isLocalhost = in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1', 'localhost']);
 $isPreviewMode = isset($_GET['preview']) && $_GET['preview'] === '1' && $isLocalhost;
 
 $member = null;
 $user = $_SESSION['user'] ?? null;
 
-// Route 1: Normal authenticated user - fetch ONLY from database
 if ($user && !empty($user['id'])) {
     if (isset($pdo)) {
         try {
-            // Fetch ALL data directly from database - this is the single source of truth
             $stmt = $pdo->prepare(
                 'SELECT u.id, u.name, u.nisn, u.school_id,
                         s.student_uuid AS student_uuid, s.foto AS foto, s.kelas, s.jurusan,
@@ -33,28 +29,23 @@ if ($user && !empty($user['id'])) {
             );
             $stmt->execute(['id' => (int)$user['id']]);
             $dbData = $stmt->fetch(PDO::FETCH_ASSOC);
-            
-            // Use database data as the single source of truth
+
             if ($dbData) {
                 $member = $dbData;
             } else {
-                // Database returned no rows - use session as fallback (user exists but no anggota record yet)
                 error_log("No anggota record found for user ID: " . $user['id']);
                 $member = $user;
             }
         } catch (Exception $e) {
             error_log("Database query error in student-card: " . $e->getMessage());
-            // Fallback to session data if database fails
             $member = $user;
         }
     } else {
-        // Database not available - use session data as fallback
         error_log("Database not available in student-card.php");
         $member = $user;
     }
 }
 
-// Route 2: Preview mode (localhost development only)
 if (!$member && $isPreviewMode && isset($pdo)) {
     try {
             $stmt = $pdo->query(
@@ -69,7 +60,6 @@ if (!$member && $isPreviewMode && isset($pdo)) {
         if ($stmt) {
             $member = $stmt->fetch(PDO::FETCH_ASSOC);
             if ($member) {
-                // Ensure session user has minimal fields
                 $_SESSION['user'] = ['id' => $member['id'], 'school_id' => $member['school_id'] ?? null, 'name' => $member['name'], 'nisn' => $member['nisn'] ?? null]; // ID Anggota
             }
         }
@@ -78,66 +68,47 @@ if (!$member && $isPreviewMode && isset($pdo)) {
     }
 }
 
-// No member found: require authentication
 if (!$member) {
     header('Location: index.php', true, 302);
     exit;
 }
 
-// Get photo URL safely - always from database
 $photoSrc = '../assets/images/default-avatar.svg';
 
 if (!empty($member['foto'])) {
     $photoPath = trim($member['foto']);
     
-    // Handle various path formats stored in database
     if (strpos($photoPath, 'http') === 0) {
-        // Already an absolute URL (http/https) - use as-is
         $photoSrc = htmlspecialchars($photoPath);
     } elseif (strpos($photoPath, '/perpustakaan-online/public/uploads/') === 0) {
-        // Path: /perpustakaan-online/public/uploads/siswa/... → ./uploads/siswa/...
         $relativePath = str_replace('/perpustakaan-online/public/', './', $photoPath);
         $photoSrc = htmlspecialchars($relativePath);
     } elseif (strpos($photoPath, '/public/uploads/') === 0) {
-        // Path: /public/uploads/siswa/... → ./uploads/siswa/...
         $relativePath = str_replace('/public/', './', $photoPath);
         $photoSrc = htmlspecialchars($relativePath);
     } elseif (strpos($photoPath, '/uploads/') === 0) {
-        // Path: /uploads/siswa/... → ./uploads/siswa/...
         $photoSrc = htmlspecialchars('.' . $photoPath);
     } elseif (strpos($photoPath, 'uploads/') === 0) {
-        // Path: uploads/siswa/... → ./uploads/siswa/...
         $photoSrc = htmlspecialchars('./' . $photoPath);
     } elseif (strpos($photoPath, '../') === 0) {
-        // Already has ../ prefix
         $photoSrc = htmlspecialchars($photoPath);
     } else {
-        // Any other relative path - prepend ../
         $photoSrc = htmlspecialchars('../' . $photoPath);
     }
-    
-    // Verify file exists, otherwise use default
-    // Only check if it's NOT a remote URL and NOT a newly uploaded file (to avoid path check issues)
-    // We trust the DB for uploads/ paths to ensure they display even if php file check is strict/flaky
+
     $useDefault = false;
     
     if (strpos($photoSrc, 'http') !== 0) {
-         // Clean path for checking
         $cleanPath = str_replace(['./', '../'], '', $photoSrc);
-        
-        // If it looks like an asset (default), check in public/assets
+
         if (strpos($cleanPath, 'assets/') !== false) {
              $checkPath = __DIR__ . '/' . $cleanPath;
              if (!file_exists($checkPath)) {
                  $useDefault = true;
              }
         } 
-        // For uploads, we try to check, but if check fails we DON'T revert to default immediately
-        // because the browser might still find it (e.g. permission or path weirdness in PHP)
         elseif (strpos($cleanPath, 'uploads/') !== false) {
              $checkPath = __DIR__ . '/' . $cleanPath;
-             // Debug note: file_exists might fail on some windows setups with mixed slashes or permissions
-             // We won't force default here.
         }
     }
 
@@ -146,11 +117,9 @@ if (!empty($member['foto'])) {
     }
 }
 
-// Add cache buster to force fresh load
 $separator = (strpos($photoSrc, '?') !== false) ? '&' : '?';
 $photoSrc .= $separator . 'v=' . bin2hex(random_bytes(4));
 
-// Ensure barcode value is clean (Prioritize NISN)
 $barcodeValue = trim($member['nisn'] ?? $member['student_uuid'] ?? $member['id'] ?? '');
 ?>
 <!doctype html>
@@ -184,9 +153,8 @@ $barcodeValue = trim($member['nisn'] ?? $member['student_uuid'] ?? $member['id']
             <p>Gunakan kartu ini untuk meminjam buku</p>
         </div>
 
-        <!-- THE CARD -->
+        <!-- CARD -->
         <div class="library-card" id="printableCard">
-            <!-- Header -->
             <div class="card-header">
                 <div class="school-logo-frame">
                    <?php if (!empty($member['school_logo'])): ?>

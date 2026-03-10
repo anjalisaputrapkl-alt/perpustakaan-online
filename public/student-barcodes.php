@@ -81,11 +81,9 @@ $school = $stmt->fetch();
                     </div>
                 </div>
                 <div id="searchResults" class="search-results">
-                    <!-- Results will be populated here -->
                 </div>
             </div>
 
-                <!-- Empty State -->
                 <div id="emptyState" class="empty-state">
                     <div class="empty-state-icon">
                         <iconify-icon icon="mdi:account-details-outline"></iconify-icon>
@@ -150,7 +148,6 @@ $school = $stmt->fetch();
             </div>
 
             <div id="modalBulkBody" class="barcode-grid" style="display: none;">
-                <!-- Bulk entries will go here -->
             </div>
 
             <div class="modal-actions">

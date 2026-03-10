@@ -9,7 +9,7 @@ $user = $_SESSION['user'];
 $sid = $user['school_id'];
 $action = $_GET['action'] ?? 'list';
 
-// Create uploads directory if not exists
+// Create uploads directory
 $uploadsDir = __DIR__ . '/../img/covers';
 if (!is_dir($uploadsDir)) {
   mkdir($uploadsDir, 0755, true);
@@ -52,7 +52,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'cover_image' => $coverImage
       ]);
   
-  // Get all students in this school to notify them about new book
+  // notification
   $studentsStmt = $pdo->prepare(
     'SELECT id FROM users WHERE school_id = :school_id AND role = "student"'
   );
@@ -139,7 +139,7 @@ if ($action === 'delete' && isset($_GET['id'])) {
   exit;
 }
 
-// Get school info needed for default settings
+// Get school info for default settings
 $stmt = $pdo->prepare('SELECT borrow_duration FROM schools WHERE id = :sid');
 $stmt->execute(['sid' => $sid]);
 $school = $stmt->fetch();
@@ -210,7 +210,7 @@ $categories = [
     <div class="content">
       <div class="main">
 
-        <!-- SECTION 1: ADD/EDIT FORM (Full Width) -->
+        <!-- ADD/EDIT FORM -->
         <div class="card form-card">
           <div class="card-header-flex" style="border-bottom: none; margin-bottom: 24px; padding-bottom: 0;">
              <div style="flex: 1;">
@@ -342,7 +342,6 @@ $categories = [
                 </div>
             </div>
 
-            <!-- Stock hidden, always 1 -->
             <input type="hidden" name="copies" value="1">
 
             <div class="form-actions">
@@ -354,7 +353,7 @@ $categories = [
           </form>
         </div>
 
-        <!-- SECTION 2: BOOK LIST (Full Width) -->
+        <!-- BOOK LIST -->
         <div class="card" style="padding-top: 0;">
           <div class="card-header-flex" style="border-bottom: 3px solid var(--accent-soft); margin-bottom: 24px; padding: 24px 0 16px 0;">
              <div style="flex: 1;">
@@ -475,9 +474,8 @@ $categories = [
           </div>
         </div>
 
-        <!-- SECTION 3: BOTTOM INFO (Grid) -->
+        <!-- BOTTOM INFo -->
         <div class="bottom-grid">
-            <!-- FAQ -->
             <div class="card">
                 <h2>Pertanyaan Umum</h2>
                 <div class="faq-container">
@@ -497,7 +495,6 @@ $categories = [
                 <h2>Statistik Perpustakaan</h2>
                 <div class="stats-grid-modern">
                     
-                    <!-- Card 1: Total Buku -->
                     <div class="stat-card-modern" onclick="showStatDetail('books')">
                         <div class="stat-icon blue">
                             <iconify-icon icon="mdi:book-open-page-variant"></iconify-icon>
@@ -511,8 +508,6 @@ $categories = [
                         </div>
                     </div>
 
-
-                    <!-- Card 3: Kategori -->
                     <div class="stat-card-modern" onclick="showStatDetail('categories')">
                         <div class="stat-icon teal">
                             <iconify-icon icon="mdi:shape"></iconify-icon>
@@ -535,7 +530,6 @@ $categories = [
     </div>
   </div>
 
-  <!-- Stat Detail Modal -->
   <div id="statModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -543,12 +537,10 @@ $categories = [
         <button class="modal-close" onclick="closeStatModal()">&times;</button>
       </div>
       <div class="modal-body" id="statModalBody">
-          <!-- Content injected via JS -->
       </div>
     </div>
   </div>
 
-  <!-- Detail Modal -->
   <div id="detailModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -591,9 +583,7 @@ $categories = [
     </div>
   </div>
 
-  <!-- Data Payload for JS -->
   <script>
-    // Pass PHP data to JS
     window.booksData = <?= json_encode(array_values($books)) ?>;
   </script>
   <script src="../assets/js/books-manage.js"></script>
