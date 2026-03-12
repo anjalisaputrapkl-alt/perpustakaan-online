@@ -178,8 +178,21 @@ function handleSuccess(data) {
     <td>
        <div style="font-size: 13px;">${data.member_name}</div>
     </td>
-    <td>\${statusHtml}</td>
-  `;
+    <td>${statusHtml}</td>
+   `;
+
+    // Update the result card info at the top if elements exist
+    const resBookTitle = document.getElementById('resBookTitle');
+    const resMemberName = document.getElementById('resMemberName');
+    const resMemberNisn = document.getElementById('resMemberNisn');
+    const scMemberName = document.getElementById('scMemberName');
+    const scBookTitle = document.getElementById('scBookTitle');
+
+    if (resBookTitle) resBookTitle.textContent = data.book_title;
+    if (resMemberName) resMemberName.textContent = data.member_name;
+    if (resMemberNisn) resMemberNisn.textContent = data.member_nisn;
+    if (scMemberName) scMemberName.textContent = data.member_name;
+    if (scBookTitle) scBookTitle.textContent = data.book_title;
 
     // Prepend to top
     if (sessionList) sessionList.insertBefore(row, sessionList.firstChild);

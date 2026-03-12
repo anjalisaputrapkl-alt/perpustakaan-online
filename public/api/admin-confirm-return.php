@@ -48,8 +48,11 @@ try {
 
     // Check if borrow exists and status is pending_return
     $borrowStmt = $pdo->prepare(
-        'SELECT b.id, b.book_id, b.member_id, b.status, b.due_at, bk.title FROM borrows b
+        'SELECT b.id, b.book_id, b.member_id, b.status, b.due_at, bk.title, bk.author, u.id as user_id 
+         FROM borrows b
          JOIN books bk ON b.book_id = bk.id
+         JOIN members m ON b.member_id = m.id
+         JOIN users u ON m.nisn = u.nisn AND m.school_id = u.school_id
          WHERE b.id = :borrow_id 
          AND b.school_id = :school_id
          AND b.status = "pending_return"'
@@ -85,7 +88,7 @@ try {
 
     // Update borrow status to returned and save fine
     $updateBorrowStmt = $pdo->prepare(
-        'UPDATE borrows SET returned_at = NOW(), status = "returned", fine_amount = :fine 
+        'UPDATE borrows SET returned_at = NOW(), status = "returned", fine_amount = :fine, fine_status = "unpaid" 
          WHERE id = :borrow_id'
     );
     $updateBorrowStmt->execute(['borrow_id' => $borrow_id, 'fine' => $fineAmount]);
@@ -103,11 +106,50 @@ try {
     
     $helper->createNotification(
         $school_id,
-        $borrow['member_id'],
+        $borrow['user_id'],
         'return_confirm',
         'Pengembalian Disetujui',
         $notification_message
     );
+
+    // --- Waitlist Notification Logic ---
+    // Check if there are students waiting for this book title
+    $waitlistStmt = $pdo->prepare(
+        'SELECT w.*, u.id as student_real_id 
+         FROM waitlist w
+         JOIN members m ON w.member_id = m.id
+         JOIN users u ON m.nisn = u.nisn AND m.school_id = u.school_id
+         WHERE w.school_id = :sid 
+         AND w.book_title = :title 
+         AND w.book_author = :author 
+         AND w.status = "pending"
+         ORDER BY w.created_at ASC'
+    );
+    $waitlistStmt->execute([
+        'sid' => $school_id,
+        'title' => trim($borrow['title']),
+        'author' => trim($borrow['author'])
+    ]);
+    
+    $waitingStudents = $waitlistStmt->fetchAll();
+
+    if ($waitingStudents) {
+        // Notify the first person in line
+        $firstStudent = $waitingStudents[0];
+        
+        $helper->createNotification(
+            $school_id,
+            $firstStudent['student_real_id'],
+            'info',
+            'Buku Tersedia!',
+            'Buku "' . htmlspecialchars($borrow['title']) . '" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!'
+        );
+        
+        // Mark as notified
+        $updateWaitlist = $pdo->prepare('UPDATE waitlist SET status = "notified" WHERE id = ?');
+        $updateWaitlist->execute([$firstStudent['id']]);
+    }
+    // --- End Waitlist Logic ---
 
     // Commit transaction
     $pdo->commit();

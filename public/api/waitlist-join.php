@@ -27,8 +27,8 @@ try {
         $input = $_POST;
     }
 
-    $title = $input['title'] ?? null;
-    $author = $input['author'] ?? null;
+    $title = trim($input['title'] ?? '');
+    $author = trim($input['author'] ?? '');
     $action = $input['action'] ?? 'join'; // join or leave
 
     if (!$title || !$author) {

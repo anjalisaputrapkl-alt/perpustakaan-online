@@ -27,7 +27,7 @@ try {
 
     // 1. Cari buku by barcode (ISBN) atau ID
     $bookStmt = $pdo->prepare(
-        'SELECT id, title, isbn, copies FROM books 
+        'SELECT id, title, author, isbn, copies FROM books 
          WHERE (isbn = :isbn OR id = :id) AND school_id = :sid'
     );
     $bookStmt->execute(['isbn' => $barcode, 'id' => $barcode, 'sid' => $sid]);
@@ -86,7 +86,8 @@ try {
         'UPDATE borrows SET 
             status = "returned", 
             returned_at = NOW(), 
-            fine_amount = :fine 
+            fine_amount = :fine,
+            fine_status = "unpaid" 
          WHERE id = :id'
     );
     $updateBorrow->execute([
@@ -101,9 +102,10 @@ try {
     // 6. Waitlist Notification Logic
     // Check if there are students waiting for this book title/author
     $waitlistStmt = $pdo->prepare(
-        'SELECT w.*, m.user_id as student_real_id 
+        'SELECT w.*, u.id as student_real_id 
          FROM waitlist w
          JOIN members m ON w.member_id = m.id
+         JOIN users u ON m.nisn = u.nisn AND m.school_id = u.school_id
          WHERE w.school_id = :sid 
          AND w.book_title = :title 
          AND w.book_author = :author 
@@ -112,8 +114,8 @@ try {
     );
     $waitlistStmt->execute([
         'sid' => $sid,
-        'title' => $book['title'],
-        'author' => $book['author']
+        'title' => trim($book['title']),
+        'author' => trim($book['author'])
     ]);
     
     $waitingStudents = $waitlistStmt->fetchAll();

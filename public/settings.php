@@ -939,7 +939,7 @@ if (!$school) {
                 <div class="settings-grid">
                     <div class="card">
                         <h2 class="card-title">
-                            <iconify-icon icon="mdi:cellphone-wireless"></iconify-icon> Scanner Tanpa Login
+                            <iconify-icon icon="mdi:cellphone-wireless"></iconify-icon> Scanner
                         </h2>
                         <p class="card-subtitle">Gunakan fitur ini untuk memberikan akses scan buku ke staff lewat handphone tanpa harus memberitahukan password admin.</p>
 

@@ -41,20 +41,20 @@ class NotificationsService {
         try {
             $query = "
                 SELECT 
-                    CONCAT('upcoming_', p.id_peminjaman) as id_notifikasi,
-                    p.id_siswa,
-                    CONCAT('📚 ', b.judul, ' akan jatuh tempo') as judul,
-                    CONCAT('Buku \"', b.judul, '\" harus dikembalikan pada ', DATE_FORMAT(p.tanggal_kembali, '%d %b %Y'), '.') as pesan,
+                    CONCAT('upcoming_', p.id) as id_notifikasi,
+                    p.member_id as id_siswa,
+                    CONCAT('📚 ', b.title, ' akan jatuh tempo') as judul,
+                    CONCAT('Buku \"', b.title, '\" harus dikembalikan pada ', DATE_FORMAT(p.due_at, '%d %b %Y'), '.') as pesan,
                     'pengembalian' as jenis_notifikasi,
-                    p.tanggal_kembali as tanggal,
+                    p.due_at as tanggal,
                     0 as status_baca
-                FROM peminjaman p
-                JOIN buku b ON p.id_buku = b.id_buku
-                WHERE p.id_siswa = ?
-                    AND p.status = 'dipinjam'
-                    AND DATE(p.tanggal_kembali) <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)
-                    AND DATE(p.tanggal_kembali) > CURDATE()
-                ORDER BY p.tanggal_kembali ASC
+                FROM borrows p
+                JOIN books b ON p.book_id = b.id
+                WHERE p.member_id = ?
+                    AND p.status = 'borrowed'
+                    AND DATE(p.due_at) <= DATE_ADD(CURDATE(), INTERVAL 3 DAY)
+                    AND DATE(p.due_at) > CURDATE()
+                ORDER BY p.due_at ASC
             ";
 
             $stmt = $this->pdo->prepare($query);
@@ -72,19 +72,19 @@ class NotificationsService {
         try {
             $query = "
                 SELECT 
-                    CONCAT('overdue_', p.id_peminjaman) as id_notifikasi,
-                    p.id_siswa,
-                    CONCAT('⚠️ ', b.judul, ' sudah jatuh tempo!') as judul,
-                    CONCAT('Buku \"', b.judul, '\" seharusnya dikembalikan pada ', DATE_FORMAT(p.tanggal_kembali, '%d %b %Y'), '. Silakan kembalikan segera untuk menghindari denda.') as pesan,
+                    CONCAT('overdue_', p.id) as id_notifikasi,
+                    p.member_id as id_siswa,
+                    CONCAT('⚠️ ', b.title, ' sudah jatuh tempo!') as judul,
+                    CONCAT('Buku \"', b.title, '\" seharusnya dikembalikan pada ', DATE_FORMAT(p.due_at, '%d %b %Y'), '. Silakan kembalikan segera untuk menghindari denda.') as pesan,
                     'telat' as jenis_notifikasi,
-                    p.tanggal_kembali as tanggal,
+                    p.due_at as tanggal,
                     0 as status_baca
-                FROM peminjaman p
-                JOIN buku b ON p.id_buku = b.id_buku
-                WHERE p.id_siswa = ?
-                    AND p.status = 'dipinjam'
-                    AND DATE(p.tanggal_kembali) < CURDATE()
-                ORDER BY p.tanggal_kembali ASC
+                FROM borrows p
+                JOIN books b ON p.book_id = b.id
+                WHERE p.member_id = ?
+                    AND p.status = 'overdue'
+                    AND DATE(p.due_at) < CURDATE()
+                ORDER BY p.due_at ASC
             ";
 
             $stmt = $this->pdo->prepare($query);
@@ -102,20 +102,20 @@ class NotificationsService {
         try {
             $query = "
                 SELECT 
-                    CONCAT('returned_', p.id_peminjaman) as id_notifikasi,
-                    p.id_siswa,
-                    CONCAT('✅ ', b.judul, ' telah dikembalikan') as judul,
-                    CONCAT('Terima kasih telah mengembalikan \"', b.judul, '\". Pengembalian dicatat pada ', DATE_FORMAT(p.tanggal_dikembalikan, '%d %b %Y %H:%i'), '.') as pesan,
+                    CONCAT('returned_', p.id) as id_notifikasi,
+                    p.member_id as id_siswa,
+                    CONCAT('✅ ', b.title, ' telah dikembalikan') as judul,
+                    CONCAT('Terima kasih telah mengembalikan \"', b.title, '\". Pengembalian dicatat pada ', DATE_FORMAT(p.returned_at, '%d %b %Y %H:%i'), '.') as pesan,
                     'sukses' as jenis_notifikasi,
-                    p.tanggal_dikembalikan as tanggal,
+                    p.returned_at as tanggal,
                     0 as status_baca
-                FROM peminjaman p
-                JOIN buku b ON p.id_buku = b.id_buku
-                WHERE p.id_siswa = ?
-                    AND p.status = 'dikembalikan'
-                    AND p.tanggal_dikembalikan IS NOT NULL
-                    AND DATE(p.tanggal_dikembalikan) >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
-                ORDER BY p.tanggal_dikembalikan DESC
+                FROM borrows p
+                JOIN books b ON p.book_id = b.id
+                WHERE p.member_id = ?
+                    AND p.status = 'returned'
+                    AND p.returned_at IS NOT NULL
+                    AND DATE(p.returned_at) >= DATE_SUB(CURDATE(), INTERVAL 3 DAY)
+                ORDER BY p.returned_at DESC
             ";
 
             $stmt = $this->pdo->prepare($query);
@@ -132,27 +132,26 @@ class NotificationsService {
      */
     public function getNewBooksNotifications($studentId) {
         try {
-            // Cek apakah ada kolom created_at atau waktu_input
-            $hasCreatedAtColumn = $this->columnExists('buku', 'created_at');
-            $hasWaktuInputColumn = $this->columnExists('buku', 'waktu_input');
+            // Cek apakah ada kolom created_at 
+            $hasCreatedAtColumn = $this->columnExists('books', 'created_at');
             
-            if (!$hasCreatedAtColumn && !$hasWaktuInputColumn) {
+            if (!$hasCreatedAtColumn) {
                 // Fallback: tampilkan buku tanpa filter waktu (max 5 buku)
                 return $this->getNewBooksWithoutTimestamp($studentId);
             }
 
-            $dateColumn = $hasCreatedAtColumn ? 'created_at' : 'waktu_input';
+            $dateColumn = 'created_at';
 
             $query = "
                 SELECT 
-                    CONCAT('newbook_', b.id_buku) as id_notifikasi,
+                    CONCAT('newbook_', b.id) as id_notifikasi,
                     {$studentId} as id_anggota,
-                    CONCAT('🆕 ', b.judul, ' - Buku Baru!') as judul,
-                    CONCAT('Buku \"', b.judul, '\" karya ', COALESCE(b.penulis, 'Penulis Terkenal'), ' telah ditambahkan ke perpustakaan. Kategori: ', COALESCE(b.kategori, 'Umum'), '.') as pesan,
+                    CONCAT('🆕 ', b.title, ' - Buku Baru!') as judul,
+                    CONCAT('Buku \"', b.title, '\" karya ', COALESCE(b.author, 'Penulis Terkenal'), ' telah ditambahkan ke perpustakaan. Kategori: ', COALESCE(b.category, 'Umum'), '.') as pesan,
                     'buku' as jenis_notifikasi,
                     b.{$dateColumn} as tanggal,
                     0 as status_baca
-                FROM buku b
+                FROM books b
                 WHERE DATE(b.{$dateColumn}) >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)
                 ORDER BY b.{$dateColumn} DESC
                 LIMIT 10
@@ -175,15 +174,15 @@ class NotificationsService {
         try {
             $query = "
                 SELECT 
-                    CONCAT('newbook_', b.id_buku) as id_notifikasi,
+                    CONCAT('newbook_', b.id) as id_notifikasi,
                     {$studentId} as id_anggota,
-                    CONCAT('🆕 ', b.judul, ' - Buku Baru!') as judul,
-                    CONCAT('Buku \"', b.judul, '\" karya ', COALESCE(b.penulis, 'Penulis Terkenal'), ' telah ditambahkan ke perpustakaan. Kategori: ', COALESCE(b.kategori, 'Umum'), '.') as pesan,
+                    CONCAT('🆕 ', b.title, ' - Buku Baru!') as judul,
+                    CONCAT('Buku \"', b.title, '\" karya ', COALESCE(b.author, 'Penulis Terkenal'), ' telah ditambahkan ke perpustakaan. Kategori: ', COALESCE(b.category, 'Umum'), '.') as pesan,
                     'buku' as jenis_notifikasi,
                     CURDATE() as tanggal,
                     0 as status_baca
-                FROM buku b
-                ORDER BY b.id_buku DESC
+                FROM books b
+                ORDER BY b.id DESC
                 LIMIT 5
             ";
 

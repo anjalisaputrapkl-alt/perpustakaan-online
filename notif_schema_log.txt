@@ -1,0 +1,10 @@
+--- TABLE: notifications ---
+id - int(11)
+school_id - int(11)
+student_id - int(11)
+title - varchar(255)
+message - text
+type - enum('borrow','return_request','return_confirm','late_warning','info','new_book')
+is_read - tinyint(1)
+created_at - timestamp
+updated_at - timestamp

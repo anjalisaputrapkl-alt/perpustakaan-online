@@ -25,19 +25,28 @@ if (!isset($_SESSION['user'])) {
     exit;
 }
 
-$memberId = $_SESSION['user']['id'] ?? null;
+$userId = $_SESSION['user']['id'] ?? null;
+$schoolId = $_SESSION['user']['school_id'] ?? null;
+$nisn = $_SESSION['user']['nisn'] ?? null;
 
-// Validasi member ID
-if (!$memberId || !is_numeric($memberId)) {
-    http_response_code(400);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Invalid member ID'
-    ]);
+// Validasi
+if (!$nisn || !$schoolId) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Sesi tidak valid']);
     exit;
 }
 
 try {
+    // Cari member_id yang sebenarnya dari tabel members
+    $memberStmt = $pdo->prepare('SELECT id FROM members WHERE nisn = ? AND school_id = ?');
+    $memberStmt->execute([$nisn, $schoolId]);
+    $memberId = $memberStmt->fetchColumn();
+
+    if (!$memberId) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Profil anggota tidak ditemukan']);
+        exit;
+    }
     // Ambil parameter filter
     $status = isset($_GET['status']) ? trim($_GET['status']) : null;
     $format = isset($_GET['format']) ? trim($_GET['format']) : 'json';

@@ -2,7 +2,7 @@
 session_start();
 $pdo = require __DIR__ . '/../src/db.php';
 require_once __DIR__ . '/../src/MemberHelper.php';
-require_once __DIR__ . '/../src/maintenance/DamageController.php';
+require_once __DIR__ . '/../src/FineHelper.php';
 
 if (!isset($_SESSION['user'])) {
     header('Location: /?login_required=1');
@@ -15,16 +15,8 @@ $school_id = $user['school_id'];
 $memberHelper = new MemberHelper($pdo);
 $member_id = $memberHelper->getMemberId($user);
 
-$damageController = new DamageController($pdo, $school_id);
-$memberDamageFines = $damageController->getByMember($member_id);
-$totalMemberDenda = 0;
-$pendingMemberDenda = 0;
-foreach ($memberDamageFines as $fine) {
-    $totalMemberDenda += $fine['fine_amount'];
-    if ($fine['status'] === 'pending') {
-        $pendingMemberDenda += $fine['fine_amount'];
-    }
-}
+$fineHelper = new FineHelper($pdo);
+$pendingMemberDenda = $fineHelper->getTotalUnpaidFine($member_id);
 
 // Total Buku
 try {
@@ -384,8 +376,7 @@ $pageTitle = 'Dashboard ' . $roleLabel;
                             style="font-size: 18px; font-weight: 700; color: <?php echo $pendingMemberDenda > 0 ? 'var(--danger)' : 'var(--success)'; ?>; margin-bottom: 8px;">
                             Rp <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></div>
                         <?php if ($pendingMemberDenda > 0): ?>
-                            <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.5;">Denda dari
-                                kerusakan buku saat peminjaman. Silakan hubungi admin untuk detail.</p>
+                            <p style="font-size: 11px; color: var(--text-muted); margin: 0; line-height: 1.5;">Total denda penalti (keterlambatan & kerusakan). Silakan hubungi admin untuk detail.</p>
                         <?php else: ?>
                             <p style="font-size: 11px; color: var(--success); margin: 0; font-weight: 500;">✓ Tidak ada denda tertunda</p>
                         <?php endif; ?>

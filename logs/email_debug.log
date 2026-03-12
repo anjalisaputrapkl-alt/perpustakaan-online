@@ -201,3 +201,71 @@
     
 ==================================================
 
+[2026-03-12 03:15:06] To: anjalisaputra@gmail.com | Subject: Notifikasi Baru: Buku Tersedia!
+--------------------------------------------------
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='utf-8'>
+        <style>
+            body { font-family: sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
+            .header { background: #3b82f6; color: white; padding: 15px; border-radius: 8px 8px 0 0; }
+            .content { padding: 20px; background: #fff; }
+            .footer { font-size: 12px; color: #888; margin-top: 20px; text-align: center; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2 style='margin:0'>Buku Tersedia!</h2>
+            </div>
+            <div class='content'>
+                <p>Buku "Sebuah Seni Untuk Bersikap Bodoamat" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!</p>
+                <br>
+                <p><em>Silakan login ke aplikasi perpustakaan untuk detail lebih lanjut.</em></p>
+            </div>
+            <div class='footer'>
+                &copy; 2026 Perpustakaan Online
+            </div>
+        </div>
+    </body>
+    </html>
+    
+==================================================
+
+[2026-03-12 03:38:54] To: tuti@gmail.com | Subject: Notifikasi Baru: Buku Tersedia!
+--------------------------------------------------
+
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset='utf-8'>
+        <style>
+            body { font-family: sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 8px; }
+            .header { background: #3b82f6; color: white; padding: 15px; border-radius: 8px 8px 0 0; }
+            .content { padding: 20px; background: #fff; }
+            .footer { font-size: 12px; color: #888; margin-top: 20px; text-align: center; }
+        </style>
+    </head>
+    <body>
+        <div class='container'>
+            <div class='header'>
+                <h2 style='margin:0'>Buku Tersedia!</h2>
+            </div>
+            <div class='content'>
+                <p>Buku "Sebuah Seni Untuk Bersikap Bodoamat" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!</p>
+                <br>
+                <p><em>Silakan login ke aplikasi perpustakaan untuk detail lebih lanjut.</em></p>
+            </div>
+            <div class='footer'>
+                &copy; 2026 Perpustakaan Online
+            </div>
+        </div>
+    </body>
+    </html>
+    
+==================================================
+

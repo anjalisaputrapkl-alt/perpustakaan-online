@@ -21,7 +21,7 @@ try {
 }
 
 require_once __DIR__ . '/../src/MemberHelper.php';
-require_once __DIR__ . '/../src/maintenance/DamageController.php';
+require_once __DIR__ . '/../src/FineHelper.php';
 
 $userId = (int) $_SESSION['user']['id'];
 $schoolId = (int) $_SESSION['user']['school_id'];
@@ -228,16 +228,8 @@ $genderDisplay = match ($siswa['jenis_kelamin'] ?? null) {
 $memberHelper = new MemberHelper($pdo);
 $member_id = $memberHelper->getMemberId($userData);
 
-$damageController = new DamageController($pdo, $schoolId);
-$memberDamageFines = $damageController->getByMember($member_id);
-$totalMemberDenda = 0;
-$pendingMemberDenda = 0;
-foreach ($memberDamageFines as $fine) {
-    $totalMemberDenda += $fine['fine_amount'];
-    if ($fine['status'] === 'pending') {
-        $pendingMemberDenda += $fine['fine_amount'];
-    }
-}
+$fineHelper = new FineHelper($pdo);
+$pendingMemberDenda = $fineHelper->getTotalUnpaidFine($member_id);
 
 $photoUrl = $siswa['foto'] ? '/perpustakaan-online/public/' . htmlspecialchars($siswa['foto']) : '/perpustakaan-online/assets/img/default-avatar.png';
 
@@ -356,8 +348,7 @@ $pageTitle = 'Profil Saya';
                         style="font-size: 24px; font-weight: 700; color: <?php echo $pendingMemberDenda > 0 ? '#dc2626' : '#059669'; ?>;">
                         Rp <?php echo number_format($pendingMemberDenda, 0, ',', '.'); ?></div>
                     <?php if ($pendingMemberDenda > 0): ?>
-                        <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0; line-height: 1.5;">Denda
-                            dari kerusakan buku saat peminjaman. Hubungi admin untuk detail lebih lanjut.</p>
+                        <p style="font-size: 12px; color: var(--text-muted); margin: 4px 0 0 0; line-height: 1.5;">Total denda penalti (keterlambatan & kerusakan). Hubungi admin untuk detail lebih lanjut.</p>
                     <?php else: ?>
                         <p style="font-size: 12px; color: #10b981; margin: 4px 0 0 0;">✓ Tidak ada denda tertunda</p>
                     <?php endif; ?>

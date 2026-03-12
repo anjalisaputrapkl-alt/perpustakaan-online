@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 10, 2026 at 09:53 AM
+-- Generation Time: Mar 12, 2026 at 03:39 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -72,7 +72,7 @@ INSERT INTO `books` (`id`, `school_id`, `title`, `author`, `isbn`, `category`, `
 (1, 4, 'Mengunyah Rindu', 'Budi Maryono', '982384', 'Fiksi', 'all', 1, NULL, '2026-01-26 02:48:25', '1A', 1, '11', 'book_1769399260_6976e3dc930ca.jpg'),
 (2, 4, 'Bu, aku ingin pelukmu', 'Reza Mustopa', '4522343', 'Fiksi', 'all', 1, NULL, '2026-01-26 02:49:48', '1A', 1, '10', 'book_1769399253_6976e3d564a9a.png'),
 (3, 4, 'Madilog', 'Tan Malaka', '533454', 'Referensi', 'all', 1, NULL, '2026-01-26 02:52:47', '1B', 1, '9', 'book_1769399247_6976e3cfbddeb.jpeg'),
-(4, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', '345645', 'Non-Fiksi', 'all', 0, NULL, '2026-01-26 02:55:04', '1B', 2, '8', 'book_1769399240_6976e3c8d253c.png'),
+(4, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', '345645', 'Non-Fiksi', 'all', 1, NULL, '2026-01-26 02:55:04', '1B', 2, '8', 'book_1769399240_6976e3c8d253c.png'),
 (5, 4, 'The Psychology of Money', 'Morgan Housel', '9786238371044', 'Lainnya', 'all', 1, NULL, '2026-01-26 04:02:19', '1B', 5, '7', 'book_1769400139_6976e74ba9d73.jpg'),
 (6, 4, 'Sang Alkemis', 'Paulo Coelho', '9786020656069', 'Lainnya', 'all', 1, NULL, '2026-01-26 04:03:53', '1B', 4, '6', 'book_1769400245_6976e7b53bd5e.jpg'),
 (7, 4, 'B.J. Habibie : Sebuah Biografi', 'Fatimah Fayrus', '9786231643094', 'Biografi', 'all', 1, NULL, '2026-01-26 04:07:07', '1C', 2, '4', 'book_1769400427_6976e86b698e3.jpg'),
@@ -80,7 +80,7 @@ INSERT INTO `books` (`id`, `school_id`, `title`, `author`, `isbn`, `category`, `
 (14, 4, 'The Art of Stoicism', 'Adora Kinara', '34567890', 'Non-Fiksi', 'teacher_only', 1, NULL, '2026-02-10 07:15:57', '1', 2, '5', 'book_1770707752_698adb282818f.jpg'),
 (18, 14, 'Spy X Familyy', 'Tatsuya Endo', '987-982', 'Fiksi', 'all', 0, 2, '2026-02-19 03:53:24', '1D', 3, '4', 'book_1771473204_6996893442426.jpg'),
 (19, 14, 'B.J Habibie', 'Fatimah Fayrus', '987492', 'Biografi', 'teacher_only', 0, 3, '2026-02-19 03:55:35', '1B', 2, '2', 'book_1771473335_699689b72f067.jpg'),
-(21, 4, 'B.J. Habibie : Sebuah Biografi', 'Fatimah Fayrus', '4534243', 'Biografi', 'all', 1, NULL, '2026-03-09 01:26:12', '2', 2, '5', 'book_1773019572_69ae21b4a1d4f.jpg');
+(21, 4, 'B.J. Habibie : Sebuah Biografi', 'Fatimah Fayrus', '4534243', 'Biografi', 'all', 0, NULL, '2026-03-09 01:26:12', '2', 2, '5', 'book_1773019572_69ae21b4a1d4f.jpg');
 
 -- --------------------------------------------------------
 
@@ -174,8 +174,10 @@ INSERT INTO `borrows` (`id`, `school_id`, `book_id`, `member_id`, `borrowed_at`,
 (58, 4, 4, 6, '2026-02-20 14:27:34', '2026-02-23 14:28:05', '2026-02-20 14:49:57', 'returned', 0.00, 'unpaid'),
 (62, 4, 4, 4, '2026-02-23 08:35:49', '2026-02-26 08:36:18', '2026-02-23 08:36:23', 'returned', 0.00, 'unpaid'),
 (63, 4, 1, 4, '2026-02-23 08:35:49', '2026-02-26 08:36:18', '2026-02-23 08:36:21', 'returned', 0.00, 'unpaid'),
-(64, 4, 4, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', NULL, 'overdue', 0.00, 'unpaid'),
-(65, 4, 1, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', '2026-02-26 10:14:33', 'returned', 0.00, 'unpaid');
+(64, 4, 4, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', '2026-03-12 09:15:06', 'returned', 14000.00, 'unpaid'),
+(65, 4, 1, 4, '2026-02-23 08:42:45', '2026-02-26 23:59:59', '2026-02-26 10:14:33', 'returned', 0.00, 'unpaid'),
+(66, 4, 4, 4, '2026-03-12 09:37:50', '2026-03-15 23:59:59', '2026-03-12 09:38:54', 'returned', 0.00, 'unpaid'),
+(67, 4, 21, 4, '2026-03-12 09:37:50', '2026-03-15 23:59:59', NULL, 'borrowed', 0.00, 'unpaid');
 
 -- --------------------------------------------------------
 
@@ -227,7 +229,8 @@ INSERT INTO `members` (`id`, `school_id`, `name`, `email`, `nisn`, `role`, `stat
 (6, 4, 'surya', 'uya4767@gmail.com', '2346558', 'student', 'active', '2026-02-10 06:53:08', 5),
 (7, 4, 'Sonia Sugiana', 'sonia@gmail.com', '2345345', 'teacher', 'active', '2026-02-12 03:46:23', 5),
 (10, 14, 'Ganiiii', 'gani@gmail.com', '222222', 'teacher', 'active', '2026-02-19 03:57:49', 10),
-(11, 14, 'Anjali Saputra', 'anjalisaputra@gmail.com', '111111', 'student', 'active', '2026-02-19 04:02:36', 3);
+(11, 14, 'Anjali Saputra', 'anjalisaputra@gmail.com', '111111', 'student', 'active', '2026-02-19 04:02:36', 3),
+(13, 4, 'tuti', 'tuti@gmail.com', '888888', 'student', 'active', '2026-03-12 01:17:51', 2);
 
 -- --------------------------------------------------------
 
@@ -268,7 +271,9 @@ INSERT INTO `notifications` (`id`, `school_id`, `student_id`, `title`, `message`
 (57, 4, 13, 'Buku Baru Tersedia', 'Buku \"Spy X Family\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-02-20 07:33:33', '2026-02-20 07:33:33'),
 (58, 4, 14, 'Buku Baru Tersedia', 'Buku \"Spy X Family\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-02-20 07:33:36', '2026-02-20 07:33:36'),
 (59, 4, 13, 'Buku Baru Tersedia', 'Buku \"B.J. Habibie : Sebuah Biografi\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-03-09 01:26:12', '2026-03-09 01:26:12'),
-(60, 4, 14, 'Buku Baru Tersedia', 'Buku \"B.J. Habibie : Sebuah Biografi\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-03-09 01:26:16', '2026-03-09 01:26:16');
+(60, 4, 14, 'Buku Baru Tersedia', 'Buku \"B.J. Habibie : Sebuah Biografi\" telah ditambahkan ke perpustakaan. Silakan pinjam sekarang!', 'new_book', 0, '2026-03-09 01:26:16', '2026-03-09 01:26:16'),
+(61, 4, 13, 'Buku Tersedia!', 'Buku \"Sebuah Seni Untuk Bersikap Bodoamat\" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!', 'info', 0, '2026-03-12 02:15:06', '2026-03-12 02:15:06'),
+(62, 4, 19, 'Buku Tersedia!', 'Buku \"Sebuah Seni Untuk Bersikap Bodoamat\" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!', 'info', 0, '2026-03-12 02:38:54', '2026-03-12 02:38:54');
 
 -- --------------------------------------------------------
 
@@ -354,7 +359,7 @@ CREATE TABLE `schools` (
 --
 
 INSERT INTO `schools` (`id`, `name`, `slug`, `status`, `activation_code`, `created_at`, `email`, `phone`, `address`, `description`, `logo`, `profile_picture`, `npsn`, `website`, `photo_path`, `founded_year`, `borrow_duration`, `late_fine`, `max_books`, `max_books_student`, `max_books_teacher`, `max_books_employee`, `scan_access_key`, `custom_base_url`) VALUES
-(4, 'AUSTRALIA INDEPENDENTS SCHOOL', '', 'pending', NULL, '2026-01-26 02:42:13', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'public/uploads/school-photos/school_1769399275_6976e3ebe6757.jpg', 0, 3, 1000.00, 4, 2, 5, 5, 'be85702d488a2deb9551de4341465227', 'https://ungaudy-bitless-jeffrey.ngrok-free.dev'),
+(4, 'AUSTRALIA INDEPENDENTS SCHOOL', '', 'pending', NULL, '2026-01-26 02:42:13', 'australiaindependentschool@sch.id', NULL, NULL, NULL, NULL, NULL, '39023341', NULL, 'public/uploads/school-photos/school_1773277970_69b213126c1ea.jpg', 0, 3, 1000.00, 4, 2, 5, 5, 'dcb4d01450fc27b7e461d696811ee113', 'https://ungaudy-bitless-jeffrey.ngrok-free.dev'),
 (5, 'sdfsdf', 'sdfsdf', 'pending', NULL, '2026-01-26 04:37:04', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
 (7, 'sdfsdfasdasd', 'sdfsdfasdasd', 'pending', NULL, '2026-01-26 04:39:59', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
 (8, 'sdfbhsd', 'sdfbhsd', 'pending', NULL, '2026-01-26 04:42:48', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 7, 500.00, 3, 3, 10, 5, NULL, NULL),
@@ -527,7 +532,8 @@ INSERT INTO `users` (`id`, `school_id`, `name`, `email`, `nisn`, `password`, `ve
 (15, 4, 'Sonia Sugiana', 'sonia@gmail.com', '2345345', '$2y$10$lF7iBPw94PG6G9cVOGY1iuvQJ0Nph4O.be/LomLYe8qfViqyjzlvm', NULL, NULL, 0, NULL, 'teacher', '2026-02-12 03:46:23'),
 (16, 14, 'Gani', 'smkbinamandirimultimedia@sch.id', NULL, '$2y$10$xJgd.CLQLLrZQ.osocHNR.484jKUUJYOlsvhUSokbXbN.qX6glc2a', NULL, '2026-02-18 22:06:47', 1, '2026-02-19 03:51:55', 'admin', '2026-02-19 03:51:47'),
 (17, 14, 'Ganiiii', 'gani@gmail.com', '222222', '$2y$10$AC4JYVpuJSn.cVwGAIRuB.MQ6vetNZqr6DTqKTF/Anhaxm98Ij0Rq', NULL, NULL, 0, NULL, 'student', '2026-02-19 03:57:50'),
-(18, 14, 'Anjali Saputra', 'anjalisaputra@gmail.com', '111111', '$2y$10$.DDjhK6LF0TIl5P4AobyJOf3LgrIptdQ50B4EgD4riej9.EWb/tvG', NULL, NULL, 0, NULL, 'student', '2026-02-19 04:02:36');
+(18, 14, 'Anjali Saputra', 'anjalisaputra@gmail.com', '111111', '$2y$10$.DDjhK6LF0TIl5P4AobyJOf3LgrIptdQ50B4EgD4riej9.EWb/tvG', NULL, NULL, 0, NULL, 'student', '2026-02-19 04:02:36'),
+(19, 4, 'tuti', 'tuti@gmail.com', '888888', '$2y$10$u6DE2vuzF.DtEKy0uS14L.oisV56tQtHz5YNQHwadUlgAzCIUVIZS', NULL, NULL, 0, NULL, 'student', '2026-03-12 01:17:51');
 
 -- --------------------------------------------------------
 
@@ -550,7 +556,9 @@ CREATE TABLE `waitlist` (
 --
 
 INSERT INTO `waitlist` (`id`, `school_id`, `book_title`, `book_author`, `member_id`, `created_at`, `status`) VALUES
-(1, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', 4, '2026-03-09 07:32:03', 'pending');
+(1, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', 4, '2026-03-09 07:32:03', 'notified'),
+(2, 4, 'Sebuah Seni Untuk Bersikap Bodoamat', 'Mark Manson', 13, '2026-03-12 01:18:31', 'notified'),
+(3, 1, 'Spy X Familyy', 'Tatsuya Endo', 2, '2026-03-12 01:30:50', 'pending');
 
 --
 -- Indexes for dumped tables
@@ -750,7 +758,7 @@ ALTER TABLE `book_maintenance`
 -- AUTO_INCREMENT for table `borrows`
 --
 ALTER TABLE `borrows`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT for table `favorites`
@@ -762,13 +770,13 @@ ALTER TABLE `favorites`
 -- AUTO_INCREMENT for table `members`
 --
 ALTER TABLE `members`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=63;
 
 --
 -- AUTO_INCREMENT for table `notifikasi`
@@ -822,13 +830,13 @@ ALTER TABLE `theme_templates`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT for table `waitlist`
 --
 ALTER TABLE `waitlist`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables

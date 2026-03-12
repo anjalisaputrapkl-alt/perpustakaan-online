@@ -31,7 +31,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
       }
 
       $stmt = $pdo->prepare(
-        'UPDATE borrows SET returned_at=NOW(), status="returned", fine_amount=:fine
+        'UPDATE borrows SET returned_at=NOW(), status="returned", fine_amount=:fine, fine_status="unpaid"
          WHERE id=:id AND school_id=:sid'
       );
       $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid, 'fine' => $fineAmount]);
@@ -45,9 +45,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
       
       if ($book) {
           $waitlistStmt = $pdo->prepare(
-              'SELECT w.*, m.user_id as student_real_id 
+              'SELECT w.*, u.id as student_real_id 
                FROM waitlist w
                JOIN members m ON w.member_id = m.id
+               JOIN users u ON m.nisn = u.nisn AND m.school_id = u.school_id
                WHERE w.school_id = :sid 
                AND w.book_title = :title 
                AND w.book_author = :author 
@@ -56,8 +57,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'return' && isset($_GET['id'])
           );
           $waitlistStmt->execute([
               'sid' => $sid,
-              'title' => $book['title'],
-              'author' => $book['author']
+              'title' => trim($book['title']),
+              'author' => trim($book['author'])
           ]);
           
           $waitingStudents = $waitlistStmt->fetchAll();
