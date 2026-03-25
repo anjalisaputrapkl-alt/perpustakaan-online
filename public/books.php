@@ -34,23 +34,30 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     }
   }
 
-  $pdo->prepare(
+  $quantity = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+  if ($quantity < 1) $quantity = 1;
+
+  $stmt = $pdo->prepare(
     'INSERT INTO books (school_id,title,author,isbn,category,access_level,shelf,row_number,lokasi_rak,copies,max_borrow_days,cover_image)
      VALUES (:sid,:title,:author,:isbn,:category,:access_level,:shelf,:row,:lokasi_rak,:copies,:max_borrow_days,:cover_image)'
-  )->execute([
-        'sid' => $sid,
-        'title' => $_POST['title'],
-        'author' => $_POST['author'],
-        'isbn' => $_POST['isbn'],
-        'category' => $_POST['category'],
-        'access_level' => $_POST['access_level'] ?? 'all',
-        'shelf' => $_POST['shelf'],
-        'row' => $_POST['row_number'],
-        'lokasi_rak' => $_POST['lokasi_rak'],
-        'copies' => 1,
-        'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
-        'cover_image' => $coverImage
+  );
+
+  for ($i = 0; $i < $quantity; $i++) {
+      $stmt->execute([
+            'sid' => $sid,
+            'title' => $_POST['title'],
+            'author' => $_POST['author'],
+            'isbn' => $_POST['isbn'],
+            'category' => $_POST['category'],
+            'access_level' => $_POST['access_level'] ?? 'all',
+            'shelf' => $_POST['shelf'],
+            'row' => $_POST['row_number'],
+            'lokasi_rak' => $_POST['lokasi_rak'],
+            'copies' => 1,
+            'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
+            'cover_image' => $coverImage
       ]);
+  }
   
   // notification
   $studentsStmt = $pdo->prepare(
@@ -107,23 +114,48 @@ if ($action === 'edit' && isset($_GET['id'])) {
     }
 
     $pdo->prepare(
-      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,access_level=:access_level,shelf=:shelf,row_number=:row,lokasi_rak=:lokasi_rak,copies=:copies,max_borrow_days=:max_borrow_days,cover_image=:cover_image
-       WHERE id=:id AND school_id=:sid'
+      'UPDATE books SET title=:title,author=:author,isbn=:isbn,category=:category,access_level=:access_level,shelf=:shelf,row_number=:row,lokasi_rak=:lokasi_rak,max_borrow_days=:max_borrow_days,cover_image=:cover_image
+       WHERE title=:old_title AND isbn <=> :old_isbn AND school_id=:sid'
     )->execute([
           'title' => $_POST['title'],
           'author' => $_POST['author'],
-          'isbn' => $_POST['isbn'],
+          'isbn' => empty($_POST['isbn']) ? null : $_POST['isbn'],
           'category' => $_POST['category'],
           'access_level' => $_POST['access_level'] ?? 'all',
           'shelf' => $_POST['shelf'],
           'row' => $_POST['row_number'],
           'lokasi_rak' => $_POST['lokasi_rak'],
-          'copies' => 1,
           'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
           'cover_image' => $coverImage,
-          'id' => $id,
+          'old_title' => $oldBook['title'],
+          'old_isbn' => $oldBook['isbn'],
           'sid' => $sid
         ]);
+        
+    $quantityAdd = isset($_POST['quantity_add']) ? (int)$_POST['quantity_add'] : 0;
+    if ($quantityAdd > 0) {
+        $insertStmt = $pdo->prepare(
+            'INSERT INTO books (school_id,title,author,isbn,category,access_level,shelf,row_number,lokasi_rak,copies,max_borrow_days,cover_image)
+             VALUES (:sid,:title,:author,:isbn,:category,:access_level,:shelf,:row,:lokasi_rak,:copies,:max_borrow_days,:cover_image)'
+        );
+        for ($i = 0; $i < $quantityAdd; $i++) {
+            $insertStmt->execute([
+                'sid' => $sid,
+                'title' => $_POST['title'],
+                'author' => $_POST['author'],
+                'isbn' => empty($_POST['isbn']) ? null : $_POST['isbn'],
+                'category' => $_POST['category'],
+                'access_level' => $_POST['access_level'] ?? 'all',
+                'shelf' => $_POST['shelf'],
+                'row' => $_POST['row_number'],
+                'lokasi_rak' => $_POST['lokasi_rak'],
+                'copies' => 1,
+                'max_borrow_days' => !empty($_POST['max_borrow_days']) ? (int)$_POST['max_borrow_days'] : null,
+                'cover_image' => $coverImage
+            ]);
+        }
+    }
+    
     header('Location: books.php');
     exit;
   }
@@ -133,9 +165,29 @@ if ($action === 'edit' && isset($_GET['id'])) {
 }
 
 if ($action === 'delete' && isset($_GET['id'])) {
+  $stmt = $pdo->prepare('SELECT title, isbn FROM books WHERE id=:id AND school_id=:sid');
+  $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
+  $deleteTarget = $stmt->fetch();
+  if ($deleteTarget) {
+      $pdo->prepare('DELETE FROM books WHERE title=:old_title AND isbn <=> :old_isbn AND school_id=:sid')
+        ->execute(['old_title' => $deleteTarget['title'], 'old_isbn' => $deleteTarget['isbn'], 'sid' => $sid]);
+  }
+  header('Location: books.php');
+  exit;
+}
+
+if ($action === 'delete_single' && isset($_GET['id'])) {
   $pdo->prepare('DELETE FROM books WHERE id=:id AND school_id=:sid')
     ->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
   header('Location: books.php');
+  exit;
+}
+
+if ($action === 'delete_single_ajax' && isset($_GET['id'])) {
+  $stmt = $pdo->prepare('DELETE FROM books WHERE id=:id AND school_id=:sid');
+  $success = $stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid]);
+  header('Content-Type: application/json');
+  echo json_encode(['success' => $success]);
   exit;
 }
 
@@ -163,7 +215,48 @@ $stmt = $pdo->prepare('
   ORDER BY bk.id DESC
 ');
 $stmt->execute(['sid' => $sid]);
-$books = $stmt->fetchAll();
+$allBooks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+$groupedBooks = [];
+foreach ($allBooks as $b) {
+    $groupKey = (!empty($b['isbn']) ? $b['isbn'] : '') . '|' . $b['title'];
+    if (!isset($groupedBooks[$groupKey])) {
+        $groupedBooks[$groupKey] = [
+            'id' => $b['id'],
+            'title' => $b['title'],
+            'author' => $b['author'],
+            'isbn' => $b['isbn'],
+            'category' => $b['category'],
+            'cover_image' => $b['cover_image'],
+            'shelf' => $b['shelf'],
+            'row_number' => $b['row_number'],
+            'lokasi_rak' => $b['lokasi_rak'],
+            'access_level' => $b['access_level'],
+            'max_borrow_days' => $b['max_borrow_days'],
+            'total_copies' => 0,
+            'available_copies' => 0,
+            'copies_detail' => []
+        ];
+    }
+    
+    $groupedBooks[$groupKey]['total_copies']++;
+    $isBorrowed = !empty($b['current_borrow_id']);
+    
+    if (!$isBorrowed && $b['copies'] > 0) {
+        $groupedBooks[$groupKey]['available_copies']++;
+    }
+
+    $groupedBooks[$groupKey]['copies_detail'][] = [
+        'id' => $b['id'],
+        'barcode' => 'B-' . $b['id'],
+        'is_borrowed' => $isBorrowed,
+        'borrow_status' => $b['borrow_status'],
+        'borrower_name' => $b['borrower_name'],
+        'copies' => $b['copies']
+    ];
+}
+
+$books = array_values($groupedBooks);
 
 $categories = [
   'Fiksi',
@@ -250,7 +343,7 @@ $categories = [
                     </div>
                     <div class="form-col">
                         <div class="form-group"><label>Kategori</label>
-                            <select name="category">
+                            <select name="category" required>
                             <option value="">-- Pilih Kategori --</option>
                             <?php foreach ($categories as $cat): ?>
                                 <option value="<?= $cat ?>" <?= ($book['category'] ?? '') === $cat ? 'selected' : '' ?>><?= $cat ?>
@@ -258,6 +351,19 @@ $categories = [
                             <?php endforeach ?>
                             </select>
                         </div>
+                    </div>
+                    
+                    <div class="form-col" style="max-width: 150px;">
+                        <?php if ($action !== 'edit'): ?>
+                        <div class="form-group"><label>Jumlah Pcs</label>
+                            <input type="number" name="quantity" min="1" value="1" required>
+                        </div>
+                        <?php else: ?>
+                        <div class="form-group"><label>Tambah Stok (+)</label>
+                            <input type="number" name="quantity_add" min="0" value="0" placeholder="0">
+                        </div>
+                        <p style="font-size: 10px; color: var(--muted); margin-top: -12px;">Isi > 0 untuk injek copy baru</p>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -387,43 +493,21 @@ $categories = [
                     </div>
                   <?php endif; ?>
                   
-                  <?php 
-                    $isBorrowed = !empty($b['current_borrow_id']);
-                    $bStatus = $b['borrow_status'] ?? '';
-                    
-                    $badgeText = 'Tersedia';
+                    <?php 
+                    $badgeText = 'Tersedia ' . $b['available_copies'] . '/' . $b['total_copies'];
                     $badgeColor = '#059669';
                     $badgeBg = 'rgba(16, 185, 129, 0.15)';
                     $badgeBorder = 'rgba(16, 185, 129, 0.3)';
                     $badgeIcon = 'mdi:check-circle';
                     $badgeTooltip = 'Buku Tersedia';
 
-                    if ($isBorrowed) {
+                    if ($b['available_copies'] == 0) {
+                        $badgeText = 'Tersedia 0/' . $b['total_copies'];
                         $badgeColor = '#dc2626';
                         $badgeBg = 'rgba(239, 68, 68, 0.15)';
                         $badgeBorder = 'rgba(239, 68, 68, 0.3)';
                         $badgeIcon = 'mdi:clock-alert';
-                        
-                        if ($bStatus === 'pending_confirmation') {
-                            $badgeText = 'Booking';
-                            $badgeColor = '#d97706'; // Orange-ish
-                            $badgeBg = 'rgba(217, 119, 6, 0.15)';
-                            $badgeBorder = 'rgba(217, 119, 6, 0.3)';
-                            $badgeTooltip = 'Menunggu Konfirmasi Admin';
-                        } else {
-                            $badgeText = 'Dipinjam';
-                        }
-                        
-                        if (!empty($b['borrower_name'])) {
-                            $badgeTooltip = 'Oleh: ' . htmlspecialchars($b['borrower_name']) . ($bStatus === 'pending_confirmation' ? ' (Menunggu)' : '');
-                        }
-                    } else if ($b['copies'] <= 0) {
-                        $badgeText = 'Sirkulasi';
-                        $badgeColor = '#dc2626';
-                        $badgeBg = 'rgba(239, 68, 68, 0.15)';
-                        $badgeBorder = 'rgba(239, 68, 68, 0.3)';
-                        $badgeIcon = 'mdi:clock-alert';
-                        $badgeTooltip = 'Sedang tidak di rak';
+                        $badgeTooltip = 'Sedang dipinjam / tidak ada stok';
                     }
                   ?>
                   <div class="stock-badge-overlay" style="
@@ -440,12 +524,7 @@ $categories = [
                   <div class="book-category"><?= htmlspecialchars($b['category'] ?? 'Umum') ?></div>
                   <div class="book-title" title="<?= htmlspecialchars($b['title']) ?>"><?= htmlspecialchars($b['title']) ?></div>
                   <div class="book-author"><?= htmlspecialchars($b['author']) ?></div>
-                  
-                  <?php if ($isBorrowed): ?>
-                      <p style="font-size: 10px; color: <?= $bStatus === 'pending_confirmation' ? '#d97706' : 'var(--danger)' ?>; margin: 4px 0 0 0;">
-                          Oleh: <?= htmlspecialchars($b['borrower_name'] ?? 'Unknown') ?>
-                      </p>
-                  <?php endif; ?>
+                  <div class="book-author"><?= htmlspecialchars($b['author']) ?></div>
                   
                   <div class="book-card-footer">
                       <div class="shelf-info">
@@ -463,7 +542,7 @@ $categories = [
                            <iconify-icon icon="mdi:pencil-outline"></iconify-icon>
                         </a>
                         <a href="books.php?action=delete&id=<?= $b['id'] ?>" class="btn-icon-sm btn-icon-danger" 
-                           onclick="return confirm('Hapus buku ini dari database?')" title="Hapus Buku">
+                           onclick="return confirm('Hapus SEMUA copy dari buku ini dari database? (Berjaga-jaga: menghapus ini akan membuang semua <?= $b['total_copies'] ?> salinan. Gunakan Lihat Detail untuk menghapus satu copy saja.)')" title="Hapus Semua Salinan">
                            <iconify-icon icon="mdi:trash-can-outline"></iconify-icon>
                         </a>
                       </div>
@@ -542,43 +621,62 @@ $categories = [
   </div>
 
   <div id="detailModal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 900px; width: 95%;">
       <div class="modal-header">
-        <h2>Detail Buku</h2>
+        <h2>Detail Buku & Stok Fisik</h2>
         <button class="modal-close" onclick="closeDetail()">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="detail-layout">
-          <div class="detail-image">
-            <img id="detailCover" src="" alt="Book Cover">
+        
+        <div style="display: flex; gap: 32px; flex-wrap: wrap; align-items: stretch;">
+          
+          <!-- LEFT PANEL: Info -->
+          <div style="flex: 1; min-width: 400px;">
+            <div class="detail-layout">
+              <div class="detail-image">
+                <img id="detailCover" src="" alt="Book Cover">
+              </div>
+              <div class="detail-info">
+                <div class="detail-field">
+                  <label>Judul</label>
+                  <div id="detailTitle"></div>
+                </div>
+                <div class="detail-field">
+                  <label>Pengarang</label>
+                  <div id="detailAuthor"></div>
+                </div>
+                <div class="detail-field">
+                  <label>ISBN</label>
+                  <div id="detailISBN"></div>
+                </div>
+                <div class="detail-field">
+                  <label>Kategori</label>
+                  <div id="detailCategory"></div>
+                </div>
+                <div class="detail-field">
+                  <label>Lokasi</label>
+                  <div id="detailLocation"></div>
+                </div>
+                <div class="detail-field">
+                  <label>Batas Pinjam</label>
+                  <div id="detailMaxBorrow"></div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div class="detail-info">
-            <div class="detail-field">
-              <label>Judul</label>
-              <div id="detailTitle"></div>
-            </div>
-            <div class="detail-field">
-              <label>Pengarang</label>
-              <div id="detailAuthor"></div>
-            </div>
-            <div class="detail-field">
-              <label>ISBN</label>
-              <div id="detailISBN"></div>
-            </div>
-            <div class="detail-field">
-              <label>Kategori</label>
-              <div id="detailCategory"></div>
-            </div>
-            <div class="detail-field">
-              <label>Lokasi</label>
-              <div id="detailLocation"></div>
-            </div>
-            <div class="detail-field">
-              <label>Batas Pinjam</label>
-              <div id="detailMaxBorrow"></div>
+          
+          <!-- RIGHT PANEL: Barcodes -->
+          <div style="flex: 0 0 240px; background: rgba(0,0,0,0.02); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column;">
+            <label style="font-size: 16px; font-weight: 600; color: var(--text); border-bottom: 2px solid var(--accent-light); padding-bottom: 12px; margin-bottom: 16px; display: block; flex-shrink: 0; display:flex; align-items:center; gap:8px;">
+              <iconify-icon icon="mdi:barcode-scan" style="color: var(--accent); font-size: 20px;"></iconify-icon>Daftar Copy (Item Fisik)
+            </label>
+            <div id="detailCopiesList" style="flex: 1; max-height: 400px; overflow-y: auto; padding-right: 8px;">
+               <!-- Injected via JavaScript -->
             </div>
           </div>
+
         </div>
+
       </div>
     </div>
   </div>

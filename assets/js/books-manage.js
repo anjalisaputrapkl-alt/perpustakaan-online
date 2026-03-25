@@ -1,4 +1,17 @@
 /**
+ * UTILITY: HTML Escaping
+ */
+function escapeHtml(unsafe) {
+    if (unsafe == null) return '';
+    return String(unsafe)
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+}
+
+/**
  * UTILITY: Image Preview
  */
 function previewImage(event) {
@@ -67,8 +80,42 @@ function openDetailModal(index) {
     set('detailCategory', book.category);
     set('detailLocation', `Rak ${book.shelf || '-'} / Baris ${book.row_number || '-'} / Kolom ${book.lokasi_rak || '-'}`);
 
-    set('detailCopies', `${book.copies} Salinan`);
     set('detailMaxBorrow', book.max_borrow_days ? `${book.max_borrow_days} Hari` : 'Default Sekolah');
+
+    // Individual Copies Listing
+    const copiesContainer = document.getElementById('detailCopiesList');
+    if (copiesContainer && book.copies_detail) {
+        let html = '<div style="display:flex; flex-direction:column; gap:8px;">';
+        book.copies_detail.forEach(c => {
+            const isAvailable = (!c.is_borrowed && c.copies > 0);
+            
+            let badgeClass = 'var(--muted)';
+            let badgeText = 'Kosong';
+            
+            if (c.is_borrowed) {
+                badgeClass = 'var(--danger)';
+                badgeText = `Dipinjam (${escapeHtml(c.borrower_name)})`;
+            } else if (isAvailable) {
+                badgeClass = 'var(--success)';
+                badgeText = 'Tersedia';
+            }
+
+            html += `
+            <div id="copy-row-${c.id}" style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; border:1px solid var(--border); border-radius:6px; background:var(--bg); transition: opacity 0.2s;">
+               <div style="display:flex; flex-direction:column;">
+                  <strong style="color:var(--accent); font-family:monospace; font-size: 14px;">${escapeHtml(c.barcode)}</strong>
+                  <span style="font-size:11px; color:${badgeClass}; font-weight:600; margin-top:2px;">${badgeText}</span>
+               </div>
+               <div>
+                  <button type="button" onclick="deleteCopyAjax(${c.id})" class="btn-icon-sm btn-icon-danger" style="display:inline-flex; border: 1px solid var(--danger); padding: 4px; border-radius: 4px; background:transparent; cursor:pointer;" title="Hapus Copy Ini">
+                     <iconify-icon icon="mdi:trash-can-outline" style="color: var(--danger);"></iconify-icon>
+                  </button>
+               </div>
+            </div>`;
+        });
+        html += '</div>';
+        copiesContainer.innerHTML = html;
+    }
 
     // Image Handling
     const imgContainer = document.getElementById('detailCover');
@@ -85,12 +132,47 @@ function openDetailModal(index) {
     }
 
     const modal = document.getElementById('detailModal');
-    if (modal) modal.style.display = 'block';
+    if (modal) {
+        modal.dataset.hasDeleted = 'false';
+        modal.style.display = 'block';
+    }
+}
+
+async function deleteCopyAjax(id) {
+    if (!confirm('Hapus permanen fisik buku spesifik ini? (Halaman tidak akan memuat ulang)')) return;
+
+    try {
+        const row = document.getElementById(`copy-row-${id}`);
+        if(row) row.style.opacity = '0.5';
+
+        const res = await fetch(`books.php?action=delete_single_ajax&id=${id}`);
+        const data = await res.json();
+        
+        if (data.success) {
+            if(row) {
+                row.style.display = 'none';
+            }
+            // Mark modal flag so main page refreshes on close to update numbers
+            const modal = document.getElementById('detailModal');
+            if (modal) modal.dataset.hasDeleted = 'true';
+        } else {
+            alert('Gagal menghapus data buku.');
+            if(row) row.style.opacity = '1';
+        }
+    } catch (e) {
+        console.error(e);
+        alert('Terjadi kesalahan koneksi.');
+    }
 }
 
 function closeDetail() {
     const modal = document.getElementById('detailModal');
-    if (modal) modal.style.display = 'none';
+    if (modal) {
+        modal.style.display = 'none';
+        if (modal.dataset.hasDeleted === 'true') {
+            window.location.reload();
+        }
+    }
 }
 
 /**

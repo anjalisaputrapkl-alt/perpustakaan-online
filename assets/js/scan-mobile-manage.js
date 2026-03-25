@@ -94,7 +94,9 @@ async function processBarcode(barcode) {
                 return;
             }
             currentMember = data.data;
+            scannedBooks = []; // Clear history for new member
             updateMemberUI();
+            updateScannedList(); // Update UI
             playSound('success');
 
             if (scannedBooks.length > 0) {
@@ -151,7 +153,9 @@ async function processBarcode(barcode) {
                 // If scanning another member card while in book mode, switch member
                 if (data.data.type === 'member') {
                     currentMember = data.data;
+                    scannedBooks = []; // Clear history for new member
                     updateMemberUI();
+                    updateScannedList(); // Update UI
                     playSound('success');
                     showToast(`Ganti anggota: ${currentMember.name}`, 'success');
                     showLoading(false);
@@ -209,15 +213,13 @@ async function processBarcode(barcode) {
                     return;
                 }
 
-                scannedBooks.push({
+                // AUTO BORROW IMMEDIATELY
+                await autoBorrowBook({
                     book_id: data.data.id,
                     book_title: data.data.name,
                     cover_image: data.data.cover_image,
-                    access_level: data.data.access_level // Store access_level
+                    access_level: data.data.access_level
                 });
-                updateScannedList();
-                playSound('success');
-                showToast('Buku ditambahkan', 'success');
 
             }
         }
@@ -231,83 +233,6 @@ async function processBarcode(barcode) {
     showLoading(false);
 }
 
-async function submitScannedBooks() {
-    if (scannedBooks.length === 0) return;
-
-    if (!currentMember) {
-        playSound('error');
-        showToast('Scan kartu anggota dulu!', 'error');
-        switchMode('member');
-        return;
-    }
-
-    showLoading(true);
-
-    try {
-        const response = await fetch('./api/submit-borrow.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                due_date: (() => {
-                    const d = new Date();
-                    d.setDate(d.getDate() + defaultBorrowDuration);
-                    const yyyy = d.getFullYear();
-                    const mm = String(d.getMonth() + 1).padStart(2, '0');
-                    const dd = String(d.getDate()).padStart(2, '0');
-                    return `${yyyy}-${mm}-${dd} 23:59:59`;
-                })(),
-                borrows: scannedBooks.map(book => ({
-                    member_id: currentMember.id,
-                    book_id: book.book_id
-                }))
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.inserted > 0) {
-            playSound('success');
-            if (data.errors && data.errors.length > 0) {
-                // Partial success: some books were accepted, some rejected
-                Swal.fire({
-                    icon: 'warning',
-                    title: `${data.inserted} Buku Berhasil Dipinjam`,
-                    html: `<div style="text-align:left;font-size:13px;">`
-                        + data.errors.map(e => `⚠️ ${e}`).join('<br>')
-                        + `</div>`,
-                    confirmButtonColor: '#d97706'
-                });
-            } else {
-                showToast('Peminjaman Berhasil!', 'success');
-            }
-            // Reset state for next transaction
-            scannedBooks = [];
-            currentMember = null;
-            updateMemberUI();
-            updateScannedList();
-        } else {
-            // All books were rejected (inserted = 0)
-            playSound('error');
-            const errorList = (data.errors && data.errors.length > 0)
-                ? data.errors
-                : [data.message || 'Peminjaman gagal'];
-            Swal.fire({
-                icon: 'error',
-                title: 'Peminjaman Gagal',
-                html: `<div style="text-align:left;font-size:13px;">`
-                    + errorList.map(e => `❌ ${e}`).join('<br>')
-                    + `</div>`,
-                confirmButtonColor: '#991b1b'
-            });
-        }
-
-    } catch (error) {
-        playSound('error');
-        showToast('Error koneksi', 'error');
-    }
-
-    showLoading(false);
-}
 
 function playSound(type) {
     const audio = document.getElementById(type === 'success' ? 'soundSuccess' : 'soundError');
@@ -380,31 +305,93 @@ function updateScannedList() {
             coverHtml = '<div class="item-cover" style="display:flex;align-items:center;justify-content:center;font-size:10px;color:#888;">NoImg</div>';
         }
 
-        return '<div class="scanned-item">' +
+        return '<div class="scanned-item" style="border-left: 4px solid var(--success);">' +
             coverHtml +
             '<div class="item-info">' +
             '<div class="item-title">' + escapeHtml(book.book_title) + '</div>' +
-            '<div class="item-meta">Tap hapus untuk membatalkan</div>' +
+            '<div class="item-meta" style="color:var(--success); font-weight:bold;">Berhasil dipinjam <iconify-icon icon="mdi:check-circle"></iconify-icon></div>' +
             '</div>' +
-            '<button class="item-remove" onclick="removeBook(' + index + ')">' +
-            '<iconify-icon icon="mdi:close"></iconify-icon>' +
-            '</button>' +
             '</div>';
     }).join('');
 
     container.scrollTop = container.scrollHeight;
 }
 
-function removeBook(index) {
-    scannedBooks.splice(index, 1);
-    updateScannedList();
-}
-
-function clearScannedBooks() {
-    if (confirm('Hapus semua?')) {
-        scannedBooks = [];
-        updateScannedList();
+async function autoBorrowBook(book) {
+    if (!currentMember) {
+        playSound('error');
+        showToast('Scan kartu anggota dulu!', 'error');
+        switchMode('member');
+        return;
     }
+
+    showLoading(true);
+
+    try {
+        const response = await fetch('./api/submit-borrow.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                due_date: (() => {
+                    const d = new Date();
+                    d.setDate(d.getDate() + defaultBorrowDuration); // Use global or fallback
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    return `${yyyy}-${mm}-${dd} 23:59:59`;
+                })(),
+                borrows: [{
+                    member_id: currentMember.id,
+                    book_id: book.book_id
+                }]
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.inserted > 0) {
+            playSound('success');
+            if (data.errors && data.errors.length > 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: `Buku Berhasil Dipinjam (Dengan Catatan)`,
+                    html: `<div style="text-align:left;font-size:13px;">`
+                        + data.errors.map(e => `⚠️ ${e}`).join('<br>')
+                        + `</div>`,
+                    confirmButtonColor: '#d97706'
+                });
+            } else {
+                showToast('Peminjaman Berhasil: ' + book.book_title, 'success');
+            }
+            
+            scannedBooks.push(book);
+            updateScannedList();
+            
+            if(currentMember.current_borrow_count !== undefined) {
+                currentMember.current_borrow_count++;
+            }
+            
+        } else {
+            playSound('error');
+            const errorList = (data.errors && data.errors.length > 0)
+                ? data.errors
+                : [data.message || 'Peminjaman gagal'];
+            Swal.fire({
+                icon: 'error',
+                title: 'Peminjaman Gagal',
+                html: `<div style="text-align:left;font-size:13px;">`
+                    + errorList.map(e => `❌ ${e}`).join('<br>')
+                    + `</div>`,
+                confirmButtonColor: '#991b1b'
+            });
+        }
+
+    } catch (error) {
+        playSound('error');
+        showToast('Error koneksi', 'error');
+    }
+
+    showLoading(false);
 }
 
 function showToast(msg, type) {

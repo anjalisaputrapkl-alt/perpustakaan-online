@@ -30,7 +30,7 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <div class="container">
         <div class="header">
             <h1>📚 Print Barcode Buku</h1>
-            <p style="color: #666; font-size: 14px;">Pilih buku untuk mencetak barcode ISBN</p>
+            <p style="color: #666; font-size: 14px;">Pilih buku untuk mencetak barcode kode unik</p>
         </div>
 
         <div class="button-group">
@@ -53,7 +53,7 @@ $books = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <?php foreach ($books as $book): ?>
                 <div class="checkbox-item">
                     <input type="checkbox" class="book-checkbox" value="<?php echo htmlspecialchars($book['id']); ?>"
-                        data-isbn="<?php echo htmlspecialchars($book['isbn']); ?>"
+                        data-code="B-<?php echo htmlspecialchars($book['id']); ?>"
                         data-title="<?php echo htmlspecialchars($book['title']); ?>"
                         data-author="<?php echo htmlspecialchars($book['author'] ?? ''); ?>" onchange="updateDisplay()">
                     <label><?php echo htmlspecialchars($book['title']); ?></label>

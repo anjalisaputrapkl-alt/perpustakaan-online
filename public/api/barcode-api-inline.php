@@ -43,7 +43,7 @@ try {
             return [
                 'id' => $book['id'],
                 'judul' => $book['title'],
-                'kode_buku' => $book['isbn'],
+                'kode_buku' => 'B-' . $book['id'],
                 'penulis' => $book['author'],
                 'stok' => $book['stok'],
                 'penerbit' => $book['category'],

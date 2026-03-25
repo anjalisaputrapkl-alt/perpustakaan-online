@@ -60,7 +60,6 @@ requireAuth();
                     <tr>
                         <th style="width: 60px;">Cover</th>
                         <th>Judul Buku</th>
-                        <th style="width: 50px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="scannedItemsList">
@@ -68,21 +67,11 @@ requireAuth();
             </table>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="btn-group" id="actionButtons" style="display: none;">
-            <button class="btn-primary" id="btnSubmit" onclick="submitScannedBooks()">
-                Pinjam
-            </button>
-            <button class="btn-secondary" id="btnClear" onclick="clearScannedBooks()">
-                Hapus Semua
-            </button>
-        </div>
-
         <!-- Instruction -->
         <div class="instruction">
             1. Scan Anggota <br>
             2. Scan Buku <br>
-            3. Tekan Pinjam
+            Buku akan otomatis dipinjam saat di-scan.
         </div>
 
         <!-- Logout Button -->

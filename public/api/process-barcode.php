@@ -69,12 +69,18 @@ try {
         exit;
     }
 
+    // Strip B- prefix if present for ID search
+    $book_id_search = $barcode;
+    if (strpos(strtoupper($barcode), 'B-') === 0) {
+        $book_id_search = substr($barcode, 2);
+    }
+
     $stmt = $pdo->prepare(
-        'SELECT id, isbn as barcode, title as name, cover_image, copies, max_borrow_days, access_level, "book" as type FROM books 
+        'SELECT id, CONCAT("B-", id) as barcode, title as name, cover_image, copies, max_borrow_days, access_level, "book" as type FROM books 
          WHERE (isbn = ? OR id = ?) AND school_id = ?
          LIMIT 1'
     );
-    $stmt->execute([$barcode, $barcode, $sid]);
+    $stmt->execute([$barcode, $book_id_search, $sid]);
     $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($result) {

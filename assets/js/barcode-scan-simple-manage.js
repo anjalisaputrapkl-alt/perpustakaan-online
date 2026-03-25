@@ -82,7 +82,9 @@ async function processBarcode(barcode) {
                 return;
             }
             currentMember = data.data;
+            scannedBooks = []; // Clear history for new member
             displayMember();
+            updateScannedList(); // Update UI
 
             // If we have books, show success
             if (scannedBooks.length > 0) {
@@ -105,7 +107,9 @@ async function processBarcode(barcode) {
                 // If scanning another member card while in book mode, switch member
                 if (data.data.type === 'member') {
                     currentMember = data.data;
+                    scannedBooks = []; // Clear history for new member
                     displayMember();
+                    updateScannedList(); // Update UI
                     showStatus(`Ganti anggota: ${currentMember.name}`, 'success');
                     showLoading(false);
                     return;
@@ -120,19 +124,13 @@ async function processBarcode(barcode) {
             if (scannedBooks.some(b => b.book_id === data.data.id)) {
                 showStatus('Buku sudah ada di daftar!', 'info');
             } else {
-                scannedBooks.push({
+                // Auto Borrow Immediately
+                await autoBorrowBook({
                     book_id: data.data.id,
                     book_title: data.data.name,
                     cover_image: data.data.cover_image,
                     max_borrow_days: data.data.max_borrow_days
                 });
-                updateScannedList();
-                showStatus(data.data.name + ' ditambahkan', 'success');
-
-                // If member is not set, encourage setting member
-                if (!currentMember) {
-                    showStatus(data.data.name + ' OK. Lanjut buku lain atau Scan Anggota.', 'success');
-                }
             }
         }
 
@@ -163,7 +161,7 @@ function updateScannedList() {
         if (bookCountEl) bookCountEl.textContent = scannedBooks.length;
 
         if (tbody) {
-            tbody.innerHTML = scannedBooks.map((book, index) => {
+            tbody.innerHTML = scannedBooks.map((book) => {
                 let coverHtml = '';
                 if (book.cover_image) {
                     coverHtml = '<img src="../img/covers/' + escapeHtml(book.cover_image) + '" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;">';
@@ -178,37 +176,17 @@ function updateScannedList() {
 
                 return '<tr>' +
                     '<td style="width: 50px;">' + coverHtml + '</td>' +
-                    '<td>' + escapeHtml(book.book_title) + maxDaysHtml + '</td>' +
-                    '<td><button class="btn-remove" onclick="removeBook(' + index + ')">Hapus</button></td>' +
+                    '<td>' + escapeHtml(book.book_title) + maxDaysHtml + '<br><span style="color: var(--success); font-size: 10px; font-weight: bold;">Berhasil dipinjam ✓</span></td>' +
                     '</tr>';
             }).join('');
         }
     }
 }
 
-function removeBook(index) {
-    scannedBooks.splice(index, 1);
-    updateScannedList();
-}
-
-function clearScannedBooks() {
-    if (confirm('Hapus semua buku yang sudah di-scan?')) {
-        scannedBooks = [];
-        updateScannedList();
-        showStatus('Daftar buku telah dihapus', 'info');
-    }
-}
-
-async function submitScannedBooks() {
-    if (scannedBooks.length === 0) {
-        showStatus('Tidak ada buku untuk dikirim', 'error');
-        return;
-    }
-
+async function autoBorrowBook(book) {
     if (!currentMember) {
         showStatus('Harap scan KARTU ANGGOTA terlebih dahulu!', 'error');
         switchMode('member');
-        // Pulse member button
         const btn = document.getElementById('btnModeMember');
         if (btn) {
             btn.style.borderColor = 'red';
@@ -217,47 +195,35 @@ async function submitScannedBooks() {
         return;
     }
 
-    const btnSubmit = document.getElementById('btnSubmit');
-    const btnClear = document.getElementById('btnClear');
-    if (btnSubmit) btnSubmit.disabled = true;
-    if (btnClear) btnClear.disabled = true;
-
     showLoading(true);
-    showStatus('Mengirim data...', 'info');
+    showStatus('Memproses peminjaman...', 'info');
 
     try {
         const response = await fetch('./api/submit-borrow.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                borrows: scannedBooks.map(book => ({
+                borrows: [{
                     member_id: currentMember.id,
                     book_id: book.book_id
-                }))
+                }]
             })
         });
 
         const data = await response.json();
-        console.log('[SUBMIT] Response:', data);
+        console.log('[AUTO-BORROW] Response:', data);
 
-        if (data.success) {
-            showStatus('Selesai! Buku berhasil dipinjam untuk ' + currentMember.name, 'success');
-            scannedBooks = [];
+        if (data.success || data.inserted > 0) {
+            showStatus('Buku ' + book.book_title + ' berhasil dipinjam!', 'success');
+            scannedBooks.push(book);
             updateScannedList();
-            currentMember = null;
-            const memberDisplay = document.getElementById('memberDisplay');
-            if (memberDisplay) memberDisplay.classList.remove('show');
-            switchMode('book'); // Ready for next person
         } else {
-            showStatus('Error: ' + (data.message || 'Gagal menyimpan'), 'error');
-            if (btnSubmit) btnSubmit.disabled = false;
-            if (btnClear) btnClear.disabled = false;
+            const errList = data.errors && data.errors.length > 0 ? data.errors.join(", ") : (data.message || 'Gagal menyimpan');
+            showStatus('Error: ' + errList, 'error');
         }
     } catch (error) {
-        console.error('[SUBMIT] Error:', error);
+        console.error('[AUTO-BORROW] Error:', error);
         showStatus('Error: ' + error.message, 'error');
-        if (btnSubmit) btnSubmit.disabled = false;
-        if (btnClear) btnClear.disabled = false;
     }
 
     showLoading(false);

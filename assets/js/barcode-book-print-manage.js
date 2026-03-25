@@ -8,7 +8,7 @@ const searchBox = document.getElementById('searchBox');
 function updateDisplay() {
     const selected = Array.from(document.querySelectorAll('.book-checkbox:checked')).map(cb => ({
         id: cb.value,
-        isbn: cb.dataset.isbn,
+        code: cb.dataset.code,
         title: cb.dataset.title,
         author: cb.dataset.author
     }));
@@ -26,7 +26,7 @@ function updateDisplay() {
             <div class="barcode-image">
                 <svg class="barcode-render"
                      jsbarcode-format="CODE128"
-                     jsbarcode-value="${escapeHtml(book.isbn)}"
+                     jsbarcode-value="${escapeHtml(book.code)}"
                      jsbarcode-displayValue="true"
                      jsbarcode-fontSize="14"
                      jsbarcode-width="2"
@@ -35,8 +35,8 @@ function updateDisplay() {
                 </svg>
             </div>
             <div class="barcode-info">
-                <strong>ISBN</strong>
-                ${escapeHtml(book.isbn || '-')}
+                <strong>Kode Unik</strong>
+                ${escapeHtml(book.code || '-')}
                 ${book.author ? '<div style="margin-top: 3px; font-size: 9px;">' + escapeHtml(book.author) + '</div>' : ''}
             </div>
         </div>

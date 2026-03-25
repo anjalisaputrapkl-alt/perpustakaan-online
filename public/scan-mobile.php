@@ -66,16 +66,6 @@ $defaultBorrowDuration = (int)($schoolSettings['borrow_duration'] ?? 7);
                     <div class="empty-placeholder">Belum ada buku discan</div>
                 </div>
 
-                <div class="action-bar" id="actionBar" style="display:none">
-                    <button class="btn-main" id="btnSubmit" onclick="submitScannedBooks()">
-                        <iconify-icon icon="mdi:check-circle-outline" style="font-size: 20px;"></iconify-icon>
-                        Pinjam (<span id="btnCount">0</span>)
-                    </button>
-                    <button class="btn-clear" onclick="clearScannedBooks()">
-                        <iconify-icon icon="mdi:delete-outline"></iconify-icon>
-                    </button>
-                </div>
-
                 <a href="<?php echo $dashboardUrl; ?>" class="btn-back" id="backBtnContainer">
                     <iconify-icon icon="mdi:check-circle"></iconify-icon>
                     Selesai Scan
