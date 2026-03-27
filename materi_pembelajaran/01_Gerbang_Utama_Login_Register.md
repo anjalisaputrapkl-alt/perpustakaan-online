@@ -1,73 +1,39 @@
-# Modul 1: Alur Login & Register Terstruktur
+# Modul 1: Gerbang Utama (Login, Register, & OTP)
 
-## A. Proses Pendaftaran (Register)
+## 1. Pendaftaran Sekolah (Register)
 **File: `public/api/register.php`**
 
-**1. Validasi Input Kosong**
-Jika field input seperti nama sekolah atau email dibiarkan kosong, maka sistem menggagalkan pendaftaran dan mengembalikan status 400.
-```php
-if (empty($school_name) || empty($admin_name) || empty($admin_email) || empty($admin_password)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Semua field wajib diisi']);
-    exit;
-}
-```
+Sistem menggunakan alur pendaftaran mandiri untuk sekolah dengan verifikasi email (OTP).
+- **Cek Duplikasi**: Menggunakan `COUNT(*)` untuk memastikan email admin belum terdaftar.
+- **Auto-slug**: Mengubah nama sekolah menjadi URL ramah (slug) menggunakan `preg_replace`.
+- **Keamanan Password**: Menggunakan `password_hash()` dengan algoritma `PASSWORD_DEFAULT`.
+- **OTP (One Time Password)**: Menghasilkan 6 digit kode unik yang berlaku selama 15 menit.
 
-**2. Pengecekan Ketersediaan Email**
-Jika email *sudah terdaftar* di tabel `users` database, pendaftaran ditolak. Jika *belum terdaftar* (hasil COUNT = 0), maka pendaftaran berhasil dan dilanjutkan.
 ```php
-$stmt = $pdo->prepare('SELECT COUNT(*) FROM users WHERE email = :email');
-$stmt->execute(['email' => $admin_email]);
-if ($stmt->fetchColumn() > 0) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Email sudah terdaftar']);
-    exit;
-}
-```
-
-**3. Enkripsi Password dan Insert Database**
-Jika email tersedia, URL/slug sekolah dibuat, password dienkripsi, dan data di-insert ke tabel `users`.
-```php
-$password_hash = password_hash($admin_password, PASSWORD_DEFAULT);
+// Menghasilkan kode verifikasi
 $verification_code = generateVerificationCode();
+$code_expires_at = date('Y-m-d H:i:s', strtotime('+15 minutes'));
 
-$stmt = $pdo->prepare(
-    'INSERT INTO users (school_id, name, email, password, verification_code, code_expires_at, is_verified, role) 
-     VALUES (:school_id, :name, :email, :password, :verification_code, :code_expires_at, 0, "admin")'
-);
+// Insert Admin dengan status is_verified = 0 (Belum Aktif)
+$stmt = $pdo->prepare('INSERT INTO users (...) VALUES (...)');
 ```
 
----
+## 2. Verifikasi Email
+**File: `public/api/verify-and-login.php`**
 
-## B. Proses Masuk (Login)
+Setelah mendaftar, user harus memasukkan kode OTP. 
+- **Logika**: Sistem mencocokkan `verification_code` dan memastikan `NOW() < code_expires_at`.
+- **Aksi**: Jika benar, kolom `is_verified` diubah menjadi `1`.
+
+## 3. Sistem Masuk (Login)
 **File: `public/api/login.php`**
 
-**1. Pemisahan Tipe Pengecekan**
-Jika `user_type` adalah 'student', pencarian di database menggunakan NISN. Jika bukan, pencarian menggunakan Email.
-```php
-if ($user_type === 'student') {
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE nisn = :nisn AND role IN ('student', 'teacher', 'employee') LIMIT 1");
-    $stmt->execute(['nisn' => $nisn]);
-} else {
-    $stmt = $pdo->prepare('SELECT * FROM users WHERE email = :email LIMIT 1');
-    $stmt->execute(['email' => $email]);
-}
-$user = $stmt->fetch(PDO::FETCH_ASSOC);
-```
+Mendukung dua jenis entitas: **Admin Sekolah** (Email) dan **Anggota/Siswa** (NISN).
+- **Logika Percabangan**:
+  - `if ($user_type === 'student')`: Query ke tabel users berdasarkan kolom `nisn`.
+  - `else`: Query ke tabel users berdasarkan kolom `email`.
+- **Verifikasi**: Menggunakan `password_verify($password, $user['password'])`.
+- **Session Handling**: Menyimpan `school_id` ke dalam session untuk isolasi data antar sekolah.
 
-**2. Verifikasi dan Sesi (Session)**
-Jika password plain-text dicocokkan dengan hash di database dan BENAR (match), maka data user disimpan ke dalam `$_SESSION`.
-```php
-if (!password_verify($password, $user['password'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'NISN/Email atau password salah']);
-    exit;
-}
-
-$_SESSION['user'] = [
-    'id' => $user['id'],
-    'school_id' => $user['school_id'],
-    'name' => $user['name'],
-    'role' => $user['role']
-];
-```
+---
+*Fakta Teknis: Isolasi data dimulai dari sini. Penanda `school_id` di Session adalah kunci utama agar data sekolah A tidak bisa dilihat oleh sekolah B.*

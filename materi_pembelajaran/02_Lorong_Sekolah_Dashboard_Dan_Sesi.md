@@ -1,40 +1,33 @@
-# Modul 2: Sesi Autentikasi & Dashboard
+# Modul 2: Autentikasi, Sesi, & Dashboard
 
-## A. Sistem Keamanan Halaman (Autentikasi Session)
+## 1. Pelindung Halaman (Middleware Sederhana)
 **File: `src/auth.php`**
 
-**1. Pengecekan Keberadaan Sesi**
-Di setiap halaman private seperti `borrows.php`, fungsi `requireAuth()` dipanggil. Jika array `$_SESSION['user']` kosong (artinya user belum login via `login.php`), maka akan langsung di-redirect lemparkan ke halaman login utama.
-```php
-function isAuthenticated()
-{
-    return !empty($_SESSION['user']) && (
-        !empty($_SESSION['user']['id']) || 
-        (!empty($_SESSION['user']['is_scanner']) && $_SESSION['user']['is_scanner'] === true)
-    );
-}
+Setiap halaman di folder `public/` (kecuali index luar) mewajibkan login.
+- **Fungsi `requireAuth()`**: Mengecek apakah `$_SESSION['user']` ada.
+- **Redirect**: Jika akses ilegal terdeteksi, user dilempar balik ke `index.php`.
 
-function requireAuth()
-{
-    if (!isAuthenticated()) {
-        $loginUrl = '/perpustakaan-online/?login_required=1';
-        header('Location: ' . $loginUrl, true, 302);
+```php
+function requireAuth() {
+    if (!isset($_SESSION['user'])) {
+        header('Location: /perpustakaan-online/index.php');
         exit;
     }
 }
 ```
 
-## B. Pemisahan Tampilan UI Dashboard (Authorization)
-**File: `public/index.php` (Admin) & `public/student-dashboard.php` (Siswa)**
+## 2. Dashboard Berbasis Role (Peran)
+Sistem mengenali siapa yang login dan memberikan dashboard yang berbeda:
+- **Admin (`index.php`)**: Menampilkan statistik agregat (`COUNT`) dari total buku, anggota, dan denda tertunggak di sekolah tersebut.
+- **Siswa (`student-dashboard.php`)**: Menampilkan "Kartu Anggota Digital", daftar buku yang sedang dipinjam, dan buku favorit.
 
-**1. Verifikasi Kepemilikan Data**
-Pada halaman dashboard admin, tampilan hanya dirender setelah sistem mencocokkan `school_id` admin dari server sessions agar tak bercampur dengan sekolah lain.
+## 3. Isolasi Data Multi-Sekolah
+Di setiap query database pada dashboard, sistem **WAJIB** menyertakan parameter `school_id`.
 ```php
-$user = $_SESSION['user'];
-$sid = $user['school_id']; // Ditarik aman dari Session Backend
-
-// Contoh query statistic dashboard dengan membatasi cakupan pada school_id tertentu
+// Contoh mengambil statistik hanya untuk sekolah yang sedang login
 $stmt = $pdo->prepare('SELECT COUNT(*) FROM books WHERE school_id = :sid');
-$stmt->execute(['sid' => $sid]);
-$totalBooks = $stmt->fetchColumn();
+$stmt->execute(['sid' => $_SESSION['user']['school_id']]);
 ```
+
+---
+*Fakta Teknis: Session di PHP ini bersifat Server-Side, artinya data `school_id` tidak bisa dimanipulasi oleh user melalui browser, menjadikannya sangat aman untuk aplikasi multi-tenant.*

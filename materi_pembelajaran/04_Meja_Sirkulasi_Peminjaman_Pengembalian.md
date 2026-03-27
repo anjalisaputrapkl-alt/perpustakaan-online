@@ -1,38 +1,28 @@
-# Modul 4: Transaksi Sirkulasi & Penghitungan Denda
+# Modul 4: Sirkulasi Otomatis & Logika Denda
 
-## A. Sirkulasi Pengembalian Buku (Returning)
-**File Terkait: `public/borrows.php`**
+## 1. Peminjaman (Borrow)
+**File: `public/borrows.php`**
 
-**1. Logika Menghitung Selisih Keterlambatan**
-Saat URL menerima parameter aksi pengembalian buku `&action=return`, server mengecek kolom `due_at`. Jika waktu sekarang (`$now`) lebih besar dari waktu jatuh tempo (`$dueDate`), maka sistem akan mengkalkulasi selisih hari keterlambatan, lalu mengalikannya dengan rasio `$late_fine` (nominal denda).
+Menggunakan alur **Transactional SQL**.
+1. Cek ketersediaan buku (`copies` > 0).
+2. Insert ke tabel `borrows` dengan status `borrowed`.
+3. Update tabel `books` (Kurangi 1 copy).
+4. Jika berhasil semua, `COMMIT`. Jika gagal salah satu, `ROLLBACK`.
 
+## 2. Pengembalian & Kalkulasi Denda
+**Logika Backend:**
+Sistem membandingkan `due_at` (tenggat) dengan tanggal server saat ini.
 ```php
-if ($borrowData['due_at']) {
-    $dueDate = new DateTime($borrowData['due_at']);
-    $now = new DateTime();
-    
-    // Mengecek apabila waktu sekarang > waktu jatuh tempo
-    if ($now > $dueDate) {
-        $diff = $now->diff($dueDate);
-        $daysLate = $diff->days;
-        $fineAmount = $daysLate * $late_fine; // Mengalikan telat x nominal denda
-    }
+if ($now > $dueDate) {
+    $diff = $now->diff($dueDate);
+    $daysLate = $diff->days;
+    $fineAmount = $daysLate * $late_fine;
 }
 ```
+Nominal `$late_fine` diambil dinamis dari pengaturan masing-masing sekolah di tabel `schools`.
 
-**2. Update Status Peminjaman (Database Commit)**
-Jika Denda telah terkalkulasi, maka sistem mengubah status kolom "status" ke "returned", serta mendata denda ke "unpaid". 
-```php
-$stmt = $pdo->prepare(
-    'UPDATE borrows SET returned_at=NOW(), status="returned", fine_amount=:fine, fine_status="unpaid"
-     WHERE id=:id AND school_id=:sid'
-);
-$stmt->execute(['id' => (int) $_GET['id'], 'sid' => $sid, 'fine' => $fineAmount]);
-```
+## 3. Notifikasi Pengembalian
+Saat pengembalian sukses, sistem memicu `NotificationsService` untuk mengirim kabar ke akun Siswa bahwa buku telah diterima kembali.
 
-**3. Memicu Penambahan Stok Kembali**
-Jika pengembalian database borrows tereksekusi, tabel master rak ketersediaan di buku akan bertambah `+ 1`.
-```php
-$stmt = $pdo->prepare('UPDATE books SET copies = copies + 1 WHERE id = :bid');
-$stmt->execute(['bid' => $borrowData['book_id']]);
-```
+---
+*Fakta Teknis: Perhitungan denda dilakukan secara Real-Time. Artinya, setiap kali halaman dibuka, status 'overdue' (terlambat) akan selalu diperbarui otomatis mengikuti waktu server.*

@@ -1,31 +1,30 @@
-# Modul 3: Manajemen Katalog & Data Item
+# Modul 3: Manajemen Koleksi Buku (CRUD & Inventory)
 
-## A. Fitur Pemisahan Fisik Buku Tunggal via Barcode
-**File: `public/books.php` dan logika aplikasi umum**
+## 1. Tambah Buku (Create)
+**File: `public/books.php`**
 
-**1. Skema Barcode Per Copy**
-Berbeda dengan sistem perpustakaan konvensional yang hanya mencatat judul buku (berbasis ISBN), sistem ini mencatat fisik buku secara terpisah (Item Tracking).
-
-Jika 1 buku ditambahkan sejumlah *N* copies, maka `N` akan digenerate sebagai Barcode Identifier pada sistem (dicatat atau diproses di `books.php` secara logis), maka database `books` akan mengkalkulasi total kopi dan merender barcode untuk masing-masing id fisik.
-
-Di dalam view:
+Fitur unik: **Multi-Copy Insertion**. Jika admin menginput "Jumlah Salinan: 5", sistem akan menjalankan `for loop`.
 ```php
-// Query mengambil data master buku untuk dirender ke tabel frontend
-$stmt = $pdo->prepare('SELECT * FROM books WHERE school_id = :sid ORDER BY created_at DESC');
-$stmt->execute(['sid' => $sid]);
-$books = $stmt->fetchAll();
+for ($i = 0; $i < $quantity; $i++) {
+    $stmt->execute(['title' => $_POST['title'], 'copies' => 1, ...]);
+}
+```
+Setiap eksekusi menghasilkan baris baru dengan id unik. ID ini nantinya menjadi dasar nomor **Barcode**.
+
+## 2. Pengelolaan Sampul (Image Upload)
+Sistem menyimpan file di `img/covers/`.
+- Nama file diubah menjadi format unik: `book_timestamp_uniqid.ext` untuk menghindari bentrokan nama file antar user.
+- Menggunakan `move_uploaded_file()` untuk memindahkan dari memory temporary ke folder permanen.
+
+## 3. Update & Delete (Sinkronisasi Data)
+- **Update**: Mengubah informasi buku (judul/pengarang) akan mengupdate SEMUA salinan yang memiliki Judul & ISBN yang sama.
+- **Delete Single**: Menghapus hanya 1 fisik buku (jika rusak).
+- **Delete All**: Menghapus seluruh koleksi dengan judul tersebut.
+
+```php
+// Hapus satu fisik (Single Item)
+$pdo->prepare('DELETE FROM books WHERE id = :id')->execute(['id' => $id]);
 ```
 
-## B. Fitur Favorit (Wishlist)
-**File: `public/favorites.php`**
-
-**1. Logic Insert Bookmark**
-Jika user menekan tombol 'Heart' (Favorit) di `student-dashboard.php`, sistem menyimpan `book_id` yang terikat pada `member_id` ke tabel `favorites`.
-```php
-$stmt = $pdo->prepare("INSERT INTO favorites (school_id, member_id, book_id) VALUES (:sid, :mid, :bid)");
-$stmt->execute([
-    'sid' => $school_id,
-    'mid' => $member_id,
-    'bid' => $book_id
-]);
-```
+---
+*Fakta Teknis: Sistem ini tidak menggunakan kolom "stok" (misal: stok=10), melainkan mencatat setiap buku sebagai 1 baris. Mengapa? Agar kita bisa tahu buku Laskar Pelangi yang mana yang sedang dipinjam oleh siapa.*
