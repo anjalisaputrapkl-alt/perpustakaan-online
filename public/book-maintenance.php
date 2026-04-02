@@ -5,35 +5,36 @@ requireAuth();
 require_once __DIR__ . '/../src/db.php';
 require_once __DIR__ . '/../src/maintenance/DamageController.php';
 
-// Get school_id from session
 $school_id = $_SESSION['user']['school_id'];
 
-// Pass school_id to controller
 $controller = new DamageController($pdo, $school_id);
 
-// Get all damage records and active borrows
+// Ambil semua data damage records dari database
 $records = $controller->getAll();
+// Ambil data peminjaman aktif, statistik denda, dan tipe kerusakan
 $activeBorrows = $controller->getActiveBorrows();
 $totalRecords = $controller->getCount();
 $totalFines = $controller->getTotalFines();
 $pendingFines = $controller->getTotalFines('pending');
 $damageTypes = $controller->getDamageTypes();
 
-// Handle AJAX requests
 if ($_SERVER['REQUEST_METHOD'] === 'POST' || isset($_GET['action'])) {
   $controller->handleAjax();
   exit;
 }
 
-// Handle Export CSV
+// export ke excel
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
+  // Set header HTTP untuk download file Excel
   header('Content-Type: application/vnd.ms-excel; charset=utf-8');
   header('Content-Disposition: attachment; filename="damage-fines-' . date('Y-m-d-H-i-s') . '.xls"');
 
+  // Buat struktur HTML table untuk export Excel
   echo '<!DOCTYPE html>';
   echo '<html>';
   echo '<head>';
   echo '<meta charset="UTF-8">';
+  // Styling untuk table Excel
   echo '<style>';
   echo 'table { border-collapse: collapse; width: 100%; }';
   echo 'th { background-color: #2563eb; color: white; padding: 12px; text-align: left; border: 1px solid #ddd; font-weight: bold; }';
@@ -48,8 +49,10 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   echo 'col.date { width: 120px; }';
   echo '</style>';
   echo '</head>';
+  // Mulai output body dengan table data
   echo '<body>';
   echo '<table>';
+  // Define kolom width untuk Excel
   echo '<colgroup>';
   echo '<col class="id">';
   echo '<col class="member">';
@@ -59,6 +62,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   echo '<col class="status">';
   echo '<col class="date">';
   echo '</colgroup>';
+  // Header row untuk table
   echo '<thead>';
   echo '<tr>';
   echo '<th>ID</th>';
@@ -70,9 +74,11 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
   echo '<th>Tanggal</th>';
   echo '</tr>';
   echo '</thead>';
+  // Isi data dari records
   echo '<tbody>';
 
   $no = 1;
+  // Loop dan output setiap record ke row table Excel
   foreach ($records as $r) {
     echo '<tr>';
     echo '<td>' . $no . '</td>';
@@ -86,6 +92,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $no++;
   }
 
+  // Close table dan body
   echo '</tbody>';
   echo '</table>';
   echo '</body>';
@@ -99,15 +106,20 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 <html lang="id">
 
 <head>
+  <!-- Meta tags untuk charset dan viewport -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Laporan Kerusakan Buku</title>
+  <!-- Load theme scripts -->
   <script src="../assets/js/theme-loader.js"></script>
   <script src="../assets/js/theme.js"></script>
+  <!-- Load Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Load icon library -->
   <script src="https://code.iconify.design/iconify-icon/1.0.8/iconify-icon.min.js"></script>
+  <!-- Load stylesheets -->
   <link rel="stylesheet" href="../assets/css/animations.css">
   <link rel="stylesheet" href="../assets/css/index.css">
   <link rel="stylesheet" href="../assets/css/book-maintenance.css">
@@ -115,12 +127,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 </head>
 
 <body>
+  <!-- Sidebar navigation -->
   <?php require __DIR__ . '/partials/sidebar.php'; ?>
 
   <div class="app">
-
+    <!-- Topbar dengan judul dan action buttons -->
     <div class="topbar" style="margin-left: -20px;">
       <strong>Laporan Kerusakan Buku</strong>
+      <!-- Action buttons: Export & Tambah laporan -->
       <div class="topbar-actions">
         <button class="btn btn-secondary" onclick="exportCSV()"><iconify-icon icon="mdi:file-excel"
             style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Export Excel</button>
@@ -130,9 +144,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     </div>
 
     <div class="content">
-
-      <!-- KPI Cards -->
+      <!-- KPI Cards: Menampilkan ringkasan statistik utama -->
       <div class="kpi-grid">
+        <!-- Card 1: Total laporan kerusakan -->
         <div class="kpi-card" data-stat-type="reports" style="cursor: pointer;" title="Klik untuk melihat detail">
           <div class="kpi-icon"><iconify-icon icon="mdi:alert"></iconify-icon></div>
           <div>
@@ -141,6 +155,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
           </div>
         </div>
 
+        <!-- Card 2: Total denda semua kategori -->
         <div class="kpi-card" data-stat-type="fines" style="cursor: pointer;" title="Klik untuk melihat detail">
           <div class="kpi-icon"><iconify-icon icon="mdi:cash-multiple"></iconify-icon></div>
           <div>
@@ -149,6 +164,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
           </div>
         </div>
 
+        <!-- Card 3: Denda yang belum dibayar -->
         <div class="kpi-card" data-stat-type="pending" style="cursor: pointer;" title="Klik untuk melihat detail">
           <div class="kpi-icon"><iconify-icon icon="mdi:clock-alert"></iconify-icon></div>
           <div>
@@ -158,37 +174,44 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         </div>
       </div>
 
-      <!-- Filter Section -->
+      <!-- Filter & Search Section -->
       <div class="card">
         <h2>Filter & Pencarian</h2>
         <div class="filter-bar">
+          <!-- Search input untuk cari anggota/buku -->
           <input type="text" id="searchInput" placeholder="Cari anggota atau buku...">
+          <!-- Filter status pembayaran denda -->
           <select id="statusFilter">
             <option value="">Semua Status</option>
             <option value="pending">Tertunda</option>
             <option value="paid">Lunas</option>
           </select>
+          <!-- Filter tipe kerusakan -->
           <select id="damageTypeFilter">
             <option value="">Semua Tipe Kerusakan</option>
             <?php foreach ($damageTypes as $key => $type): ?>
               <option value="<?= htmlspecialchars($key) ?>"><?= htmlspecialchars($type['name']) ?></option>
             <?php endforeach; ?>
           </select>
+          <!-- Button reset semua filter -->
           <button class="btn btn-danger" onclick="resetFilter();"><iconify-icon icon="mdi:redo"></iconify-icon>
             Reset</button>
         </div>
       </div>
 
-      <!-- Table Section -->
+      <!-- Table Section: Daftar lengkap laporan kerusakan -->
       <div class="card">
         <h2>Daftar Laporan (<?= count($records) ?>)</h2>
         <?php if (empty($records)): ?>
+          <!-- Pesan jika tidak ada laporan kerusakan -->
           <p style="text-align: center; color: var(--muted); padding: 32px 0;">
             Belum ada laporan kerusakan.
           </p>
         <?php else: ?>
+          <!-- Table dengan kolom member, buku, tipe kerusakan, denda, status, dll -->
           <div class="table-wrap">
             <table>
+              <!-- Define kolom width -->
               <colgroup>
                 <col class="member">
                 <col class="book">
@@ -199,7 +222,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                 <col class="date">
                 <col class="action">
               </colgroup>
-
+              <!-- Header row -->
               <thead>
                 <tr>
                   <th>Anggota</th>
@@ -212,12 +235,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                   <th class="text-center">Aksi</th>
                 </tr>
               </thead>
-
+              <!-- Body: Isi data dari records -->
               <tbody>
                 <?php foreach ($records as $r): ?>
+                  <!-- Row untuk setiap laporan kerusakan -->
                   <tr>
                     <td><strong><?= htmlspecialchars($r['member_name']) ?></strong></td>
                     <td><?= htmlspecialchars($r['book_title']) ?></td>
+                    <!-- Tipe kerusakan dengan badge styling -->
                     <td data-damage-type="<?= htmlspecialchars($r['damage_type']) ?>">
                       <span class="damage-badge" style="background-color: rgba(220, 38, 38, 0.1); color: #dc2626;">
                         <?= htmlspecialchars($damageTypes[$r['damage_type']]['name'] ?? $r['damage_type']) ?>
@@ -226,20 +251,26 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                     <td style="font-size: 12px;">
                       <?= $r['damage_description'] ? htmlspecialchars(substr($r['damage_description'], 0, 30)) . (strlen($r['damage_description']) > 30 ? '...' : '') : '-' ?>
                     </td>
+                    <!-- Nominal denda -->
                     <td style="font-weight: 600; color: #dc2626;">Rp <?= number_format($r['fine_amount'], 0, ',', '.') ?>
                     </td>
+                    <!-- Status denda (Tertunda/Lunas) -->
                     <td>
                       <span class="status-badge status-<?= strtolower($r['status']) ?>">
                         <?= $r['status'] === 'paid' ? 'Lunas' : 'Tertunda' ?>
                       </span>
                     </td>
+                    <!-- Tanggal laporan -->
                     <td style="font-size: 12px;"><?= date('d M Y H:i', strtotime($r['created_at'])) ?></td>
+                    <!-- Action buttons: Tandai lunas / Hapus -->
                     <td class="text-center">
                       <div class="actions">
                         <?php if ($r['status'] === 'pending'): ?>
+                          <!-- Button tandai pembayaran jika masih pending -->
                           <button class="btn btn-sm btn-success" onclick="markAsPaid(<?= $r['id'] ?>)"
                             title="Tandai Sebagai Lunas"><iconify-icon icon="mdi:check"></iconify-icon></button>
                         <?php endif; ?>
+                        <!-- Button hapus laporan -->
                         <button class="btn btn-sm btn-danger" onclick="deleteRecord(<?= $r['id'] ?>)"
                           title="Hapus"><iconify-icon icon="mdi:trash-can"></iconify-icon></button>
                       </div>
@@ -254,12 +285,15 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 
     </div>
 
-    <!-- Modal Add Damage Report -->
+    <!-- Modal untuk menambah damage report baru -->
     <div id="damageModal" class="modal">
       <div class="modal-content">
+        <!-- Modal header -->
         <div class="modal-header">Lapor Kerusakan Buku</div>
         <div class="modal-body">
+          <!-- Form lapor kerusakan -->
           <form id="damageForm">
+            <!-- Select peminjaman (dropdown populated dari active borrow) -->
             <div class="form-group">
               <label for="borrowId">Pilih Peminjaman</label>
               <select id="borrowId" name="borrow_id" required onchange="onBorrowSelected()">
@@ -268,12 +302,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                   <option value="<?= $b['id'] ?>" data-member-id="<?= $b['member_id'] ?>"
                     data-book-id="<?= $b['book_id'] ?>">
                     <?= htmlspecialchars($b['member_name']) ?> - <?= htmlspecialchars($b['book_title']) ?>
-                    (<?= $b['status'] === 'returned' ? 'Dikembalikan' : 'Dipinjam' ?> - <?= date('d M Y', strtotime($b['borrowed_at'])) ?>)
+                    (<?= $b['status'] === 'returned' ? 'Dikembalikan' : 'Dipinjam' ?> -
+                    <?= date('d M Y', strtotime($b['borrowed_at'])) ?>)
                   </option>
                 <?php endforeach; ?>
               </select>
             </div>
 
+            <!-- Select tipe kerusakan (dropdown diisi dari damage types) -->
             <div class="form-group">
               <label for="damageType">Tipe Kerusakan</label>
               <select id="damageType" name="damage_type" required onchange="onDamageTypeChanged()">
@@ -286,12 +322,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
               </select>
             </div>
 
+            <!-- Textarea untuk deskripsi detail kerusakan -->
             <div class="form-group">
               <label for="damageDescription">Deskripsi Kerusakan (Opsional)</label>
               <textarea id="damageDescription" name="damage_description"
                 placeholder="Jelaskan detail kerusakan..."></textarea>
             </div>
 
+            <!-- Display nominal denda otomatis berdasarkan tipe kerusakan -->
             <div class="form-group">
               <label>Denda Otomatis</label>
               <div
@@ -299,49 +337,60 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
                 <div style="font-size: 12px; color: var(--muted); margin-bottom: 6px;">Berdasarkan tipe kerusakan:</div>
                 <div id="fineAmount" style="font-size: 20px; font-weight: 600; color: #dc2626;">Rp 0</div>
               </div>
+              <!-- Hidden input untuk submit nominal denda -->
               <input type="hidden" id="fineAmountInput" name="fine_amount" value="0">
             </div>
           </form>
         </div>
+        <!-- Modal footer dengan button aksi -->
         <div class="modal-footer">
+          <!-- Button batal menutup modal -->
           <button class="btn btn-secondary" onclick="closeModal()"><iconify-icon icon="mdi:close"
               style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Batal</button>
+          <!-- Button submit lapor kerusakan -->
           <button class="btn" onclick="saveDamageReport()"><iconify-icon icon="mdi:content-save"
               style="vertical-align: middle; margin-right: 6px;"></iconify-icon> Lapor Kerusakan</button>
         </div>
       </div>
     </div>
 
-    <!-- Stats Modal -->
+    <!-- Modal untuk menampilkan statistik detail -->
     <div class="modal-overlay" id="statsModal">
       <div class="modal-container">
+        <!-- Modal header dengan search -->
         <div class="modal-header">
           <div style="flex: 1;">
             <h2 id="statsModalTitle">Detail Data</h2>
           </div>
+          <!-- Search box di stats modal -->
           <div class="search-wrapper">
-              <input type="text" id="searchStatsModal" class="search-input" placeholder="Cari data...">
-              <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
-              <div class="search-kbd">
-                  <span style="font-size: 8px;">Ctrl</span>
-                  <span>K</span>
-              </div>
-              <button class="search-clear" id="clearStatsSearch"><iconify-icon icon="mdi:close-circle"></iconify-icon></button>
+            <input type="text" id="searchStatsModal" class="search-input" placeholder="Cari data...">
+            <iconify-icon icon="mdi:magnify" class="search-icon-inside"></iconify-icon>
+            <div class="search-kbd">
+              <span style="font-size: 8px;">Ctrl</span>
+              <span>K</span>
+            </div>
+            <button class="search-clear" id="clearStatsSearch"><iconify-icon
+                icon="mdi:close-circle"></iconify-icon></button>
           </div>
           <button class="modal-close" type="button" style="margin-left: 20px;">×</button>
         </div>
+        <!-- Modal body (populated via JS) -->
         <div class="modal-body">
           <div class="modal-loading">Memuat data...</div>
         </div>
       </div>
     </div>
 
+    <!-- Pass data ke JavaScript -->
     <script>
-      // Data untuk digunakan di book-maintenance.js
+      // Embed data records dan damage types untuk digunakan di JS frontend
       window.recordsData = <?php echo json_encode($records); ?>;
       window.damageTypesData = <?php echo json_encode($damageTypes); ?>;
     </script>
+    <!-- Load JS untuk handle damage maintenance operations -->
     <script src="../assets/js/book-maintenance.js"></script>
+    <!-- Load JS untuk handle statistics modal -->
     <script src="../assets/js/maintenance-stats.js"></script>
 
   </div>

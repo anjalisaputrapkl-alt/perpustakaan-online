@@ -1,10 +1,5 @@
 <?php
-/**
- * Authentication Helper Functions
- * Mulai session dan cek autentikasi
- */
-
-// Mulai session jika belum
+// Mulai session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -15,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
 function isAuthenticated()
 {
     return !empty($_SESSION['user']) && (
-        !empty($_SESSION['user']['id']) || 
+        !empty($_SESSION['user']['id']) ||
         (!empty($_SESSION['user']['is_scanner']) && $_SESSION['user']['is_scanner'] === true)
     );
 }
@@ -28,10 +23,7 @@ function getAuthUser()
     return $_SESSION['user'] ?? null;
 }
 
-/**
- * Redirect ke login jika belum autentikasi
- * Safe header redirect
- */
+/*** Redirect ke login jika belum autentikasi */
 function requireAuth()
 {
     if (!isAuthenticated()) {
@@ -70,14 +62,13 @@ function getCurrentSchoolId()
 }
 
 /**
- * Login user using a Scan Access Key (Mobile Scanner)
  * Creates a limited session for scanning
  */
 function loginByScanKey($key)
 {
-    if (empty($key)) return false;
+    if (empty($key))
+        return false;
 
-    // We need $pdo here. Since this might be called early, we'll require it if not globalized.
     $pdo = require __DIR__ . '/db.php';
 
     $stmt = $pdo->prepare('SELECT id, name FROM schools WHERE scan_access_key = :key');
@@ -85,14 +76,13 @@ function loginByScanKey($key)
     $school = $stmt->fetch();
 
     if ($school) {
-        // Create a special session
         $_SESSION['user'] = [
-            'id' => 0, // No specific user ID
+            'id' => 0,
             'name' => 'Mobile Scanner',
             'email' => 'scanner@' . $school['id'],
-            'role' => 'librarian', // Grant librarian privileges for scanning
+            'role' => 'librarian',
             'school_id' => $school['id'],
-            'is_scanner' => true // Flag for scanner session
+            'is_scanner' => true
         ];
         return true;
     }

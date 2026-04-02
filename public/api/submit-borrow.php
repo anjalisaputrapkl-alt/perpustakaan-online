@@ -39,7 +39,7 @@ try {
     if (!empty($borrows[0]['member_id'])) {
         $countStmt = $pdo->prepare('SELECT COUNT(*) FROM borrows WHERE member_id = ? AND status NOT IN ("returned", "rejected")');
         $countStmt->execute([$borrows[0]['member_id']]);
-        $currentBorrows = (int)$countStmt->fetchColumn();
+        $currentBorrows = (int) $countStmt->fetchColumn();
     }
 
     foreach ($borrows as $borrow) {
@@ -59,12 +59,15 @@ try {
             $memStmt->execute(['mid' => $borrow['member_id'], 'sid' => $school_id]);
             $memberData = $memStmt->fetch();
             $memberRole = $memberData['role'] ?? 'student';
-            
+
             // Map role to school setting column
             $roleDefaultLimit = 3;
-            if ($memberRole === 'teacher') $roleDefaultLimit = $memberData['max_books_teacher'] ?? 10;
-            elseif ($memberRole === 'employee') $roleDefaultLimit = $memberData['max_books_employee'] ?? 5;
-            else $roleDefaultLimit = $memberData['max_books_student'] ?? 3;
+            if ($memberRole === 'teacher')
+                $roleDefaultLimit = $memberData['max_books_teacher'] ?? 10;
+            elseif ($memberRole === 'employee')
+                $roleDefaultLimit = $memberData['max_books_employee'] ?? 5;
+            else
+                $roleDefaultLimit = $memberData['max_books_student'] ?? 3;
 
             $maxLimit = $memberData['max_pinjam'] ?? $roleDefaultLimit;
 
@@ -95,7 +98,7 @@ try {
             $checkStmt = $pdo->prepare('SELECT copies, title, max_borrow_days, access_level FROM books WHERE id = :bid AND school_id = :sid');
             $checkStmt->execute(['bid' => $borrow['book_id'], 'sid' => $school_id]);
             $bookInfo = $checkStmt->fetch();
-            
+
             if (!$bookInfo || $bookInfo['copies'] < 1) {
                 $errors[] = "Buku '" . ($bookInfo['title'] ?? 'Unknown') . "' sedang tidak tersedia (Stok 0)";
                 continue;
@@ -106,7 +109,7 @@ try {
             // 2. Fallback: Provided date in request
             // 3. last Fallback: School default
             $bookDuration = $bookInfo['max_borrow_days'] ?? null;
-            
+
             if ($bookDuration) {
                 $dueDate = date('Y-m-d H:i:s', strtotime('+' . $bookDuration . ' days'));
             } else if (!empty($input['due_date'])) {
@@ -127,8 +130,8 @@ try {
                     continue;
                 }
             } else {
-                 $logMsg = date('Y-m-d H:i:s') . " [BORROW CHECK] Book: '{$bookInfo['title']}' (ID: {$borrow['book_id']}) Access: " . ($bookInfo['access_level'] ?? 'null') . "\n";
-                 file_put_contents(__DIR__ . '/../../debug_borrow.log', $logMsg, FILE_APPEND);
+                $logMsg = date('Y-m-d H:i:s') . " [BORROW CHECK] Book: '{$bookInfo['title']}' (ID: {$borrow['book_id']}) Access: " . ($bookInfo['access_level'] ?? 'null') . "\n";
+                file_put_contents(__DIR__ . '/../../debug_borrow.log', $logMsg, FILE_APPEND);
             }
 
             // Insert into borrows table with borrowed status (no verification needed)

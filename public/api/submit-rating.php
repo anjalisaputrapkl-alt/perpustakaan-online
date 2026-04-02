@@ -43,11 +43,11 @@ try {
     $stmt->execute([
         'id_user' => $user['id'],
         'id_buku' => $book_id,
-        'rating' => (int)$rating,
+        'rating' => (int) $rating,
         'komentar' => $comment
     ]);
     echo json_encode(['success' => true, 'message' => 'Ulasan Anda berhasil dikirim!']);
-    
+
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Gagal mengirim ulasan: ' . $e->getMessage()]);
 }

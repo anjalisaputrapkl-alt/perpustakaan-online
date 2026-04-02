@@ -1,4 +1,5 @@
 <?php
+// Autentikasi admin dan load dependencies
 require __DIR__ . '/../src/auth.php';
 requireAuth();
 ini_set('display_errors', 1);
@@ -7,18 +8,19 @@ $pdo = require __DIR__ . '/../src/db.php';
 require __DIR__ . '/../src/SchoolProfileModel.php';
 require __DIR__ . '/../src/ThemeModel.php';
 
-// Ensure user is not a student
+// Redirect student ke dashboard
 if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'student') {
     header('Location: student-dashboard.php');
     exit;
 }
 
+// Setup user dan model instances
 $user = $_SESSION['user'];
 $sid = $user['school_id'];
 $schoolProfileModel = new SchoolProfileModel($pdo);
 $themeModel = new ThemeModel($pdo);
 
-// Fetch school data BEFORE POST processing so we have current values for fallbacks
+// Fetch school data
 $stmt = $pdo->prepare('SELECT * FROM schools WHERE id = :id');
 $stmt->execute(['id' => $sid]);
 $school = $stmt->fetch();
@@ -27,6 +29,7 @@ if (!$school) {
     die('Error: School data not found');
 }
 
+// Initialize message variables
 $error = null;
 $success = null;
 $profile_error = null;
@@ -34,9 +37,11 @@ $profile_success = null;
 $theme_success = null;
 $theme_error = null;
 
+// Process form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
 
+    // Update school identity (name, slug, NPSN, email)
     if ($action === 'update_identity') {
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
@@ -46,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($name === '') {
             $error = 'Nama sekolah wajib diisi.';
         } else {
-            // Auto-generate slug from name
+            // Auto-generate slug dari nama jika kosong
             if ($slug === '') {
                 $slug = strtolower(trim(preg_replace('/[^a-zA-Z0-9\s-]/', '', $name)));
                 $slug = preg_replace('/\s+/', '-', $slug);
@@ -54,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $slug = trim($slug, '-');
             }
 
-            // ensure slug unique
+            // Check slug uniqueness
             $stmt = $pdo->prepare('SELECT id FROM schools WHERE slug = :slug AND id != :id');
             $stmt->execute(['slug' => $slug, 'id' => $sid]);
             $exists = $stmt->fetchColumn();
@@ -75,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     } elseif ($action === 'update_theme') {
-        // Update school theme
+        // Update tema sekolah
         try {
             $theme_name = trim($_POST['theme_name'] ?? 'light');
             if (!$theme_name) {
@@ -87,6 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $theme_error = 'Gagal menyimpan tema: ' . $e->getMessage();
         }
     } elseif ($action === 'update_borrows') {
+        // Update kebijakan peminjaman buku
         try {
             $schoolProfileModel->updateSchoolProfile($sid, [
                 'max_books_student' => (int)($_POST['max_books_student'] ?? $school['max_books_student']),
@@ -98,13 +104,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $profile_error = 'Gagal memperbarui peraturan: ' . $e->getMessage();
         }
     } elseif ($action === 'update_password') {
-        // Update user (admin) password
+        // Update password admin
         try {
             $password_old = $_POST['school_password_old'] ?? '';
             $password_new = $_POST['school_password_new'] ?? '';
             $password_confirm = $_POST['school_password_confirm'] ?? '';
 
-            // Validate inputs
             if (empty($password_old) || empty($password_new) || empty($password_confirm)) {
                 throw new Exception('Semua field password harus diisi.');
             }
@@ -117,7 +122,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Password baru minimal 6 karakter.');
             }
 
-            // Verify old password
             $stmt = $pdo->prepare('SELECT password FROM users WHERE id = :id');
             $stmt->execute(['id' => $user['id']]);
             $user_data = $stmt->fetch();
@@ -126,7 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('Password lama tidak sesuai.');
             }
 
-            // Update password
             $hashed_password = password_hash($password_new, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare('UPDATE users SET password = :password WHERE id = :id');
             $stmt->execute(['password' => $hashed_password, 'id' => $user['id']]);
@@ -136,16 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $profile_error = 'Gagal mengubah password: ' . $e->getMessage();
         }
     } elseif ($action === 'upload_photo') {
-        // Handle photo upload
+        // Upload foto profil sekolah
         try {
             if (!isset($_FILES['school_photo']) || $_FILES['school_photo']['error'] !== UPLOAD_ERR_OK) {
                 throw new Exception('File tidak ditemukan');
             }
 
-            // Validate
             $schoolProfileModel->validatePhotoFile($_FILES['school_photo']);
 
-            // Delete old photo
             $old_photo = $schoolProfileModel->getSchoolPhoto($sid);
             if ($old_photo) {
                 $old_path = __DIR__ . '/' . $old_photo;
@@ -154,7 +155,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // Save new photo
             $filename = $schoolProfileModel->savePhotoFile($_FILES['school_photo']);
             $photo_path = 'public/uploads/school-photos/' . $filename;
             $schoolProfileModel->updateSchoolPhoto($sid, $photo_path);
@@ -164,15 +164,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $profile_error = 'Gagal mengunggah foto: ' . $e->getMessage();
         }
     } elseif ($action === 'delete_photo') {
-        // Handle photo deletion
+        // Delete foto profil sekolah
         try {
             $schoolProfileModel->deleteSchoolPhoto($sid);
             $profile_success = 'Foto profil sekolah berhasil dihapus.';
         } catch (Exception $e) {
             $profile_error = 'Gagal menghapus foto: ' . $e->getMessage();
         }
-
     } elseif ($action === 'add_special_theme') {
+        // Add tema untuk hari penting/event
         try {
             $themeModel->addSpecialTheme([
                 'school_id' => $sid,
@@ -187,6 +187,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $theme_error = 'Gagal menambah tema: ' . $e->getMessage();
         }
     } elseif ($action === 'toggle_special_theme') {
+        // Toggle status tema hari penting
         try {
             $id = (int)$_POST['theme_id'];
             $status = (int)$_POST['status'];
@@ -196,6 +197,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $theme_error = 'Gagal mengubah status: ' . $e->getMessage();
         }
     } elseif ($action === 'delete_special_theme') {
+        // Delete tema hari penting
         try {
             $id = (int)$_POST['theme_id'];
             $themeModel->deleteSpecialTheme($id, $sid);
@@ -203,8 +205,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             $theme_error = 'Gagal menghapus tema: ' . $e->getMessage();
         }
-
     } elseif ($action === 'reset_scan_key') {
+        // Generate/reset scanner mobile access key
         try {
             $schoolProfileModel->resetScanAccessKey($sid);
             $profile_success = 'Scan Access Key berhasil direset. Silakan bagikan link baru ke staff.';
@@ -212,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $profile_error = 'Gagal mereset key: ' . $e->getMessage();
         }
     } elseif ($action === 'update_scanner_settings') {
+        // Update custom base URL untuk scanner
         try {
             $custom_url = trim($_POST['custom_base_url'] ?? '');
             $schoolProfileModel->updateSchoolProfile($sid, ['custom_base_url' => $custom_url ?: null]);

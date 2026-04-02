@@ -63,15 +63,15 @@ try {
     // 3. Hitung Denda (jika telat)
     $fineAmount = 0;
     $lateDays = 0;
-    
+
     if ($borrow['due_at']) {
         $dueDate = strtotime($borrow['due_at']);
         $today = time();
-        
+
         if ($today > $dueDate) {
             $lateSeconds = $today - $dueDate;
             $lateDays = ceil($lateSeconds / (60 * 60 * 24));
-            
+
             // Ambil late_fine dari sekolah
             $schoolStmt = $pdo->prepare('SELECT late_fine FROM schools WHERE id = ?');
             $schoolStmt->execute([$sid]);
@@ -117,16 +117,16 @@ try {
         'title' => trim($book['title']),
         'author' => trim($book['author'])
     ]);
-    
+
     $waitingStudents = $waitlistStmt->fetchAll();
 
     if ($waitingStudents) {
         require_once __DIR__ . '/../../src/NotificationsHelper.php';
         $notifHelper = new NotificationsHelper($pdo);
-        
+
         // Notify the first person in line
         $firstStudent = $waitingStudents[0];
-        
+
         $notifHelper->createNotification(
             $sid,
             $firstStudent['student_real_id'],
@@ -134,7 +134,7 @@ try {
             'Buku Tersedia!',
             'Buku "' . htmlspecialchars($book['title']) . '" yang Anda tunggu sudah tersedia. Segera lakukan peminjaman!'
         );
-        
+
         // Mark as notified
         $updateWaitlist = $pdo->prepare('UPDATE waitlist SET status = "notified" WHERE id = ?');
         $updateWaitlist->execute([$firstStudent['id']]);

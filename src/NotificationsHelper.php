@@ -1,20 +1,12 @@
 <?php
 require_once __DIR__ . '/EmailHelper.php';
-/**
- * NotificationsHelper - Helper class untuk manajemen notifikasi
- * 
- * Menyediakan fungsi reusable untuk:
- * - Create notifikasi
- * - Fetch notifikasi
- * - Mark as read
- * - Delete notifikasi
- * - Broadcast notifikasi ke multiple users
- */
 
-class NotificationsHelper {
+class NotificationsHelper
+{
     private $pdo;
 
-    public function __construct($pdo) {
+    public function __construct($pdo)
+    {
         $this->pdo = $pdo;
     }
 
@@ -28,7 +20,8 @@ class NotificationsHelper {
      * @param string $message Isi pesan notifikasi
      * @return bool Success status
      */
-    public function createNotification($schoolId, $studentId, $type, $title, $message) {
+    public function createNotification($schoolId, $studentId, $type, $title, $message)
+    {
         try {
             // 1. Simpan ke database
             $stmt = $this->pdo->prepare(
@@ -59,7 +52,8 @@ class NotificationsHelper {
     /**
      * Helper internal untuk kirim email ke anggota berdasarkan member_id
      */
-    private function sendEmailToStudent($studentId, $title, $message) {
+    private function sendEmailToStudent($studentId, $title, $message)
+    {
         try {
             // Ambil email anggota dari tabel users (karena studentId adalah user_id)
             $stmt = $this->pdo->prepare('SELECT email FROM users WHERE id = :id LIMIT 1');
@@ -87,18 +81,19 @@ class NotificationsHelper {
      * @param string $message Isi pesan notifikasi
      * @return int Jumlah notifikasi yang berhasil dibuat
      */
-    public function broadcastNotification($schoolId, $studentIds, $type, $title, $message) {
+    public function broadcastNotification($schoolId, $studentIds, $type, $title, $message)
+    {
         $count = 0;
-        
+
         try {
             $this->pdo->beginTransaction();
-            
+
             foreach ($studentIds as $studentId) {
                 if ($this->createNotification($schoolId, $studentId, $type, $title, $message)) {
                     $count++;
                 }
             }
-            
+
             $this->pdo->commit();
             return $count;
         } catch (Exception $e) {
@@ -118,7 +113,8 @@ class NotificationsHelper {
      * @param int $offset Default 0
      * @return array Array notifikasi
      */
-    public function getNotifications($schoolId, $studentId, $type = null, $limit = 10, $offset = 0) {
+    public function getNotifications($schoolId, $studentId, $type = null, $limit = 10, $offset = 0)
+    {
         try {
             $query = 'SELECT * FROM notifications 
                      WHERE school_id = :school_id AND student_id = :student_id';
@@ -157,7 +153,8 @@ class NotificationsHelper {
      * @param int $studentId ID anggota
      * @return array Array dengan key: total, unread, borrow, return_request, return_confirm, late_warning, info, new_book
      */
-    public function getStatistics($schoolId, $studentId) {
+    public function getStatistics($schoolId, $studentId)
+    {
         try {
             // Total & Unread
             $stmt = $this->pdo->prepare(
@@ -210,7 +207,8 @@ class NotificationsHelper {
      * @param int $studentId ID anggota (untuk security check)
      * @return bool Success status
      */
-    public function markAsRead($schoolId, $notificationId, $studentId) {
+    public function markAsRead($schoolId, $notificationId, $studentId)
+    {
         try {
             $stmt = $this->pdo->prepare(
                 'UPDATE notifications 
@@ -236,7 +234,8 @@ class NotificationsHelper {
      * @param int $studentId ID anggota
      * @return bool Success status
      */
-    public function markAllAsRead($schoolId, $studentId) {
+    public function markAllAsRead($schoolId, $studentId)
+    {
         try {
             $stmt = $this->pdo->prepare(
                 'UPDATE notifications 
@@ -261,7 +260,8 @@ class NotificationsHelper {
      * @param int $days Jumlah hari threshold
      * @return int Jumlah notifikasi yang dihapus
      */
-    public function deleteOldNotifications($days = 30) {
+    public function deleteOldNotifications($days = 30)
+    {
         try {
             $stmt = $this->pdo->prepare(
                 'DELETE FROM notifications 
@@ -269,7 +269,7 @@ class NotificationsHelper {
             );
             $stmt->bindValue(':days', $days, PDO::PARAM_INT);
             $stmt->execute();
-            
+
             return $this->pdo->lastInsertId();
         } catch (Exception $e) {
             error_log('Error deleting old notifications: ' . $e->getMessage());
@@ -284,7 +284,8 @@ class NotificationsHelper {
      * @param int $studentId ID anggota
      * @return int Jumlah notifikasi warning yang dibuat
      */
-    public function checkAndCreateLateWarnings($schoolId, $studentId = null) {
+    public function checkAndCreateLateWarnings($schoolId, $studentId = null)
+    {
         try {
             $this->pdo->beginTransaction();
             $count = 0;

@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 0);
 header('Content-Type: application/json');
 
-// Catch any output before JSON
+// sistem daftar sekolah mandiri
 ob_start();
 
 try {
@@ -98,14 +98,14 @@ try {
 } catch (Exception $e) {
     http_response_code(500);
     $message = $e->getMessage();
-    
+
     // Handle specific duplicate entry error for slug
     if (str_contains($message, '1062') && str_contains($message, 'slug')) {
         $message = "Nama sekolah ini sudah terdaftar di sistem kami. Silakan coba nama yang lebih spesifik atau hubungi admin support.";
     } else {
         $message = 'Terjadi kesalahan server: ' . $message;
     }
-    
+
     echo json_encode(['success' => false, 'message' => $message]);
     exit;
 }
